@@ -17,6 +17,9 @@ import {
 	TextDocumentPositionParams
 } from 'vscode-languageserver'
 
+import { buildEnvironment, validate } from 'wollok-ts'
+
+
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 let connection = createConnection(ProposedFeatures.all)
@@ -97,20 +100,20 @@ connection.onDidChangeConfiguration(change => {
 	documents.all().forEach(validateTextDocument)
 })
 
-function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
-	if (!hasConfigurationCapability) {
-		return Promise.resolve(globalSettings)
-	}
-	let result = documentSettings.get(resource)
-	if (!result) {
-		result = connection.workspace.getConfiguration({
-			scopeUri: resource,
-			section: 'languageServerExample'
-		})
-		documentSettings.set(resource, result)
-	}
-	return result
-}
+// function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
+// 	if (!hasConfigurationCapability) {
+// 		return Promise.resolve(globalSettings)
+// 	}
+// 	let result = documentSettings.get(resource)
+// 	if (!result) {
+// 		result = connection.workspace.getConfiguration({
+// 			scopeUri: resource,
+// 			section: 'wollokLinter'
+// 		})
+// 		documentSettings.set(resource, result)
+// 	}
+// 	return result
+// }
 
 // Only keep settings for open documents
 documents.onDidClose(e => {
@@ -125,63 +128,81 @@ documents.onDidChangeContent(change => {
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// In this simple example we get the settings for every validate run.
-	let settings = await getDocumentSettings(textDocument.uri)
+	// let settings = await getDocumentSettings(textDocument.uri)
+
 
 	// The validator creates diagnostics for all uppercase words length 2 and more
-	let text = textDocument.getText()
-	let pattern = /\b[A-Z]{2,}\b/g
-	let m: RegExpExecArray | null
-
-	let problems = 0
-	let diagnostics: Diagnostic[] = []
-	while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
-		problems++
-		let diagnostic: Diagnostic = {
-			severity: DiagnosticSeverity.Warning,
-			range: {
-				start: textDocument.positionAt(m.index),
-				end: textDocument.positionAt(m.index + m[0].length)
-			},
-			message: `${m[0]} is all uppercase.`,
-			source: 'ex'
-		}
-		if (hasDiagnosticRelatedInformationCapability) {
-			diagnostic.relatedInformation = [
-				{
-					location: {
-						uri: textDocument.uri,
-						range: Object.assign({}, diagnostic.range)
-					},
-					message: 'Spelling matters'
-				},
-				{
-					location: {
-						uri: textDocument.uri,
-						range: Object.assign({}, diagnostic.range)
-					},
-					message: 'Particularly for names'
-				}
-			]
-		}
-		diagnostics.push(diagnostic)
+	const text = textDocument.getText()
+	const file: { name: string, content: string } = {
+		name: textDocument.uri,
+		content: text,
 	}
 
-	const allWords = text.split(/\s+/)
-	connection.console.log('all words')
-	const smallWords = allWords.filter(word => word.length < 4)
-	connection.console.log(JSON.stringify(smallWords))
-	smallWords.forEach(word => {
-		const where = text.indexOf(word)
-		diagnostics.push({
-			severity: DiagnosticSeverity.Error,
-			range: {
-				start: textDocument.positionAt(where),
-				end: textDocument.positionAt(where + word.length)
-			},
-			message: `${word} is too short. From ${smallWords}`,
-			source: 'ex'
-		})
+	console.log(file, 'file')
+	const environment = buildEnvironment([file])
+	console.log('environment', environment)
+	const problems = validate(environment)
+	console.log('problems', problems)
+
+	// const diagnostics: Diagnostic[] = validate(environment).map(problem => {
+	// 	const source = problem.node.source
+	// 	const range = {
+	// 		start: textDocument.positionAt(source ? source.start.offset : 0),
+	// 		end: textDocument.positionAt(source ? source.start.offset : 0),
+	// 	}
+	// 	return {
+	// 		severity: DiagnosticSeverity.Error, // convert from problem
+	// 		range,
+	// 		message: problem.code,
+	// 		source: problem.node.source?.file,
+	// 	}
+	// })
+	const diagnostics: Diagnostic[] = []
+
+	diagnostics.push({
+		severity: DiagnosticSeverity.Warning,
+		message: file.name,
+		range: {
+			start: textDocument.positionAt(0),
+			end: textDocument.positionAt(5),
+		}
 	})
+
+	// let pattern = /\b[A-Z]{2,}\b/g
+	// let m: RegExpExecArray | null
+	// let problems = 0
+	// let diagnostics: Diagnostic[] = []
+	// while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
+	// 	problems++
+	// 	let diagnostic: Diagnostic = {
+	// 		severity: DiagnosticSeverity.Warning,
+	// 		range: {
+	// 			start: textDocument.positionAt(m.index),
+	// 			end: textDocument.positionAt(m.index + m[0].length)
+	// 		},
+	// 		message: `${m[0]} is all uppercase.`,
+	// 		source: 'ex'
+	// 	}
+	// 	if (hasDiagnosticRelatedInformationCapability) {
+	// 		diagnostic.relatedInformation = [
+	// 			{
+	// 				location: {
+	// 					uri: textDocument.uri,
+	// 					range: Object.assign({}, diagnostic.range)
+	// 				},
+	// 				message: 'Spelling matters'
+	// 			},
+	// 			{
+	// 				location: {
+	// 					uri: textDocument.uri,
+	// 					range: Object.assign({}, diagnostic.range)
+	// 				},
+	// 				message: 'Particularly for names'
+	// 			}
+	// 		]
+		// 	}
+	// 	diagnostics.push(diagnostic)
+	// }
 
 	// Send the computed diagnostics to VSCode.
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })

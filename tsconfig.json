@@ -4,7 +4,8 @@
 		"target": "es6",
 		"outDir": "out",
 		"rootDir": "src",
-		"sourceMap": true
+		"sourceMap": true,
+		"strict": true,
 	},
 	"include": [
 		"src"
@@ -14,7 +15,11 @@
 		".vscode-test"
 	],
 	"references": [
-		{ "path": "./client" },
-		{ "path": "./server" }
+		{
+			"path": "./client"
+		},
+		{
+			"path": "./server"
+		}
 	]
 }
