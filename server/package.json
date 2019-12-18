@@ -1,0 +1,18 @@
+{
+	"name": "wollok-linter-server",
+	"description": "Wollok Linter - LSP implementation in node.",
+	"version": "0.0.1",
+	"author": "Uqbar Foundation",
+	"license": "LGPL-3.0",
+	"engines": {
+		"node": "*"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/uqbar-project/wollok-linter"
+	},
+	"dependencies": {
+		"vscode-languageserver": "^5.2.1"
+	},
+	"scripts": {}
+}
