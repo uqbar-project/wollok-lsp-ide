@@ -74,7 +74,7 @@
 		"test": "sh ./scripts/e2e.sh"
 	},
 	"dependencies": {
-		"wollok-ts": "^2.0.0"
+		"wollok-ts": "file:../wollok-ts/wollok-ts-2.0.1.tgz"
 	},
 	"devDependencies": {
 		"@types/mocha": "^5.2.7",
