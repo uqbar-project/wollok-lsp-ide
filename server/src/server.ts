@@ -18,6 +18,7 @@ import {
 } from 'vscode-languageserver'
 
 import { buildEnvironment, validate } from 'wollok-ts'
+import { Problem } from 'wollok-ts/dist/validator'
 
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
@@ -133,78 +134,42 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 	// The validator creates diagnostics for all uppercase words length 2 and more
 	const text = textDocument.getText()
+	
+	console.log('text', text)
+
 	const file: { name: string, content: string } = {
 		name: textDocument.uri,
 		content: text,
 	}
 
-	console.log(file, 'file')
+	const start = new Date().getTime()
+
 	const environment = buildEnvironment([file])
-	console.log('environment', environment)
+	const endEnvironment = new Date().getTime()
+
 	const problems = validate(environment)
-	console.log('problems', problems)
+	const endValidation = new Date().getTime()
 
-	// const diagnostics: Diagnostic[] = validate(environment).map(problem => {
-	// 	const source = problem.node.source
-	// 	const range = {
-	// 		start: textDocument.positionAt(source ? source.start.offset : 0),
-	// 		end: textDocument.positionAt(source ? source.start.offset : 0),
-	// 	}
-	// 	return {
-	// 		severity: DiagnosticSeverity.Error, // convert from problem
-	// 		range,
-	// 		message: problem.code,
-	// 		source: problem.node.source?.file,
-	// 	}
-	// })
-	const diagnostics: Diagnostic[] = []
+	console.log('environment time ', (endEnvironment - start))
+	console.log('validation time ', (endValidation - endEnvironment))
 
-	diagnostics.push({
-		severity: DiagnosticSeverity.Warning,
-		message: file.name,
-		range: {
-			start: textDocument.positionAt(0),
-			end: textDocument.positionAt(5),
+	const diagnostics: Diagnostic[] = problems.map(problem => {
+		// console.log(problem.code, JSON.stringify(problem.node))
+		// console.log('**********************************************************************')
+
+		const source = problem.node.source
+		const range = {
+			start: textDocument.positionAt(source ? source.start.offset : 0),
+			end: textDocument.positionAt(source ? source.start.offset : 0),
+		}
+		return {
+			severity: buildSeverity(problem),
+			range,
+			message: problem.code,
+			source: problem.node.source?.file,
 		}
 	})
 
-	// let pattern = /\b[A-Z]{2,}\b/g
-	// let m: RegExpExecArray | null
-	// let problems = 0
-	// let diagnostics: Diagnostic[] = []
-	// while ((m = pattern.exec(text)) && problems < settings.maxNumberOfProblems) {
-	// 	problems++
-	// 	let diagnostic: Diagnostic = {
-	// 		severity: DiagnosticSeverity.Warning,
-	// 		range: {
-	// 			start: textDocument.positionAt(m.index),
-	// 			end: textDocument.positionAt(m.index + m[0].length)
-	// 		},
-	// 		message: `${m[0]} is all uppercase.`,
-	// 		source: 'ex'
-	// 	}
-	// 	if (hasDiagnosticRelatedInformationCapability) {
-	// 		diagnostic.relatedInformation = [
-	// 			{
-	// 				location: {
-	// 					uri: textDocument.uri,
-	// 					range: Object.assign({}, diagnostic.range)
-	// 				},
-	// 				message: 'Spelling matters'
-	// 			},
-	// 			{
-	// 				location: {
-	// 					uri: textDocument.uri,
-	// 					range: Object.assign({}, diagnostic.range)
-	// 				},
-	// 				message: 'Particularly for names'
-	// 			}
-	// 		]
-		// 	}
-	// 	diagnostics.push(diagnostic)
-	// }
-
-	// Send the computed diagnostics to VSCode.
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
 }
 
@@ -275,3 +240,7 @@ documents.listen(connection)
 
 // Listen on the connection
 connection.listen()
+
+const buildSeverity = (problem: Problem) =>
+	problem.level === 'Error' ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning
+
