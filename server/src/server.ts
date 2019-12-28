@@ -3,7 +3,6 @@ import {
   CompletionItemKind,
   createConnection,
   Diagnostic,
-  DiagnosticSeverity,
   DidChangeConfigurationNotification,
   InitializeParams,
   ProposedFeatures,
@@ -12,10 +11,12 @@ import {
   TextDocuments,
 } from 'vscode-languageserver'
 import { buildEnvironment, validate } from 'wollok-ts'
-import { Problem } from 'wollok-ts/dist/validator'
 
-import { reportMessage } from './reporter'
+import { createDiagnostic } from './diagnostic'
+import { TimeMeasurer } from './timeMeasurer'
 
+const timeMeasurer = new TimeMeasurer()
+let firstTime = true
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -139,27 +140,15 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 	const problems = validate(environment)
 
-	console.log('environment time ', (endEnvironment - start))
+	// console.log('environment time ', (endEnvironment - start))
 
-	const diagnostics: Diagnostic[] = problems.map(problem => {
-		const source = problem.node.source
-		const range = {
-			start: textDocument.positionAt(source ? source.start.offset : 0),
-			end: textDocument.positionAt(source ? source.start.offset : 0),
-		}
-		return {
-			severity: buildSeverity(problem),
-			range,
-			code: problem.code,
-			message: reportMessage(problem),
-			source: problem.node.source?.file,
-		}
-	})
+	const diagnostics: Diagnostic[] = problems.map(problem => createDiagnostic(textDocument, problem))
 
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
 
 	const endValidation = new Date().getTime()
-	console.log('validation time ', (endValidation - endEnvironment))
+	// console.log('validation time ', (endValidation - endEnvironment))
+
 }
 
 connection.onDidChangeWatchedFiles(_change => {
@@ -229,7 +218,4 @@ documents.listen(connection)
 
 // Listen on the connection
 connection.listen()
-
-const buildSeverity = (problem: Problem) =>
-	problem.level === 'Error' ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning
 

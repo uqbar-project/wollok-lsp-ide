@@ -43,7 +43,7 @@ const validationI18nized = () =>
 
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-// EXPORTABLE FUNCTIONS
+// PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 export const reportMessage = (problem: Problem) => interpolateValidationMessage(validationI18nized()[problem.code], problem.values)
