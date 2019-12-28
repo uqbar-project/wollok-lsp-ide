@@ -71,16 +71,17 @@
 		"compile": "tsc -b",
 		"watch": "tsc -b -w",
 		"postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
-		"test": "sh ./scripts/e2e.sh"
+		"test": "sh ./scripts/e2e.sh",
+		"upgrade-wollok-ts": "npm uninstall wollok-ts && npm i file://~/workspace/wollok-dev/wollok-ts/wollok-ts-2.0.1.tgz"
 	},
 	"dependencies": {
 		"wollok-ts": "file:../wollok-ts/wollok-ts-2.0.1.tgz"
 	},
 	"devDependencies": {
 		"@types/mocha": "^5.2.7",
-		"@types/node": "^12.12.18",
+		"@types/node": "^12.12.21",
 		"tslint": "^5.20.1",
-		"typescript": "^3.7.3"
+		"typescript": "^3.7.4"
 	},
 	"__metadata": {
 		"id": "d5cabd83-07f7-417e-928b-df2551b9c261",
