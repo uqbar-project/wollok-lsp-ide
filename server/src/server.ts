@@ -1,33 +1,29 @@
-/* --------------------------------------------------------------------------------------------
- * Copyright (c) Microsoft Corporation. All rights reserved.
- * Licensed under the MIT License. See License.txt in the project root for license information.
- * ------------------------------------------------------------------------------------------ */
-
 import {
-	createConnection,
-	TextDocuments,
-	TextDocument,
-	Diagnostic,
-	DiagnosticSeverity,
-	ProposedFeatures,
-	InitializeParams,
-	DidChangeConfigurationNotification,
-	CompletionItem,
-	CompletionItemKind,
-	TextDocumentPositionParams
+  CompletionItem,
+  CompletionItemKind,
+  createConnection,
+  Diagnostic,
+  DiagnosticSeverity,
+  DidChangeConfigurationNotification,
+  InitializeParams,
+  ProposedFeatures,
+  TextDocument,
+  TextDocumentPositionParams,
+  TextDocuments,
 } from 'vscode-languageserver'
-
 import { buildEnvironment, validate } from 'wollok-ts'
 import { Problem } from 'wollok-ts/dist/validator'
+
+import { reportMessage } from './reporter'
 
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
-let connection = createConnection(ProposedFeatures.all)
+const connection = createConnection(ProposedFeatures.all)
 
 // Create a simple text document manager. The text document manager
 // supports full document sync only
-let documents: TextDocuments = new TextDocuments()
+const documents: TextDocuments = new TextDocuments()
 
 let hasConfigurationCapability: boolean = false
 let hasWorkspaceFolderCapability: boolean = false
@@ -128,14 +124,8 @@ documents.onDidChangeContent(change => {
 })
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
-	// In this simple example we get the settings for every validate run.
 	// let settings = await getDocumentSettings(textDocument.uri)
-
-
-	// The validator creates diagnostics for all uppercase words length 2 and more
 	const text = textDocument.getText()
-	
-	console.log('text', text)
 
 	const file: { name: string, content: string } = {
 		name: textDocument.uri,
@@ -148,15 +138,10 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	const endEnvironment = new Date().getTime()
 
 	const problems = validate(environment)
-	const endValidation = new Date().getTime()
 
 	console.log('environment time ', (endEnvironment - start))
-	console.log('validation time ', (endValidation - endEnvironment))
 
 	const diagnostics: Diagnostic[] = problems.map(problem => {
-		// console.log(problem.code, JSON.stringify(problem.node))
-		// console.log('**********************************************************************')
-
 		const source = problem.node.source
 		const range = {
 			start: textDocument.positionAt(source ? source.start.offset : 0),
@@ -165,12 +150,16 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 		return {
 			severity: buildSeverity(problem),
 			range,
-			message: problem.code,
+			code: problem.code,
+			message: reportMessage(problem),
 			source: problem.node.source?.file,
 		}
 	})
 
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
+
+	const endValidation = new Date().getTime()
+	console.log('validation time ', (endValidation - endEnvironment))
 }
 
 connection.onDidChangeWatchedFiles(_change => {
