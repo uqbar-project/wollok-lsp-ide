@@ -13,10 +13,6 @@ import {
 import { buildEnvironment, validate } from 'wollok-ts'
 
 import { createDiagnostic } from './diagnostic'
-import { TimeMeasurer } from './timeMeasurer'
-
-const timeMeasurer = new TimeMeasurer()
-let firstTime = true
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -125,6 +121,7 @@ documents.onDidChangeContent(change => {
 })
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
+
 	// let settings = await getDocumentSettings(textDocument.uri)
 	const text = textDocument.getText()
 
@@ -140,14 +137,14 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 	const problems = validate(environment)
 
-	// console.log('environment time ', (endEnvironment - start))
+	console.log('environment time ', (endEnvironment - start))
 
 	const diagnostics: Diagnostic[] = problems.map(problem => createDiagnostic(textDocument, problem))
 
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
 
 	const endValidation = new Date().getTime()
-	// console.log('validation time ', (endValidation - endEnvironment))
+	console.log('validation time ', (endValidation - endEnvironment))
 
 }
 

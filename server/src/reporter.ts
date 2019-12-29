@@ -9,11 +9,13 @@ type ValidationMessage = { [key: string]: string }
 const validationMessagesEn: ValidationMessage = {
 	'nameIsCamelCase': 'The name {0} must start with lowercase',
 	'nameIsPascalCase': 'The name {0} must start with uppercase',
+	'nameIsNotKeyword': 'The name {0} is a keyword, you should pick another one',
 }
 
 const validationMessagesEs: ValidationMessage = {
 	'nameIsCamelCase': 'El nombre {0} debe comenzar con minúsculas',
 	'nameIsPascalCase': 'El nombre {0} debe comenzar con mayúsculas',
+	'nameIsNotKeyword': 'El nombre {0} es una palabra reservada, debe cambiarla',
 }
 
 const validationMessages: { [key: string]: ValidationMessage } = {
@@ -41,9 +43,16 @@ const lang = () => {
 const validationI18nized = () =>
 	validationMessages[lang()] as ValidationMessage
 
+const getBasicMessage = (problem: Problem) => validationI18nized()[problem.code] || convertToHumanReadable(problem.code)
+
+const convertToHumanReadable = (code: string) => {
+	if (!code) { return '' }
+	const result = code.replace(/[A-Z0-9]+/g, (match) => ' ' + match.toLowerCase())
+	return result.charAt(0).toUpperCase() + result.slice(1, result.length)
+}
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-export const reportMessage = (problem: Problem) => interpolateValidationMessage(validationI18nized()[problem.code], problem.values)
+export const reportMessage = (problem: Problem) => interpolateValidationMessage(getBasicMessage(problem), problem.values)
