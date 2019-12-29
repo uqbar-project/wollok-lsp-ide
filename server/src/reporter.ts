@@ -6,16 +6,20 @@ import { Problem } from 'wollok-ts/dist/validator'
 
 type ValidationMessage = { [key: string]: string }
 
+const FAILURE = 'failure'
+
 const validationMessagesEn: ValidationMessage = {
-	'nameIsCamelCase': 'The name {0} must start with lowercase',
-	'nameIsPascalCase': 'The name {0} must start with uppercase',
+	'nameBeginsWithLowercase': 'The name {0} must start with lowercase',
+	'nameBeginsWithUppercase': 'The name {0} must start with uppercase',
 	'nameIsNotKeyword': 'The name {0} is a keyword, you should pick another one',
+	[FAILURE]: 'Rule failure: ',
 }
 
 const validationMessagesEs: ValidationMessage = {
-	'nameIsCamelCase': 'El nombre {0} debe comenzar con minúsculas',
-	'nameIsPascalCase': 'El nombre {0} debe comenzar con mayúsculas',
+	'nameBeginsWithLowercase': 'El nombre {0} debe comenzar con minúsculas',
+	'nameBeginsWithUppercase': 'El nombre {0} debe comenzar con mayúsculas',
 	'nameIsNotKeyword': 'El nombre {0} es una palabra reservada, debe cambiarla',
+	[FAILURE]: 'La siguiente regla falló: ',
 }
 
 const validationMessages: { [key: string]: ValidationMessage } = {
@@ -48,7 +52,7 @@ const getBasicMessage = (problem: Problem) => validationI18nized()[problem.code]
 const convertToHumanReadable = (code: string) => {
 	if (!code) { return '' }
 	const result = code.replace(/[A-Z0-9]+/g, (match) => ' ' + match.toLowerCase())
-	return result.charAt(0).toUpperCase() + result.slice(1, result.length)
+	return validationI18nized()[FAILURE] + result.charAt(0).toUpperCase() + result.slice(1, result.length)
 }
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
