@@ -1,5 +1,7 @@
 import { Problem } from 'wollok-ts/dist/validator'
 
+import { lang } from './settings'
+
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // VALIDATION MESSAGES DEFINITION
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -37,12 +39,6 @@ const interpolateValidationMessage = (message: string, values: string[]) =>
 		return values[index] || ''
 	}
 	)
-
-const lang = () => {
-	const env = process.env
-	const fullLanguage = env.LC_ALL || env.LC_MESSAGES || env.LANG || env.LANGUAGE
-	return fullLanguage ? fullLanguage.substring(0, 2) : 'es'
-}
 
 const validationI18nized = () =>
 	validationMessages[lang()] as ValidationMessage

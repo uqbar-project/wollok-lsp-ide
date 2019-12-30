@@ -2,17 +2,15 @@ import {
   CompletionItem,
   CompletionItemKind,
   createConnection,
-  Diagnostic,
   DidChangeConfigurationNotification,
   InitializeParams,
   ProposedFeatures,
-  TextDocument,
   TextDocumentPositionParams,
   TextDocuments,
 } from 'vscode-languageserver'
-import { buildEnvironment, validate } from 'wollok-ts'
 
-import { createDiagnostic } from './diagnostic'
+import { validateTextDocument } from './linter'
+import { hasConfigurationCapability, hasWorkspaceFolderCapability, initializeSettings, settingsChanged } from './settings'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -22,26 +20,9 @@ const connection = createConnection(ProposedFeatures.all)
 // supports full document sync only
 const documents: TextDocuments = new TextDocuments()
 
-let hasConfigurationCapability: boolean = false
-let hasWorkspaceFolderCapability: boolean = false
-let hasDiagnosticRelatedInformationCapability: boolean = false
-
 connection.onInitialize((params: InitializeParams) => {
 	let capabilities = params.capabilities
-
-	// Does the client support the `workspace/configuration` request?
-	// If not, we will fall back using global settings
-	hasConfigurationCapability = !!(
-		capabilities.workspace && !!capabilities.workspace.configuration
-	)
-	hasWorkspaceFolderCapability = !!(
-		capabilities.workspace && !!capabilities.workspace.workspaceFolders
-	)
-	hasDiagnosticRelatedInformationCapability = !!(
-		capabilities.textDocument &&
-		capabilities.textDocument.publishDiagnostics &&
-		capabilities.textDocument.publishDiagnostics.relatedInformation
-	)
+	initializeSettings(params.capabilities)
 
 	return {
 		capabilities: {
@@ -66,87 +47,19 @@ connection.onInitialized(() => {
 	}
 })
 
-// The example settings
-interface ExampleSettings {
-	maxNumberOfProblems: number
-}
-
-// The global settings, used when the `workspace/configuration` request is not supported by the client.
-// Please note that this is not the case when using this server with the client provided in this example
-// but could happen with other clients.
-const defaultSettings: ExampleSettings = { maxNumberOfProblems: 1000 }
-let globalSettings: ExampleSettings = defaultSettings
-
-// Cache the settings of all open documents
-let documentSettings: Map<string, Thenable<ExampleSettings>> = new Map()
 
 connection.onDidChangeConfiguration(change => {
-	if (hasConfigurationCapability) {
-		// Reset all cached document settings
-		documentSettings.clear()
-	} else {
-		globalSettings = <ExampleSettings>(
-			(change.settings.languageServerExample || defaultSettings)
-		)
-	}
+	settingsChanged(connection, change)
 
 	// Revalidate all open text documents
-	documents.all().forEach(validateTextDocument)
-})
-
-// function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
-// 	if (!hasConfigurationCapability) {
-// 		return Promise.resolve(globalSettings)
-// 	}
-// 	let result = documentSettings.get(resource)
-// 	if (!result) {
-// 		result = connection.workspace.getConfiguration({
-// 			scopeUri: resource,
-// 			section: 'wollokLinter'
-// 		})
-// 		documentSettings.set(resource, result)
-// 	}
-// 	return result
-// }
-
-// Only keep settings for open documents
-documents.onDidClose(e => {
-	documentSettings.delete(e.document.uri)
+	documents.all().forEach(validateTextDocument(connection))
 })
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {
-	validateTextDocument(change.document)
+	validateTextDocument(connection)(change.document)
 })
-
-async function validateTextDocument(textDocument: TextDocument): Promise<void> {
-
-	// let settings = await getDocumentSettings(textDocument.uri)
-	const text = textDocument.getText()
-
-	const file: { name: string, content: string } = {
-		name: textDocument.uri,
-		content: text,
-	}
-
-	const start = new Date().getTime()
-
-	const environment = buildEnvironment([file])
-	const endEnvironment = new Date().getTime()
-
-	const problems = validate(environment)
-
-	console.log('environment time ', (endEnvironment - start))
-
-	const diagnostics: Diagnostic[] = problems.map(problem => createDiagnostic(textDocument, problem))
-
-	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
-
-	const endValidation = new Date().getTime()
-	console.log('validation time ', (endValidation - endEnvironment))
-
-}
 
 connection.onDidChangeWatchedFiles(_change => {
 	// Monitored files have change in VSCode
