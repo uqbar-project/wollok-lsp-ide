@@ -16,10 +16,10 @@ const buildSeverity = (problem: Problem) =>
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 export const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
-	const source = problem.node.source
+	const source = problem.source
 	const range = {
 		start: textDocument.positionAt(source ? source.start.offset : 0),
-		end: textDocument.positionAt(source ? source.start.offset : 0),
+		end: textDocument.positionAt(source ? source.end.offset : 0),
 	}
 	return {
 		severity: buildSeverity(problem),
