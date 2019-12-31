@@ -1,7 +1,34 @@
-import { Connection, Diagnostic, TextDocument } from 'vscode-languageserver'
+import { Connection, Diagnostic, DiagnosticSeverity, TextDocument } from 'vscode-languageserver'
 import { buildEnvironment, validate } from 'wollok-ts'
+import { Problem } from 'wollok-ts/dist/validator'
 
-import { createDiagnostic } from './diagnostic'
+import { reportMessage } from './reporter'
+
+// ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+// INTERNAL FUNCTIONS
+// ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+const buildSeverity = (problem: Problem) =>
+	problem.level === 'Error' ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning
+
+const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
+	const source = problem.source
+	const range = {
+		start: textDocument.positionAt(source ? source.start.offset : 0),
+		end: textDocument.positionAt(source ? source.end.offset : 0),
+	}
+	return {
+		severity: buildSeverity(problem),
+		range,
+		code: problem.code,
+		message: reportMessage(problem),
+		source: problem.node.source?.file,
+	} as Diagnostic
+}
+
+// ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+// PUBLIC INTERFACE
+// ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 export const validateTextDocument = (connection: Connection) => async (textDocument: TextDocument) => {
 	const text = textDocument.getText()

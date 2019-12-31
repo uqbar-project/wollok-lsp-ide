@@ -2,16 +2,10 @@
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
-
 import * as path from 'path'
-import { workspace, ExtensionContext } from 'vscode'
+import { ExtensionContext, workspace } from 'vscode'
+import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient'
 
-import {
-	LanguageClient,
-	LanguageClientOptions,
-	ServerOptions,
-	TransportKind
-} from 'vscode-languageclient'
 
 let client: LanguageClient
 
@@ -40,6 +34,7 @@ export function activate(context: ExtensionContext) {
 		// Register the server for Wollok documents
 		documentSelector: [{ scheme: 'file', language: 'wollok' }],
 		synchronize: {
+			configurationSection: 'wollokLinter',
 			// Notify the server about file changes to '.clientrc files contained in the workspace
 			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
 		}

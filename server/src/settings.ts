@@ -1,6 +1,10 @@
 import { ClientCapabilities, Connection, DidChangeConfigurationParams } from 'vscode-languageserver'
 
-interface ExampleSettings {
+interface Settings {
+	wollokLinter: WollokLinterSettings
+}
+
+interface WollokLinterSettings {
 	maxNumberOfProblems: number,
 	language: string
 }
@@ -15,68 +19,44 @@ const envLang = () => {
 	return fullLanguage ? fullLanguage.substring(0, 2) : 'es'
 }
 
-const defaultSettings: ExampleSettings = {
+const defaultSettings: WollokLinterSettings = {
 	maxNumberOfProblems: 1000,
 	language: envLang(),
 }
-let globalSettings: ExampleSettings = defaultSettings
-// Cache the settings of all open documents
-let documentSettings: Map<string, Thenable<ExampleSettings>> = new Map()
 
-export let hasConfigurationCapability: boolean = false
-export let hasWorkspaceFolderCapability: boolean = false
-export let hasDiagnosticRelatedInformationCapability: boolean = false
+let globalSettings: WollokLinterSettings = defaultSettings
+
+const languageDescription: { [key: string]: string } = {
+	'Spanish': 'es',
+	'English': 'en',
+}
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 export const initializeSettings = (capabilities: ClientCapabilities) => {
-	// Does the client support the `workspace/configuration` request?
-	// If not, we will fall back using global settings
-	hasConfigurationCapability = !!(
-		capabilities.workspace && !!capabilities.workspace.configuration
-	)
-	hasWorkspaceFolderCapability = !!(
-		capabilities.workspace && !!capabilities.workspace.workspaceFolders
-	)
-	hasDiagnosticRelatedInformationCapability = !!(
-		capabilities.textDocument &&
-		capabilities.textDocument.publishDiagnostics &&
-		capabilities.textDocument.publishDiagnostics.relatedInformation
-	)
+	console.log('capabilities', capabilities)
 }
 
 export const settingsChanged = (connection: Connection, change: DidChangeConfigurationParams) => {
-	if (hasConfigurationCapability) {
-		// Reset all cached document settings
-		documentSettings.clear()
-	} else {
-		globalSettings = <ExampleSettings>(
-			(change.settings.wollokLinter || defaultSettings)
-		)
-	}
+	console.log('settings changed', change.settings.wollokLinter)
+	globalSettings = <WollokLinterSettings>(
+		(change.settings.wollokLinter || defaultSettings)
+	)
 }
 
-export const lang = () => globalSettings.language
+export const lang = () => languageDescription[globalSettings.language] || envLang()
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 const getDocumentSettings = (connection: Connection) => ((resource: string) => {
-	if (!hasConfigurationCapability) {
-		return Promise.resolve(globalSettings)
-	}
-	let result = documentSettings.get(resource)
-	if (!result) {
-		result = connection.workspace.getConfiguration({
-			scopeUri: resource,
-			section: 'wollokLinter'
-		})
-		documentSettings.set(resource, result)
-	}
-	return result
+	connection.workspace.getConfiguration({
+		scopeUri: resource,
+		section: 'wollokLinter'
+	})
 })
 
 

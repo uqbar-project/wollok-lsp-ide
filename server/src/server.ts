@@ -2,7 +2,6 @@ import {
   CompletionItem,
   CompletionItemKind,
   createConnection,
-  DidChangeConfigurationNotification,
   InitializeParams,
   ProposedFeatures,
   TextDocumentPositionParams,
@@ -10,7 +9,7 @@ import {
 } from 'vscode-languageserver'
 
 import { validateTextDocument } from './linter'
-import { hasConfigurationCapability, hasWorkspaceFolderCapability, initializeSettings, settingsChanged } from './settings'
+import { initializeSettings, settingsChanged } from './settings'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -35,20 +34,10 @@ connection.onInitialize((params: InitializeParams) => {
 	}
 })
 
-connection.onInitialized(() => {
-	if (hasConfigurationCapability) {
-		// Register for all configuration changes.
-		connection.client.register(DidChangeConfigurationNotification.type, undefined)
-	}
-	if (hasWorkspaceFolderCapability) {
-		connection.workspace.onDidChangeWorkspaceFolders(_event => {
-			connection.console.log('Workspace folder change event received.')
-		})
-	}
-})
-
+console.log('1')
 
 connection.onDidChangeConfiguration(change => {
+	console.log('didChangeConfiguration')
 	settingsChanged(connection, change)
 
 	// Revalidate all open text documents

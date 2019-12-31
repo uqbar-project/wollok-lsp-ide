@@ -56,10 +56,11 @@
 					"scope": "resource",
 					"type": "string",
 					"enum": [
-						"es",
-						"en"
+						"Spanish",
+						"English",
+						"Based on Local Environment"
 					],
-					"default": "es",
+					"default": "Based on Local Environment",
 					"description": "Language used while reporting linter errors and warnings."
 				},
 				"wollokLinter.trace.server": {
