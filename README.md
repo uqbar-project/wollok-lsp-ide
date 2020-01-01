@@ -1,9 +1,11 @@
 # Wollok Linter
 
+[![Build Status](https://travis-ci.org/uqbar-project/wollok-linter.svg?branch=master)](https://travis-ci.org/uqbar-project/wollok-linter)
+
 Starting from [LSP sample code](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide) for Visual Studio Code, we developed a couple of tools for Wollok using Language Server Protocol (for VSC, IntelliJ, Eclipse, Atom, Sublime, etc.)
 
 
-## Linter
+## Linter itself
 
 By now we have a first working version of a linter, calling wollok-ts implementation. For a deeper developer guide, please refer to the [wiki](https://github.com/uqbar-project/wollok-linter/wiki)
 
