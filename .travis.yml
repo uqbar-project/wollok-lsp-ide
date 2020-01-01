@@ -1,6 +1,7 @@
 language: node_js
 node_js:
-  - 11
+  - 11.15
 script: 
+  - npm cache clean -f
   - npm install
   - npm run lint
