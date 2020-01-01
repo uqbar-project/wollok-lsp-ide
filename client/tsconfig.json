@@ -1,21 +1,24 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"target": "es2017",
-		"outDir": "out",
-		"rootDir": "src",
-		"sourceMap": true,
-		"strict": true,
-		"declaration": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noImplicitReturns": true,
-		"noFallthroughCasesInSwitch": true,
-		"removeComments": true,
-		"moduleResolution": "node",
-		"resolveJsonModule": true,
-		"esModuleInterop": true
-		},	
-	"include": ["src"],
-	"exclude": ["node_modules", ".vscode-test"],
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2017",
+    "outDir": "out",
+    "rootDir": "src",
+    "sourceMap": true,
+    "strict": true,
+    "declaration": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "removeComments": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "composite": true
+  },
+  "exclude": [
+    "node_modules",
+    ".vscode-test"
+  ],
 }

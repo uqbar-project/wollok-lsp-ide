@@ -20,75 +20,71 @@ const connection = createConnection(ProposedFeatures.all)
 const documents: TextDocuments = new TextDocuments()
 
 connection.onInitialize((params: InitializeParams) => {
-	let capabilities = params.capabilities
-	initializeSettings(params.capabilities)
+  initializeSettings(connection, params.capabilities)
 
-	return {
-		capabilities: {
-			textDocumentSync: documents.syncKind,
-			// Tell the client that the server supports code completion
-			completionProvider: {
-				resolveProvider: true
-			}
-		}
-	}
+  return {
+    capabilities: {
+      textDocumentSync: documents.syncKind,
+      // Tell the client that the server supports code completion
+      completionProvider: {
+        resolveProvider: true
+      }
+    }
+  }
 })
 
-console.log('1')
-
 connection.onDidChangeConfiguration(change => {
-	console.log('didChangeConfiguration')
-	settingsChanged(connection, change)
+  settingsChanged(connection, change)
 
-	// Revalidate all open text documents
-	documents.all().forEach(validateTextDocument(connection))
+  // Revalidate all open text documents
+  documents.all().forEach(validateTextDocument(connection))
 })
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {
-	validateTextDocument(connection)(change.document)
+  validateTextDocument(connection)(change.document)
 })
 
 connection.onDidChangeWatchedFiles(_change => {
-	// Monitored files have change in VSCode
-	connection.console.log('We received an file change event')
+  // Monitored files have change in VSCode
+  connection.console.log('We received an file change event')
 })
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
-	(_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-		// The pass parameter contains the position of the text document in
-		// which code complete got requested. For the example we ignore this
-		// info and always provide the same completion items.
-		return [
-			{
-				label: 'TypeScript',
-				kind: CompletionItemKind.Text,
-				data: 1
-			},
-			{
-				label: 'JavaScript',
-				kind: CompletionItemKind.Text,
-				data: 2
-			}
-		]
-	}
+  (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+    // The pass parameter contains the position of the text document in
+    // which code complete got requested. For the example we ignore this
+    // info and always provide the same completion items.
+    return [
+      {
+        label: 'TypeScript',
+        kind: CompletionItemKind.Text,
+        data: 1
+      },
+      {
+        label: 'JavaScript',
+        kind: CompletionItemKind.Text,
+        data: 2
+      }
+    ]
+  }
 )
 
 // This handler resolves additional information for the item selected in
 // the completion list.
 connection.onCompletionResolve(
-	(item: CompletionItem): CompletionItem => {
-		if (item.data === 1) {
-			item.detail = 'TypeScript details'
-			item.documentation = 'TypeScript documentation'
-		} else if (item.data === 2) {
-			item.detail = 'JavaScript details'
-			item.documentation = 'JavaScript documentation'
-		}
-		return item
-	}
+  (item: CompletionItem): CompletionItem => {
+    if (item.data === 1) {
+      item.detail = 'TypeScript details'
+      item.documentation = 'TypeScript documentation'
+    } else if (item.data === 2) {
+      item.detail = 'JavaScript details'
+      item.documentation = 'JavaScript documentation'
+    }
+    return item
+  }
 )
 
 /*
