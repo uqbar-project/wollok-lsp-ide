@@ -22,6 +22,7 @@ module.exports = {
       "error",
       2
     ],
+    "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/member-delimiter-style": [
       "off",
       {
@@ -35,6 +36,7 @@ module.exports = {
         }
       }
     ],
+    "@typescript-eslint/no-unused-vars": ["warn", { "args": "none" }],
     "@typescript-eslint/semi": [
       "off",
       "always"
