@@ -20,8 +20,7 @@ const connection = createConnection(ProposedFeatures.all)
 const documents: TextDocuments = new TextDocuments()
 
 connection.onInitialize((params: InitializeParams) => {
-  const capabilities = params.capabilities
-  initializeSettings(params.capabilities)
+  initializeSettings(connection, params.capabilities)
 
   return {
     capabilities: {
@@ -34,10 +33,7 @@ connection.onInitialize((params: InitializeParams) => {
   }
 })
 
-console.log('1')
-
 connection.onDidChangeConfiguration(change => {
-  console.log('didChangeConfiguration')
   settingsChanged(connection, change)
 
   // Revalidate all open text documents

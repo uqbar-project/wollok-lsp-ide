@@ -30,7 +30,7 @@ const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-export const validateTextDocument = (connection: Connection) => async (textDocument: TextDocument) => {
+export const validateTextDocument = (connection: Connection) => (textDocument: TextDocument) => {
   const text = textDocument.getText()
 
   const file: { name: string, content: string } = {
@@ -38,20 +38,20 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
     content: text,
   }
 
-  const start = new Date().getTime()
+  // const start = new Date().getTime()
 
   const environment = buildEnvironment([file])
-  const endEnvironment = new Date().getTime()
+  // const endEnvironment = new Date().getTime()
 
   const problems = validate(environment)
 
-  console.log('environment time ', (endEnvironment - start))
+  // console.log('environment time ', (endEnvironment - start))
 
   const diagnostics: Diagnostic[] = problems.map(problem => createDiagnostic(textDocument, problem))
 
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
 
-  const endValidation = new Date().getTime()
-  console.log('validation time ', (endValidation - endEnvironment))
+  // const endValidation = new Date().getTime()
+  // console.log('validation time ', (endValidation - endEnvironment))
 
 }

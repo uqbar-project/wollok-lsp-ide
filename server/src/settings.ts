@@ -32,31 +32,25 @@ const languageDescription: { [key: string]: string } = {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-// PUBLIC INTERFACE
-// ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-
-export const initializeSettings = (capabilities: ClientCapabilities) => {
-  console.log('capabilities', capabilities)
-}
-
-export const settingsChanged = (connection: Connection, change: DidChangeConfigurationParams) => {
-  console.log('settings changed', change.settings.wollokLinter)
-  globalSettings = <WollokLinterSettings>(
-    (change.settings.wollokLinter || defaultSettings)
-  )
-}
-
-export const lang = () => languageDescription[globalSettings.language] || envLang()
-
-// ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-const getDocumentSettings = (connection: Connection) => ((resource: string) => {
-  connection.workspace.getConfiguration({
-    scopeUri: resource,
+const getDocumentSettings = async (connection: Connection) =>
+  await connection.workspace.getConfiguration({
     section: 'wollokLinter'
-  })
-})
+  }) as WollokLinterSettings
 
+// ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+// PUBLIC INTERFACE
+// ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+
+export const initializeSettings = async (connection: Connection, capabilities: ClientCapabilities) => {
+  globalSettings = await getDocumentSettings(connection) || defaultSettings
+}
+
+export const settingsChanged = (connection: Connection, change: DidChangeConfigurationParams) => {
+  globalSettings = change.settings.wollokLinter || defaultSettings
+}
+
+export const lang = () => languageDescription[globalSettings.language] || envLang()
 

@@ -33,6 +33,14 @@ const validationMessages: { [key: string]: ValidationMessage } = {
 // INTERNAL FUNCTIONS
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
+const validationI18nized = () => validationMessages[lang()]
+
+const convertToHumanReadable = (code: string) => {
+  if (!code) { return '' }
+  const result = code.replace(/[A-Z0-9]+/g, (match) => ' ' + match.toLowerCase())
+  return validationI18nized()[FAILURE] + result.charAt(0).toUpperCase() + result.slice(1, result.length)
+}
+
 const interpolateValidationMessage = (message: string, values: string[]) =>
   message.replace(/{\d*}/g, (match: string) => {
     const index = match.replace('{', '').replace('}', '') as unknown as number
@@ -40,16 +48,7 @@ const interpolateValidationMessage = (message: string, values: string[]) =>
   }
   )
 
-const validationI18nized = () =>
-  validationMessages[lang()]
-
 const getBasicMessage = (problem: Problem) => validationI18nized()[problem.code] || convertToHumanReadable(problem.code)
-
-const convertToHumanReadable = (code: string) => {
-  if (!code) { return '' }
-  const result = code.replace(/[A-Z0-9]+/g, (match) => ' ' + match.toLowerCase())
-  return validationI18nized()[FAILURE] + result.charAt(0).toUpperCase() + result.slice(1, result.length)
-}
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE
