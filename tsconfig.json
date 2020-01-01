@@ -1,25 +1,21 @@
 {
-	"compilerOptions": {
-		"module": "commonjs",
-		"target": "es6",
-		"outDir": "out",
-		"rootDir": "src",
-		"sourceMap": true,
-		"strict": true,
-	},
-	"include": [
-		"src"
-	],
-	"exclude": [
-		"node_modules",
-		".vscode-test"
-	],
-	"references": [
-		{
-			"path": "./client"
-		},
-		{
-			"path": "./server"
-		}
-	]
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "outDir": "out",
+    "sourceMap": true,
+    "rootDirs": [
+      "server",
+      "client"
+    ],
+    "strict": true
+  },
+  "include": [
+    "server/src",
+    "client/src"
+  ],
+  "exclude": [
+    "node_modules",
+    ".vscode-test"
+  ],
 }
