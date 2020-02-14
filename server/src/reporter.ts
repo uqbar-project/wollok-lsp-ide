@@ -33,8 +33,6 @@ const validationMessages: { [key: string]: ValidationMessage } = {
 // INTERNAL FUNCTIONS
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-const validationI18nized = () => validationMessages[lang()]
-
 const convertToHumanReadable = (code: string) => {
   if (!code) { return '' }
   const result = code.replace(/[A-Z0-9]+/g, (match) => ' ' + match.toLowerCase())
@@ -49,6 +47,9 @@ const interpolateValidationMessage = (message: string, values: string[]) =>
   )
 
 const getBasicMessage = (problem: Problem) => validationI18nized()[problem.code] || convertToHumanReadable(problem.code)
+
+const validationI18nized = () =>
+  validationMessages[lang()] as ValidationMessage
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE

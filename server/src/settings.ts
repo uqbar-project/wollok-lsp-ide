@@ -53,4 +53,3 @@ export const settingsChanged = (connection: Connection, change: DidChangeConfigu
 }
 
 export const lang = () => languageDescription[globalSettings.language] || envLang()
-
