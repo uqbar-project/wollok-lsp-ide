@@ -100,3 +100,111 @@
 		"publisherId": "1a24489d-a5e7-4ea1-a73c-f3df82d39763"
 	}
 }
+=======
+  "name": "wollok-linter",
+  "displayName": "wollok-linter",
+  "description": "Wollok Linter",
+  "author": "Uqbar Foundation",
+  "license": "LGPL-3.0",
+  "publisher": "uqbar",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uqbar-project/wollok-linter"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "linter validator wollok oop educative objects learning"
+  ],
+  "icon": "images/wollokLinterLogo.png",
+  "engines": {
+    "vscode": "^1.37.0"
+  },
+  "activationEvents": [
+    "onLanguage:wollok"
+  ],
+  "main": "./client/out/extension",
+  "contributes": {
+    "languages": [
+      {
+        "id": "wollok",
+        "aliases": [
+          "Wollok",
+          "wollok"
+        ],
+        "extensions": [
+          ".wlk",
+          ".wtest",
+          ".wpgm",
+          ".wlk.xt",
+          ".wtest.xt",
+          ".wpgm.xt"
+        ]
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Wollok Linter",
+      "properties": {
+        "wollokLinter.maxNumberOfProblems": {
+          "scope": "resource",
+          "type": "number",
+          "default": 100,
+          "description": "Controls the maximum number of problems produced by the server."
+        },
+        "wollokLinter.language": {
+          "scope": "resource",
+          "type": "string",
+          "enum": [
+            "Spanish",
+            "English",
+            "Based on Local Environment"
+          ],
+          "default": "Based on Local Environment",
+          "description": "Language used while reporting linter errors and warnings."
+        },
+        "wollokLinter.trace.server": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the language server."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "cd client && npm run update-vscode && cd .. && npm run compile",
+    "compile": "tsc -b",
+    "watch": "tsc -b -w",
+    "lint": "eslint 'server/**/*.ts' --fix",
+    "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
+    "test": "sh ./scripts/e2e.sh",
+    "upgrade-wollok-ts": "npm uninstall wollok-ts && npm i file://~/workspace/wollok-dev/wollok-ts/wollok-ts-2.0.1.tgz"
+  },
+  "dependencies": {
+    "wollok-ts": "file:../wollok-ts/wollok-ts-2.0.1.tgz"
+  },
+  "devDependencies": {
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.12.21",
+    "@typescript-eslint/eslint-plugin": "^2.14.0",
+    "@typescript-eslint/parser": "^2.14.0",
+    "eslint": "^6.8.0",
+    "eslint-import-resolver-typescript": "^2.0.0",
+    "eslint-json": "^2.0.0",
+    "eslint-plugin-import": "^2.19.1",
+    "typescript": "^3.7.4"
+  },
+  "__metadata": {
+    "id": "d5cabd83-07f7-417e-928b-df2551b9c261",
+    "publisherDisplayName": "Uqbar",
+    "publisherId": "1a24489d-a5e7-4ea1-a73c-f3df82d39763"
+  }
+}

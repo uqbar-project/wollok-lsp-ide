@@ -6,7 +6,6 @@ import * as path from 'path'
 import { ExtensionContext, workspace } from 'vscode'
 import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient'
 
-
 let client: LanguageClient
 
 export function activate(context: ExtensionContext) {

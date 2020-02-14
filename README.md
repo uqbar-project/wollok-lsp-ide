@@ -30,3 +30,4 @@ By now we have a first working version of a linter, calling wollok-ts implementa
 - Develop a new highlighter based on AST
 - Build an internal cache and detect small changes, in order to avoid calling wollok-ts all the time
 - Develop a formatter (based on AST, too)
+
