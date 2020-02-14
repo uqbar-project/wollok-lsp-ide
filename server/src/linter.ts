@@ -30,6 +30,8 @@ const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
+let environment = buildEnvironment([])
+
 export const validateTextDocument = (connection: Connection) => async (textDocument: TextDocument) => {
 	const text = textDocument.getText()
 
@@ -40,7 +42,7 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
 
 	const start = new Date().getTime()
 
-	const environment = buildEnvironment([file])
+	environment = buildEnvironment([file], environment)
 	const endEnvironment = new Date().getTime()
 
 	const problems = validate(environment)
