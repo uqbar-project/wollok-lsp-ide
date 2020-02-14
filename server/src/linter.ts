@@ -48,11 +48,11 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
 
   const problems = validate(environment)
 
-  console.log('environment time ', (endEnvironment - start))
+  console.log('o- environment time ', (endEnvironment - start))
 
   const diagnostics: Diagnostic[] = problems.map(problem => createDiagnostic(textDocument, problem))
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
 
   const endValidation = new Date().getTime()
-  console.log('validation time ', (endValidation - endEnvironment))
+  console.log('o- validation time ', (endValidation - endEnvironment))
 }

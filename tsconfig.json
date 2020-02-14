@@ -3,19 +3,22 @@
     "module": "commonjs",
     "target": "es6",
     "outDir": "out",
-    "sourceMap": true,
-    "rootDirs": [
-      "server",
-      "client"
-    ],
-    "strict": true
+    "rootDir": "src",
+    "sourceMap": true
   },
   "include": [
-    "server/src",
-    "client/src"
+    "src"
   ],
   "exclude": [
     "node_modules",
     ".vscode-test"
   ],
+  "references": [
+    {
+      "path": "./client"
+    },
+    {
+      "path": "./server"
+    }
+  ]
 }

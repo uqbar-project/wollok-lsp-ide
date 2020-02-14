@@ -14,8 +14,7 @@
     "removeComments": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "composite": true
+    "esModuleInterop": true
   },
   "exclude": [
     "node_modules",
