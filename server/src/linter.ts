@@ -1,5 +1,5 @@
-import { Connection, Diagnostic, DiagnosticSeverity, TextDocument } from 'vscode-languageserver'
-import { buildEnvironment, validate } from 'wollok-ts'
+import { CompletionItem, CompletionItemKind, Connection, Diagnostic, DiagnosticSeverity, TextDocument, TextDocumentPositionParams } from 'vscode-languageserver'
+import { buildEnvironment, Node, validate } from 'wollok-ts'
 import { Problem } from 'wollok-ts/dist/validator'
 
 import { reportMessage } from './reporter'
@@ -55,4 +55,13 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
 
   const endValidation = new Date().getTime()
   console.log('o- validation time ', (endValidation - endEnvironment))
+}
+
+export const completition = (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+  const global: string[] = []
+  environment.forEach(node => { if (node.is('Singleton') && node.name) global.push(node.name) })
+  return global.map(name => ({
+    label: name,
+    kind: CompletionItemKind.Text
+  }))
 }
