@@ -79,20 +79,19 @@
   },
   "scripts": {
     "vscode:prepublish": "cd client && npm run update-vscode && cd .. && npm run compile",
-    "compile": "tsc -b",
+    "compile": "tsc -b --resolveJsonModule",
     "watch": "tsc -b -w",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
-    "test": "sh ./scripts/e2e.sh",
-    "upgrade-wollok-ts": "npm uninstall wollok-ts && npm i file://~/workspace/wollok-dev/wollok-ts/wollok-ts-2.0.1.tgz"
+    "test": "sh ./scripts/e2e.sh"
   },
   "dependencies": {
-    "wollok-ts": "file:../wollok-ts/wollok-ts-2.0.1.tgz"
+    "wollok-ts": "^2.3.1"
   },
   "devDependencies": {
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.21",
     "tslint": "^5.20.1",
-    "typescript": "^3.7.4"
+    "typescript": "^4.2.3"
   },
   "__metadata": {
     "id": "d5cabd83-07f7-417e-928b-df2551b9c261",
