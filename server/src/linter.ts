@@ -1,7 +1,6 @@
 import { Connection, Diagnostic, DiagnosticSeverity, TextDocument } from 'vscode-languageserver'
 import { buildEnvironment, validate } from 'wollok-ts'
 import { Problem } from 'wollok-ts/dist/validator'
-
 import { reportMessage } from './reporter'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -48,11 +47,11 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
 
   const problems = validate(environment)
 
-  console.log('o- environment time ', (endEnvironment - start))
+  console.log('o- environment time ', endEnvironment - start)
 
   const diagnostics: Diagnostic[] = problems.map(problem => createDiagnostic(textDocument, problem))
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
 
   const endValidation = new Date().getTime()
-  console.log('o- validation time ', (endValidation - endEnvironment))
+  console.log('o- validation time ', endValidation - endEnvironment)
 }

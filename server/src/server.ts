@@ -1,13 +1,10 @@
-import {
-  CompletionItem,
+import { CompletionItem,
   CompletionItemKind,
   createConnection,
   InitializeParams,
   ProposedFeatures,
   TextDocumentPositionParams,
-  TextDocuments,
-} from 'vscode-languageserver'
-
+  TextDocuments } from 'vscode-languageserver'
 import { validateTextDocument } from './linter'
 import { initializeSettings, settingsChanged } from './settings'
 
@@ -26,10 +23,8 @@ connection.onInitialize((params: InitializeParams) => {
     capabilities: {
       textDocumentSync: documents.syncKind,
       // Tell the client that the server supports code completion
-      completionProvider: {
-        resolveProvider: true
-      }
-    }
+      completionProvider: { resolveProvider: true },
+    },
   }
 })
 
@@ -61,13 +56,13 @@ connection.onCompletion(
       {
         label: 'TypeScript',
         kind: CompletionItemKind.Text,
-        data: 1
+        data: 1,
       },
       {
         label: 'JavaScript',
         kind: CompletionItemKind.Text,
-        data: 2
-      }
+        data: 2,
+      },
     ]
   }
 )

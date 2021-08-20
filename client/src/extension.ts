@@ -24,8 +24,8 @@ export function activate(context: ExtensionContext) {
     debug: {
       module: serverModule,
       transport: TransportKind.ipc,
-      options: debugOptions
-    }
+      options: debugOptions,
+    },
   }
 
   // Options to control the language client
@@ -35,8 +35,8 @@ export function activate(context: ExtensionContext) {
     synchronize: {
       configurationSection: 'wollokLinter',
       // Notify the server about file changes to '.clientrc files contained in the workspace
-      fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
-    }
+      fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
+    },
   }
 
   // Create the language client and start the client.

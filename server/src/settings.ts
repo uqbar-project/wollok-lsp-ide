@@ -36,9 +36,7 @@ const languageDescription: { [key: string]: string } = {
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 const getDocumentSettings = async (connection: Connection) =>
-  await connection.workspace.getConfiguration({
-    section: 'wollokLinter'
-  }) as WollokLinterSettings
+  await connection.workspace.getConfiguration({ section: 'wollokLinter' }) as WollokLinterSettings
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE

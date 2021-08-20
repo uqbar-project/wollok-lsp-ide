@@ -10,16 +10,16 @@
 		"url": "https://github.com/uqbar-project/wollok-linter"
 	},
 	"engines": {
-		"vscode": "^1.37.0"
+		"vscode": "^1.59.0"
 	},
 	"scripts": {
 		"update-vscode": "vscode-install",
 		"postinstall": "vscode-install"
 	},
 	"dependencies": {
-		"vscode-languageclient": "^5.2.1"
+		"vscode-languageclient": "^7.0.0"
 	},
 	"devDependencies": {
-		"vscode": "^1.1.36"
+		"vscode": "^1.1.37"
 	}
 }
