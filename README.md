@@ -25,9 +25,18 @@ By now we have a first working version of a linter, calling wollok-ts implementa
 
 ## TODO List
 
+- Develop a Test Runner
 - Enhance validation messages
-- Build an autocomplete tool
 - Develop a new highlighter based on AST
+- Develop a REPL
 - Build an internal cache and detect small changes, in order to avoid calling wollok-ts all the time
+-----
+- Develop an autocomplete tool (and conect with WollokDOC)
+- Develop Quick fixs & Refactors
+- Develop a Dinamic Diagram view
+- Develop a Type system
+- Develop a Wollok Game view
 - Develop a formatter (based on AST, too)
+- Develop a Static Diagram view
+- Develop a Debugger
 
