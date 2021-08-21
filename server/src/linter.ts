@@ -1,9 +1,10 @@
 import { CompletionItem, CompletionItemKind, Connection, Diagnostic, DiagnosticSeverity, InsertTextFormat, Position, TextDocumentPositionParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { buildEnvironment, Node, validate } from 'wollok-ts'
+import { buildEnvironment, Environment, Node, validate } from 'wollok-ts'
 import { Problem } from 'wollok-ts/dist/validator'
 import { completionsForNode, NodeCompletion } from './autocomplete'
 import { reportMessage } from './reporter'
+import { TimeMeasurer } from './timeMeasurer'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -63,31 +64,30 @@ const createCompletionItem = (position: Position) => (base: NodeCompletion): Com
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-let environment = buildEnvironment([])
+let environment: Environment
 
 export const validateTextDocument = (connection: Connection) => async (textDocument: TextDocument): Promise<void> => {
-  const text = textDocument.getText()
+  const timeMeasurer = new TimeMeasurer()
 
+  environment = buildEnvironment([])
+  timeMeasurer.addTime('build empty environment')
+
+  const text = textDocument.getText()
   const file: { name: string, content: string } = {
     name: textDocument.uri,
     content: text,
   }
-
-  const start = new Date().getTime()
+  timeMeasurer.addTime('adapt parameters')
 
   environment = buildEnvironment([file], environment)
-
-  const endEnvironment = new Date().getTime()
-
   const problems = validate(environment)
-
-  console.info('o- environment time ', endEnvironment - start)
+  timeMeasurer.addTime('environment time for file')
 
   const diagnostics: Diagnostic[] = problems.map(problem => createDiagnostic(textDocument, problem))
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
+  timeMeasurer.addTime('validation time')
 
-  const endValidation = new Date().getTime()
-  console.info('o- validation time ', endValidation - endEnvironment)
+  timeMeasurer.finalReport()
 }
 
 export const completions = (textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
