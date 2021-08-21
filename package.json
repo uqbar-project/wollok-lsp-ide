@@ -18,7 +18,7 @@
   ],
   "icon": "images/wollokLinterLogo.png",
   "engines": {
-    "vscode": "^1.37.0"
+    "vscode": "^1.59.0"
   },
   "activationEvents": [
     "onLanguage:wollok"
@@ -78,7 +78,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "cd client && npm run update-vscode && cd .. && npm run compile",
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
@@ -92,9 +92,11 @@
   },
   "devDependencies": {
     "@types/mocha": "^9.0.0",
-    "@types/node": "^16.6.2",
+    "@types/node": "^16.7.0",
     "@typescript-eslint/eslint-plugin": "^4.29.2",
     "@typescript-eslint/parser": "^4.29.2",
+    "eslint": "^7.32.0",
+    "mocha": "^9.1.0",
     "typescript": "^4.3.5"
   },
   "__metadata": {

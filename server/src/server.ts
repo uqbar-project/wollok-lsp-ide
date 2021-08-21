@@ -4,7 +4,9 @@ import { CompletionItem,
   InitializeParams,
   ProposedFeatures,
   TextDocumentPositionParams,
-  TextDocuments } from 'vscode-languageserver'
+  TextDocuments,
+  TextDocumentSyncKind } from 'vscode-languageserver/node'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 import { validateTextDocument } from './linter'
 import { initializeSettings, settingsChanged } from './settings'
 
@@ -14,14 +16,15 @@ const connection = createConnection(ProposedFeatures.all)
 
 // Create a simple text document manager. The text document manager
 // supports full document sync only
-const documents: TextDocuments = new TextDocuments()
+const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
 connection.onInitialize((params: InitializeParams) => {
   initializeSettings(connection, params.capabilities)
 
   return {
+    // Tell the client which capabilities the server supports
     capabilities: {
-      textDocumentSync: documents.syncKind,
+      textDocumentSync: TextDocumentSyncKind.Incremental,
       // Tell the client that the server supports code completion
       completionProvider: { resolveProvider: true },
     },
@@ -67,17 +70,13 @@ connection.onCompletion(
   }
 )
 
-// This handler resolves additional information for the item selected in
-// the completion list.
+// This handler resolves additional information for the item selected in the completion list.
 connection.onCompletionResolve(
   (item: CompletionItem): CompletionItem => {
-    if (item.data === 1) {
-      item.detail = 'TypeScript details'
-      item.documentation = 'TypeScript documentation'
-    } else if (item.data === 2) {
-      item.detail = 'JavaScript details'
-      item.documentation = 'JavaScript documentation'
-    }
+    // if (item.data === 1) {
+    //   item.detail = 'TypeScript details'
+    //   item.documentation = 'TypeScript documentation'
+    // }
     return item
   }
 )

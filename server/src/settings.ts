@@ -42,12 +42,12 @@ const getDocumentSettings = async (connection: Connection) =>
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-export const initializeSettings = async (connection: Connection, capabilities: ClientCapabilities) => {
+export const initializeSettings = async (connection: Connection, _capabilities: ClientCapabilities): Promise<void> => {
   globalSettings = await getDocumentSettings(connection) || defaultSettings
 }
 
-export const settingsChanged = (connection: Connection, change: DidChangeConfigurationParams) => {
+export const settingsChanged = (connection: Connection, change: DidChangeConfigurationParams): void => {
   globalSettings = change.settings.wollokLinter || defaultSettings
 }
 
-export const lang = () => languageDescription[globalSettings.language] || envLang()
+export const lang = (): string => languageDescription[globalSettings.language] || envLang()

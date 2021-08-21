@@ -2,11 +2,11 @@ export class TimeMeasurer {
 
   lastTime = this.now()
 
-  get timeElapsed() {
+  get timeElapsed(): number {
     return this.now() - this.lastTime
   }
 
-  setLastTime() {
+  setLastTime(): void {
     this.lastTime = this.now()
   }
 
