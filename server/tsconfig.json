@@ -4,8 +4,12 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
+    "resolveJsonModule": true,
     "strict": true,
     "outDir": "out",
+    "lib": [
+      "esNext"
+    ],
     "rootDir": "src",
     "esModuleInterop": true
   },
@@ -14,6 +18,7 @@
   ],
   "exclude": [
     "node_modules",
-    ".vscode-test"
+    ".vscode-test",
+    "out"
   ]
 }

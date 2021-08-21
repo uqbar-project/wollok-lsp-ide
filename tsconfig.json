@@ -6,7 +6,7 @@
     "rootDir": "src",
     "sourceMap": true,
     "lib": [
-      "es2020"
+      "esNext"
     ],
     "declaration": true,
     "strict": true,
