@@ -15,6 +15,7 @@ export class TimeMeasurer {
       const time = this.elapsedTime(index)
       console.info(`o- ${timeRow.processName} ${time}`)
     })
+    console.info('')
     this.reset()
   }
 
