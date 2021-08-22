@@ -40,6 +40,7 @@ const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPo
   )
 }
 
+// TODO: Use map instead of forEach
 const getNodesByPosition = (textDocumentPosition: TextDocumentPositionParams): Node[] => {
   const result: Node[] = []
   environment.forEach(node => { if (node.sourceFileName() && include(node, textDocumentPosition)) result.push(node) })
