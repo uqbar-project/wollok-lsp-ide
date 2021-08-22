@@ -22,10 +22,8 @@ connection.onInitialize((params: InitializeParams) => {
   initializeSettings(connection, params.capabilities)
 
   return {
-    // Tell the client which capabilities the server supports
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
-      // Tell the client that the server supports code completion
       completionProvider: { resolveProvider: true },
     },
   }
@@ -34,7 +32,6 @@ connection.onInitialize((params: InitializeParams) => {
 connection.onDidChangeConfiguration(change => {
   settingsChanged(connection, change)
 
-  // Revalidate all open text documents
   documents.all().forEach(validateTextDocument(connection))
 })
 
