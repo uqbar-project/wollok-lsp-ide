@@ -1,9 +1,5 @@
 import { ClientCapabilities, Connection, DidChangeConfigurationParams } from 'vscode-languageserver'
 
-interface Settings {
-  wollokLinter: WollokLinterSettings
-}
-
 interface WollokLinterSettings {
   maxNumberOfProblems: number,
   language: string
