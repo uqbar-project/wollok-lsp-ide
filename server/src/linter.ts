@@ -77,11 +77,9 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
     name: textDocument.uri,
     content: text,
   }
-  timeMeasurer.addTime('adapt parameters')
-
   environment = buildEnvironment([file], environment)
   const problems = validate(environment)
-  timeMeasurer.addTime('environment time for file')
+  timeMeasurer.addTime('build environment for file')
 
   const diagnostics: Diagnostic[] = problems.map(problem => createDiagnostic(textDocument, problem))
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
