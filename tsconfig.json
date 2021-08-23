@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "ES2017",
+    "target": "es2017",
     "outDir": "out",
     "rootDir": "src",
     "sourceMap": true,
     "lib": [
-      "es2020"
+      "esNext"
     ],
     "declaration": true,
     "strict": true,
@@ -17,8 +17,8 @@
     "experimentalDecorators": true
   },
   "include": [
-    "src"
-  ],
+		"src"
+	],
   "exclude": [
     "node_modules",
     ".vscode-test"

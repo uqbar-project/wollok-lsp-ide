@@ -4,7 +4,7 @@ import { Body, Method, Node } from 'wollok-ts'
 export type NodeCompletion = Pick<CompletionItem, 'label' | 'kind' | 'sortText'> & { textEdit: { newText: string } }
 
 export const completionsForNode = (node: Node): NodeCompletion[] => {
-  console.log(node.kind)
+  console.info(node.kind)
   switch (node.kind) {
     case 'Package': return completePackage()
     case 'Singleton': return completeSingleton()
@@ -18,17 +18,13 @@ const completePackage = (): NodeCompletion[] => [
   {
     label: 'object',
     kind: CompletionItemKind.Class,
-    textEdit: {
-      newText: 'object ${1:pepita} { $0}'
-    }
+    textEdit: { newText: 'object ${1:pepita} { $0}' },
   },
   {
     label: 'class',
     kind: CompletionItemKind.Class,
-    textEdit: {
-      newText: 'class ${1:Golondrina} { $0}'
-    }
-  }
+    textEdit: { newText: 'class ${1:Golondrina} { $0}' },
+  },
 ]
 
 
@@ -37,26 +33,20 @@ const completeSingleton = (): NodeCompletion[] => [
     label: 'var attribute',
     kind: CompletionItemKind.Field,
     sortText: 'a',
-    textEdit: {
-      newText: 'var ${1:energia} = ${0:0}'
-    }
+    textEdit: { newText: 'var ${1:energia} = ${0:0}' },
   },
   {
     label: 'const attribute',
     kind: CompletionItemKind.Field,
     sortText: 'a',
-    textEdit: {
-      newText: 'const ${1:energia} = ${0:0}'
-    }
+    textEdit: { newText: 'const ${1:energia} = ${0:0}' },
   },
   {
     label: 'method',
     kind: CompletionItemKind.Method,
     sortText: 'b',
-    textEdit: {
-      newText: 'method ${1:volar}($2) { $0}'
-    }
-  }
+    textEdit: { newText: 'method ${1:volar}($2) { $0}' },
+  },
 ]
 
 const completeBody = (node: Body): NodeCompletion[] => completionsForNode(node.parent())
@@ -68,8 +58,6 @@ const completeMethod = (node: Method): NodeCompletion[] => {
   return references.map(name => ({
     label: name,
     kind: CompletionItemKind.Reference,
-    textEdit: {
-      newText: name
-    }
+    textEdit: { newText: name },
   }))
 }

@@ -1,9 +1,10 @@
-import { CompletionItem, CompletionItemKind, Connection, Diagnostic, DiagnosticSeverity, InsertTextFormat, Position, TextDocument, TextDocumentPositionParams } from 'vscode-languageserver'
-import { buildEnvironment, Node, Source, validate } from 'wollok-ts'
+import { CompletionItem, CompletionItemKind, Connection, Diagnostic, DiagnosticSeverity, InsertTextFormat, Position, TextDocumentPositionParams } from 'vscode-languageserver'
+import { TextDocument } from 'vscode-languageserver-textdocument'
+import { buildEnvironment, Environment, Node, validate } from 'wollok-ts'
 import { Problem } from 'wollok-ts/dist/validator'
-
-import { reportMessage } from './reporter'
 import { completionsForNode, NodeCompletion } from './autocomplete'
+import { reportMessage } from './reporter'
+import { TimeMeasurer } from './timeMeasurer'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -23,22 +24,26 @@ const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
     range,
     code: problem.code,
     message: reportMessage(problem),
-    source: problem.node.source?.file,
+    source: problem.node.sourceFileName(),
   } as Diagnostic
 }
 
 
-// TODO: To utils?
-const include = (source: Source, { position, textDocument: { uri } }: TextDocumentPositionParams) =>
-  source.file == uri &&
-  (source.start.line - 1 <= position.line && position.line <= source.end.line - 1 ||
-    (source.start.line - 1 == position.line && position.line == source.end.line - 1 &&
-      source.start.offset <= position.character && position.character <= source.end.line
-    ))
+// TODO: Refactor and move to utils
+const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
+  const startLine = node.sourceMap?.start?.line
+  const endLine = node.sourceMap?.end?.line
+  return node.sourceFileName() == uri && startLine && endLine &&
+  (startLine - 1 <= position.line && position.line <= endLine - 1 ||
+    startLine - 1 == position.line && position.line == endLine - 1 &&
+      (node?.sourceMap?.start?.offset || 0) <= position.character && position.character <= endLine
+  )
+}
 
+// TODO: Use map instead of forEach
 const getNodesByPosition = (textDocumentPosition: TextDocumentPositionParams): Node[] => {
   const result: Node[] = []
-  environment.forEach(node => { if (node.source?.file && include(node.source, textDocumentPosition)) result.push(node) })
+  environment.forEach(node => { if (node.sourceFileName() && include(node, textDocumentPosition)) result.push(node) })
   return result
 }
 
@@ -52,39 +57,36 @@ const createCompletionItem = (position: Position) => (base: NodeCompletion): Com
     range: {
       start: position,
       end: position,
-    }
-  }
+    },
+  },
 })
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-let environment = buildEnvironment([])
+let environment: Environment
 
-export const validateTextDocument = (connection: Connection) => async (textDocument: TextDocument) => {
+export const validateTextDocument = (connection: Connection) => async (textDocument: TextDocument): Promise<void> => {
+  const timeMeasurer = new TimeMeasurer()
+
+  environment = buildEnvironment([])
+  timeMeasurer.addTime('build empty environment')
+
   const text = textDocument.getText()
-
   const file: { name: string, content: string } = {
     name: textDocument.uri,
     content: text,
   }
-
-  const start = new Date().getTime()
-
   environment = buildEnvironment([file], environment)
-
-  const endEnvironment = new Date().getTime()
-
   const problems = validate(environment)
-
-  console.log('o- environment time ', (endEnvironment - start))
+  timeMeasurer.addTime('build environment for file')
 
   const diagnostics: Diagnostic[] = problems.map(problem => createDiagnostic(textDocument, problem))
   connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
+  timeMeasurer.addTime('validation time')
 
-  const endValidation = new Date().getTime()
-  console.log('o- validation time ', (endValidation - endEnvironment))
+  timeMeasurer.finalReport()
 }
 
 export const completions = (textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
@@ -92,6 +94,3 @@ export const completions = (textDocumentPosition: TextDocumentPositionParams): C
   const cursorNode = getNodesByPosition(textDocumentPosition).reverse()[0]
   return completionsForNode(cursorNode).map(createCompletionItem(position))
 }
-
-
-

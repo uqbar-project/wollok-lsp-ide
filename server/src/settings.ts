@@ -1,9 +1,5 @@
 import { ClientCapabilities, Connection, DidChangeConfigurationParams } from 'vscode-languageserver'
 
-interface Settings {
-  wollokLinter: WollokLinterSettings
-}
-
 interface WollokLinterSettings {
   maxNumberOfProblems: number,
   language: string
@@ -13,10 +9,13 @@ interface WollokLinterSettings {
 // INTERNAL & PUBLISHED STATE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
+const SPANISH = 'es'
+const ENGLISH = 'en'
+
 const envLang = () => {
   const env = process.env
   const fullLanguage = env.LC_ALL || env.LC_MESSAGES || env.LANG || env.LANGUAGE
-  return fullLanguage ? fullLanguage.substring(0, 2) : 'es'
+  return fullLanguage ? fullLanguage.substring(0, 2) : SPANISH
 }
 
 const defaultSettings: WollokLinterSettings = {
@@ -27,8 +26,8 @@ const defaultSettings: WollokLinterSettings = {
 let globalSettings: WollokLinterSettings = defaultSettings
 
 const languageDescription: { [key: string]: string } = {
-  'Spanish': 'es',
-  'English': 'en',
+  'Spanish': SPANISH,
+  'English': ENGLISH,
 }
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -36,20 +35,18 @@ const languageDescription: { [key: string]: string } = {
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 const getDocumentSettings = async (connection: Connection) =>
-  await connection.workspace.getConfiguration({
-    section: 'wollokLinter'
-  }) as WollokLinterSettings
+  await connection.workspace.getConfiguration({ section: 'wollokLinter' }) as WollokLinterSettings
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-export const initializeSettings = async (connection: Connection, capabilities: ClientCapabilities) => {
+export const initializeSettings = async (connection: Connection, _capabilities: ClientCapabilities): Promise<void> => {
   globalSettings = await getDocumentSettings(connection) || defaultSettings
 }
 
-export const settingsChanged = (connection: Connection, change: DidChangeConfigurationParams) => {
+export const settingsChanged = (connection: Connection, change: DidChangeConfigurationParams): void => {
   globalSettings = change.settings.wollokLinter || defaultSettings
 }
 
-export const lang = () => languageDescription[globalSettings.language] || envLang()
+export const lang = (): string => languageDescription[globalSettings.language] || envLang()

@@ -7,7 +7,7 @@ Starting from [LSP sample code](https://code.visualstudio.com/api/language-exten
 
 ## Linter itself
 
-By now we have a first working version of a linter, calling wollok-ts implementation. For a deeper developer guide, please refer to the [wiki](https://github.com/uqbar-project/wollok-linter/wiki)
+By now we have a first working version of a linter, calling wollok-ts implementation. For a deeper developer guide, please refer to the [wiki](https://github.com/uqbar-project/wollok-linter/wiki). See [installation instructions for developers](https://github.com/uqbar-project/wollok-linter/wiki/Development-Environment).
 
 ## Structure
 
@@ -32,8 +32,8 @@ By now we have a first working version of a linter, calling wollok-ts implementa
 - Build an internal cache and detect small changes, in order to avoid calling wollok-ts all the time
 -----
 - Develop an autocomplete tool (and conect with WollokDOC)
-- Develop Quick fixs & Refactors
-- Develop a Dinamic Diagram view
+- Develop Quick fixes & Refactors
+- Develop a Dynamic Diagram view
 - Develop a Type system
 - Develop a Wollok Game view
 - Develop a formatter (based on AST, too)

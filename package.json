@@ -18,7 +18,7 @@
   ],
   "icon": "images/wollokLinterLogo.png",
   "engines": {
-    "vscode": "^1.37.0"
+    "vscode": "^1.59.0"
   },
   "activationEvents": [
     "onLanguage:wollok"
@@ -78,20 +78,26 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "cd client && npm run update-vscode && cd .. && npm run compile",
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
-    "test": "sh ./scripts/e2e.sh"
+    "lint": "cd client && eslint . --ignore-path ../.eslintignore && cd ../server && eslint . --ignore-path ../.eslintignore && cd ..",
+    "lint:fix": "cd client && eslint . --fix && cd ../server && eslint . --fix && cd ..",
+    "test": "npm run lint && sh ./scripts/e2e.sh",
+    "upgrade-wollok-ts": "npm uninstall wollok-ts && npm i file://~/workspace/wollok-dev/wollok-ts/wollok-ts-3.0.6.tgz"
   },
   "dependencies": {
-    "wollok-ts": "^2.3.1"
+    "wollok-ts": "3.0.6"
   },
   "devDependencies": {
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^12.12.21",
-    "tslint": "^5.20.1",
-    "typescript": "^4.2.3"
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.7.0",
+    "@typescript-eslint/eslint-plugin": "^4.29.2",
+    "@typescript-eslint/parser": "^4.29.2",
+    "eslint": "^7.32.0",
+    "mocha": "^9.1.0",
+    "typescript": "^4.3.5"
   },
   "__metadata": {
     "id": "d5cabd83-07f7-417e-928b-df2551b9c261",

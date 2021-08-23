@@ -1,12 +1,13 @@
-import {
-  CompletionItem,
+import { CompletionItem,
+  CompletionItemKind,
   createConnection,
   InitializeParams,
   ProposedFeatures,
+  TextDocumentPositionParams,
   TextDocuments,
-} from 'vscode-languageserver'
-
-import { validateTextDocument, completions } from './linter';
+  TextDocumentSyncKind } from 'vscode-languageserver/node'
+import { TextDocument } from 'vscode-languageserver-textdocument'
+import { validateTextDocument } from './linter'
 import { initializeSettings, settingsChanged } from './settings'
 
 // Create a connection for the server. The connection uses Node's IPC as a transport.
@@ -15,26 +16,22 @@ const connection = createConnection(ProposedFeatures.all)
 
 // Create a simple text document manager. The text document manager
 // supports full document sync only
-const documents: TextDocuments = new TextDocuments()
+const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
 connection.onInitialize((params: InitializeParams) => {
   initializeSettings(connection, params.capabilities)
 
   return {
-    // Tell the client which capabilities the server supports
     capabilities: {
-      textDocumentSync: documents.syncKind,
-      completionProvider: {
-        resolveProvider: true
-      }
-    }
+      textDocumentSync: TextDocumentSyncKind.Incremental,
+      completionProvider: { resolveProvider: true },
+    },
   }
 })
 
 connection.onDidChangeConfiguration(change => {
   settingsChanged(connection, change)
 
-  // Revalidate all open text documents
   documents.all().forEach(validateTextDocument(connection))
 })
 
@@ -50,7 +47,25 @@ connection.onDidChangeWatchedFiles(_change => {
 })
 
 // This handler provides the initial list of the completion items.
-connection.onCompletion(completions)
+connection.onCompletion(
+  (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+    // The pass parameter contains the position of the text document in
+    // which code complete got requested. For the example we ignore this
+    // info and always provide the same completion items.
+    return [
+      {
+        label: 'TypeScript',
+        kind: CompletionItemKind.Text,
+        data: 1,
+      },
+      {
+        label: 'JavaScript',
+        kind: CompletionItemKind.Text,
+        data: 2,
+      },
+    ]
+  }
+)
 
 // This handler resolves additional information for the item selected in the completion list.
 connection.onCompletionResolve(

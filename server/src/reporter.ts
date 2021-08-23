@@ -1,5 +1,4 @@
 import { Problem } from 'wollok-ts/dist/validator'
-
 import { lang } from './settings'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -55,4 +54,4 @@ const validationI18nized = () =>
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-export const reportMessage = (problem: Problem) => interpolateValidationMessage(getBasicMessage(problem), ...problem.values)
+export const reportMessage = (problem: Problem): string => interpolateValidationMessage(getBasicMessage(problem), ...problem.values)

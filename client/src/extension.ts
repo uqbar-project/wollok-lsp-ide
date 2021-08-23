@@ -4,11 +4,11 @@
  * ------------------------------------------------------------------------------------------ */
 import * as path from 'path'
 import { ExtensionContext, workspace } from 'vscode'
-import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient'
+import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient/node'
 
 let client: LanguageClient
 
-export function activate(context: ExtensionContext) {
+export function activate(context: ExtensionContext): void {
   // The server is implemented in node
   const serverModule = context.asAbsolutePath(
     path.join('server', 'out', 'server.js')
@@ -24,8 +24,8 @@ export function activate(context: ExtensionContext) {
     debug: {
       module: serverModule,
       transport: TransportKind.ipc,
-      options: debugOptions
-    }
+      options: debugOptions,
+    },
   }
 
   // Options to control the language client
@@ -35,8 +35,8 @@ export function activate(context: ExtensionContext) {
     synchronize: {
       configurationSection: 'wollokLinter',
       // Notify the server about file changes to '.clientrc files contained in the workspace
-      fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
-    }
+      fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
+    },
   }
 
   // Create the language client and start the client.
