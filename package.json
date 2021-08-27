@@ -85,7 +85,6 @@
     "lint": "cd client && eslint . --ignore-path ../.eslintignore && cd ../server && eslint . --ignore-path ../.eslintignore && cd ..",
     "lint:fix": "cd client && eslint . --fix && cd ../server && eslint . --fix && cd ..",
     "test": "npm run lint && sh ./scripts/e2e.sh",
-    "upgrade-wollok-ts": "npm uninstall wollok-ts && npm i file://~/workspace/wollok-dev/wollok-ts/wollok-ts-3.0.6.tgz"
   },
   "dependencies": {
     "wollok-ts": "3.0.6"
