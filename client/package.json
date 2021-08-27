@@ -13,8 +13,10 @@
 		"vscode": "^1.59.0"
 	},
 	"dependencies": {
-		"@types/vscode": "^1.59.0",
-		"vscode-languageclient": "^7.0.0",
-		"vscode-test": "^1.6.1"
+		"@types/vscode": "^1.59.0"
+	},
+	"devDependencies": {
+		"@vscode/test-electron": "^1.6.1",
+		"vscode-languageclient": "^7.0.0"
 	}
 }
