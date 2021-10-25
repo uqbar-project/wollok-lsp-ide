@@ -25,18 +25,19 @@ By now we have a first working version of a linter, calling wollok-ts implementa
 
 ## TODO List
 
-- Develop a Test Runner
+- Develop a [Test Runner](https://code.visualstudio.com/api/extension-guides/testing)
 - Enhance validation messages
-- Develop a new highlighter based on AST
+- Develop a [new highlighter based on AST](https://code.visualstudio.com/api/language-extensions/semantic-highlight-guide)
 - Develop a REPL
 - Build an internal cache and detect small changes, in order to avoid calling wollok-ts all the time
 -----
 - Develop an autocomplete tool (and conect with WollokDOC)
 - Develop Quick fixes & Refactors
-- Develop a Dynamic Diagram view
+- Develop a [Dynamic Diagram view, maybe thru Notebooks](https://code.visualstudio.com/api/extension-guides/notebook)
 - Develop a Type system
 - Develop a Wollok Game view
 - Develop a formatter (based on AST, too)
 - Develop a Static Diagram view
-- Develop a Debugger
-
+- Develop a [Debugger](https://code.visualstudio.com/api/extension-guides/debugger-extension)
+- Develop [Web extensions](https://code.visualstudio.com/api/extension-guides/web-extensions)
+- Develop a [Snippet extension](https://code.visualstudio.com/api/language-extensions/snippet-guide)
