@@ -13,8 +13,11 @@ suite('Should do completion', () => {
   test('Completes JS/TS in txt file', async () => {
     await testCompletion(docUri, new vscode.Position(0, 0), {
       items: [
-        { label: 'JavaScript', kind: vscode.CompletionItemKind.Text },
-        { label: 'TypeScript', kind: vscode.CompletionItemKind.Text },
+        { label: 'class', kind: vscode.CompletionItemKind.Class },
+        { label: 'describe', kind: vscode.CompletionItemKind.Event },
+        { label: 'method (with effect)', kind: vscode.CompletionItemKind.Method },
+        { label: 'method (without effect)', kind: vscode.CompletionItemKind.Method },
+        { label: 'object', kind: vscode.CompletionItemKind.Module },
       ],
     })
   })
@@ -34,7 +37,7 @@ async function testCompletion(
     position
   )) as vscode.CompletionList
 
-  assert.ok(actualCompletionList.items.length >= 2)
+  assert.equal(expectedCompletionList.items.length, actualCompletionList.items.length)
   expectedCompletionList.items.forEach((expectedItem, i) => {
     const actualItem = actualCompletionList.items[i]
     assert.equal(actualItem.label, expectedItem.label)

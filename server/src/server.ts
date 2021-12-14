@@ -54,14 +54,39 @@ connection.onCompletion(
     // info and always provide the same completion items.
     return [
       {
-        label: 'TypeScript',
-        kind: CompletionItemKind.Text,
+        label: 'class',
+        kind: CompletionItemKind.Class,
         data: 1,
+        insertText: 'class ClassName {\n}',
       },
       {
         label: 'JavaScript',
         kind: CompletionItemKind.Text,
         data: 2,
+        insertText: 'object objectName {\n}',
+      },
+      {
+        label: 'method (with effect)',
+        kind: CompletionItemKind.Method,
+        data: 3,
+        insertText: 'method methodName() {\n}',
+      },
+      {
+        label: 'method (without effect)',
+        kind: CompletionItemKind.Method,
+        data: 4,
+        insertText: 'method methodName() = value',
+      },
+      {
+        label: 'describe',
+        kind: CompletionItemKind.Event,
+        data: 5,
+        insertText: `describe "a group of tests" {
+  test "something" {
+    assert.that(true)
+  }
+}
+`,
       },
     ]
   }

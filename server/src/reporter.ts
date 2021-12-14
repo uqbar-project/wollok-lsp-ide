@@ -10,16 +10,20 @@ type ValidationMessage = { [key: string]: string }
 const FAILURE = 'failure'
 
 const validationMessagesEn: ValidationMessage = {
-  'nameBeginsWithLowercase': 'The name {0} must start with lowercase',
-  'nameBeginsWithUppercase': 'The name {0} must start with uppercase',
-  'nameIsNotKeyword': 'The name {0} is a keyword, you should pick another one',
+  'nameShouldBeginWithLowercase': 'The name {0} must start with lowercase',
+  'nameShouldBeginWithUppercase': 'The name {0} must start with uppercase',
+  'nameShouldNotBeKeyword': 'The name {0} is a keyword, you should pick another one',
+  'shouldNotBeEmpty': 'Should not make an empty definition.',
+  'shouldUseConditionalExpression': 'Bad usage of if! You must return the condition itself without using if.',
   [FAILURE]: 'Rule failure: ',
 }
 
 const validationMessagesEs: ValidationMessage = {
-  'nameBeginsWithLowercase': 'El nombre {0} debe comenzar con minúsculas',
-  'nameBeginsWithUppercase': 'El nombre {0} debe comenzar con mayúsculas',
-  'nameIsNotKeyword': 'El nombre {0} es una palabra reservada, debe cambiarla',
+  'nameShouldBeginWithLowercase': 'El nombre {0} debe comenzar con minúsculas',
+  'nameShouldBeginWithUppercase': 'El nombre {0} debe comenzar con mayúsculas',
+  'nameShouldNotBeKeyword': 'El nombre {0} es una palabra reservada, debe cambiarla',
+  'shouldNotBeEmpty': 'El elemento no puede estar vacío: falta escribir código.',
+  'shouldUseConditionalExpression': 'Estás usando incorrectamente el if. Devolvé simplemente la expresión booleana.',
   [FAILURE]: 'La siguiente regla falló: ',
 }
 
