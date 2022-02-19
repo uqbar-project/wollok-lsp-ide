@@ -28,7 +28,7 @@ By now we have a first working version of a linter, calling wollok-ts implementa
 - Develop a [Test Runner](https://code.visualstudio.com/api/extension-guides/testing)
 - Enhance validation messages
 - Develop a [new highlighter based on AST](https://code.visualstudio.com/api/language-extensions/semantic-highlight-guide)
-- Develop a REPL
+- Develop a REPL (or a Worksheet instead)
 - Build an internal cache and detect small changes, in order to avoid calling wollok-ts all the time
 -----
 - Develop an autocomplete tool (and conect with WollokDOC)
