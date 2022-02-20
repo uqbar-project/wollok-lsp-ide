@@ -7,9 +7,7 @@ suite('Should get diagnostics', () => {
 
   test('Diagnoses lowercase names for objects', async () => {
     await testDiagnostics(docUri, [
-      // TODO: once 3.0.7 wollok-ts is released, you must change current line with the following one
-      // { message: 'The name Pepita must start with lowercase', range: toRange(0, 7, 0, 13), severity: DiagnosticSeverity.Warning, source: 'ex' },
-      { message: 'Rule failure: Name begins with lowercase', range: toRange(0, 0, 2, 1), severity: DiagnosticSeverity.Warning, source: 'ex' },
+      { message: 'The name Pepita must start with lowercase', range: toRange(0, 7, 0, 13), severity: DiagnosticSeverity.Warning, source: 'ex' },
     ])
   })
 })
