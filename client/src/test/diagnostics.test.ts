@@ -25,7 +25,7 @@ async function testDiagnostics(docUri: Uri, expectedDiagnostics: Diagnostic[]) {
 
   const actualDiagnostics = languages.getDiagnostics(docUri)
 
-  assert.equal(actualDiagnostics.length, expectedDiagnostics.length)
+  assert.equal(actualDiagnostics.length, expectedDiagnostics.length, 'Diagnostics length differ')
 
   expectedDiagnostics.forEach((expectedDiagnostic, i) => {
     const actualDiagnostic = actualDiagnostics[i]
