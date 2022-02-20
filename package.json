@@ -1,14 +1,14 @@
 {
-  "name": "wollok-linter",
-  "displayName": "wollok-linter",
-  "description": "Wollok Linter",
+  "name": "wollok-ide",
+  "displayName": "wollok-ide",
+  "description": "Wollok IDE",
   "author": "Uqbar Foundation",
   "license": "LGPL-3.0",
   "publisher": "uqbar",
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/uqbar-project/wollok-linter"
+    "url": "https://github.com/uqbar-project/wollok-ide"
   },
   "categories": [
     "Programming Languages"
