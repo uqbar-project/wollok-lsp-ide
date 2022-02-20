@@ -23,5 +23,8 @@ jobs:
     - run: npm ci
     - run: npm run lint
     - run: npm run compile
-    - run: npm test   # running e2e tests
+    - name: Run headless test
+      uses: GabrielBB/xvfb-action@v1
+      with:
+        run: npm test    # running e2e tests in headless mode
     
