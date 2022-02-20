@@ -3,45 +3,45 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 
-import * as vscode from 'vscode'
 import * as path from 'path'
+import { extensions, Range, TextDocument, TextEditor, Uri, window, workspace } from 'vscode'
 
-export let doc: vscode.TextDocument
-export let editor: vscode.TextEditor
+export let document: TextDocument
+export let editor: TextEditor
 export let documentEol: string
 export let platformEol: string
 
 /**
- * Activates the vscode.lsp-sample extension
+ * Activates the lsp-sample extension
  */
-export async function activate(docUri: vscode.Uri): Promise<void> {
+export async function activate(docUri: Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
-  const ext = vscode.extensions.getExtension('uqbar.wollok-linter')!
-  await ext.activate()
+  const wollokExtension = extensions.getExtension('uqbar.wollok-ide')!
+  await wollokExtension.activate()
   try {
-    doc = await vscode.workspace.openTextDocument(docUri)
-    editor = await vscode.window.showTextDocument(doc)
+    document = await workspace.openTextDocument(docUri)
+    editor = await window.showTextDocument(document)
     await sleep(2000) // Wait for server activation
   } catch (e) {
     console.error(e)
   }
 }
 
-async function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms))
+async function sleep(milliseconds: number) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 
-export const getDocPath = (p: string): string => {
-  return path.resolve(__dirname, '../../testFixture', p)
+export const getDocumentPath = (docPath: string): string => {
+  return path.resolve(__dirname, '../../testFixture', docPath)
 }
-export const getDocUri = (p: string): vscode.Uri => {
-  return vscode.Uri.file(getDocPath(p))
+export const getDocumentURI = (docPath: string): Uri => {
+  return Uri.file(getDocumentPath(docPath))
 }
 
 export async function setTestContent(content: string): Promise<boolean> {
-  const all = new vscode.Range(
-    doc.positionAt(0),
-    doc.positionAt(doc.getText().length)
+  const all = new Range(
+    document.positionAt(0),
+    document.positionAt(document.getText().length)
   )
-  return editor.edit(eb => eb.replace(all, content))
+  return editor.edit(editBuilder => editBuilder.replace(all, content))
 }

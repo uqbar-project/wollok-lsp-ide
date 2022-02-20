@@ -60,7 +60,7 @@ connection.onCompletion(
         insertText: 'class ClassName {\n}',
       },
       {
-        label: 'JavaScript',
+        label: 'object',
         kind: CompletionItemKind.Text,
         data: 2,
         insertText: 'object objectName {\n}',
