@@ -5,16 +5,18 @@ import { getDocumentURI, activate } from './helper'
 suite('Should get diagnostics', () => {
   const docUri = getDocumentURI('pepita.txt')
 
-  test('Diagnoses lowercase texts', async () => {
+  test('Diagnoses lowercase names for objects', async () => {
     await testDiagnostics(docUri, [
-      { message: 'The name Pepita must start with lowercase', range: toRange(0, 7, 0, 13), severity: DiagnosticSeverity.Warning, source: 'ex' },
+      // TODO: once 3.0.7 wollok-ts is released, you must change current line with the following one
+      // { message: 'The name Pepita must start with lowercase', range: toRange(0, 7, 0, 13), severity: DiagnosticSeverity.Warning, source: 'ex' },
+      { message: 'Rule failure: Name begins with lowercase', range: toRange(0, 0, 2, 1), severity: DiagnosticSeverity.Warning, source: 'ex' },
     ])
   })
 })
 
-function toRange(sLine: number, sChar: number, eLine: number, eChar: number) {
-  const start = new Position(sLine, sChar)
-  const end = new Position(eLine, eChar)
+function toRange(startLine: number, startCharacter: number, endLine: number, endCharacter: number) {
+  const start = new Position(startLine, startCharacter)
+  const end = new Position(endLine, endCharacter)
   return new Range(start, end)
 }
 
@@ -27,8 +29,8 @@ async function testDiagnostics(docUri: Uri, expectedDiagnostics: Diagnostic[]) {
 
   expectedDiagnostics.forEach((expectedDiagnostic, i) => {
     const actualDiagnostic = actualDiagnostics[i]
-    assert.equal(actualDiagnostic.message, expectedDiagnostic.message)
-    assert.deepEqual(actualDiagnostic.range, expectedDiagnostic.range)
-    assert.equal(actualDiagnostic.severity, expectedDiagnostic.severity)
+    assert.equal(actualDiagnostic.message, expectedDiagnostic.message, 'Diagnostic message failed')
+    assert.deepEqual(actualDiagnostic.range, expectedDiagnostic.range, 'Diagnostic range failed')
+    assert.equal(actualDiagnostic.severity, expectedDiagnostic.severity, 'Diagnostic severity failed')
   })
 }
