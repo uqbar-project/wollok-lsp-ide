@@ -44,7 +44,7 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "Wollok Linter",
+      "title": "Wollok IDE",
       "properties": {
         "wollokLinter.maxNumberOfProblems": {
           "scope": "resource",
@@ -87,7 +87,7 @@
     "test": "npm run lint && sh ./scripts/e2e.sh"
   },
   "dependencies": {
-    "wollok-ts": "3.0.6"
+    "wollok-ts": "3.0.7"
   },
   "devDependencies": {
     "@types/mocha": "^9.0.0",
