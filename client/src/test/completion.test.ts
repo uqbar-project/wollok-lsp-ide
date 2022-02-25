@@ -2,6 +2,8 @@ import * as assert from 'assert'
 import { commands, CompletionItemKind, CompletionList, Position, Uri } from 'vscode'
 import { getDocumentURI, activate } from './helper'
 
+const WOLLOK_AUTOCOMPLETE = 'wollok_autocomplete'
+
 suite('Should do completion', () => {
   const docUri = getDocumentURI('completion.wlk')
 
@@ -32,9 +34,10 @@ async function testCompletion(
     position
   )) as CompletionList
 
-  assert.equal(expectedCompletionList.items.length, actualCompletionList.items.length)
+  const wollokCompletionList = actualCompletionList.items.filter(completionElement => completionElement.detail === WOLLOK_AUTOCOMPLETE)
+  assert.equal(expectedCompletionList.items.length, wollokCompletionList.length)
   expectedCompletionList.items.forEach((expectedItem, i) => {
-    const actualItem = actualCompletionList.items[i]
+    const actualItem = wollokCompletionList[i]
     assert.equal(actualItem.label, expectedItem.label)
     assert.equal(actualItem.kind, expectedItem.kind)
   })

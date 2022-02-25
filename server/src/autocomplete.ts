@@ -4,7 +4,6 @@ import { Body, Method, Node } from 'wollok-ts'
 export type NodeCompletion = Pick<CompletionItem, 'label' | 'kind' | 'sortText'> & { textEdit: { newText: string } }
 
 export const completionsForNode = (node: Node): NodeCompletion[] => {
-  console.info(node.kind)
   switch (node.kind) {
     case 'Package': return completePackage()
     case 'Singleton': return completeSingleton()
