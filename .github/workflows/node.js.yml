@@ -23,7 +23,6 @@ jobs:
     - run: npm ci
     - run: npm run lint
     - run: |
-      sudo apt-get install -y xvfb
-      npm run compile
-      xvfb-run npm test
-    
+        sudo apt-get install -y xvfb
+        npm run compile
+        xvfb-run npm test
