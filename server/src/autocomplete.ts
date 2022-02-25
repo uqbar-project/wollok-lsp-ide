@@ -49,11 +49,11 @@ const completeSingleton = (): NodeCompletion[] => [
   },
 ]
 
-const completeBody = (node: Body): NodeCompletion[] => completionsForNode(node.parent())
+const completeBody = (node: Body): NodeCompletion[] => completionsForNode(node.parent)
 
 const completeMethod = (node: Method): NodeCompletion[] => {
   const references = node.parameters.map(p => p.name)
-  const parent = node.parent()
+  const parent = node.parent
   if (parent.is('Module')) references.push(...parent.fields().map(f => f.name))
   return references.map(name => ({
     label: name,

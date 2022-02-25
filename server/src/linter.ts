@@ -1,7 +1,7 @@
 import { CompletionItem, CompletionItemKind, Connection, Diagnostic, DiagnosticSeverity, InsertTextFormat, Position, TextDocumentPositionParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { buildEnvironment, Environment, Node, validate } from 'wollok-ts'
-import { Problem } from 'wollok-ts/dist/validator'
+import { Problem } from 'wollok-ts'
 import { completionsForNode, NodeCompletion } from './autocomplete'
 import { reportMessage } from './reporter'
 import { TimeMeasurer } from './timeMeasurer'
@@ -11,10 +11,10 @@ import { TimeMeasurer } from './timeMeasurer'
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 const buildSeverity = (problem: Problem) =>
-  problem.level === 'Error' ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning
+  problem.level === 'error' ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning
 
 const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
-  const source = problem.source
+  const source = problem.sourceMap
   const range = {
     start: textDocument.positionAt(source ? source.start.offset : 0),
     end: textDocument.positionAt(source ? source.end.offset : 0),

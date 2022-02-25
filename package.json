@@ -87,7 +87,7 @@
     "test": "npm run lint && sh ./scripts/e2e.sh"
   },
   "dependencies": {
-    "wollok-ts": "3.0.7"
+    "wollok-ts": "3.0.8"
   },
   "devDependencies": {
     "@types/mocha": "^9.0.0",
