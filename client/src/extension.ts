@@ -34,9 +34,10 @@ export function activate(context: ExtensionContext): void {
 
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
-    // Register the server for plain text documents
-    documentSelector: [{ scheme: 'file', language: 'plaintext' }],
+    // Register the server for Wollok documents
+    documentSelector: [{ scheme: 'file', language: 'wollok' }],
     synchronize: {
+      configurationSection: 'wollok-lsp-ide',
       // Notify the server about file changes to '.clientrc files contained in the workspace
       fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
     },
