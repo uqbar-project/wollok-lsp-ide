@@ -22,9 +22,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm run lint
-    - run: npm run compile
-    - name: Run headless test
-      uses: GabrielBB/xvfb-action@v1
-      with:
-        run: npm test    # running e2e tests in headless mode
+    - run: |
+      sudo apt-get install -y xvfb
+      npm run compile
+      xvfb-run npm test
     
