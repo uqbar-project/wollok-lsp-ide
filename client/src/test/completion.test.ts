@@ -3,7 +3,7 @@ import { commands, CompletionItemKind, CompletionList, Position, Uri } from 'vsc
 import { getDocumentURI, activate } from './helper'
 
 suite('Should do completion', () => {
-  const docUri = getDocumentURI('completion.txt')
+  const docUri = getDocumentURI('completion.wlk')
 
   test('Completes Wollok file', async () => {
     await testCompletion(docUri, new Position(0, 0), {

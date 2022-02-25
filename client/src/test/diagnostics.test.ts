@@ -3,11 +3,11 @@ import { Diagnostic, DiagnosticSeverity, languages, Position, Range, Uri } from 
 import { getDocumentURI, activate } from './helper'
 
 suite('Should get diagnostics', () => {
-  const docUri = getDocumentURI('pepita.txt')
+  const docUri = getDocumentURI('pepita.wlk')
 
   test('Diagnoses lowercase names for objects', async () => {
     await testDiagnostics(docUri, [
-      { message: 'The name Pepita must start with lowercase', range: toRange(0, 7, 0, 13), severity: DiagnosticSeverity.Warning, source: 'ex' },
+      { message: 'The name  must start with lowercase', range: toRange(0, 7, 0, 13), severity: DiagnosticSeverity.Warning, source: 'ex' },
     ])
   })
 })
