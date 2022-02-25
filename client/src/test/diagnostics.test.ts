@@ -23,7 +23,7 @@ async function testDiagnostics(docUri: Uri, expectedDiagnostics: TestDiagnostic[
 
   const actualDiagnostics = languages.getDiagnostics(docUri)
 
-  assert.equal(actualDiagnostics.length, expectedDiagnostics.length, 'Diagnostics length differ: ${JSON.stringify(actualDiagnostics)}')
+  assert.equal(actualDiagnostics.length, expectedDiagnostics.length, 'Diagnostics length differ: ' + JSON.stringify(actualDiagnostics))
 
   expectedDiagnostics.forEach((expectedDiagnostic, i) => {
     const actualDiagnostic = actualDiagnostics[i]
