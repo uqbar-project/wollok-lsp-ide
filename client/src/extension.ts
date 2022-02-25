@@ -44,8 +44,8 @@ export function activate(context: ExtensionContext): void {
 
   // Create the language client and start the client.
   client = new LanguageClient(
-    'languageServerExample',
-    'Language Server Example',
+    'wollok-lsp-ide',
+    'Wollok',
     serverOptions,
     clientOptions
   )

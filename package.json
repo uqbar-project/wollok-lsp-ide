@@ -1,14 +1,14 @@
 {
-  "name": "wollok-ide",
-  "displayName": "wollok-ide",
-  "description": "Wollok IDE",
+  "name": "wollok-lsp-ide",
+  "displayName": "wollok-lsp-ide",
+  "description": "Wollok LSP IDE",
   "author": "Uqbar Foundation",
   "license": "LGPL-3.0",
   "publisher": "uqbar",
   "version": "0.0.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/uqbar-project/wollok-ide"
+    "url": "https://github.com/uqbar-project/wollok-lsp-ide"
   },
   "categories": [
     "Programming Languages"
@@ -44,7 +44,7 @@
     ],
     "configuration": {
       "type": "object",
-      "title": "Wollok IDE",
+      "title": "Wollok LSP IDE",
       "properties": {
         "wollokLinter.maxNumberOfProblems": {
           "scope": "resource",

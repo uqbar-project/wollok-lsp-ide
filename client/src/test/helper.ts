@@ -16,7 +16,7 @@ export let platformEol: string
  */
 export async function activate(docUri: Uri): Promise<void> {
   // The extensionId is `publisher.name` from package.json
-  const wollokExtension = extensions.getExtension('uqbar.wollok-ide')!
+  const wollokExtension = extensions.getExtension('uqbar.wollok-lsp-ide')!
   await wollokExtension.activate()
   try {
     document = await workspace.openTextDocument(docUri)

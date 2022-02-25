@@ -7,7 +7,7 @@
 	"publisher": "vscode",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/uqbar-project/wollok-ide"
+		"url": "https://github.com/uqbar-project/wollok-lsp-ide"
 	},
 	"engines": {
 		"vscode": "^1.59.0"
