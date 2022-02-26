@@ -8,6 +8,7 @@ suite('Should get diagnostics', () => {
   test('Diagnoses lowercase names for objects', async () => {
     await testDiagnostics(docUri, [
       { code: 'nameShouldBeginWithUppercase', severity: DiagnosticSeverity.Warning },
+      { code: 'nameShouldBeginWithUppercase', severity: DiagnosticSeverity.Warning },
     ])
   })
 })
