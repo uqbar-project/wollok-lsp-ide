@@ -27,4 +27,4 @@ jobs:
     #   uses: GabrielBB/xvfb-action@v1
     #   with:
     #     run: npm test
-    - run: xvfb-run -a -l npm test
+    - run: xvfb-run --auto-servernum --server-num=1 -e /dev/stdout npm test
