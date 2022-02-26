@@ -3,7 +3,7 @@ import { DiagnosticSeverity, languages, Uri } from 'vscode'
 import { getDocumentURI, activate } from './helper'
 
 suite('Should get diagnostics', () => {
-  const docUri = getDocumentURI('pepita.wlk')
+  const docUri = getDocumentURI('pepita2.wlk')
 
   test('Diagnoses lowercase names for objects', async () => {
     await testDiagnostics(docUri, [
@@ -21,11 +21,9 @@ interface TestDiagnostic {
 async function testDiagnostics(docUri: Uri, expectedDiagnostics: TestDiagnostic[]) {
   await activate(docUri)
 
-  console.error(docUri.toString())
-
   const actualDiagnostics = languages.getDiagnostics(docUri)
 
-  assert.equal(actualDiagnostics.length, expectedDiagnostics.length, 'Diagnostics length differ ' + docUri.toString())
+  assert.equal(actualDiagnostics.length, expectedDiagnostics.length, 'Diagnostics length differ')
 
   expectedDiagnostics.forEach((expectedDiagnostic, i) => {
     const actualDiagnostic = actualDiagnostics[i]
