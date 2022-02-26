@@ -14,14 +14,14 @@ export let platformEol: string
 /**
  * Activates the lsp-sample extension
  */
-export async function activate(docUri: Uri): Promise<void> {
+export async function activate(docUri: Uri, timeToWait = 2000): Promise<void> {
   // The extensionId is `publisher.name` from package.json
   const wollokExtension = extensions.getExtension('uqbar.wollok-lsp-ide')!
   await wollokExtension.activate()
   try {
     document = await workspace.openTextDocument(docUri)
     editor = await window.showTextDocument(document)
-    await sleep(2000) // Wait for server activation
+    await sleep(timeToWait) // Wait for server activation
   } catch (e) {
     console.error(e)
   }

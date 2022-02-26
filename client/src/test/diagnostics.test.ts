@@ -20,7 +20,7 @@ interface TestDiagnostic {
 }
 
 async function testDiagnostics(docUri: Uri, expectedDiagnostics: TestDiagnostic[]) {
-  await activate(docUri)
+  await activate(docUri, 5000)
 
   const actualDiagnostics = languages.getDiagnostics(docUri)
 
