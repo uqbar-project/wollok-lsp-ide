@@ -20,10 +20,14 @@ export async function activate(docUri: Uri, timeToWait = 2000): Promise<void> {
   await wollokExtension.activate()
   try {
     document = await workspace.openTextDocument(docUri)
+    console.error(document, wollokExtension.extensionKind, wollokExtension.extensionPath, wollokExtension.isActive)
     editor = await window.showTextDocument(document)
+    console.error(editor)
     await sleep(timeToWait) // Wait for server activation
   } catch (e) {
+    console.error('************************************************')
     console.error(e)
+    console.error('************************************************')
   }
 }
 
