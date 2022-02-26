@@ -3,7 +3,7 @@ import { DiagnosticSeverity, languages, Uri } from 'vscode'
 import { getDocumentURI, activate } from './helper'
 
 suite('Should get diagnostics', () => {
-  const docUri = getDocumentURI('pepita2.wlk')
+  const docUri = getDocumentURI('pepita.wlk')
 
   test('Diagnoses lowercase names for objects', async () => {
     await testDiagnostics(docUri, [
