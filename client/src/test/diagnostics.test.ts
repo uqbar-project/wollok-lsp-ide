@@ -21,13 +21,15 @@ interface TestDiagnostic {
 async function testDiagnostics(docUri: Uri, expectedDiagnostics: TestDiagnostic[]) {
   await activate(docUri)
 
-  // const actualDiagnostics = languages.getDiagnostics(docUri)
+  console.error(docUri.toString())
 
-  // assert.equal(actualDiagnostics.length, expectedDiagnostics.length, 'Diagnostics length differ')
+  const actualDiagnostics = languages.getDiagnostics(docUri)
 
-  // expectedDiagnostics.forEach((expectedDiagnostic, i) => {
-  //   const actualDiagnostic = actualDiagnostics[i]
-  //   assert.equal(actualDiagnostic.code, expectedDiagnostic.code, 'Diagnostic code failed')
-  //   assert.equal(actualDiagnostic.severity, expectedDiagnostic.severity, 'Diagnostic severity failed')
-  // })
+  assert.equal(actualDiagnostics.length, expectedDiagnostics.length, 'Diagnostics length differ ' + docUri.toString())
+
+  expectedDiagnostics.forEach((expectedDiagnostic, i) => {
+    const actualDiagnostic = actualDiagnostics[i]
+    assert.equal(actualDiagnostic.code, expectedDiagnostic.code, 'Diagnostic code failed')
+    assert.equal(actualDiagnostic.severity, expectedDiagnostic.severity, 'Diagnostic severity failed')
+  })
 }

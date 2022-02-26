@@ -22,6 +22,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: |
+        pwd
+        ls
         sudo apt-get install -y xvfb
         npm run compile
         xvfb-run npm test
