@@ -22,7 +22,12 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm install
     - run: npm run compile
-    - run: xvfb-run -a npm test
+    - name: Test
+      uses: run-with-xvfb
+      with:
+        run: npm test
+      env:
+        CI: true
       if: runner.os == 'Linux'
     - run: npm test
       if: runner.os != 'Linux'
