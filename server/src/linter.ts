@@ -68,25 +68,50 @@ const createCompletionItem = (position: Position) => (base: NodeCompletion): Com
 let environment: Environment
 
 export const validateTextDocument = (connection: Connection) => async (textDocument: TextDocument): Promise<void> => {
-  const timeMeasurer = new TimeMeasurer()
-
-  environment = buildEnvironment([])
-  timeMeasurer.addTime('build empty environment')
-
   const text = textDocument.getText()
-  const file: { name: string, content: string } = {
-    name: textDocument.uri,
-    content: text,
+  try {
+    const timeMeasurer = new TimeMeasurer()
+
+    environment = buildEnvironment([])
+    timeMeasurer.addTime('build empty environment')
+
+    const file: { name: string, content: string } = {
+      name: textDocument.uri,
+      content: text,
+    }
+    environment = buildEnvironment([file], environment)
+    const problems = validate(environment)
+    timeMeasurer.addTime('build environment for file')
+
+    const diagnostics: Diagnostic[] = problems.map(problem => createDiagnostic(textDocument, problem))
+    connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
+    timeMeasurer.addTime('validation time')
+
+    timeMeasurer.finalReport()
+  } catch (e) {
+    // TODO: Generate a high-level function
+    connection.sendDiagnostics({
+      uri: textDocument.uri, diagnostics: [
+        createDiagnostic(textDocument, {
+          level: 'error',
+          code: 'FileHasParsingProblems',
+          node: { sourceFileName: () => textDocument.uri },
+          values: [],
+          sourceMap: {
+            start: {
+              line: 1,
+              offset: 0,
+            }, end: {
+              line: Number.MAX_VALUE,
+              offset: text.length - 1,
+            },
+          },
+        } as unknown as Problem),
+      ],
+    })
+    connection.console.error('programa: ' + text)
+    connection.console.error((e as { message: string}).message)
   }
-  environment = buildEnvironment([file], environment)
-  const problems = validate(environment)
-  timeMeasurer.addTime('build environment for file')
-
-  const diagnostics: Diagnostic[] = problems.map(problem => createDiagnostic(textDocument, problem))
-  connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
-  timeMeasurer.addTime('validation time')
-
-  timeMeasurer.finalReport()
 }
 
 export const completions = (textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
