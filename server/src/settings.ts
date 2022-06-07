@@ -1,6 +1,6 @@
-import { ClientCapabilities, Connection, DidChangeConfigurationParams } from 'vscode-languageserver'
+import { Connection, DidChangeConfigurationParams } from 'vscode-languageserver/node'
 
-interface WollokLinterSettings {
+export interface WollokLinterSettings {
   maxNumberOfProblems: number,
   language: string
 }
@@ -41,11 +41,11 @@ const getDocumentSettings = async (connection: Connection) =>
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-export const initializeSettings = async (connection: Connection, _capabilities: ClientCapabilities): Promise<void> => {
+export const initializeSettings = async (connection: Connection): Promise<void> => {
   globalSettings = await getDocumentSettings(connection) || defaultSettings
 }
 
-export const settingsChanged = (connection: Connection, change: DidChangeConfigurationParams): void => {
+export const settingsChanged = (change: DidChangeConfigurationParams): void => {
   globalSettings = change.settings.wollokLinter || defaultSettings
 }
 
