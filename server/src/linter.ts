@@ -5,6 +5,7 @@ import { Problem } from 'wollok-ts'
 import { completionsForNode, NodeCompletion } from './autocomplete'
 import { reportMessage } from './reporter'
 import { TimeMeasurer } from './timeMeasurer'
+import { updateDocumentSettings } from './settings'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -68,6 +69,8 @@ const createCompletionItem = (position: Position) => (base: NodeCompletion): Com
 let environment: Environment
 
 export const validateTextDocument = (connection: Connection) => async (textDocument: TextDocument): Promise<void> => {
+  await updateDocumentSettings(connection)
+
   const text = textDocument.getText()
   try {
     const timeMeasurer = new TimeMeasurer()

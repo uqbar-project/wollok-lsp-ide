@@ -1,7 +1,7 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocumentPositionParams, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
 import { validateTextDocument } from './linter'
-import { WollokLinterSettings, initializeSettings, settingsChanged } from './settings'
+import { WollokLinterSettings, initializeSettings } from './settings'
 import { templates } from './templates'
 
 // Create a connection for the server, using Node's IPC as a transport.
@@ -11,25 +11,13 @@ const connection = createConnection(ProposedFeatures.all)
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
-let hasConfigurationCapability = false
 let hasWorkspaceFolderCapability = false
-let hasDiagnosticRelatedInformationCapability = false
 
 connection.onInitialize((params: InitializeParams) => {
   const capabilities = params.capabilities
 
-  // Does the client support the `workspace/configuration` request?
-  // If not, we fall back using global settings.
-  hasConfigurationCapability = !!(
-    capabilities.workspace && !!capabilities.workspace.configuration
-  )
   hasWorkspaceFolderCapability = !!(
     capabilities.workspace && !!capabilities.workspace.workspaceFolders
-  )
-  hasDiagnosticRelatedInformationCapability = !!(
-    capabilities.textDocument &&
-    capabilities.textDocument.publishDiagnostics &&
-    capabilities.textDocument.publishDiagnostics.relatedInformation
   )
 
   const result: InitializeResult = {
@@ -60,9 +48,7 @@ connection.onInitialized(() => {
 // Cache the settings of all open documents
 const documentSettings: Map<string, Thenable<WollokLinterSettings>> = new Map()
 
-connection.onDidChangeConfiguration((change) => {
-  settingsChanged(change)
-
+connection.onDidChangeConfiguration(() => {
   // Revalidate all open text documents
   documents.all().forEach(validateTextDocument(connection))
 })

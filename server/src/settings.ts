@@ -1,4 +1,4 @@
-import { Connection, DidChangeConfigurationParams } from 'vscode-languageserver/node'
+import { Connection } from 'vscode-languageserver/node'
 
 export interface WollokLinterSettings {
   maxNumberOfProblems: number,
@@ -31,22 +31,14 @@ const languageDescription: { [key: string]: string } = {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-// INTERNAL FUNCTIONS
-// ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-
-const getDocumentSettings = async (connection: Connection) =>
-  await connection.workspace.getConfiguration({ section: 'wollokLinter' }) as WollokLinterSettings
-
-// ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-
-export const initializeSettings = async (connection: Connection): Promise<void> => {
-  globalSettings = await getDocumentSettings(connection) || defaultSettings
+export const updateDocumentSettings = async (connection: Connection): Promise<void> => {
+  globalSettings = await connection.workspace.getConfiguration({ section: 'wollokLinter' }) as WollokLinterSettings || defaultSettings
 }
 
-export const settingsChanged = (change: DidChangeConfigurationParams): void => {
-  globalSettings = change.settings.wollokLinter || defaultSettings
+export const initializeSettings = async (connection: Connection): Promise<void> => {
+  await updateDocumentSettings(connection)
 }
 
 export const lang = (): string => languageDescription[globalSettings.language] || envLang()
