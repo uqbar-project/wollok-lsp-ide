@@ -84,7 +84,7 @@
     "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
     "lint": "cd client && eslint . --ignore-path ../.eslintignore && cd ../server && eslint . --ignore-path ../.eslintignore && cd ..",
     "lint:fix": "cd client && eslint . --fix && cd ../server && eslint . --fix && cd ..",
-    "test": "npm run lint && sh ./scripts/e2e.sh"
+    "test": "npm run lint && npm run compile && sh ./scripts/e2e.sh"
   },
   "dependencies": {
     "wollok-ts": "3.0.8"

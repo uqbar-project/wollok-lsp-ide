@@ -15,6 +15,7 @@ suite('Should do completion', () => {
         { label: 'method (with effect)', kind: CompletionItemKind.Method },
         { label: 'method (without effect)', kind: CompletionItemKind.Method },
         { label: 'object', kind: CompletionItemKind.Text },
+        { label: 'test', kind: CompletionItemKind.Event },
       ],
     })
   })
@@ -35,7 +36,7 @@ async function testCompletion(
   )) as CompletionList
 
   const wollokCompletionList = actualCompletionList.items.filter(completionElement => completionElement.detail === WOLLOK_AUTOCOMPLETE)
-  assert.equal(expectedCompletionList.items.length, wollokCompletionList.length)
+  assert.equal(expectedCompletionList.items.length, wollokCompletionList.length, JSON.stringify(actualCompletionList))
   expectedCompletionList.items.forEach((expectedItem, i) => {
     const actualItem = wollokCompletionList[i]
     assert.equal(actualItem.label, expectedItem.label)

@@ -1,5 +1,6 @@
-import { WOLLOK_AUTOCOMPLETE } from './server'
 import { CompletionItemKind } from 'vscode-languageserver/node'
+
+export const WOLLOK_AUTOCOMPLETE = 'wollok_autocomplete'
 
 export const templates = [
   {
@@ -35,13 +36,21 @@ export const templates = [
     kind: CompletionItemKind.Event,
     data: 5,
     detail: WOLLOK_AUTOCOMPLETE,
-    insertText: 'describe "a group of tests" {\n  test "something" {\n    assert.that(true)\n  }\n}\n',
+    insertText: `describe "a group of tests" {
+      test "something" {
+        assert.that(true)
+      }
+    }
+    `,
   },
   {
     label: 'test',
     kind: CompletionItemKind.Event,
     data: 6,
     detail: WOLLOK_AUTOCOMPLETE,
-    insertText: 'test "something" {\n  assert.that(true)\n}\n',
+    insertText: `test "something" {
+      assert.that(true)
+    }
+    `,
   },
 ]

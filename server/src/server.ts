@@ -84,8 +84,6 @@ connection.onDidChangeWatchedFiles(_change => {
   connection.console.log('We received an file change event')
 })
 
-export const WOLLOK_AUTOCOMPLETE = 'wollok_autocomplete'
-
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
   (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
