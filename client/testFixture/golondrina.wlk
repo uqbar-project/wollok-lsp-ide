@@ -28,6 +28,8 @@ object nido {
     pepa.comer()
   }
 
+  method r() {return ramas}
+
   method aux(){
     //shouldUseSelfAndNotSingletonReference
     //nido.alimentarNido()
@@ -76,7 +78,7 @@ mixin A {}
 //class BadElBurroPorDelante inherits AClass and A {}
 
 class OtraClaseMas {
-  var aVar = 2
+  var property aVar = 2
   //shouldNotUseOverride
   //override method algo(){}
 
@@ -134,15 +136,82 @@ mixin Caminante {
 
 mixin Volador {
   var property kilometros = 0
+  //shouldDefineConstInsteadOfVar
+  //var shouldBeConst = 3
+  //ShouldNotDefineUnusedVariables
+  //var unused = 2
   method volar() { kilometros = kilometros + 100 }
+  
+  method returntres () {
+     return shouldBeConst
+  }
+  //shouldNotUseVoidMethodAsValue
+  /*method usingVoid() {
+    const a = self.volar()
+    return a
+  }//*/
 }
 
 //ShouldNotDuplicateVariablesInLinearization
 //object pepitaaa inherits Caminante and Volador and Ave {}
 
 class AbstracC {
-  method c()
+  method a()
+
+  //shouldNotCompareEqualityOfSingleton
+  //method compare(algo){return algo==nido}
+
+  //shouldUseBooleanValueInIfCondition
+  //method nobool(){if(2){return 2}return 1}
+
+  //shouldUseBooleanValueInLogicOperation
+  //method b() { return !2}
+
+  //shouldNotDefineUnnecesaryIf
+  //method c() {if(true){return 1} return 3}
+
+  //codeShouldBeReachable
+  //method d() {if(false){return 1} return 2}
+
+  //unnecesaryCondition
+  //method e(aa) {if(true && 2==aa){return 1} return 2}
 }
 
 //ShouldImplementAbstractMethods
-object concreto inherits AbstracC {}
+//object concreto inherits AbstracC {}
+
+//shouldInitializeGlobalReference
+//const globalnotinicialiced
+
+//shouldNotDefineGlobalMutableVariables
+//var globalvar = 1
+
+//shouldNotUseReservedWords
+//class Object {}
+
+/*package otherPackage {class A {}}
+package otherPackage {}//*/
+
+//shouldMatchFileExtension
+//shouldHaveNonEmptyName
+/*describe "" {
+  test "" {
+    assert.that(true)
+  }
+}//*/
+
+/*test "testTryCatchWithoutAssert" {
+  try {
+    1 / 0
+  } catch e : Exception {
+    1 + 1
+  }
+}//*/
+
+class overidingC inherits AbstracC {
+  //overridingMethodShouldHaveABody
+  //override method a()
+}
+
+//shouldNotDefineEmptyDescribe
+//describe "empty" {}
