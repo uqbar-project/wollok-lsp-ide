@@ -118,7 +118,7 @@ const validationMessagesEs: ValidationMessage = {
   'catchShouldBeReachable' : 'Este catch nunca se va a ejecutar debido a otro catch anterior',
   'shouldNotUseReservedWords' : '{0} es una palabra reservada por la biblioteca de Wollok',
   'shouldNotDuplicatePackageName' : 'Package duplicado',
-  'shouldMatchFileExtension' : 'TODO',
+  'shouldMatchFileExtension' : 'La extensi\u00F3n del archivo no permite esta definici\u00F3n',
   'shouldHaveNonEmptyName' : 'Los tests deben tener una descripci\u00F3n no vac\u00EDa',
   'shouldHaveAssertInTest' : 'Los tests deben enviar al menos un mensaje al WKO "assert"',
   'overridingMethodShouldHaveABody' : 'Si sobrescribe debe especificar el cuerpo del m\u00E9todo',
