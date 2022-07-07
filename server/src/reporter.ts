@@ -47,7 +47,7 @@ const validationMessagesEn: ValidationMessage = {
   'shouldNotUseVoidMethodAsValue' : 'Message send "{0}" produces no value (missing return in method?)',
   'shouldInitializeGlobalReference' : 'Reference is never initialized',
   'shouldNotDefineUnusedVariables' : 'Unused variable',
-  'shouldNotDefineGlobalMutableVariables' : 'Global variables are not allowed',
+  'shouldNotDefineGlobalMutableVariables' : 'Global \'var\' references are not allowed. You should use \'const\' instead.',
   'shouldDefineConstInsteadOfVar' : 'Variable should be const',
   'shouldNotCompareEqualityOfSingleton' : 'Comparing against named object is discouraged (missing polymorphism?)',
   'shouldUseBooleanValueInIfCondition' : 'Expecting a boolean',
@@ -69,15 +69,15 @@ const validationMessagesEn: ValidationMessage = {
 }
 
 const validationMessagesEs: ValidationMessage = {
-  'nameShouldBeginWithLowercase': 'El nombre {0} debe comenzar con minúsculas',
-  'nameShouldBeginWithUppercase': 'El nombre {0} debe comenzar con mayúsculas',
+  'nameShouldBeginWithLowercase': 'El nombre {0} debe comenzar con min\u00FAsculas',
+  'nameShouldBeginWithUppercase': 'El nombre {0} debe comenzar con may\u00FAsculas',
   'nameShouldNotBeKeyword': 'El nombre {0} es una palabra reservada, debe cambiarla',
-  'shouldNotBeEmpty': 'El elemento no puede estar vacío: falta escribir código.',
-  'shouldUseConditionalExpression': 'Estás usando incorrectamente el if. Devolvé simplemente la expresión booleana.',
+  'shouldNotBeEmpty': 'El elemento no puede estar vac\u00EDo: falta escribir c\u00F3digo.',
+  'shouldUseConditionalExpression': 'Est\u00E1s usando incorrectamente el if. Devolv\u00E9 simplemente la expresi\u00F3n booleana.',
   'shouldPassValuesToAllAttributes' : 'No se encuentra la referencia {0} en {1}',
   'namedArgumentShouldExist' : 'No se encuentra la referencia {0} en {1}',
-  'linearizationShouldNotRepeatNamedArguments' : 'La referencia {0} está inicializada m\u00E1s de una vez',
-  'namedArgumentShouldNotAppearMoreThanOnce' : 'La referencia {0} está inicializada m\u00E1s de una vez',
+  'linearizationShouldNotRepeatNamedArguments' : 'La referencia {0} est\u00E1 inicializada m\u00E1s de una vez',
+  'namedArgumentShouldNotAppearMoreThanOnce' : 'La referencia {0} est\u00E1 inicializada m\u00E1s de una vez',
   'shouldInitializeAllAttributes' : 'Debe proveer un valor inicial a las siguientes referencias: {0}',
   'shouldImplementAllMethodsInHierarchy' : 'Jerarqu\u00EDa inconsistente. Existen m\u00E9todos en mixins que requieren implementaci\u00F3n en super',
   'shouldUseSelfAndNotSingletonReference' : 'No debe usar el nombre del objeto dentro del mismo. Use \'self\'.',
@@ -124,7 +124,7 @@ const validationMessagesEs: ValidationMessage = {
   'overridingMethodShouldHaveABody' : 'Si sobrescribe debe especificar el cuerpo del m\u00E9todo',
   'shouldNotDefineEmptyDescribe' : 'El describe no deber\u00EDa estar vac\u00EDo',
   'shouldNotMarkMoreThanOneOnlyTest' : 'Solo un test puede marcarse como \'only\' (los otros no se ejecutar\u00E1n)',
-  [FAILURE]: 'La siguiente regla falló: ',
+  [FAILURE]: 'La siguiente regla fall\u00F3: ',
 }
 
 const validationMessages: { [key: string]: ValidationMessage } = {
