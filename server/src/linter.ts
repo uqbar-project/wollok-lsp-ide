@@ -34,6 +34,9 @@ const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
   const startLine = node.sourceMap?.start?.line
   const endLine = node.sourceMap?.end?.line
+  if(node.kind === 'Package'){
+    return uri === node.sourceFileName()
+  }
   return node.sourceFileName() == uri && startLine && endLine &&
   (startLine - 1 <= position.line && position.line <= endLine + 1 ||
     startLine - 1 == position.line && position.line == endLine + 1 &&
@@ -45,7 +48,7 @@ const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPo
 const getNodesByPosition = (textDocumentPosition: TextDocumentPositionParams): Node[] => {
   const result: Node[] = []
   environment.forEach(node => {
-    if (node.sourceFileName() && include(node, textDocumentPosition)) result.push(node) 
+    if (node.sourceFileName() && include(node, textDocumentPosition)) result.push(node)
   })
   return result
 }
