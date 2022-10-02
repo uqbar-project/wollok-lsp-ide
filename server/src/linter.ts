@@ -35,8 +35,8 @@ const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPo
   const startLine = node.sourceMap?.start?.line
   const endLine = node.sourceMap?.end?.line
   return node.sourceFileName() == uri && startLine && endLine &&
-  (startLine - 1 <= position.line && position.line <= endLine - 1 ||
-    startLine - 1 == position.line && position.line == endLine - 1 &&
+  (startLine - 1 <= position.line && position.line <= endLine + 1 ||
+    startLine - 1 == position.line && position.line == endLine + 1 &&
       (node?.sourceMap?.start?.offset || 0) <= position.character && position.character <= endLine
   )
 }
@@ -44,7 +44,9 @@ const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPo
 // TODO: Use map instead of forEach
 const getNodesByPosition = (textDocumentPosition: TextDocumentPositionParams): Node[] => {
   const result: Node[] = []
-  environment.forEach(node => { if (node.sourceFileName() && include(node, textDocumentPosition)) result.push(node) })
+  environment.forEach(node => {
+    if (node.sourceFileName() && include(node, textDocumentPosition)) result.push(node) 
+  })
   return result
 }
 
@@ -61,6 +63,16 @@ const createCompletionItem = (position: Position) => (base: NodeCompletion): Com
     },
   },
 })
+
+function findFirstStableNode(node: Node): Node {
+  if(!node.problems){
+    return node
+  }
+  if(node.parent.kind === 'Environment'){
+    throw new Error('No stable node found')
+  }
+  return findFirstStableNode(node.parent)
+}
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE
@@ -120,5 +132,6 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
 export const completions = (textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
   const { position } = textDocumentPosition
   const cursorNode = getNodesByPosition(textDocumentPosition).reverse()[0]
-  return completionsForNode(cursorNode).map(createCompletionItem(position))
+  const stableNode = findFirstStableNode(cursorNode)
+  return completionsForNode(stableNode).map(createCompletionItem(position))
 }
