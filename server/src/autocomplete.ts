@@ -5,11 +5,12 @@ export type NodeCompletion = Pick<CompletionItem, 'label' | 'kind' | 'sortText'>
 
 export const completionsForNode = (node: Node): NodeCompletion[] => {
   switch (node.kind) {
+    case 'Environment': return []
     case 'Package': return completePackage()
     case 'Singleton': return completeSingleton()
     case 'Body': return completeBody(node)
     case 'Method': return completeMethod(node)
-    default: return []
+    default: return completeForParent(node)
   }
 }
 
@@ -59,4 +60,8 @@ const completeMethod = (node: Method): NodeCompletion[] => {
     kind: CompletionItemKind.Reference,
     textEdit: { newText: name },
   }))
+}
+
+const completeForParent = (node: Node): NodeCompletion[] => {
+  return completionsForNode(node.parent)
 }
