@@ -50,18 +50,12 @@ const getNodesByPosition = (textDocumentPosition: TextDocumentPositionParams): N
   return result
 }
 
-const createCompletionItem = (position: Position) => (base: NodeCompletion): CompletionItem => ({
-  ...base,
+const createCompletionItem = (_position: Position) => (base: NodeCompletion): CompletionItem => ({
   kind: CompletionItemKind.Method,
-  insertTextFormat: InsertTextFormat.Snippet,
   sortText: 'b',
-  textEdit: {
-    ...base?.textEdit,
-    range: {
-      start: position,
-      end: position,
-    },
-  },
+  insertTextFormat: InsertTextFormat.Snippet,
+  insertText: base.textEdit.newText,
+  label: base.label,
 })
 
 function findFirstStableNode(node: Node): Node {
