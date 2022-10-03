@@ -9,20 +9,6 @@ Starting from [LSP sample code](https://code.visualstudio.com/api/language-exten
 
 By now we have a first working version of a linter, calling wollok-ts implementation. For a deeper developer guide, please refer to the [wiki](https://github.com/uqbar-project/wollok-lsp-ide/wiki). See [installation instructions for developers](https://github.com/uqbar-project/wollok-lsp-ide/wiki/Development-Environment).
 
-## Structure
-
-```
-.
-├── client // Language Client
-│   ├── src
-│   │   ├── test // End to End tests for Language Client / Server
-│   │   └── extension.ts // Language Client entry point
-├── package.json // The extension manifest.
-└── server // Language Server
-    └── src
-        └── server.ts // Language Server entry point
-```
-
 ## TODO List
 
 - Develop a [Test Runner](https://code.visualstudio.com/api/extension-guides/testing)
