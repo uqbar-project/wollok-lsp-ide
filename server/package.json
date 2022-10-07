@@ -1,19 +1,26 @@
 {
-	"name": "wollok-lsp-ide-server",
-	"description": "Wollok Linter - LSP implementation in node.",
-	"version": "0.0.1",
-	"author": "Uqbar Foundation",
-	"license": "LGPL-3.0",
-	"engines": {
-		"node": "*"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/uqbar-project/wollok-lsp-ide"
-	},
-	"dependencies": {
-		"vscode-languageserver": "^8.0.1",
-		"vscode-languageserver-textdocument": "^1.0.5"
-	},
-	"scripts": {}
+  "name": "wollok-lsp-ide-server",
+  "description": "Wollok Linter - LSP implementation in node.",
+  "version": "0.0.1",
+  "author": "Uqbar Foundation",
+  "license": "LGPL-3.0",
+  "engines": {
+    "node": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uqbar-project/wollok-lsp-ide"
+  },
+  "dependencies": {
+    "vscode-languageserver": "^8.0.1",
+    "vscode-languageserver-textdocument": "^1.0.5"
+  },
+  "scripts": {
+    "test": "jest test"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.1.2",
+    "jest": "^29.1.2",
+    "ts-jest": "^29.0.3"
+  }
 }
