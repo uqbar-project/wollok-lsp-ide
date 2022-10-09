@@ -27,5 +27,4 @@ jobs:
       with:
         run: npm test
     - name: Unit Tests
-      with:
-        run: npm run test:unit
+      run: npm run test:unit
