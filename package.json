@@ -84,7 +84,7 @@
     "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
     "lint": "cd client && eslint . --ignore-path ../.eslintignore && cd ../server && eslint . --ignore-path ../.eslintignore && cd ..",
     "lint:fix": "cd client && eslint . --fix && cd ../server && eslint . --fix && cd ..",
-    "test": "test:e2e && test:unit",
+    "test": "npm run test:e2e && npm run test:unit",
     "test:e2e": "npm run lint && npm run compile && sh ./scripts/e2e.sh",
     "test:unit": "cd server && npm run test && cd .."
   },
