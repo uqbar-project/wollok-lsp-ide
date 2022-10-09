@@ -6,7 +6,7 @@ name: Node.js CI
 on: [push, pull_request]
 
 jobs:
-  build:
+  test:
 
     runs-on: windows-latest
 
@@ -26,3 +26,6 @@ jobs:
       uses: GabrielBB/xvfb-action@v1
       with:
         run: npm test
+    - name: Unit Tests
+      with:
+        run: npm run test:unit

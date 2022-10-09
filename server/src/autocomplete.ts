@@ -49,7 +49,7 @@ const completeSingleton = (): NodeCompletion[] => [
   },
 ]
 
-const completeBody = (node: Body): NodeCompletion[] => completionsForNode(node.parent)
+const completeBody = (node: Body): NodeCompletion[] => completeForParent(node)
 
 const completeMethod = (node: Method): NodeCompletion[] => {
   const references = node.parameters.map(p => p.name)
@@ -62,6 +62,7 @@ const completeMethod = (node: Method): NodeCompletion[] => {
   }))
 }
 
-const completeForParent = (node: Node): NodeCompletion[] => {
+export const completeForParent = (node: Node): NodeCompletion[] => {
+  if(!node.parent) throw new Error('Node has no parent')
   return completionsForNode(node.parent)
 }
