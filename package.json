@@ -86,6 +86,12 @@
         "command": "wollok.start.repl",
         "title": "Start a new REPL session",
         "category": "Wollok"
+      },
+      {
+        "command": "wollok.run.allTests",
+        "title": "Run all tests",
+        "when": "resourceExtname == .wtest",
+        "category": "Wollok"
       }
     ]
   },

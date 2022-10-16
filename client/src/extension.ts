@@ -63,6 +63,21 @@ export function activate(context: ExtensionContext): void {
     })
   );
 
+  context.subscriptions.push(
+    commands.registerCommand('wollok.run.allTests', () => {
+      const wollokCli = workspace.getConfiguration('wollokLinter').get('cli-path')
+      const folder = workspace.workspaceFolders[0]
+
+      tasks.executeTask(new Task(
+        { type: 'wollok', task: 'run tests' },
+        folder,
+        `Wollok run all tests`,
+        'wollok',
+        new ShellExecution(`${wollokCli} test`)
+      ))
+    })
+  );
+
 
   // Create the language client and start the client.
   client = new LanguageClient(
