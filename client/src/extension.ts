@@ -4,11 +4,13 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path'
-import { workspace, ExtensionContext } from 'vscode'
-import { LanguageClient,
+import { commands, ExtensionContext, ShellExecution, Task, tasks, window, workspace } from 'vscode'
+import {
+  LanguageClient,
   LanguageClientOptions,
   ServerOptions,
-  TransportKind } from 'vscode-languageclient/node'
+  TransportKind
+} from 'vscode-languageclient/node'
 
 let client: LanguageClient
 
@@ -42,6 +44,24 @@ export function activate(context: ExtensionContext): void {
       fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
     },
   }
+
+  context.subscriptions.push(
+    commands.registerCommand('wollok.start.repl', () => {
+
+      const currentDocument = window.activeTextEditor.document
+      const folder = workspace.workspaceFolders[0]
+      const currentFileName = currentDocument.uri.path.replace(`${folder.uri.path}/`, '')
+
+      tasks.executeTask(new Task(
+        { type: 'wollok', task: 'repl' },
+        folder,
+        `Wollok Repl: ${currentFileName}`,
+        'wollok',
+        new ShellExecution(`wollok repl ${currentDocument.fileName}`)
+      ))
+    })
+  );
+
 
   // Create the language client and start the client.
   client = new LanguageClient(
