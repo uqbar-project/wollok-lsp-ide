@@ -47,17 +47,18 @@ export function activate(context: ExtensionContext): void {
 
   context.subscriptions.push(
     commands.registerCommand('wollok.start.repl', () => {
+      const wollokCli = workspace.getConfiguration('wollokLinter').get('cli-path')
 
       const currentDocument = window.activeTextEditor.document
       const folder = workspace.workspaceFolders[0]
-      const currentFileName = currentDocument.uri.path.replace(`${folder.uri.path}/`, '')
+      const currentFileName = path.basename(currentDocument.uri.path)
 
       tasks.executeTask(new Task(
         { type: 'wollok', task: 'repl' },
         folder,
         `Wollok Repl: ${currentFileName}`,
         'wollok',
-        new ShellExecution(`wollok repl ${currentDocument.fileName}`)
+        new ShellExecution(`${wollokCli} repl ${currentDocument.fileName}`)
       ))
     })
   );

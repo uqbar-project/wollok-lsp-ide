@@ -46,6 +46,11 @@
       "type": "object",
       "title": "Wollok LSP IDE",
       "properties": {
+        "wollokLinter.cli-path": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Path to Wollok-CLI."
+        },
         "wollokLinter.maxNumberOfProblems": {
           "scope": "resource",
           "type": "number",
