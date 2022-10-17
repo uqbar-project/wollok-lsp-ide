@@ -4,13 +4,14 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path'
-import { commands, ExtensionContext, ShellExecution, Task, tasks, window, workspace } from 'vscode'
+import { ExtensionContext, workspace } from 'vscode'
 import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
   TransportKind
 } from 'vscode-languageclient/node'
+import { subscribeWollokCommands } from './commands'
 
 let client: LanguageClient
 
@@ -45,38 +46,8 @@ export function activate(context: ExtensionContext): void {
     },
   }
 
-  context.subscriptions.push(
-    commands.registerCommand('wollok.start.repl', () => {
-      const wollokCli = workspace.getConfiguration('wollokLinter').get('cli-path')
-
-      const currentDocument = window.activeTextEditor.document
-      const folder = workspace.workspaceFolders[0]
-      const currentFileName = path.basename(currentDocument.uri.path)
-
-      tasks.executeTask(new Task(
-        { type: 'wollok', task: 'repl' },
-        folder,
-        `Wollok Repl: ${currentFileName}`,
-        'wollok',
-        new ShellExecution(`${wollokCli} repl ${currentDocument.fileName}`)
-      ))
-    })
-  );
-
-  context.subscriptions.push(
-    commands.registerCommand('wollok.run.allTests', () => {
-      const wollokCli = workspace.getConfiguration('wollokLinter').get('cli-path')
-      const folder = workspace.workspaceFolders[0]
-
-      tasks.executeTask(new Task(
-        { type: 'wollok', task: 'run tests' },
-        folder,
-        `Wollok run all tests`,
-        'wollok',
-        new ShellExecution(`${wollokCli} test`)
-      ))
-    })
-  );
+  // Subscribe Wollok Commands
+  subscribeWollokCommands(context)
 
 
   // Create the language client and start the client.
