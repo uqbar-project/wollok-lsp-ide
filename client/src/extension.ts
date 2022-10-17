@@ -5,12 +5,10 @@
 
 import * as path from 'path'
 import { ExtensionContext, workspace } from 'vscode'
-import {
-  LanguageClient,
+import { LanguageClient,
   LanguageClientOptions,
   ServerOptions,
-  TransportKind
-} from 'vscode-languageclient/node'
+  TransportKind } from 'vscode-languageclient/node'
 import { subscribeWollokCommands } from './commands'
 
 let client: LanguageClient

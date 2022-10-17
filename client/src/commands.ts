@@ -2,7 +2,7 @@ import * as path from 'path'
 import { commands, ExtensionContext, ShellExecution, Task, tasks, window, workspace } from 'vscode'
 
 
-export const subscribeWollokCommands = (context: ExtensionContext) => {
+export const subscribeWollokCommands = (context: ExtensionContext): void => {
   context.subscriptions.push(registerCLICommand('wollok.start.repl', startRepl))
   context.subscriptions.push(registerCLICommand('wollok.run.allTests', runAllTests))
 }
@@ -11,7 +11,7 @@ export const subscribeWollokCommands = (context: ExtensionContext) => {
  * CLI Commands
  */
 
-const runAllTests = () => wollokCLITask('run tests', `Wollok run all tests`, ['test'])
+const runAllTests = () => wollokCLITask('run tests', 'Wollok run all tests', ['test'])
 
 const startRepl = () => {
   const currentDocument = window.activeTextEditor.document
