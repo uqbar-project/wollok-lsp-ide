@@ -4,11 +4,12 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path'
-import { workspace, ExtensionContext } from 'vscode'
+import { ExtensionContext, workspace } from 'vscode'
 import { LanguageClient,
   LanguageClientOptions,
   ServerOptions,
   TransportKind } from 'vscode-languageclient/node'
+import { subscribeWollokCommands } from './commands'
 
 let client: LanguageClient
 
@@ -42,6 +43,10 @@ export function activate(context: ExtensionContext): void {
       fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
     },
   }
+
+  // Subscribe Wollok Commands
+  subscribeWollokCommands(context)
+
 
   // Create the language client and start the client.
   client = new LanguageClient(

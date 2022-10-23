@@ -46,6 +46,11 @@
       "type": "object",
       "title": "Wollok LSP IDE",
       "properties": {
+        "wollokLinter.cli-path": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Path to Wollok-CLI."
+        },
         "wollokLinter.maxNumberOfProblems": {
           "scope": "resource",
           "type": "number",
@@ -75,7 +80,20 @@
           "description": "Traces the communication between VS Code and the language server."
         }
       }
-    }
+    },
+    "commands": [
+      {
+        "command": "wollok.start.repl",
+        "title": "Start a new REPL session",
+        "category": "Wollok"
+      },
+      {
+        "command": "wollok.run.allTests",
+        "title": "Run all tests",
+        "when": "resourceExtname == .wtest",
+        "category": "Wollok"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
