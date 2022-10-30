@@ -32,12 +32,13 @@ const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
 
 // TODO: Refactor and move to utils
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
+  if (!node.sourceFileName()) return false
+  if (node.kind === 'Package') {
+    return uri.includes(node.sourceFileName()!)
+  }
   const startLine = node.sourceMap?.start?.line
   const endLine = node.sourceMap?.end?.line
-  if (node.kind === 'Package') {
-    return uri === node.sourceFileName()
-  }
-  return node.sourceFileName() == uri && startLine && endLine &&
+  return uri.includes(node.sourceFileName()!) && startLine && endLine &&
     (startLine - 1 <= position.line && position.line <= endLine + 1 ||
       startLine - 1 == position.line && position.line == endLine + 1 &&
       (node?.sourceMap?.start?.offset || 0) <= position.character && position.character <= endLine
@@ -62,7 +63,7 @@ const createCompletionItem = (_position: Position) => (base: NodeCompletion): Co
 })
 
 function findFirstStableNode(node: Node): Node {
-  if (!node.problems) {
+  if (!node.problems || node.problems.length === 0) {
     return node
   }
   if (node.parent.kind === 'Environment') {
