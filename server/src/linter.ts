@@ -1,4 +1,4 @@
-import { CompletionItem, CompletionItemKind, Connection, Diagnostic, DiagnosticSeverity, InsertTextFormat, Position, TextDocumentPositionParams } from 'vscode-languageserver'
+import { CompletionItem, CompletionItemKind, Connection, Diagnostic, DiagnosticSeverity, InsertTextFormat, Location, Position, TextDocumentPositionParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { buildEnvironment, Environment, Node, validate } from 'wollok-ts'
 import { Problem } from 'wollok-ts'
@@ -6,6 +6,8 @@ import { completionsForNode, NodeCompletion } from './autocomplete'
 import { reportMessage } from './reporter'
 import { TimeMeasurer } from './timeMeasurer'
 import { updateDocumentSettings } from './settings'
+import { getNodesByPosition, nodeToLocation } from './utils/text-documents'
+import { getNodeDefinition } from './definition'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -27,30 +29,6 @@ const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
     message: reportMessage(problem),
     source: problem.node.sourceFileName(),
   } as Diagnostic
-}
-
-
-// TODO: Refactor and move to utils
-const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
-  const startLine = node.sourceMap?.start?.line
-  const endLine = node.sourceMap?.end?.line
-  if(node.kind === 'Package'){
-    return uri === node.sourceFileName()
-  }
-  return node.sourceFileName() == uri && startLine && endLine &&
-  (startLine - 1 <= position.line && position.line <= endLine + 1 ||
-    startLine - 1 == position.line && position.line == endLine + 1 &&
-      (node?.sourceMap?.start?.offset || 0) <= position.character && position.character <= endLine
-  )
-}
-
-// TODO: Use map instead of forEach
-const getNodesByPosition = (textDocumentPosition: TextDocumentPositionParams): Node[] => {
-  const result: Node[] = []
-  environment.forEach(node => {
-    if (node.sourceFileName() && include(node, textDocumentPosition)) result.push(node)
-  })
-  return result
 }
 
 const createCompletionItem = (_position: Position) => (base: NodeCompletion): CompletionItem => ({
@@ -128,7 +106,13 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
 
 export const completions = (textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
   const { position } = textDocumentPosition
-  const cursorNode = getNodesByPosition(textDocumentPosition).reverse()[0]
+  const cursorNode = getNodesByPosition(environment, textDocumentPosition).reverse()[0]
   const stableNode = findFirstStableNode(cursorNode)
   return completionsForNode(stableNode).map(createCompletionItem(position))
+}
+
+export const definition = (textDocumentPosition: TextDocumentPositionParams): Location => {
+  const cursorNode = getNodesByPosition(environment, textDocumentPosition).reverse()[0]
+  const definition = getNodeDefinition(cursorNode)
+  return nodeToLocation(definition)
 }

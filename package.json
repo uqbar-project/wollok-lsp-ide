@@ -23,6 +23,10 @@
   "activationEvents": [
     "onLanguage:wollok"
   ],
+  "capabilities": {
+    "referencesProvider": true,
+    "definitionProvider": true
+  },
   "main": "./client/out/extension",
   "contributes": {
     "languages": [
@@ -107,7 +111,7 @@
     "test:unit": "cd server && npm run test && cd .."
   },
   "dependencies": {
-    "wollok-ts": "3.1.2"
+    "wollok-ts": "file:../wollok-ts"
   },
   "devDependencies": {
     "@types/expect": "^24.3.0",
