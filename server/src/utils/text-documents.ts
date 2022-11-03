@@ -1,5 +1,5 @@
-import { Location, TextDocumentPositionParams } from 'vscode-languageserver'
-import { Environment, Node } from 'wollok-ts'
+import { Location, Position, TextDocumentPositionParams } from 'vscode-languageserver'
+import { Environment, Node, SourceIndex } from 'wollok-ts'
 
 // TODO: Refactor and move to utils
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
@@ -24,17 +24,25 @@ export const getNodesByPosition = (environment: Environment, textDocumentPositio
   return result
 }
 
+const toVSCPosition = (position: SourceIndex): Position => {
+  const max0 = (n: number) => n < 0 ? 0 : n
+
+  return {
+    line: max0(position.line - 1),
+    character: max0(position.column - 1),
+  }
+}
+
 export const nodeToLocation = (node: Node): Location => {
   if(!node.sourceMap || !node.sourceFileName()){
     throw new Error('No source map found for node')
   }
 
-  const max0 = (n: number) => n < 0 ? 0 : n
   return {
     uri: node.sourceFileName()!,
     range: {
-      start: { line: max0(node.sourceMap.start.line - 1), character: max0(node.sourceMap.start.column - 1) },
-      end: { line: max0(node.sourceMap.end.line - 1), character: max0(node.sourceMap.end.column - 1) },
+      start: toVSCPosition(node.sourceMap.start),
+      end: toVSCPosition(node.sourceMap.end),
     },
   }
 }
