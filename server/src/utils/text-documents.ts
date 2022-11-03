@@ -1,18 +1,19 @@
 import { Location, Position, TextDocumentPositionParams } from 'vscode-languageserver'
 import { Environment, Node, SourceIndex } from 'wollok-ts'
 
-// TODO: Refactor and move to utils
+// TODO: Refactor
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
+  if (!node.sourceFileName()) return false
+  if (node.kind === 'Package') {
+    return uri.includes(node.sourceFileName()!)
+  }
   const startLine = node.sourceMap?.start?.line
   const endLine = node.sourceMap?.end?.line
-  if(node.kind === 'Package'){
-    return uri === node.sourceFileName()
-  }
-  return node.sourceFileName() == uri && startLine && endLine &&
-  (startLine - 1 <= position.line && position.line <= endLine + 1 ||
-    startLine - 1 == position.line && position.line == endLine + 1 &&
+  return uri.includes(node.sourceFileName()!) && startLine && endLine &&
+    (startLine - 1 <= position.line && position.line <= endLine + 1 ||
+      startLine - 1 == position.line && position.line == endLine + 1 &&
       (node?.sourceMap?.start?.offset || 0) <= position.character && position.character <= endLine
-  )
+    )
 }
 
 // TODO: Use map instead of forEach

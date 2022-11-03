@@ -1,13 +1,13 @@
 import { CompletionItem, CompletionItemKind, Connection, Diagnostic, DiagnosticSeverity, InsertTextFormat, Location, Position, TextDocumentPositionParams } from 'vscode-languageserver'
+import path from 'path'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { buildEnvironment, Environment, Node, validate } from 'wollok-ts'
-import { Problem } from 'wollok-ts'
+import { buildEnvironment, Environment, Node, Problem, validate } from 'wollok-ts'
 import { completionsForNode, NodeCompletion } from './autocomplete'
 import { reportMessage } from './reporter'
-import { TimeMeasurer } from './timeMeasurer'
 import { updateDocumentSettings } from './settings'
 import { getNodesByPosition, nodeToLocation } from './utils/text-documents'
 import { getNodeDefinition } from './definition'
+import { TimeMeasurer } from './timeMeasurer'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -40,10 +40,10 @@ const createCompletionItem = (_position: Position) => (base: NodeCompletion): Co
 })
 
 function findFirstStableNode(node: Node): Node {
-  if(!node.problems){
+  if (!node.problems || node.problems.length === 0) {
     return node
   }
-  if(node.parent.kind === 'Environment'){
+  if (node.parent.kind === 'Environment') {
     throw new Error('No stable node found')
   }
   return findFirstStableNode(node.parent)
@@ -58,23 +58,22 @@ let environment: Environment
 export const validateTextDocument = (connection: Connection) => async (textDocument: TextDocument): Promise<void> => {
   await updateDocumentSettings(connection)
 
-  const text = textDocument.getText()
+  const uri = textDocument.uri
+  const name = path.basename(uri)
+  const content = textDocument.getText()
   try {
     const timeMeasurer = new TimeMeasurer()
 
-    environment = buildEnvironment([])
-    timeMeasurer.addTime('build empty environment')
-
-    const file: { name: string, content: string } = {
-      name: textDocument.uri,
-      content: text,
-    }
+    const file: { name: string, content: string } = { name, content }
     environment = buildEnvironment([file], environment)
     const problems = validate(environment)
     timeMeasurer.addTime('build environment for file')
 
-    const diagnostics: Diagnostic[] = problems.map(problem => createDiagnostic(textDocument, problem))
-    connection.sendDiagnostics({ uri: textDocument.uri, diagnostics })
+    const diagnostics: Diagnostic[] = problems
+      .filter(problem => problem.node.sourceFileName() == name)
+      .map(problem => createDiagnostic(textDocument, problem))
+
+    connection.sendDiagnostics({ uri, diagnostics })
     timeMeasurer.addTime('validation time')
 
     timeMeasurer.finalReport()
@@ -93,14 +92,12 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
               offset: 0,
             }, end: {
               line: Number.MAX_VALUE,
-              offset: text.length - 1,
+              offset: content.length - 1,
             },
           },
         } as unknown as Problem),
       ],
     })
-    connection.console.error('programa: ' + text)
-    connection.console.error((e as { message: string}).message)
   }
 }
 
