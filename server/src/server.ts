@@ -104,7 +104,7 @@ connection.onReferences((_params) => {
   return []
 })
 
-connection.onDefinition((params) => {
+connection.onDefinition(async (params) => {
   return definition(params)
 })
 

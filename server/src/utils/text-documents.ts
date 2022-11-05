@@ -4,17 +4,36 @@ import { Environment, Node, SourceIndex } from 'wollok-ts'
 // TODO: Refactor
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
   if (!node.sourceFileName()) return false
+  if(!node.sourceMap) return false
   if (node.kind === 'Package') {
     return uri.includes(node.sourceFileName()!)
   }
-  const startLine = node.sourceMap?.start?.line
-  const endLine = node.sourceMap?.end?.line
-  return uri.includes(node.sourceFileName()!) && startLine && endLine &&
-    (startLine - 1 <= position.line && position.line <= endLine + 1 ||
-      startLine - 1 == position.line && position.line == endLine + 1 &&
-      (node?.sourceMap?.start?.offset || 0) <= position.character && position.character <= endLine
-    )
+
+  const startPosition = toVSCPosition(node.sourceMap.start)
+  const endPosition = toVSCPosition(node.sourceMap.end)
+
+  return uri.includes(node.sourceFileName()!)
+    && node.sourceMap
+    && between(position, startPosition, endPosition)
 }
+
+export const between = (pointer: Position, start: Position, end: Position): boolean => {
+  const { line: linePointer, character: charPointer } = pointer
+  const { line: lineStart, character: charStart } = start
+  const { line: lineEnd, character: charEnd } = end
+
+  if(lineStart === lineEnd && linePointer === lineStart) {
+    return charPointer >= charStart && charPointer <= charEnd
+  }
+
+  return linePointer > lineStart
+    && linePointer < lineEnd
+    || (linePointer === lineStart
+    && charPointer >= charStart
+    || linePointer === lineEnd
+    && charPointer <= charEnd)
+}
+
 
 // TODO: Use map instead of forEach
 export const getNodesByPosition = (environment: Environment, textDocumentPosition: TextDocumentPositionParams): Node[] => {
@@ -25,7 +44,7 @@ export const getNodesByPosition = (environment: Environment, textDocumentPositio
   return result
 }
 
-const toVSCPosition = (position: SourceIndex): Position => {
+export const toVSCPosition = (position: SourceIndex): Position => {
   const max0 = (n: number) => n < 0 ? 0 : n
 
   return {

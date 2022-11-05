@@ -64,7 +64,10 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
   try {
     const timeMeasurer = new TimeMeasurer()
 
-    const file: { name: string, content: string } = { name, content }
+    const file: { name: string, content: string } = {
+      name: textDocument.uri,
+      content: content,
+    }
     environment = buildEnvironment([file], environment)
     const problems = validate(environment)
     timeMeasurer.addTime('build environment for file')
@@ -108,8 +111,8 @@ export const completions = (textDocumentPosition: TextDocumentPositionParams): C
   return completionsForNode(stableNode).map(createCompletionItem(position))
 }
 
-export const definition = (textDocumentPosition: TextDocumentPositionParams): Location => {
-  const cursorNode = getNodesByPosition(environment, textDocumentPosition).reverse()[0]
-  const definition = getNodeDefinition(cursorNode)
-  return nodeToLocation(definition)
+export const definition = (textDocumentPosition: TextDocumentPositionParams): Location[] => {
+  const cursorNodes = getNodesByPosition(environment, textDocumentPosition)
+  const definitions = getNodeDefinition(environment)(cursorNodes.reverse()[0])
+  return definitions.map(nodeToLocation)
 }
