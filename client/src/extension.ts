@@ -4,11 +4,9 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path'
-import { ExtensionContext, workspace } from 'vscode'
+import { ExtensionContext, workspace, languages } from 'vscode'
 import { LanguageClient,
-  LanguageClientOptions,
-  ServerOptions,
-  TransportKind } from 'vscode-languageclient/node'
+  LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient/node'
 import { subscribeWollokCommands } from './commands'
 
 let client: LanguageClient
@@ -47,7 +45,6 @@ export function activate(context: ExtensionContext): void {
   // Subscribe Wollok Commands
   subscribeWollokCommands(context)
 
-
   // Create the language client and start the client.
   client = new LanguageClient(
     'wollok-lsp-ide',
@@ -55,6 +52,14 @@ export function activate(context: ExtensionContext): void {
     serverOptions,
     clientOptions
   )
+
+  // Force document changes for first validation
+  workspace.findFiles('**/*.wlk').then(async uris => {
+    for (const uri of uris) {
+      const textDoc = await workspace.openTextDocument(uri)
+      languages.setTextDocumentLanguage(textDoc, 'wollok')
+    }
+  })
 
   // Start the client. This will also launch the server
   client.start()
