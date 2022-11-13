@@ -7,6 +7,8 @@ export const getNodeDefinition = (environment: Environment) => (node: Node): Nod
     case 'Send':
       return sendDefinitions(environment, node)
     case 'Super':
+      return definedOrEmpty(superMethodDefinition(node))
+    case 'Self':
       return definedOrEmpty(node.ancestors().find(is('Module')))
     default:
       return [node]
@@ -33,18 +35,13 @@ function sendDefinitions(environment: Environment, send: Send): Method[] {
       (module) => definedOrEmpty(module.lookupMethod(send.message, send.args.length))
     )
   }
-  if(send.receiver.kind === 'Super'){
-    return withModule(
-      (module) => definedOrEmpty(lookupSuperMethod(module, send.receiver as Super))
-    )
-  }
-
   return allMethodDefinitions(environment, send)
 }
 
-function lookupSuperMethod(receiver: Module, superNode: Super): Method | undefined {
+function superMethodDefinition(superNode: Super): Method | undefined {
   const currentMethod = superNode.ancestors().find(is('Method'))!
-  return receiver.lookupMethod(currentMethod.name, superNode.args.length, { lookupStartFQN: currentMethod.parent.fullyQualifiedName() })
+  const module = superNode.ancestors().find(is('Module'))!
+  return module.lookupMethod(currentMethod.name, superNode.args.length, { lookupStartFQN: module.fullyQualifiedName() })
 }
 
 function allMethodDefinitions(environment: Environment, send: Send): Method[] {

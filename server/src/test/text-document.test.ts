@@ -1,16 +1,7 @@
 import { expect } from 'expect'
-import { Environment } from 'wollok-ts'
 import { between } from '../utils/text-documents'
-import { buildPepitaEnvironment } from './utils/wollok-test-utils'
 
 describe('text document utilities', () => {
-  let pepitaEnvironment: Environment
-
-  beforeEach(() => {
-    pepitaEnvironment = buildPepitaEnvironment()
-  })
-
-
   describe('between', () => {
     it('should return true when position is between start and end lines', () => {
       expect(between({ line: 2, character: 0 }, { line: 1, character: 0 }, { line: 3, character: 0 })).toBe(true)
