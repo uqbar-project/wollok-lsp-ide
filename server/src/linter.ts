@@ -59,7 +59,6 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
   await updateDocumentSettings(connection)
 
   const uri = textDocument.uri
-  const name = path.basename(uri)
   const content = textDocument.getText()
   try {
     const timeMeasurer = new TimeMeasurer()
@@ -73,7 +72,7 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
     timeMeasurer.addTime('build environment for file')
 
     const diagnostics: Diagnostic[] = problems
-      .filter(problem => problem.node.sourceFileName() == name)
+      .filter(problem => problem.node.sourceFileName() == textDocument.uri)
       .map(problem => createDiagnostic(textDocument, problem))
 
     connection.sendDiagnostics({ uri, diagnostics })
