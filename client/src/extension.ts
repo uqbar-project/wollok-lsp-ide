@@ -54,13 +54,15 @@ export function activate(context: ExtensionContext): void {
     clientOptions
   )
 
-  // Force document changes for first validation
-  allWollokFiles().then(async uris => {
-    for (const uri of uris) {
-      const textDoc = await workspace.openTextDocument(uri)
-      languages.setTextDocumentLanguage(textDoc, 'wollok')
-    }
-  })
+  // Force first validation
+  validateWorkspace()
+
+  // Force environment to restart
+  const revalidateWorskpace = _event => {
+    client.sendRequest('STRONG_FILES_CHANGED').then(validateWorkspace)
+  }
+  workspace.onDidDeleteFiles(revalidateWorskpace)
+  workspace.onDidRenameFiles(revalidateWorskpace)
 
   // Start the client. This will also launch the server
   client.start()
@@ -71,4 +73,14 @@ export function deactivate(): Thenable<void> | undefined {
     return undefined
   }
   return client.stop()
+}
+
+function validateWorkspace() {
+  allWollokFiles().then(async uris => {
+    for (const uri of uris) {
+      // Force 'change' on document for server tracking
+      const textDoc = await workspace.openTextDocument(uri)
+      languages.setTextDocumentLanguage(textDoc, 'wollok')
+    }
+  })
 }
