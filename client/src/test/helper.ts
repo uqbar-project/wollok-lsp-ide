@@ -46,3 +46,7 @@ export async function setTestContent(content: string): Promise<boolean> {
   )
   return editor.edit(editBuilder => editBuilder.replace(all, content))
 }
+
+export async function allWollokFiles(): Promise<Uri[]> {
+  return workspace.findFiles('**/*.{wlk,wtest,wpgm}')
+}

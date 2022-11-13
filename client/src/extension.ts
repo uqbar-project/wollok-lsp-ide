@@ -8,6 +8,7 @@ import { ExtensionContext, workspace, languages } from 'vscode'
 import { LanguageClient,
   LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient/node'
 import { subscribeWollokCommands } from './commands'
+import { allWollokFiles } from './test/helper'
 
 let client: LanguageClient
 
@@ -54,7 +55,7 @@ export function activate(context: ExtensionContext): void {
   )
 
   // Force document changes for first validation
-  workspace.findFiles('**/*.wlk').then(async uris => {
+  allWollokFiles().then(async uris => {
     for (const uri of uris) {
       const textDoc = await workspace.openTextDocument(uri)
       languages.setTextDocumentLanguage(textDoc, 'wollok')
