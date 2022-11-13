@@ -4,10 +4,10 @@ import { Environment, Node, SourceIndex } from 'wollok-ts'
 // TODO: Refactor
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
   if (!node.sourceFileName()) return false
-  if(!node.sourceMap) return false
   if (node.kind === 'Package') {
-    return uri.includes(node.sourceFileName()!)
+    return uri === node.sourceFileName()
   }
+  if(!node.sourceMap) return false
 
   const startPosition = toVSCPosition(node.sourceMap.start)
   const endPosition = toVSCPosition(node.sourceMap.end)
