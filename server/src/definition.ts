@@ -19,21 +19,17 @@ function referenceDefinition(ref: Reference<Node>): Node | undefined {
 
 
 const sendDefinitions = (environment: Environment) => ( send: Send): Method[] => {
-  const withModule = moduleFinderWithBackup(environment, send)
-
-  if(send.receiver.kind === 'Singleton'){
-    return definedOrEmpty(send.receiver.lookupMethod(send.message, send.args.length))
+  try {
+    return send.receiver.match({
+      Singleton: match => definedOrEmpty(match.lookupMethod(send.message, send.args.length)),
+      New: match => definedOrEmpty(match.instantiated.target()?.lookupMethod(send.message, send.args.length)),
+      Self: _ => moduleFinderWithBackup(environment, send)(
+        (module) => definedOrEmpty(module.lookupMethod(send.message, send.args.length))
+      ),
+    })
+  } catch {
+    return allMethodDefinitions(environment, send)
   }
-  if(send.receiver.kind === 'New'){
-
-    return definedOrEmpty(send.receiver.instantiated.target()?.lookupMethod(send.message, send.args.length))
-  }
-  if(send.receiver.kind === 'Self'){
-    return withModule(
-      (module) => definedOrEmpty(module.lookupMethod(send.message, send.args.length))
-    )
-  }
-  return allMethodDefinitions(environment, send)
 }
 
 function superMethodDefinition(superNode: Super): Method | undefined {
@@ -50,7 +46,7 @@ function allMethodDefinitions(environment: Environment, send: Send): Method[] {
     if(
       n.kind === 'Method' &&
       n.name === name &&
-       n.parameters.length === arity
+      n.parameters.length === arity
     ) {
       methods.push(n)
     }
