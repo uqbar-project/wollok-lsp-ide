@@ -1,17 +1,15 @@
 import { Environment, is, Method, Module, Node, Reference, Send, Super } from 'wollok-ts'
 
 export const getNodeDefinition = (environment: Environment) => (node: Node): Node[] => {
-  switch(node.kind){
-    case 'Reference':
-      return definedOrEmpty(referenceDefinition(node))
-    case 'Send':
-      return sendDefinitions(environment, node)
-    case 'Super':
-      return definedOrEmpty(superMethodDefinition(node))
-    case 'Self':
-      return definedOrEmpty(node.ancestors().find(is('Module')))
-    default:
-      return [node]
+  try {
+    return node.match({
+      Reference:  match => definedOrEmpty(referenceDefinition(match)),
+      Send:  sendDefinitions(environment),
+      Super:  match => definedOrEmpty(superMethodDefinition(match)),
+      Self:  match => definedOrEmpty(match.ancestors().find(is('Module'))),
+    })
+  } catch {
+    return [node]
   }
 }
 
@@ -20,7 +18,7 @@ function referenceDefinition(ref: Reference<Node>): Node | undefined {
 }
 
 
-function sendDefinitions(environment: Environment, send: Send): Method[] {
+const sendDefinitions = (environment: Environment) => ( send: Send): Method[] => {
   const withModule = moduleFinderWithBackup(environment, send)
 
   if(send.receiver.kind === 'Singleton'){
