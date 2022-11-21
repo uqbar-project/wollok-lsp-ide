@@ -21,7 +21,12 @@ function referenceDefinition(ref: Reference<Node>): Node | undefined {
 const sendDefinitions = (environment: Environment) => ( send: Send): Method[] => {
   try {
     return send.receiver.match({
-      Singleton: match => definedOrEmpty(match.lookupMethod(send.message, send.args.length)),
+      Reference: match => {
+        const target = match.target()
+        return target && target.is('Singleton') ?
+          definedOrEmpty(target.lookupMethod(send.message, send.args.length))
+          : allMethodDefinitions(environment, send)
+      },
       New: match => definedOrEmpty(match.instantiated.target()?.lookupMethod(send.message, send.args.length)),
       Self: _ => moduleFinderWithBackup(environment, send)(
         (module) => definedOrEmpty(module.lookupMethod(send.message, send.args.length))
