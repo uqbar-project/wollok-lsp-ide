@@ -34,8 +34,8 @@ const sendDefinitions = (environment: Environment) => ( send: Send): Method[] =>
 
 function superMethodDefinition(superNode: Super): Method | undefined {
   const currentMethod = superNode.ancestors().find(is('Method'))!
-  const module = superNode.ancestors().find(is('Module'))!
-  return module.lookupMethod(currentMethod.name, superNode.args.length, { lookupStartFQN: module.fullyQualifiedName() })
+  const module = superNode.ancestors().find(is('Module'))
+  return module ? module.lookupMethod(currentMethod.name, superNode.args.length, { lookupStartFQN: module.fullyQualifiedName() }) : undefined
 }
 
 function allMethodDefinitions(environment: Environment, send: Send): Method[] {
