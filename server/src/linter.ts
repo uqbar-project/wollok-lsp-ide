@@ -1,5 +1,4 @@
 import { CompletionItem, CompletionItemKind, Connection, Diagnostic, DiagnosticSeverity, InsertTextFormat, Location, Position, TextDocumentPositionParams } from 'vscode-languageserver'
-import path from 'path'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { buildEnvironment, Environment, Node, Problem, validate } from 'wollok-ts'
 import { completionsForNode, NodeCompletion } from './autocomplete'
