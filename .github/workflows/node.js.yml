@@ -3,7 +3,13 @@
 
 name: Node.js CI
 
-on: [push, pull_request]
+on:
+  push: 
+    branches:
+      - master
+  pull_request:
+
+
 
 jobs:
   test:
@@ -12,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [15.x]
+        node-version: [18.x]
 
     steps:
     - uses: actions/checkout@v2

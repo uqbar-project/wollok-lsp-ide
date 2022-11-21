@@ -1,6 +1,6 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocumentPositionParams, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
-import { completions, validateTextDocument } from './linter'
+import { completions, definition, validateTextDocument } from './linter'
 import { WollokLinterSettings, initializeSettings } from './settings'
 import { templates } from './templates'
 
@@ -25,6 +25,8 @@ connection.onInitialize((params: InitializeParams) => {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       // Tell the client that this server supports code completion.
       completionProvider: { resolveProvider: true },
+      referencesProvider: true,
+      definitionProvider: true,
     },
   }
   if (hasWorkspaceFolderCapability) {
@@ -97,6 +99,14 @@ connection.onCompletion(
     ]
   }
 )
+
+connection.onReferences((_params) => {
+  return []
+})
+
+connection.onDefinition(async (params) => {
+  return definition(params)
+})
 
 // This handler resolves additional information for the item selected in the completion list.
 connection.onCompletionResolve(

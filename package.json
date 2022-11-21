@@ -23,6 +23,10 @@
   "activationEvents": [
     "onLanguage:wollok"
   ],
+  "capabilities": {
+    "referencesProvider": true,
+    "definitionProvider": true
+  },
   "main": "./client/out/extension",
   "contributes": {
     "languages": [
