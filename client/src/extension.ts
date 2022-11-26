@@ -4,11 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path'
-import { ExtensionContext, workspace, languages } from 'vscode'
-import {
-  LanguageClient,
-  LanguageClientOptions, ServerOptions, TransportKind
-} from 'vscode-languageclient/node'
+import { ExtensionContext, languages, workspace } from 'vscode'
+import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient/node'
 import { subscribeWollokCommands } from './commands'
 import { allWollokFiles } from './test/helper'
 
@@ -60,9 +57,9 @@ export function activate(context: ExtensionContext): void {
   validateWorkspace()
 
   // Force environment to restart
-  const revalidateWorskpace = _event => 
+  const revalidateWorskpace = _event =>
     client.sendRequest('STRONG_FILES_CHANGED').then(validateWorkspace)
-  
+
 
   workspace.onDidDeleteFiles(revalidateWorskpace)
   workspace.onDidRenameFiles(revalidateWorskpace)
