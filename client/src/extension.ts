@@ -5,8 +5,10 @@
 
 import * as path from 'path'
 import { ExtensionContext, workspace, languages } from 'vscode'
-import { LanguageClient,
-  LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient/node'
+import {
+  LanguageClient,
+  LanguageClientOptions, ServerOptions, TransportKind
+} from 'vscode-languageclient/node'
 import { subscribeWollokCommands } from './commands'
 import { allWollokFiles } from './test/helper'
 
@@ -58,9 +60,10 @@ export function activate(context: ExtensionContext): void {
   validateWorkspace()
 
   // Force environment to restart
-  const revalidateWorskpace = _event => {
+  const revalidateWorskpace = _event => 
     client.sendRequest('STRONG_FILES_CHANGED').then(validateWorkspace)
-  }
+  
+
   workspace.onDidDeleteFiles(revalidateWorskpace)
   workspace.onDidRenameFiles(revalidateWorskpace)
 
@@ -75,12 +78,11 @@ export function deactivate(): Thenable<void> | undefined {
   return client.stop()
 }
 
-function validateWorkspace() {
-  allWollokFiles().then(async uris => {
-    for (const uri of uris) {
-      // Force 'change' on document for server tracking
-      const textDoc = await workspace.openTextDocument(uri)
-      languages.setTextDocumentLanguage(textDoc, 'wollok')
-    }
-  })
+async function validateWorkspace() {
+  const uris = await allWollokFiles()
+  for (const uri of uris) {
+    // Force 'change' on document for server tracking
+    const textDoc = await workspace.openTextDocument(uri)
+    languages.setTextDocumentLanguage(textDoc, 'wollok')
+  }
 }
