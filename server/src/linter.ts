@@ -1,12 +1,13 @@
-import { CompletionItem, CompletionItemKind, Connection, Diagnostic, DiagnosticSeverity, InsertTextFormat, Location, Position, TextDocumentPositionParams } from 'vscode-languageserver'
+import { CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { buildEnvironment, Environment, Node, Problem, validate } from 'wollok-ts'
-import { completionsForNode, NodeCompletion } from './autocomplete'
 import { reportMessage } from './reporter'
 import { updateDocumentSettings } from './settings'
 import { getNodesByPosition, nodeToLocation } from './utils/text-documents'
 import { getNodeDefinition } from './definition'
 import { TimeMeasurer } from './timeMeasurer'
+import { completeMessages } from './autocomplete/send-completion'
+import { completionsForNode } from './autocomplete/node-completion'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -29,14 +30,6 @@ const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
     source: problem.node.sourceFileName(),
   } as Diagnostic
 }
-
-const createCompletionItem = (_position: Position) => (base: NodeCompletion): CompletionItem => ({
-  kind: CompletionItemKind.Method,
-  sortText: 'b',
-  insertTextFormat: InsertTextFormat.Snippet,
-  insertText: base.textEdit.newText,
-  label: base.label,
-})
 
 function findFirstStableNode(node: Node): Node {
   if (!node.problems || node.problems.length === 0) {
@@ -102,11 +95,14 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
   }
 }
 
-export const completions = (textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-  const { position } = textDocumentPosition
-  const cursorNode = getNodesByPosition(environment, textDocumentPosition).reverse()[0]
-  const stableNode = findFirstStableNode(cursorNode)
-  return completionsForNode(stableNode).map(createCompletionItem(position))
+export const completions = (position: Position, textDocument: TextDocumentIdentifier, context?: CompletionContext): CompletionItem[] => {
+  if(context?.triggerCharacter === '.') {
+    return completeMessages(environment)
+  } else {
+    const cursorNode = getNodesByPosition(environment, { position, textDocument }).reverse()[0]
+    const stableNode = findFirstStableNode(cursorNode)
+    return completionsForNode(stableNode)
+  }
 }
 
 export const definition = (textDocumentPosition: TextDocumentPositionParams): Location[] => {

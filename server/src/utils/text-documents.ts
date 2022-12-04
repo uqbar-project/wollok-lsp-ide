@@ -34,8 +34,6 @@ export const between = (pointer: Position, start: Position, end: Position): bool
     && charPointer <= charEnd)
 }
 
-
-// TODO: Use map instead of forEach
 export const getNodesByPosition = (environment: Environment, textDocumentPosition: TextDocumentPositionParams): Node[] => {
   return environment.filter(node => !!node.sourceFileName() && include(node, textDocumentPosition))
 }

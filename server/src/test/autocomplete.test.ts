@@ -1,7 +1,7 @@
 import { Body, Environment, Node, Singleton } from 'wollok-ts'
-import { completeForParent, completionsForNode } from '../autocomplete'
 import { buildPepitaEnvironment } from './utils/wollok-test-utils'
 import { expect } from 'expect'
+import { completionsForNode, completeForParent } from '../autocomplete/node-completion'
 
 describe('autocomplete', () => {
   describe('completions for node', () => {
