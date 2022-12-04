@@ -54,6 +54,10 @@ function findFirstStableNode(node: Node): Node {
 
 let environment: Environment
 
+export const resetEnvironment = (): void => {
+  environment = buildEnvironment([])
+}
+
 export const validateTextDocument = (connection: Connection) => async (textDocument: TextDocument): Promise<void> => {
   await updateDocumentSettings(connection)
 
