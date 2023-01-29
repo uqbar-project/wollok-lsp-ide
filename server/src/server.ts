@@ -1,6 +1,6 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
-import { completions, definition, validateTextDocument } from './linter'
+import { completions, definition, resetEnvironment, validateTextDocument } from './linter'
 import { WollokLinterSettings, initializeSettings } from './settings'
 import { templates } from './templates'
 
@@ -85,9 +85,10 @@ documents.onDidChangeContent(change => {
   validateTextDocument(connection)(change.document)
 })
 
-connection.onDidChangeWatchedFiles(_change => {
-  // Monitored files have change in VSCode
-  connection.console.log('We received an file change event')
+connection.onRequest(change => {
+  if (change === 'STRONG_FILES_CHANGED') {
+    resetEnvironment()
+  }
 })
 
 // This handler provides the initial list of the completion items.
