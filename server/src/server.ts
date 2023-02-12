@@ -1,5 +1,5 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocumentPositionParams, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
+import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
 import { completions, definition, resetEnvironment, validateTextDocument } from './linter'
 import { WollokLinterSettings, initializeSettings } from './settings'
 import { templates } from './templates'
@@ -24,7 +24,11 @@ connection.onInitialize((params: InitializeParams) => {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       // Tell the client that this server supports code completion.
-      completionProvider: { resolveProvider: true },
+      completionProvider: {
+        resolveProvider: true,
+        triggerCharacters: ['.'],
+        completionItem: { labelDetailsSupport: true },
+      },
       referencesProvider: true,
       definitionProvider: true,
     },
@@ -89,11 +93,11 @@ connection.onRequest(change => {
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
-  (textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+  (params): CompletionItem[] => {
     // The pass parameter contains the position of the text document in
     // which code complete got requested. For the example we ignore this
     // info and always provide the same completion items.
-    const contextCompletions = completions(textDocumentPosition)
+    const contextCompletions = completions(params.position, params.textDocument, params.context)
     return [
       ...contextCompletions,
       ...templates,

@@ -46,17 +46,11 @@ function superMethodDefinition(superNode: Super): Method | undefined {
 function allMethodDefinitions(environment: Environment, send: Send): Method[] {
   const arity = send.args.length
   const name = send.message
-  const methods: Method[] = []
-  environment.forEach(n => {
-    if(
-      n.kind === 'Method' &&
-      n.name === name &&
-      n.parameters.length === arity
-    ) {
-      methods.push(n)
-    }
-  })
-  return methods
+  return environment.filter(n =>
+    n.is('Method') &&
+    n.name === name &&
+    n.parameters.length === arity
+  ) as Method[]
 }
 
 

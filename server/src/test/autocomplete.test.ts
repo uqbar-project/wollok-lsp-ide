@@ -1,7 +1,7 @@
 import { Body, Environment, Node, Singleton } from 'wollok-ts'
-import { completeForParent, completionsForNode } from '../autocomplete'
 import { buildPepitaEnvironment } from './utils/wollok-test-utils'
 import { expect } from 'expect'
+import { completionsForNode, completeForParent } from '../autocomplete/node-completion'
 
 describe('autocomplete', () => {
   describe('completions for node', () => {
@@ -21,9 +21,9 @@ describe('autocomplete', () => {
       testCompletionLabelsForNode(pepita, ['var attribute', 'const attribute', 'method'])
     })
 
-    it('method should complete with module fields and parameters', () => {
+    it('method should complete with module fields, parameters and WKOs', () => {
       const comerMethod = pepita.lookupMethod('comer', 1)
-      testCompletionLabelsForNode(comerMethod!, ['comida', 'peso'])
+      testCompletionLabelsForNodeIncludes(comerMethod!, ['comida', 'peso', 'game', 'pepita', 'keyboard', 'assert', 'console'])
     })
 
     it('unhandled node should complete with parent completions', () => {
@@ -52,6 +52,11 @@ describe('autocomplete', () => {
   })
 })
 
+
+function testCompletionLabelsForNodeIncludes(node: Node, expectedLabels: string[]) {
+  const completions = completionsForNode(node).map(c => c.label)
+  expectedLabels.forEach(label => expect(completions).toContain(label))
+}
 
 function testCompletionLabelsForNode(node: Node, expectedLabels: string[]) {
   const completions = completionsForNode(node)
