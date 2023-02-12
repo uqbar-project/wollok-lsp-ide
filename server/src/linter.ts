@@ -100,13 +100,19 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
 }
 
 export const completions = (position: Position, textDocument: TextDocumentIdentifier, context?: CompletionContext): CompletionItem[] => {
+
   if(context?.triggerCharacter === '.') {
-    return completeMessages(environment)
+    // ignore dot
+    position.character -= 1
+    return completeMessages(environment, stableNode(position, textDocument))
   } else {
-    const cursorNode = getNodesByPosition(environment, { position, textDocument }).reverse()[0]
-    const stableNode = findFirstStableNode(cursorNode)
-    return completionsForNode(stableNode)
+    return completionsForNode(stableNode(position, textDocument))
   }
+}
+
+function stableNode(position: Position, textDocument: TextDocumentIdentifier): Node {
+  const cursorNode = getNodesByPosition(environment, { position, textDocument }).reverse()[0]
+  return findFirstStableNode(cursorNode)
 }
 
 export const definition = (textDocumentPosition: TextDocumentPositionParams): Location[] => {
