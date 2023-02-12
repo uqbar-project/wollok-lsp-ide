@@ -56,7 +56,7 @@ const completeMethod = (node: Method): CompletionItem[] => {
   return [
     ...node.parameters.map(parameterCompletionItem),
     ...fields.map(fieldCompletionItem),
-    ...(node.environment.filter(node => node.is('Singleton')) as Singleton[]).map(singletonCompletionItem),
+    ...(node.environment.filter(node => node.is('Singleton') && !!node.name) as Singleton[]).map(singletonCompletionItem),
   ]
 }
 
