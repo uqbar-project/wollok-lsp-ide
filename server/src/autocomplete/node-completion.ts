@@ -1,6 +1,6 @@
 import { CompletionItem, CompletionItemKind } from 'vscode-languageserver'
-import { Node, Body, Method } from 'wollok-ts'
-import { fieldCompletionItem, parameterCompletionItem } from './autocomplete'
+import { Node, Body, Method, Singleton } from 'wollok-ts'
+import { fieldCompletionItem, parameterCompletionItem, singletonCompletionItem } from './autocomplete'
 
 export const completionsForNode = (node: Node): CompletionItem[] => {
   switch (node.kind) {
@@ -53,7 +53,11 @@ const completeBody = (node: Body): CompletionItem[] => completeForParent(node)
 const completeMethod = (node: Method): CompletionItem[] => {
   const parent = node.parent
   const fields = parent.is('Module') ? parent.fields() : []
-  return [...node.parameters.map(parameterCompletionItem), ...fields.map(fieldCompletionItem)]
+  return [
+    ...node.parameters.map(parameterCompletionItem),
+    ...fields.map(fieldCompletionItem),
+    ...(node.environment.filter(node => node.is('Singleton')) as Singleton[]).map(singletonCompletionItem),
+  ]
 }
 
 export const completeForParent = (node: Node): CompletionItem[] => {
