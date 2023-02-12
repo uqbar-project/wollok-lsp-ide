@@ -29,6 +29,7 @@ connection.onInitialize((params: InitializeParams) => {
         triggerCharacters: ['.'],
         completionItem: { labelDetailsSupport: true },
       },
+      codeLensProvider : { resolveProvider: true },
       referencesProvider: true,
       definitionProvider: true,
     },
@@ -124,6 +125,32 @@ connection.onCompletionResolve(
   }
 )
 
+connection.onCodeLens((params) => {
+  return [{
+    range: {
+      start: { line: 0, character: 0 },
+      end: { line: 0, character: 10 },
+    },
+    command: {
+      command: 'wollok.run.describe',
+      title: 'Run test',
+      arguments: ['tests de pepita'],
+    },
+  }]
+})
+
+connection.onCodeLensResolve(() => ({
+  range: {
+    start: { line: 0, character: 0 },
+    end: { line: 0, character: 10 },
+  },
+  command: {
+    command: 'wollok.run.describe',
+    title: 'Run test',
+    arguments: ['tests de pepita'],
+  },
+})
+)
 /*
 connection.onDidOpenTextDocument((params) => {
   // A text document got opened in VSCode.

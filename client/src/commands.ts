@@ -5,11 +5,14 @@ import { commands, ExtensionContext, ShellExecution, Task, tasks, window, worksp
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
   context.subscriptions.push(registerCLICommand('wollok.start.repl', startRepl))
   context.subscriptions.push(registerCLICommand('wollok.run.allTests', runAllTests))
+  context.subscriptions.push(registerCLICommand('wollok.run.describe', runDescribe))
 }
 
 /**
  * CLI Commands
  */
+
+const runDescribe = (describeName: string) => wollokCLITask('run describe', 'Wollok run describe', ['test', `"${describeName}"`])
 
 const runAllTests = () => wollokCLITask('run tests', 'Wollok run all tests', ['test'])
 
@@ -23,8 +26,8 @@ const startRepl = () => {
  * Helpers
  */
 
-const registerCLICommand = (command: string, taskBuilder: () => Task) =>
-  commands.registerCommand(command, () => tasks.executeTask(taskBuilder()))
+const registerCLICommand = (command: string, taskBuilder: (...args: any[]) => Task) =>
+  commands.registerCommand(command, (...args) => tasks.executeTask(taskBuilder(args)))
 
 const wollokCLITask = (task: string, name: string, cliCommands: string[]) => {
   const wollokCli = workspace.getConfiguration('wollokLinter').get('cli-path')
