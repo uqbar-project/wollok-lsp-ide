@@ -3,9 +3,9 @@ import { Environment, Method } from 'wollok-ts'
 import { methodCompletionItem } from './autocomplete'
 
 export function completeMessages(environment: Environment): CompletionItem[] {
-  return allPossibleMessages(environment).map(methodCompletionItem)
+  return allPossibleMethods(environment).map(methodCompletionItem)
 }
 
-function allPossibleMessages(environment: Environment): Method[]{
+function allPossibleMethods(environment: Environment): Method[]{
   return environment.filter(node => node.is('Method')) as Method[]
 }
