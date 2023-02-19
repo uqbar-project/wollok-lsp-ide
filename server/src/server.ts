@@ -125,7 +125,9 @@ connection.onCompletionResolve(
   }
 )
 
-connection.onCodeLens((params) => params.textDocument.uri.endsWith('wtest') ? codeLenses(params) : [])
+connection.onCodeLens(
+  (params) => params.textDocument.uri.endsWith('wtest') ? codeLenses(params) : null
+)
 /*
 connection.onDidOpenTextDocument((params) => {
   // A text document got opened in VSCode.
