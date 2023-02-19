@@ -1,6 +1,6 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
-import { completions, definition, resetEnvironment, validateTextDocument } from './linter'
+import { codeLenses, completions, definition, resetEnvironment, validateTextDocument } from './linter'
 import { WollokLinterSettings, initializeSettings } from './settings'
 import { templates } from './templates'
 
@@ -125,32 +125,7 @@ connection.onCompletionResolve(
   }
 )
 
-connection.onCodeLens((params) => {
-  return [{
-    range: {
-      start: { line: 0, character: 0 },
-      end: { line: 0, character: 10 },
-    },
-    command: {
-      command: 'wollok.run.describe',
-      title: 'Run test',
-      arguments: ['tests de pepita'],
-    },
-  }]
-})
-
-connection.onCodeLensResolve(() => ({
-  range: {
-    start: { line: 0, character: 0 },
-    end: { line: 0, character: 10 },
-  },
-  command: {
-    command: 'wollok.run.describe',
-    title: 'Run test',
-    arguments: ['tests de pepita'],
-  },
-})
-)
+connection.onCodeLens((params) => params.textDocument.uri.endsWith('wtest') ? codeLenses(params) : [])
 /*
 connection.onDidOpenTextDocument((params) => {
   // A text document got opened in VSCode.
