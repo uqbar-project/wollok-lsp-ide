@@ -3,12 +3,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "command": "npm run test:e2e",
-      "name": "Run Wollok TS tests",
-      "request": "launch",
-      "type": "node-terminal"
-    },
-    {
       "type": "extensionHost",
       "request": "launch",
       "name": "Launch Client",
@@ -34,6 +28,7 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
+        "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceRoot}",
         "--extensionTestsPath=${workspaceRoot}/client/out/test",
         "${workspaceRoot}/client/testFixture"

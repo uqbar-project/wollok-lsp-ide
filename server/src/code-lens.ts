@@ -1,28 +1,32 @@
 import { CodeLens, Position } from 'vscode-languageserver'
 import { Describe, Node, Package, Test } from 'wollok-ts'
 import { toVSCPosition } from './utils/text-documents'
+import { fqnRelativeToPackage } from './utils/wollok'
 
-export const getCodeLenses = (file: Package): CodeLens[] =>
-  [
-    buildTestCodeLens(
-      {
-        start: { line: 0, character: 0 },
-        end: { line: 0, character: 0 },
-      },
-      file.name,
-      'Run all tests'
-    ),
+export const getCodeLenses = (file: Package): CodeLens[] => {
+  const runAllTests = buildTestCodeLens(
+    {
+      start: { line: 0, character: 0 },
+      end: { line: 0, character: 0 },
+    },
+    file.name,
+    'Run all tests'
+  )
+
+  return [
+    runAllTests
+    ,
     ...file
       .filter(isTesteable)
       .map(n =>
         buildTestCodeLens(
           { start: toVSCPosition(n.sourceMap!.start), end: toVSCPosition(n.sourceMap!.end) },
-          // @ToDo Had to use workaround because package fqn is absolute in the lsp.
-          (n as Test | Describe).fullyQualifiedName().replace(file.fullyQualifiedName(), file.name),
+          fqnRelativeToPackage(file, n as Test | Describe),
           `Run ${n.is('Test') ? 'test' : 'describe'}`
         )
       ),
   ]
+}
 
 
 function buildTestCodeLens(range: {start: Position, end: Position}, filter: string, title: string): CodeLens{
