@@ -25,7 +25,8 @@
   ],
   "capabilities": {
     "referencesProvider": true,
-    "definitionProvider": true
+    "definitionProvider": true,
+    "documentFormattingProvider": true
   },
   "main": "./client/out/extension",
   "contributes": {

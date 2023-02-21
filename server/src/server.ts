@@ -1,6 +1,6 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
-import { codeLenses, completions, definition, resetEnvironment, validateTextDocument } from './linter'
+import { codeLenses, completions, definition, formatDocument, resetEnvironment, validateTextDocument } from './linter'
 import { WollokLinterSettings, initializeSettings } from './settings'
 import { templates } from './templates'
 
@@ -32,6 +32,7 @@ connection.onInitialize((params: InitializeParams) => {
       codeLensProvider : { resolveProvider: true },
       referencesProvider: true,
       definitionProvider: true,
+      documentFormattingProvider: true,
     },
   }
   if (hasWorkspaceFolderCapability) {
@@ -128,6 +129,8 @@ connection.onCompletionResolve(
 connection.onCodeLens(
   (params) => params.textDocument.uri.endsWith('wtest') ? codeLenses(params) : null
 )
+
+connection.onDocumentFormatting(formatDocument)
 /*
 connection.onDidOpenTextDocument((params) => {
   // A text document got opened in VSCode.

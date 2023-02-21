@@ -1,14 +1,15 @@
-import { CodeLens, CodeLensParams, CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
+import { CodeLens, CodeLensParams, CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, DocumentFormattingParams, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams, TextEdit } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { buildEnvironment, Environment, is, Node, Package, Problem, validate } from 'wollok-ts'
+import { buildEnvironment, Environment, is, Node, Package, Problem, SourceMap, validate } from 'wollok-ts'
+import { completionsForNode } from './autocomplete/node-completion'
+import { completeMessages } from './autocomplete/send-completion'
+import { getCodeLenses } from './code-lens'
+import { getNodeDefinition } from './definition'
+import { write } from './formatter'
 import { reportMessage } from './reporter'
 import { updateDocumentSettings } from './settings'
-import { getNodesByPosition, nodeToLocation } from './utils/text-documents'
-import { getNodeDefinition } from './definition'
 import { TimeMeasurer } from './timeMeasurer'
-import { completeMessages } from './autocomplete/send-completion'
-import { completionsForNode } from './autocomplete/node-completion'
-import { getCodeLenses } from './code-lens'
+import { getNodesByPosition, nodeToLocation, sourceMapToRange } from './utils/text-documents'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -129,4 +130,22 @@ export const codeLenses = (params: CodeLensParams): CodeLens[] => {
     .find(p => (p as Package).sourceFileName() === params.textDocument.uri) as Package | undefined
   if(!testsPackage) return []
   return getCodeLenses(testsPackage)
+}
+
+
+export const formatDocument = (params: DocumentFormattingParams): TextEdit[] => {
+  const file = environment
+    .descendants()
+    .find(n => n.is('Package') && n.sourceFileName() === params.textDocument.uri) as Package | undefined
+
+  if(!file){
+    throw Error('Missing file information')
+  }
+  return [
+    {
+      range: sourceMapToRange(new SourceMap({ start: file.children()[0].sourceMap!.start, end: file.children()[file.children().length-1].sourceMap!.end })),
+      newText: write(0)(file),
+    },
+  ]
+
 }
