@@ -1,6 +1,6 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
-import { completions, definition, resetEnvironment, validateTextDocument } from './linter'
+import { codeLenses, completions, definition, resetEnvironment, validateTextDocument } from './linter'
 import { WollokLinterSettings, initializeSettings } from './settings'
 import { templates } from './templates'
 
@@ -29,6 +29,7 @@ connection.onInitialize((params: InitializeParams) => {
         triggerCharacters: ['.'],
         completionItem: { labelDetailsSupport: true },
       },
+      codeLensProvider : { resolveProvider: true },
       referencesProvider: true,
       definitionProvider: true,
     },
@@ -124,6 +125,9 @@ connection.onCompletionResolve(
   }
 )
 
+connection.onCodeLens(
+  (params) => params.textDocument.uri.endsWith('wtest') ? codeLenses(params) : null
+)
 /*
 connection.onDidOpenTextDocument((params) => {
   // A text document got opened in VSCode.

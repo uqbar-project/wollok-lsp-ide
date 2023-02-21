@@ -1,4 +1,4 @@
-import { Class, Environment, LiteralValue } from 'wollok-ts'
+import { Class, Entity, Environment, LiteralValue, Package } from 'wollok-ts'
 
 export const literalValueToClass = (environment: Environment, literal: LiteralValue): Class => {
   switch (typeof literal){
@@ -12,3 +12,8 @@ export const literalValueToClass = (environment: Environment, literal: LiteralVa
       return environment.getNodeByFQN('wollok.lang.Object')
   }
 }
+
+// @ToDo Workaround because package fqn is absolute in the lsp.
+export const fqnRelativeToPackage =
+  (pckg: Package, node: Entity): string =>
+    node.fullyQualifiedName().replace(pckg.fullyQualifiedName(), pckg.name)

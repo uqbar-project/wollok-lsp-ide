@@ -1,6 +1,6 @@
-import { CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
+import { CodeLens, CodeLensParams, CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { buildEnvironment, Environment, Node, Problem, validate } from 'wollok-ts'
+import { buildEnvironment, Environment, is, Node, Package, Problem, validate } from 'wollok-ts'
 import { reportMessage } from './reporter'
 import { updateDocumentSettings } from './settings'
 import { getNodesByPosition, nodeToLocation } from './utils/text-documents'
@@ -8,6 +8,7 @@ import { getNodeDefinition } from './definition'
 import { TimeMeasurer } from './timeMeasurer'
 import { completeMessages } from './autocomplete/send-completion'
 import { completionsForNode } from './autocomplete/node-completion'
+import { getCodeLenses } from './code-lens'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -60,7 +61,7 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
     const timeMeasurer = new TimeMeasurer()
 
     const file: { name: string, content: string } = {
-      name: textDocument.uri,
+      name: uri,
       content: content,
     }
     environment = buildEnvironment([file], environment)
@@ -68,7 +69,7 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
     timeMeasurer.addTime('build environment for file')
 
     const diagnostics: Diagnostic[] = problems
-      .filter(problem => problem.node.sourceFileName() == textDocument.uri)
+      .filter(problem => problem.node.sourceFileName() == uri)
       .map(problem => createDiagnostic(textDocument, problem))
 
     connection.sendDiagnostics({ uri, diagnostics })
@@ -119,4 +120,13 @@ export const definition = (textDocumentPosition: TextDocumentPositionParams): Lo
   const cursorNodes = getNodesByPosition(environment, textDocumentPosition)
   const definitions = getNodeDefinition(environment)(cursorNodes.reverse()[0])
   return definitions.map(nodeToLocation)
+}
+
+
+export const codeLenses = (params: CodeLensParams): CodeLens[] => {
+  const testsPackage = environment
+    .filter(is('Package'))
+    .find(p => (p as Package).sourceFileName() === params.textDocument.uri) as Package | undefined
+  if(!testsPackage) return []
+  return getCodeLenses(testsPackage)
 }
