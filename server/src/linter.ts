@@ -8,7 +8,6 @@ import { getNodeDefinition } from './definition'
 import { TimeMeasurer } from './timeMeasurer'
 import { completeMessages } from './autocomplete/send-completion'
 import { completionsForNode } from './autocomplete/node-completion'
-import { env } from 'process'
 import { getCodeLenses } from './code-lens'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════

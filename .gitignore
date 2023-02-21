@@ -6,3 +6,4 @@ client/server
 .history
 .yalc
 yalc.lock
+.DS_Store
