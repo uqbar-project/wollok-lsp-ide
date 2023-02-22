@@ -18,7 +18,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [18.9.1]
+        cache: ['npm']
 
     steps:
     - uses: actions/checkout@v2
@@ -26,6 +27,7 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.node-version }}
+        cache: ${{ matrix.cache }}
     - run: npm install
     - run: npm run compile
     - name: Run headless test
