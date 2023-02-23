@@ -32,6 +32,7 @@ connection.onInitialize((params: InitializeParams) => {
       codeLensProvider : { resolveProvider: true },
       referencesProvider: true,
       definitionProvider: true,
+      documentSymbolProvider: true,
     },
   }
   if (hasWorkspaceFolderCapability) {
@@ -124,6 +125,11 @@ connection.onCompletionResolve(
     return item
   }
 )
+
+connection.onDocumentSymbol((params) => {
+  // @ToDo: Implement this
+  return []
+})
 
 connection.onCodeLens(
   (params) => params.textDocument.uri.endsWith('wtest') ? codeLenses(params) : null
