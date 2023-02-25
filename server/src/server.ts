@@ -45,6 +45,7 @@ connection.onInitialized(() => {
   }
 
   initializeSettings(connection)
+  resetEnvironment()
 })
 
 // Cache the settings of all open documents
@@ -52,7 +53,7 @@ const documentSettings: Map<string, Thenable<WollokLinterSettings>> = new Map()
 
 connection.onDidChangeConfiguration(() => {
   // Revalidate all open text documents
-  documents.all().forEach(validateTextDocument(connection))
+  documents.all().forEach(validateTextDocument(connection, documents.all()))
 })
 
 // function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
@@ -78,7 +79,11 @@ documents.onDidClose(e => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {
-  validateTextDocument(connection)(change.document)
+  validateTextDocument(connection, documents.all())(change.document)
+})
+
+documents.onDidOpen(change => {
+  validateTextDocument(connection, documents.all())(change.document)
 })
 
 connection.onRequest(change => {

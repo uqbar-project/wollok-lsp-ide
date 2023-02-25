@@ -1,12 +1,13 @@
 import { CompletionItem, CompletionItemKind, Connection, Diagnostic, DiagnosticSeverity, InsertTextFormat, Location, Position, TextDocumentPositionParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { buildEnvironment, Environment, Node, Problem, validate } from 'wollok-ts'
+import { buildEnvironment, Environment, Node, Package, Problem, validate } from 'wollok-ts'
 import { completionsForNode, NodeCompletion } from './autocomplete'
 import { reportMessage } from './reporter'
 import { updateDocumentSettings } from './settings'
 import { getNodesByPosition, nodeToLocation } from './utils/text-documents'
 import { getNodeDefinition } from './definition'
 import { TimeMeasurer } from './timeMeasurer'
+import { List } from 'wollok-ts/dist/extensions'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -58,38 +59,53 @@ export const resetEnvironment = (): void => {
   environment = buildEnvironment([])
 }
 
-export const validateTextDocument = (connection: Connection) => async (textDocument: TextDocument): Promise<void> => {
+const wollokURI = (uri: string) => uri.replace('file:///', '')
+
+const sendDiagnistics = (connection: Connection, problems: List<Problem>, documents: TextDocument[]) => {
+  for (const document of documents) {
+    const uri = wollokURI(document.uri)
+    const diagnostics: Diagnostic[] = problems
+      .filter(problem => problem.node.sourceFileName() == uri)
+      .map(problem => createDiagnostic(document, problem))
+    connection.sendDiagnostics({ uri, diagnostics })
+  }
+}
+
+const rebuildTextDocument = (document: TextDocument) => {
+  const uri = wollokURI(document.uri)
+  const content = document.getText()
+  const file: { name: string, content: string } = {
+    name: uri,
+    content: content,
+  }
+  environment = buildEnvironment([file], environment)
+}
+
+export const validateTextDocument = (connection: Connection, allDocuments: TextDocument[]) => async (textDocument: TextDocument): Promise<void> => {
   await updateDocumentSettings(connection)
 
-  const uri = textDocument.uri
-  const content = textDocument.getText()
   try {
     const timeMeasurer = new TimeMeasurer()
 
-    const file: { name: string, content: string } = {
-      name: textDocument.uri,
-      content: content,
-    }
-    environment = buildEnvironment([file], environment)
+    rebuildTextDocument(textDocument)
     const problems = validate(environment)
     timeMeasurer.addTime('build environment for file')
 
-    const diagnostics: Diagnostic[] = problems
-      .filter(problem => problem.node.sourceFileName() == textDocument.uri)
-      .map(problem => createDiagnostic(textDocument, problem))
-
-    connection.sendDiagnostics({ uri, diagnostics })
+    sendDiagnistics(connection, problems, allDocuments)
     timeMeasurer.addTime('validation time')
 
     timeMeasurer.finalReport()
   } catch (e) {
     // TODO: Generate a high-level function
+    const uri = wollokURI(textDocument.uri)
+    const content = textDocument.getText()
+  
     connection.sendDiagnostics({
-      uri: textDocument.uri, diagnostics: [
+      uri: uri, diagnostics: [
         createDiagnostic(textDocument, {
           level: 'error',
-          code: 'FileHasParsingProblems',
-          node: { sourceFileName: () => textDocument.uri },
+          code: 'FileCouldNotBeValidated',
+          node: { sourceFileName: () => uri },
           values: [],
           sourceMap: {
             start: {
