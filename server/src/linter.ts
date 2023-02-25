@@ -1,4 +1,4 @@
-import { CodeLens, CodeLensParams, CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
+import { CodeLens, CodeLensParams, CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, DocumentSymbol, DocumentSymbolParams, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { buildEnvironment, Environment, is, Node, Package, Problem, validate } from 'wollok-ts'
 import { reportMessage } from './reporter'
@@ -9,6 +9,7 @@ import { TimeMeasurer } from './timeMeasurer'
 import { completeMessages } from './autocomplete/send-completion'
 import { completionsForNode } from './autocomplete/node-completion'
 import { getCodeLenses } from './code-lens'
+import { symbolsFor } from './document-symbols'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -124,9 +125,19 @@ export const definition = (textDocumentPosition: TextDocumentPositionParams): Lo
 
 
 export const codeLenses = (params: CodeLensParams): CodeLens[] => {
-  const testsPackage = environment
-    .filter(is('Package'))
-    .find(p => (p as Package).sourceFileName() === params.textDocument.uri) as Package | undefined
+  const testsPackage = findPackage(params.textDocument.uri)
   if(!testsPackage) return []
   return getCodeLenses(testsPackage)
 }
+
+export const documentSymbols = (params: DocumentSymbolParams): DocumentSymbol[] => {
+  const document = findPackage(params.textDocument.uri)
+  if(!document) throw new Error('Could not produce symbols: document not found')
+  return symbolsFor(document)
+}
+
+
+const findPackage = (uri: string): Package | undefined =>
+  environment
+    .filter(is('Package'))
+    .find(p => (p as Package).sourceFileName() === uri) as Package | undefined
