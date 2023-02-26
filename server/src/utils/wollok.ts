@@ -1,7 +1,7 @@
-import { Class, Entity, Environment, LiteralValue, Package } from 'wollok-ts'
+import { Class, Entity, Environment, LiteralValue, Node, Package } from 'wollok-ts'
 
 export const literalValueToClass = (environment: Environment, literal: LiteralValue): Class => {
-  switch (typeof literal){
+  switch (typeof literal) {
     case 'number':
       return environment.getNodeByFQN('wollok.lang.Number')
     case 'string':
@@ -17,6 +17,10 @@ export const literalValueToClass = (environment: Environment, literal: LiteralVa
 export const fqnRelativeToPackage =
   (pckg: Package, node: Entity): string =>
     node.fullyQualifiedName().replace(pckg.fullyQualifiedName(), pckg.name)
+
+export const wollokURI = (uri: string): string => uri.replace('file:///', '')
+
+export const isNodeURI = (node: Node, uri: string): boolean => node.sourceFileName() == wollokURI(uri)
 
 export const workspacePackage = (environment: Environment): Package =>
   environment.members[1]

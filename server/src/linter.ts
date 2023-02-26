@@ -1,6 +1,7 @@
 import { CodeLens, CodeLensParams, CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, DocumentSymbol, DocumentSymbolParams, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams, WorkspaceSymbol, WorkspaceSymbolParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { buildEnvironment, Environment, is, Node, Package, Problem, validate } from 'wollok-ts'
+import { List } from 'wollok-ts/dist/extensions'
 import { completionsForNode } from './autocomplete/node-completion'
 import { completeMessages } from './autocomplete/send-completion'
 import { getProgramCodeLenses, getTestCodeLenses } from './code-lens'
@@ -10,6 +11,7 @@ import { updateDocumentSettings } from './settings'
 import { documentSymbolsFor, workspaceSymbolsFor } from './symbols'
 import { TimeMeasurer } from './timeMeasurer'
 import { getNodesByPosition, getWollokFileExtension, nodeToLocation } from './utils/text-documents'
+import { isNodeURI, wollokURI } from './utils/wollok'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -53,38 +55,52 @@ export const resetEnvironment = (): void => {
   environment = buildEnvironment([])
 }
 
-export const validateTextDocument = (connection: Connection) => async (textDocument: TextDocument): Promise<void> => {
+const sendDiagnistics = (connection: Connection, problems: List<Problem>, documents: TextDocument[]): void => {
+  for (const document of documents) {
+    const diagnostics: Diagnostic[] = problems
+      .filter(problem => isNodeURI(problem.node, document.uri))
+      .map(problem => createDiagnostic(document, problem))
+
+    const uri = wollokURI(document.uri)
+    connection.sendDiagnostics({ uri, diagnostics })
+  }
+}
+
+const rebuildTextDocument = (document: TextDocument) => {
+  const uri = wollokURI(document.uri)
+  const content = document.getText()
+  const file: { name: string, content: string } = {
+    name: uri,
+    content: content,
+  }
+  environment = buildEnvironment([file], environment)
+}
+
+export const validateTextDocument = (connection: Connection, allDocuments: TextDocument[]) => async (textDocument: TextDocument): Promise<void> => {
   await updateDocumentSettings(connection)
 
-  const uri = textDocument.uri
-  const content = textDocument.getText()
   try {
     const timeMeasurer = new TimeMeasurer()
 
-    const file: { name: string, content: string } = {
-      name: uri,
-      content: content,
-    }
-    environment = buildEnvironment([file], environment)
+    rebuildTextDocument(textDocument)
     const problems = validate(environment)
     timeMeasurer.addTime('build environment for file')
 
-    const diagnostics: Diagnostic[] = problems
-      .filter(problem => problem.node.sourceFileName() == uri)
-      .map(problem => createDiagnostic(textDocument, problem))
-
-    connection.sendDiagnostics({ uri, diagnostics })
+    sendDiagnistics(connection, problems, allDocuments)
     timeMeasurer.addTime('validation time')
 
     timeMeasurer.finalReport()
   } catch (e) {
     // TODO: Generate a high-level function
+    const uri = wollokURI(textDocument.uri)
+    const content = textDocument.getText()
+
     connection.sendDiagnostics({
-      uri: textDocument.uri, diagnostics: [
+      uri: uri, diagnostics: [
         createDiagnostic(textDocument, {
           level: 'error',
-          code: 'FileHasParsingProblems',
-          node: { sourceFileName: () => textDocument.uri },
+          code: 'FileCouldNotBeValidated',
+          node: { sourceFileName: () => uri },
           values: [],
           sourceMap: {
             start: {
@@ -103,7 +119,7 @@ export const validateTextDocument = (connection: Connection) => async (textDocum
 
 export const completions = (position: Position, textDocument: TextDocumentIdentifier, context?: CompletionContext): CompletionItem[] => {
 
-  if(context?.triggerCharacter === '.') {
+  if (context?.triggerCharacter === '.') {
     // ignore dot
     position.character -= 1
     return completeMessages(environment, stableNode(position, textDocument))
@@ -127,9 +143,9 @@ export const definition = (textDocumentPosition: TextDocumentPositionParams): Lo
 export const codeLenses = (params: CodeLensParams): CodeLens[] | null => {
   const fileExtension = getWollokFileExtension(params.textDocument.uri)
   const file = findPackage(params.textDocument.uri)
-  if(!file) return null
+  if (!file) return null
 
-  switch(fileExtension) {
+  switch (fileExtension) {
     case 'wpgm':
       return getProgramCodeLenses(file)
     case 'wtest':
@@ -141,7 +157,7 @@ export const codeLenses = (params: CodeLensParams): CodeLens[] | null => {
 
 export const documentSymbols = (params: DocumentSymbolParams): DocumentSymbol[] => {
   const document = findPackage(params.textDocument.uri)
-  if(!document) throw new Error('Could not produce symbols: document not found')
+  if (!document) throw new Error('Could not produce symbols: document not found')
   return documentSymbolsFor(document)
 }
 
@@ -151,4 +167,4 @@ export const workspaceSymbols = (params: WorkspaceSymbolParams): WorkspaceSymbol
 const findPackage = (uri: string): Package | undefined =>
   environment
     .filter(is('Package'))
-    .find(p => (p as Package).sourceFileName() === uri) as Package | undefined
+    .find(p => isNodeURI(p, uri)) as Package | undefined
