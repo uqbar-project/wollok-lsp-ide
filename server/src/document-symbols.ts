@@ -2,11 +2,8 @@ import { DocumentSymbol, Range, SymbolKind } from 'vscode-languageserver'
 import { Entity, Field, Method, Node, Package, Test } from 'wollok-ts'
 import { toVSCRange } from './utils/text-documents'
 
-export const symbolsFor = (document: Package): DocumentSymbol[] => {
-  const arr = Array.from({ length: 26 }, (_, index) => index + 1)
-
-  return document.members.map(documentSymbol).concat(arr.map(i => DocumentSymbol.create('test ' + i, undefined, i as SymbolKind, Range.create(0, 0, 0, 0), Range.create(0, 0, 0, 0), undefined)))
-}
+export const symbolsFor = (document: Package): DocumentSymbol[] =>
+  document.members.map(documentSymbol)
 
 const documentSymbol = (node: Entity | Field | Method | Test): DocumentSymbol => {
   const range = toVSCRange(node.sourceMap!)
