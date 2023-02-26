@@ -1,4 +1,4 @@
-import { CodeLens, CodeLensParams, CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
+import { CodeLens, CodeLensParams, CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, DocumentSymbol, DocumentSymbolParams, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams, WorkspaceSymbol, WorkspaceSymbolParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { buildEnvironment, Environment, is, Node, Package, Problem, validate } from 'wollok-ts'
 import { List } from 'wollok-ts/dist/extensions'
@@ -8,6 +8,7 @@ import { getCodeLenses } from './code-lens'
 import { getNodeDefinition } from './definition'
 import { reportMessage } from './reporter'
 import { updateDocumentSettings } from './settings'
+import { documentSymbolsFor, workspaceSymbolsFor } from './symbols'
 import { TimeMeasurer } from './timeMeasurer'
 import { getNodesByPosition, nodeToLocation } from './utils/text-documents'
 import { isNodeURI, wollokURI } from './utils/wollok'
@@ -54,7 +55,7 @@ export const resetEnvironment = (): void => {
   environment = buildEnvironment([])
 }
 
-const sendDiagnistics = (connection: Connection, problems: List<Problem>, documents: TextDocument[]) => {
+const sendDiagnistics = (connection: Connection, problems: List<Problem>, documents: TextDocument[]): void => {
   for (const document of documents) {
     const diagnostics: Diagnostic[] = problems
       .filter(problem => isNodeURI(problem.node, document.uri))
@@ -140,9 +141,21 @@ export const definition = (textDocumentPosition: TextDocumentPositionParams): Lo
 
 
 export const codeLenses = (params: CodeLensParams): CodeLens[] => {
-  const testsPackage = environment
-    .filter(is('Package'))
-    .find(p => isNodeURI(p, params.textDocument.uri)) as Package | undefined
-  if (!testsPackage) return []
+  const testsPackage = findPackage(params.textDocument.uri)
+  if(!testsPackage) return []
   return getCodeLenses(testsPackage)
 }
+
+export const documentSymbols = (params: DocumentSymbolParams): DocumentSymbol[] => {
+  const document = findPackage(params.textDocument.uri)
+  if (!document) throw new Error('Could not produce symbols: document not found')
+  return documentSymbolsFor(document)
+}
+
+export const workspaceSymbols = (params: WorkspaceSymbolParams): WorkspaceSymbol[] =>
+  workspaceSymbolsFor(environment, params.query)
+
+const findPackage = (uri: string): Package | undefined =>
+  environment
+    .filter(is('Package'))
+    .find(p => isNodeURI(p, uri)) as Package | undefined
