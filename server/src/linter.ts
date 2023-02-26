@@ -10,6 +10,7 @@ import { reportMessage } from './reporter'
 import { updateDocumentSettings } from './settings'
 import { TimeMeasurer } from './timeMeasurer'
 import { getNodesByPosition, nodeToLocation } from './utils/text-documents'
+import { isNodeURI, wollokURI } from './utils/wollok'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -53,14 +54,13 @@ export const resetEnvironment = (): void => {
   environment = buildEnvironment([])
 }
 
-const wollokURI = (uri: string) => uri.replace('file:///', '')
-
 const sendDiagnistics = (connection: Connection, problems: List<Problem>, documents: TextDocument[]) => {
   for (const document of documents) {
-    const uri = wollokURI(document.uri)
     const diagnostics: Diagnostic[] = problems
-      .filter(problem => problem.node.sourceFileName() == uri)
+      .filter(problem => isNodeURI(problem.node, document.uri))
       .map(problem => createDiagnostic(document, problem))
+
+    const uri = wollokURI(document.uri)
     connection.sendDiagnostics({ uri, diagnostics })
   }
 }
@@ -142,7 +142,7 @@ export const definition = (textDocumentPosition: TextDocumentPositionParams): Lo
 export const codeLenses = (params: CodeLensParams): CodeLens[] => {
   const testsPackage = environment
     .filter(is('Package'))
-    .find(p => (p as Package).sourceFileName() === params.textDocument.uri) as Package | undefined
+    .find(p => isNodeURI(p, params.textDocument.uri)) as Package | undefined
   if (!testsPackage) return []
   return getCodeLenses(testsPackage)
 }
