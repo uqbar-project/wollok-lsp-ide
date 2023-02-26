@@ -23,7 +23,7 @@ const documentSymbol = (node: Symbolyzable): DocumentSymbol => {
     symbolKind(node),
     range,
     range,
-    node.is('Module') ? node.members.map(documentSymbol) : undefined
+    node.is('Module') ? node.members.filter(m => m.sourceMap).map(documentSymbol) : undefined
   )
 }
 

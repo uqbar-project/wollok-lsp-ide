@@ -60,3 +60,18 @@ export const nodeToLocation = (node: Node): Location => {
     range: toVSCRange(node.sourceMap),
   }
 }
+
+
+export const getWollokFileExtension = (uri: string): 'wlk' | 'wpgm' | 'wtest' => {
+  const extension = uri.split('.').pop()
+  if(!extension) throw new Error('Could not determine file extension')
+
+  switch(extension) {
+    case 'wlk':
+    case 'wpgm':
+    case 'wtest':
+      return extension
+    default:
+      throw new Error('Invalid file extension')
+  }
+}

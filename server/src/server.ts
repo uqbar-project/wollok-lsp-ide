@@ -131,9 +131,7 @@ connection.onDocumentSymbol(documentSymbols)
 
 connection.onWorkspaceSymbol(workspaceSymbols)
 
-connection.onCodeLens(
-  (params) => params.textDocument.uri.endsWith('wtest') ? codeLenses(params) : null
-)
+connection.onCodeLens(codeLenses)
 /*
 connection.onDidOpenTextDocument((params) => {
   // A text document got opened in VSCode.
