@@ -1,0 +1,5 @@
+describe "pepita test" {
+    test "pepita is happy" {
+        assert.that(true)
+    }
+}

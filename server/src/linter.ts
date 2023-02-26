@@ -1,13 +1,15 @@
-import { CompletionItem, CompletionItemKind, Connection, Diagnostic, DiagnosticSeverity, InsertTextFormat, Location, Position, TextDocumentPositionParams } from 'vscode-languageserver'
+import { CodeLens, CodeLensParams, CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { buildEnvironment, Environment, Node, Package, Problem, validate } from 'wollok-ts'
-import { completionsForNode, NodeCompletion } from './autocomplete'
+import { buildEnvironment, Environment, is, Node, Package, Problem, validate } from 'wollok-ts'
+import { List } from 'wollok-ts/dist/extensions'
+import { completionsForNode } from './autocomplete/node-completion'
+import { completeMessages } from './autocomplete/send-completion'
+import { getCodeLenses } from './code-lens'
+import { getNodeDefinition } from './definition'
 import { reportMessage } from './reporter'
 import { updateDocumentSettings } from './settings'
-import { getNodesByPosition, nodeToLocation } from './utils/text-documents'
-import { getNodeDefinition } from './definition'
 import { TimeMeasurer } from './timeMeasurer'
-import { List } from 'wollok-ts/dist/extensions'
+import { getNodesByPosition, nodeToLocation } from './utils/text-documents'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -30,14 +32,6 @@ const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
     source: problem.node.sourceFileName(),
   } as Diagnostic
 }
-
-const createCompletionItem = (_position: Position) => (base: NodeCompletion): CompletionItem => ({
-  kind: CompletionItemKind.Method,
-  sortText: 'b',
-  insertTextFormat: InsertTextFormat.Snippet,
-  insertText: base.textEdit.newText,
-  label: base.label,
-})
 
 function findFirstStableNode(node: Node): Node {
   if (!node.problems || node.problems.length === 0) {
@@ -99,7 +93,7 @@ export const validateTextDocument = (connection: Connection, allDocuments: TextD
     // TODO: Generate a high-level function
     const uri = wollokURI(textDocument.uri)
     const content = textDocument.getText()
-  
+
     connection.sendDiagnostics({
       uri: uri, diagnostics: [
         createDiagnostic(textDocument, {
@@ -122,15 +116,33 @@ export const validateTextDocument = (connection: Connection, allDocuments: TextD
   }
 }
 
-export const completions = (textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-  const { position } = textDocumentPosition
-  const cursorNode = getNodesByPosition(environment, textDocumentPosition).reverse()[0]
-  const stableNode = findFirstStableNode(cursorNode)
-  return completionsForNode(stableNode).map(createCompletionItem(position))
+export const completions = (position: Position, textDocument: TextDocumentIdentifier, context?: CompletionContext): CompletionItem[] => {
+
+  if (context?.triggerCharacter === '.') {
+    // ignore dot
+    position.character -= 1
+    return completeMessages(environment, stableNode(position, textDocument))
+  } else {
+    return completionsForNode(stableNode(position, textDocument))
+  }
+}
+
+function stableNode(position: Position, textDocument: TextDocumentIdentifier): Node {
+  const cursorNode = getNodesByPosition(environment, { position, textDocument }).reverse()[0]
+  return findFirstStableNode(cursorNode)
 }
 
 export const definition = (textDocumentPosition: TextDocumentPositionParams): Location[] => {
   const cursorNodes = getNodesByPosition(environment, textDocumentPosition)
   const definitions = getNodeDefinition(environment)(cursorNodes.reverse()[0])
   return definitions.map(nodeToLocation)
+}
+
+
+export const codeLenses = (params: CodeLensParams): CodeLens[] => {
+  const testsPackage = environment
+    .filter(is('Package'))
+    .find(p => (p as Package).sourceFileName() === params.textDocument.uri) as Package | undefined
+  if (!testsPackage) return []
+  return getCodeLenses(testsPackage)
 }
