@@ -17,3 +17,6 @@ export const literalValueToClass = (environment: Environment, literal: LiteralVa
 export const fqnRelativeToPackage =
   (pckg: Package, node: Entity): string =>
     node.fullyQualifiedName().replace(pckg.fullyQualifiedName(), pckg.name)
+
+export const workspacePackage = (environment: Environment): Package =>
+  environment.members[1]

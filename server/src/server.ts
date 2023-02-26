@@ -1,7 +1,7 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
-import { codeLenses, completions, definition, resetEnvironment, validateTextDocument } from './linter'
-import { WollokLinterSettings, initializeSettings } from './settings'
+import { codeLenses, completions, definition, documentSymbols, resetEnvironment, validateTextDocument, workspaceSymbols } from './linter'
+import { initializeSettings, WollokLinterSettings } from './settings'
 import { templates } from './templates'
 
 // Create a connection for the server, using Node's IPC as a transport.
@@ -32,6 +32,8 @@ connection.onInitialize((params: InitializeParams) => {
       codeLensProvider : { resolveProvider: true },
       referencesProvider: true,
       definitionProvider: true,
+      documentSymbolProvider: true,
+      workspaceSymbolProvider: true,
     },
   }
   if (hasWorkspaceFolderCapability) {
@@ -124,6 +126,10 @@ connection.onCompletionResolve(
     return item
   }
 )
+
+connection.onDocumentSymbol(documentSymbols)
+
+connection.onWorkspaceSymbol(workspaceSymbols)
 
 connection.onCodeLens(
   (params) => params.textDocument.uri.endsWith('wtest') ? codeLenses(params) : null

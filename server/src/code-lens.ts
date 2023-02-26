@@ -1,6 +1,6 @@
 import { CodeLens, Position } from 'vscode-languageserver'
 import { Describe, Node, Package, Test } from 'wollok-ts'
-import { toVSCPosition } from './utils/text-documents'
+import { toVSCRange } from './utils/text-documents'
 import { fqnRelativeToPackage } from './utils/wollok'
 
 export const getCodeLenses = (file: Package): CodeLens[] => {
@@ -20,7 +20,7 @@ export const getCodeLenses = (file: Package): CodeLens[] => {
       .filter(isTesteable)
       .map(n =>
         buildTestCodeLens(
-          { start: toVSCPosition(n.sourceMap!.start), end: toVSCPosition(n.sourceMap!.end) },
+          toVSCRange(n.sourceMap!),
           fqnRelativeToPackage(file, n as Test | Describe),
           `Run ${n.is('Test') ? 'test' : 'describe'}`
         )
