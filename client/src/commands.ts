@@ -6,11 +6,14 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
   context.subscriptions.push(registerCLICommand('wollok.start.repl', startRepl))
   context.subscriptions.push(registerCLICommand('wollok.run.allTests', runAllTests))
   context.subscriptions.push(registerCLICommand('wollok.run.tests', runTests))
+  context.subscriptions.push(registerCLICommand('wollok.run.program', runProgram))
 }
 
 /**
  * CLI Commands
  */
+
+const runProgram = (fqn: string) => wollokCLITask('run program', 'Wollok run program', ['run', `'${fqn}'`, '--skipValidations'])
 
 const runTests = (filter: string) => wollokCLITask('run tests', 'Wollok run tests', ['test', `'${filter}'`])
 
@@ -32,7 +35,7 @@ const registerCLICommand = (command: string, taskBuilder: (...args: any[]) => Ta
 const wollokCLITask = (task: string, name: string, cliCommands: string[]) => {
   const wollokCli = workspace.getConfiguration('wollokLinter').get('cli-path')
   const folder = workspace.workspaceFolders[0]
-  const shellCommand = [wollokCli, ...cliCommands].join(' ')
+  const shellCommand = [wollokCli, ...cliCommands, '-p', folder.uri.fsPath].join(' ')
 
   return new Task(
     { type: 'wollok', task },

@@ -1,14 +1,23 @@
-import { CodeLens, Position } from 'vscode-languageserver'
-import { Describe, Node, Package, Test } from 'wollok-ts'
+import { CodeLens, Position, Range } from 'vscode-languageserver'
+import { Describe, is, Node, Package, Test } from 'wollok-ts'
 import { toVSCRange } from './utils/text-documents'
 import { fqnRelativeToPackage } from './utils/wollok'
 
-export const getCodeLenses = (file: Package): CodeLens[] => {
-  const runAllTests = buildTestCodeLens(
-    {
-      start: { line: 0, character: 0 },
-      end: { line: 0, character: 0 },
+
+export const getProgramCodeLenses = (file: Package): CodeLens[] =>
+  file.members.filter(is('Program')).map(program => ({
+    range: toVSCRange(program.sourceMap!),
+    command: {
+      command: 'wollok.run.program',
+      title: 'Run program',
+      arguments: [fqnRelativeToPackage(file, program)],
     },
+  }))
+
+
+export const getTestCodeLenses = (file: Package): CodeLens[] => {
+  const runAllTests = buildTestCodeLens(
+    Range.create(Position.create(0, 0), Position.create(0, 0)),
     file.name,
     'Run all tests'
   )
@@ -28,8 +37,7 @@ export const getCodeLenses = (file: Package): CodeLens[] => {
   ]
 }
 
-
-function buildTestCodeLens(range: {start: Position, end: Position}, filter: string, title: string): CodeLens{
+function buildTestCodeLens(range: Range, filter: string, title: string): CodeLens{
   return {
     range,
     command: {
