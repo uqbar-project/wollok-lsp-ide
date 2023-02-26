@@ -26,7 +26,8 @@
   "capabilities": {
     "referencesProvider": true,
     "definitionProvider": true,
-    "documentSymbolProvider": true
+    "documentSymbolProvider": true,
+    "workspaceSymbolProvider": true
   },
   "main": "./client/out/extension",
   "contributes": {

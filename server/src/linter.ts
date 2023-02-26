@@ -1,15 +1,15 @@
-import { CodeLens, CodeLensParams, CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, DocumentSymbol, DocumentSymbolParams, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
+import { CodeLens, CodeLensParams, CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, DocumentSymbol, DocumentSymbolParams, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams, WorkspaceSymbol, WorkspaceSymbolParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { buildEnvironment, Environment, is, Node, Package, Problem, validate } from 'wollok-ts'
+import { completionsForNode } from './autocomplete/node-completion'
+import { completeMessages } from './autocomplete/send-completion'
+import { getCodeLenses } from './code-lens'
+import { getNodeDefinition } from './definition'
 import { reportMessage } from './reporter'
 import { updateDocumentSettings } from './settings'
-import { getNodesByPosition, nodeToLocation } from './utils/text-documents'
-import { getNodeDefinition } from './definition'
+import { documentSymbolsFor, workspaceSymbolsFor } from './symbols'
 import { TimeMeasurer } from './timeMeasurer'
-import { completeMessages } from './autocomplete/send-completion'
-import { completionsForNode } from './autocomplete/node-completion'
-import { getCodeLenses } from './code-lens'
-import { symbolsFor } from './document-symbols'
+import { getNodesByPosition, nodeToLocation } from './utils/text-documents'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -133,9 +133,11 @@ export const codeLenses = (params: CodeLensParams): CodeLens[] => {
 export const documentSymbols = (params: DocumentSymbolParams): DocumentSymbol[] => {
   const document = findPackage(params.textDocument.uri)
   if(!document) throw new Error('Could not produce symbols: document not found')
-  return symbolsFor(document)
+  return documentSymbolsFor(document)
 }
 
+export const workspaceSymbols = (params: WorkspaceSymbolParams): WorkspaceSymbol[] =>
+  workspaceSymbolsFor(environment, params.query)
 
 const findPackage = (uri: string): Package | undefined =>
   environment

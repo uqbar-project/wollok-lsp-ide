@@ -1,6 +1,6 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
-import { codeLenses, completions, definition, documentSymbols, resetEnvironment, validateTextDocument } from './linter'
+import { codeLenses, completions, definition, documentSymbols, resetEnvironment, validateTextDocument, workspaceSymbols } from './linter'
 import { initializeSettings, WollokLinterSettings } from './settings'
 import { templates } from './templates'
 
@@ -33,6 +33,7 @@ connection.onInitialize((params: InitializeParams) => {
       referencesProvider: true,
       definitionProvider: true,
       documentSymbolProvider: true,
+      workspaceSymbolProvider: true,
     },
   }
   if (hasWorkspaceFolderCapability) {
@@ -126,8 +127,11 @@ connection.onCompletionResolve(
   }
 )
 
-connection.onDocumentSymbol((params) => {
-  return documentSymbols(params)
+connection.onDocumentSymbol(documentSymbols)
+
+connection.onWorkspaceSymbol(params => {
+  const symbols = workspaceSymbols(params)
+  return symbols
 })
 
 connection.onCodeLens(
