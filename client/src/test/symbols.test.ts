@@ -30,12 +30,11 @@ async function testWorkspaceSymbols(
 ) {
   await activate(docUri)
 
-  // Executing the command `executeDocumentSymbolProvider` to simulate triggering documnet symbols search
-  const actualSymbolsList: WorkspaceSymbol[]=
-    await commands.executeCommand(
-      'vscode.executeWorkspaceSymbolProvider',
-      query
-    )
+  // Executing the command `executeWorkspaceSymbolProvider` to simulate triggering workspace symbols search
+  const actualSymbolsList: WorkspaceSymbol[] = await commands.executeCommand(
+    'vscode.executeWorkspaceSymbolProvider',
+    query
+  )
 
   symbolsEqual(expectedSymbolList, actualSymbolsList)
 }
@@ -46,12 +45,11 @@ async function testDocumentSymbols(
 ) {
   await activate(docUri)
 
-  // Executing the command `executeDocumentSymbolProvider` to simulate triggering documnet symbols search
-  const actualSymbolsList: DocumentSymbol[] | WorkspaceSymbol[]=
-    await commands.executeCommand(
-      'vscode.executeDocumentSymbolProvider',
-      docUri
-    )
+  // Executing the command `executeDocumentSymbolProvider` to simulate triggering document symbols search
+  const actualSymbolsList: DocumentSymbol[] = await commands.executeCommand(
+    'vscode.executeDocumentSymbolProvider',
+    docUri
+  )
 
   symbolsEqual(expectedSymbolList, actualSymbolsList)
 }

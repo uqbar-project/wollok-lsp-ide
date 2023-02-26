@@ -129,10 +129,7 @@ connection.onCompletionResolve(
 
 connection.onDocumentSymbol(documentSymbols)
 
-connection.onWorkspaceSymbol(params => {
-  const symbols = workspaceSymbols(params)
-  return symbols
-})
+connection.onWorkspaceSymbol(workspaceSymbols)
 
 connection.onCodeLens(
   (params) => params.textDocument.uri.endsWith('wtest') ? codeLenses(params) : null
