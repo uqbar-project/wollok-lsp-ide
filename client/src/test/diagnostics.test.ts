@@ -2,14 +2,30 @@ import * as assert from 'assert'
 import { DiagnosticSeverity, languages, Uri } from 'vscode'
 import { getDocumentURI, activate } from './helper'
 
+/** ATTENTION
+ * These tests are NOT ATOMIC, they depend on each other, order matters. (Resolve TODO)
+ * */
 suite('Should get diagnostics', () => {
-  const docUri = getDocumentURI('pepita.wlk')
+  const importerURI = getDocumentURI('importer.wlk')
+  const pepitaURI = getDocumentURI('pepita.wlk')
+
+  //TODO: Restart server status after each test
+
+  test('on file with missing imports', async () => {
+    await testDiagnostics(importerURI, [
+      { code: 'missingReference', severity: DiagnosticSeverity.Error },
+    ])
+  })
 
   test('Diagnoses lower / uppercase names for objects', async () => {
-    await testDiagnostics(docUri, [
+    await testDiagnostics(pepitaURI, [
       { code: 'nameShouldBeginWithLowercase', severity: DiagnosticSeverity.Warning },
       { code: 'nameShouldBeginWithUppercase', severity: DiagnosticSeverity.Warning },
     ])
+  })
+
+  test('after missing imports are solved', async () => {
+    await testDiagnostics(importerURI, [])
   })
 })
 
