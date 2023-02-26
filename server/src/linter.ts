@@ -4,13 +4,13 @@ import { buildEnvironment, Environment, is, Node, Package, Problem, validate } f
 import { List } from 'wollok-ts/dist/extensions'
 import { completionsForNode } from './autocomplete/node-completion'
 import { completeMessages } from './autocomplete/send-completion'
-import { getCodeLenses } from './code-lens'
+import { getProgramCodeLenses, getTestCodeLenses } from './code-lens'
 import { getNodeDefinition } from './definition'
 import { reportMessage } from './reporter'
 import { updateDocumentSettings } from './settings'
 import { documentSymbolsFor, workspaceSymbolsFor } from './symbols'
 import { TimeMeasurer } from './timeMeasurer'
-import { getNodesByPosition, nodeToLocation } from './utils/text-documents'
+import { getNodesByPosition, getWollokFileExtension, nodeToLocation } from './utils/text-documents'
 import { isNodeURI, wollokURI } from './utils/wollok'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -140,10 +140,19 @@ export const definition = (textDocumentPosition: TextDocumentPositionParams): Lo
 }
 
 
-export const codeLenses = (params: CodeLensParams): CodeLens[] => {
-  const testsPackage = findPackage(params.textDocument.uri)
-  if(!testsPackage) return []
-  return getCodeLenses(testsPackage)
+export const codeLenses = (params: CodeLensParams): CodeLens[] | null => {
+  const fileExtension = getWollokFileExtension(params.textDocument.uri)
+  const file = findPackage(params.textDocument.uri)
+  if (!file) return null
+
+  switch (fileExtension) {
+    case 'wpgm':
+      return getProgramCodeLenses(file)
+    case 'wtest':
+      return getTestCodeLenses(file)
+    default:
+      return null
+  }
 }
 
 export const documentSymbols = (params: DocumentSymbolParams): DocumentSymbol[] => {
