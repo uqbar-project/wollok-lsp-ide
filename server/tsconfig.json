@@ -2,15 +2,15 @@
   "compilerOptions": {
     "target": "es2017",
     "module": "commonjs",
-    "outDir": "dist/temp",
-    "lib": ["esNext"],
-    "declaration": true,
-    "strict": true,
-    "removeComments": true,
     "moduleResolution": "node",
+    "sourceMap": true,
     "resolveJsonModule": true,
+    "strict": true,
+    "outDir": "out",
+    "lib": ["esNext"],
+    "rootDir": "src",
     "esModuleInterop": true,
-    "experimentalDecorators": true
+    "skipLibCheck": true
   },
   "include": ["src"],
   "exclude": ["node_modules", ".vscode-test", "out"]

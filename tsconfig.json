@@ -5,24 +5,18 @@
     "outDir": "out",
     "rootDir": "src",
     "sourceMap": true,
-    "lib": [
-      "esNext"
-    ],
+    "lib": ["esNext"],
     "declaration": true,
     "strict": true,
     "removeComments": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "skipLibCheck": true
   },
-  "include": [
-		"src"
-	],
-  "exclude": [
-    "node_modules",
-    ".vscode-test"
-  ],
+  "include": ["src"],
+  "exclude": ["node_modules", ".vscode-test"],
   "references": [
     {
       "path": "./client"

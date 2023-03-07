@@ -11,7 +11,7 @@ import { updateDocumentSettings } from './settings'
 import { documentSymbolsFor, workspaceSymbolsFor } from './symbols'
 import { TimeMeasurer } from './timeMeasurer'
 import { getNodesByPosition, getWollokFileExtension, nodeToLocation } from './utils/text-documents'
-import { isNodeURI, wollokURI } from './utils/wollok'
+import { isNodeURI, wollokURI, workspacePackage } from './utils/wollok'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -156,6 +156,10 @@ export const codeLenses = (params: CodeLensParams): CodeLens[] | null => {
 }
 
 export const documentSymbols = (params: DocumentSymbolParams): DocumentSymbol[] => {
+  // ToDo this is a temporal fix for https://github.com/uqbar-project/wollok-lsp-ide/issues/61
+  if(!workspacePackage(environment)){
+    return []
+  }
   const document = findPackage(params.textDocument.uri)
   if (!document) throw new Error('Could not produce symbols: document not found')
   return documentSymbolsFor(document)
