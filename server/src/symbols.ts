@@ -1,6 +1,5 @@
 import { DocumentSymbol, SymbolKind, WorkspaceSymbol } from 'vscode-languageserver'
 import { Environment, Field, Method, Module, Node, Package, Program, Test, Variable } from 'wollok-ts'
-import { is } from 'wollok-ts/dist/extensions'
 import { toVSCRange } from './utils/text-documents'
 import { workspacePackage } from './utils/wollok'
 
