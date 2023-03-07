@@ -20,7 +20,7 @@ export const methodCompletionItem: CompletionItemMapper<Method> = (method) => {
     insertTextFormat: InsertTextFormat.Snippet,
     insertText: `${method.name}(${params})`,
     kind: CompletionItemKind.Method,
-    detail: `${method.parent.name} \n\n\n File ${method.parent.sourceFileName()?.split('/').pop()}`,
+    detail: `${method.parent.name} \n\n\n File ${method.parent.sourceFileName?.split('/').pop()}`,
     labelDetails: { description: method.parent.name, detail: `(${method.parameters.map(p => p.name).join(', ')})` },
   }
 }

@@ -2,23 +2,16 @@
   "compilerOptions": {
     "target": "es2017",
     "module": "commonjs",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "resolveJsonModule": true,
+    "outDir": "dist/temp",
+    "lib": ["esNext"],
+    "declaration": true,
     "strict": true,
-    "outDir": "out",
-    "lib": [
-      "esNext"
-    ],
-    "rootDir": "src",
-    "esModuleInterop": true
+    "removeComments": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules",
-    ".vscode-test",
-    "out"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules", ".vscode-test", "out"]
 }

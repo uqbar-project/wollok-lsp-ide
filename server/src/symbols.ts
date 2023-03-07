@@ -1,5 +1,6 @@
 import { DocumentSymbol, SymbolKind, WorkspaceSymbol } from 'vscode-languageserver'
 import { Environment, Field, Method, Module, Node, Package, Program, Test, Variable } from 'wollok-ts'
+import { is } from 'wollok-ts/dist/extensions'
 import { toVSCRange } from './utils/text-documents'
 import { workspacePackage } from './utils/wollok'
 
@@ -9,8 +10,8 @@ export const documentSymbolsFor = (document: Package): DocumentSymbol[] =>
   (document.members.filter(isSymbolyzable) as Symbolyzable[]).map(documentSymbol)
 
 export const workspaceSymbolsFor = (environment: Environment, query: string): WorkspaceSymbol[] =>
-  (workspacePackage(environment).filter(isSymbolyzable) as Array<Symbolyzable>)
-    .filter(node => node.sourceFileName() && node.sourceMap)
+  workspacePackage(environment).descendants.filter(isSymbolyzable)
+    .filter(node => node.sourceFileName && node.sourceMap)
     .filter(node => node.name?.toLowerCase().includes(query.toLowerCase()))
     .map(workspaceSymbol)
 
@@ -23,18 +24,20 @@ const documentSymbol = (node: Symbolyzable): DocumentSymbol => {
     symbolKind(node),
     range,
     range,
-    node.is('Module') ? node.members?.filter(m => m.sourceMap).map(documentSymbol) : undefined
+    'members' in node ? node.members.filter(m => m.sourceMap).map(documentSymbol) : undefined
   )
 }
 
 const workspaceSymbol = (node: Symbolyzable): WorkspaceSymbol => WorkspaceSymbol.create(
   node.name!,
   symbolKind(node),
-  node.sourceFileName()!,
+  node.sourceFileName!,
   toVSCRange(node.sourceMap!)
 )
 
-const isSymbolyzable = (node: Node): node is Symbolyzable => node.is('Program') || node.is('Test') || node.is('Module') || node.is('Variable') || node.is('Field') || node.is('Method') || node.is('Test')
+const isSymbolyzable = (node: Node): node is Symbolyzable =>
+  [Program, Test, Module, Variable, Field, Method, Test].some(t => is(t)(node))
+
 
 const symbolKind = (node: Node): SymbolKind => {
   switch (node.kind) {
