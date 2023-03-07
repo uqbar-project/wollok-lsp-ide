@@ -10,10 +10,10 @@ export function completeMessages(environment: Environment, node: Node): Completi
 
 
 function methodPool(environment: Environment, node: Node): List<Method> {
-  if(is(Reference)(node) && is(Singleton)(node.target)) {
+  if(node.is(Reference) && node.target?.is(Singleton)) {
     return node.target.allMethods
   }
-  if(is(Literal)(node)){
+  if(node.is(Literal)){
     return literalMethods(environment, node)
   }
   return allPossibleMethods(environment)

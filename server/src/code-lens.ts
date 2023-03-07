@@ -33,7 +33,7 @@ export const getTestCodeLenses = (file: Package): CodeLens[] => {
         buildTestCodeLens(
           toVSCRange(n.sourceMap!),
           fqnRelativeToPackage(file, n as Test | Describe),
-          `Run ${is(Test)(n) ? 'test' : 'describe'}`
+          `Run ${n.is(Test) ? 'test' : 'describe'}`
         )
       ),
   ]
@@ -51,5 +51,5 @@ function buildTestCodeLens(range: Range, filter: string, title: string): CodeLen
 }
 
 function isTesteable(node: Node): node is Test | Describe {
-  return is(Test)(node) || is(Describe)(node)
+  return node.is(Test) || node.is(Describe)
 }
