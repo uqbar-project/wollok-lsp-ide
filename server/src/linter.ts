@@ -1,7 +1,7 @@
 import { CodeLens, CodeLensParams, CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, DocumentSymbol, DocumentSymbolParams, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams, WorkspaceSymbol, WorkspaceSymbolParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { buildEnvironment, Environment, is, Node, Package, Problem, validate } from 'wollok-ts'
-import { List } from 'wollok-ts/dist/extensions'
+import { buildEnvironment, Environment, Node, Package, Problem, validate } from 'wollok-ts'
+import { is, List } from 'wollok-ts/dist/extensions'
 import { completionsForNode } from './autocomplete/node-completion'
 import { completeMessages } from './autocomplete/send-completion'
 import { getProgramCodeLenses, getTestCodeLenses } from './code-lens'
@@ -11,7 +11,7 @@ import { updateDocumentSettings } from './settings'
 import { documentSymbolsFor, workspaceSymbolsFor } from './symbols'
 import { TimeMeasurer } from './timeMeasurer'
 import { getNodesByPosition, getWollokFileExtension, nodeToLocation } from './utils/text-documents'
-import { isNodeURI, wollokURI } from './utils/wollok'
+import { isNodeURI, wollokURI, workspacePackage } from './utils/wollok'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -31,7 +31,7 @@ const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
     range,
     code: problem.code,
     message: reportMessage(problem),
-    source: problem.node.sourceFileName(),
+    source: problem.node.sourceFileName,
   } as Diagnostic
 }
 
@@ -156,6 +156,10 @@ export const codeLenses = (params: CodeLensParams): CodeLens[] | null => {
 }
 
 export const documentSymbols = (params: DocumentSymbolParams): DocumentSymbol[] => {
+  // ToDo this is a temporal fix for https://github.com/uqbar-project/wollok-lsp-ide/issues/61
+  if(!workspacePackage(environment)){
+    return []
+  }
   const document = findPackage(params.textDocument.uri)
   if (!document) throw new Error('Could not produce symbols: document not found')
   return documentSymbolsFor(document)
@@ -166,5 +170,6 @@ export const workspaceSymbols = (params: WorkspaceSymbolParams): WorkspaceSymbol
 
 const findPackage = (uri: string): Package | undefined =>
   environment
-    .filter(is('Package'))
-    .find(p => isNodeURI(p, uri)) as Package | undefined
+    .descendants
+    .filter(is(Package))
+    .find(p => isNodeURI(p, uri))

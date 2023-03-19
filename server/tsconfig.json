@@ -7,18 +7,11 @@
     "resolveJsonModule": true,
     "strict": true,
     "outDir": "out",
-    "lib": [
-      "esNext"
-    ],
+    "lib": ["esNext"],
     "rootDir": "src",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules",
-    ".vscode-test",
-    "out"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules", ".vscode-test", "out"]
 }

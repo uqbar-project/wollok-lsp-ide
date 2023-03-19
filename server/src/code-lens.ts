@@ -1,11 +1,12 @@
 import { CodeLens, Position, Range } from 'vscode-languageserver'
-import { Describe, is, Node, Package, Test } from 'wollok-ts'
+import { Describe, Node, Package, Test, Program } from 'wollok-ts'
+import { is } from 'wollok-ts/dist/extensions'
 import { toVSCRange } from './utils/text-documents'
 import { fqnRelativeToPackage } from './utils/wollok'
 
 
 export const getProgramCodeLenses = (file: Package): CodeLens[] =>
-  file.members.filter(is('Program')).map(program => ({
+  file.members.filter(is(Program)).map(program => ({
     range: toVSCRange(program.sourceMap!),
     command: {
       command: 'wollok.run.program',
@@ -26,12 +27,13 @@ export const getTestCodeLenses = (file: Package): CodeLens[] => {
     runAllTests
     ,
     ...file
+      .descendants
       .filter(isTesteable)
       .map(n =>
         buildTestCodeLens(
           toVSCRange(n.sourceMap!),
           fqnRelativeToPackage(file, n as Test | Describe),
-          `Run ${n.is('Test') ? 'test' : 'describe'}`
+          `Run ${n.is(Test) ? 'test' : 'describe'}`
         )
       ),
   ]
@@ -49,5 +51,5 @@ function buildTestCodeLens(range: Range, filter: string, title: string): CodeLen
 }
 
 function isTesteable(node: Node): node is Test | Describe {
-  return node.is('Test') || node.is('Describe')
+  return node.is(Test) || node.is(Describe)
 }

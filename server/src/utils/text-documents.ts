@@ -3,16 +3,16 @@ import { Environment, Node, SourceIndex, SourceMap } from 'wollok-ts'
 
 // TODO: Refactor
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
-  if (!node.sourceFileName()) return false
+  if (!node.sourceFileName) return false
   if (node.kind === 'Package') {
-    return uri === node.sourceFileName()
+    return uri === node.sourceFileName
   }
   if(!node.sourceMap) return false
 
   const startPosition = toVSCPosition(node.sourceMap.start)
   const endPosition = toVSCPosition(node.sourceMap.end)
 
-  return uri.includes(node.sourceFileName()!)
+  return uri.includes(node.sourceFileName!)
     && node.sourceMap
     && between(position, startPosition, endPosition)
 }
@@ -35,7 +35,7 @@ export const between = (pointer: Position, start: Position, end: Position): bool
 }
 
 export const getNodesByPosition = (environment: Environment, textDocumentPosition: TextDocumentPositionParams): Node[] => {
-  return environment.filter(node => !!node.sourceFileName() && include(node, textDocumentPosition))
+  return environment.descendants.filter(node => !!node.sourceFileName && include(node, textDocumentPosition))
 }
 
 export const toVSCPosition = (position: SourceIndex): Position => {
@@ -51,12 +51,12 @@ export const toVSCRange = (sourceMap: SourceMap): Range =>
   Range.create(toVSCPosition(sourceMap.start), toVSCPosition(sourceMap.end))
 
 export const nodeToLocation = (node: Node): Location => {
-  if(!node.sourceMap || !node.sourceFileName()){
+  if(!node.sourceMap || !node.sourceFileName){
     throw new Error('No source map found for node')
   }
 
   return {
-    uri: node.sourceFileName()!,
+    uri: node.sourceFileName!,
     range: toVSCRange(node.sourceMap),
   }
 }
