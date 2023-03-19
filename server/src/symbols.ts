@@ -35,7 +35,7 @@ const workspaceSymbol = (node: Symbolyzable): WorkspaceSymbol => WorkspaceSymbol
 )
 
 const isSymbolyzable = (node: Node): node is Symbolyzable =>
-  [Program, Test, Module, Variable, Field, Method, Test].some(t => node.is(t))
+  [Program, Test, Module, Variable, Field, Method].some(t => node.is(t))
 
 
 const symbolKind = (node: Node): SymbolKind => {
