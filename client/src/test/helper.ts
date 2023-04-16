@@ -38,6 +38,9 @@ export const getDocumentPath = (docPath: string): string => {
 export const getDocumentURI = (docPath: string): Uri => {
   return Uri.file(getDocumentPath(docPath))
 }
+export const getFolderURI = (): Uri => {
+  return Uri.file(getDocumentPath(''))
+}
 
 export async function setTestContent(content: string): Promise<boolean> {
   const all = new Range(

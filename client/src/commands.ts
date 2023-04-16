@@ -13,13 +13,13 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
  * CLI Commands
  */
 
-const runProgram = (fqn: string) => wollokCLITask('run program', 'Wollok run program', ['run', `'${fqn}'`, '--skipValidations'])
+export const runProgram = (fqn: string): Task => wollokCLITask('run program', 'Wollok run program', ['run', `'${fqn}'`, '--skipValidations'])
 
-const runTests = (filter: string) => wollokCLITask('run tests', 'Wollok run tests', ['test', `'${filter}'`])
+export const runTests = (filter: string): Task => wollokCLITask('run tests', 'Wollok run tests', ['test', `'${filter}'`])
 
-const runAllTests = () => wollokCLITask('run tests', 'Wollok run all tests', ['test'])
+export const runAllTests = (): Task => wollokCLITask('run tests', 'Wollok run all tests', ['test'])
 
-const startRepl = () => {
+export const startRepl = (): Task => {
   const currentDocument = window.activeTextEditor.document
   const currentFileName = path.basename(currentDocument.uri.path)
   return wollokCLITask('repl', `Wollok Repl: ${currentFileName}`, ['repl', currentDocument.fileName])
