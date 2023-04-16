@@ -16,7 +16,7 @@ suite('Should run commands', () => {
   })
 
   test('run all tests', async () => {
-    await testCommand(pepitaURI, runAllTests, ` test -p ${folderURI.fsPath} --skipValidations`)
+    await testCommand(pepitaURI, runAllTests, ` test --skipValidations -p ${folderURI.fsPath}`)
   })
 
   test('repl on current file', async () => {

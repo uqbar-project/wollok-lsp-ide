@@ -15,9 +15,9 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
 
 export const runProgram = (fqn: string): Task => wollokCLITask('run program', 'Wollok run program', ['run', `'${fqn}'`, '--skipValidations'])
 
-export const runTests = (filter: string): Task => wollokCLITask('run tests', 'Wollok run tests', ['test', `'${filter}'`])
+export const runTests = (filter: string): Task => wollokCLITask('run tests', 'Wollok run tests', ['test', `'${filter.replace(/"/g, '\\"')}'`, '--skipValidations'])
 
-export const runAllTests = (): Task => wollokCLITask('run tests', 'Wollok run all tests', ['test'])
+export const runAllTests = (): Task => wollokCLITask('run tests', 'Wollok run all tests', ['test', '--skipValidations'])
 
 export const startRepl = (): Task => {
   const currentDocument = window.activeTextEditor.document
