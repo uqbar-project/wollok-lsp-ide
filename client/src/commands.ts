@@ -1,5 +1,6 @@
 import * as path from 'path'
 import { commands, ExtensionContext, ShellExecution, Task, tasks, window, workspace } from 'vscode'
+import { asOSString } from './test/helper'
 
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
@@ -15,7 +16,7 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
 
 export const runProgram = (fqn: string): Task => wollokCLITask('run program', 'Wollok run program', ['run', `'${fqn}'`, '--skipValidations'])
 
-export const runTests = (filter: string): Task => wollokCLITask('run tests', 'Wollok run tests', ['test', `'${filter.replace(/"/g, '\\"')}'`, '--skipValidations'])
+export const runTests = (filter: string): Task => wollokCLITask('run tests', 'Wollok run tests', ['test', `'${asOSString(filter)}'`, '--skipValidations'])
 
 export const runAllTests = (): Task => wollokCLITask('run tests', 'Wollok run all tests', ['test', '--skipValidations'])
 
