@@ -23,7 +23,7 @@ export const runAllTests = (): Task => wollokCLITask('run tests', 'Wollok run al
 export const startRepl = (): Task => {
   const currentDocument = window.activeTextEditor.document
   const currentFileName = path.basename(currentDocument.uri.path)
-  return wollokCLITask('repl', `Wollok Repl: ${currentFileName}`, ['repl', currentDocument.fileName])
+  return wollokCLITask('repl', `Wollok Repl: ${currentFileName}`, ['repl', currentDocument.fileName, '--skipValidations'])
 }
 
 /**

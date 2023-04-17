@@ -32,7 +32,7 @@ suite('Should run commands', () => {
   })
 
   test('repl on current file', async () => {
-    await testCommand(pepitaURI, startRepl, ` repl ${pepitaURI.fsPath} -p ${folderURI.fsPath}`)
+    await testCommand(pepitaURI, startRepl, ` repl ${pepitaURI.fsPath} --skipValidations -p ${folderURI.fsPath}`)
   })
 })
 
