@@ -10,7 +10,7 @@ import { LanguageClient,
   ServerOptions,
   TransportKind } from 'vscode-languageclient/node'
 import { subscribeWollokCommands } from './commands'
-import { allWollokFiles } from './test/helper'
+import { allWollokFiles } from './utils'
 
 let client: LanguageClient
 

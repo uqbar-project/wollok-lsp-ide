@@ -1,6 +1,6 @@
 import * as path from 'path'
 import { commands, ExtensionContext, ShellExecution, Task, tasks, window, workspace } from 'vscode'
-import { asOSString } from './test/helper'
+import { asOSString } from './utils'
 
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
