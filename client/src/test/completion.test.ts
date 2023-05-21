@@ -6,18 +6,23 @@ const WOLLOK_AUTOCOMPLETE = 'wollok_autocomplete'
 
 suite('Should do completion', () => {
   const docUri = getDocumentURI('completion.wlk')
+  const fileCompletion = {
+    items: [
+      { label: 'class', kind: CompletionItemKind.Class },
+      { label: 'describe', kind: CompletionItemKind.Event },
+      { label: 'method (with effect)', kind: CompletionItemKind.Method },
+      { label: 'method (without effect)', kind: CompletionItemKind.Method },
+      { label: 'object', kind: CompletionItemKind.Text },
+      { label: 'test', kind: CompletionItemKind.Event },
+    ],
+  }
 
   test('Completes Wollok file', async () => {
-    await testCompletion(docUri, new Position(0, 0), {
-      items: [
-        { label: 'class', kind: CompletionItemKind.Class },
-        { label: 'describe', kind: CompletionItemKind.Event },
-        { label: 'method (with effect)', kind: CompletionItemKind.Method },
-        { label: 'method (without effect)', kind: CompletionItemKind.Method },
-        { label: 'object', kind: CompletionItemKind.Text },
-        { label: 'test', kind: CompletionItemKind.Event },
-      ],
-    })
+    await testCompletion(docUri, new Position(0, 0), fileCompletion)
+  })
+
+  test('Completes unparsed node', async () => {
+    await testCompletion(docUri, new Position(2, 3), fileCompletion)
   })
 })
 

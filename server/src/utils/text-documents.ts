@@ -5,7 +5,7 @@ import { Environment, Node, SourceIndex, SourceMap } from 'wollok-ts'
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
   if (!node.sourceFileName) return false
   if (node.kind === 'Package') {
-    return uri === node.sourceFileName
+    return uri.includes(node.sourceFileName)
   }
   if(!node.sourceMap) return false
 
