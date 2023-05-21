@@ -6,6 +6,7 @@ import { getDocumentURI, activate } from './helper'
  * These tests are NOT ATOMIC, they depend on each other, order matters. (Resolve TODO)
  * */
 suite('Should get diagnostics', () => {
+  const lostURI = getDocumentURI('lost.wlk')
   const pepitaURI = getDocumentURI('pepita.wlk')
   const importerURI = getDocumentURI('importer.wlk')
   const importedURI = getDocumentURI('imported.wlk')
@@ -13,7 +14,7 @@ suite('Should get diagnostics', () => {
   //TODO: Restart server status after each test
 
   test('on file with missing imports', async () => {
-    await testDiagnostics(importerURI, [
+    await testDiagnostics(lostURI, [
       { code: 'missingReference', severity: DiagnosticSeverity.Error },
     ])
   })
