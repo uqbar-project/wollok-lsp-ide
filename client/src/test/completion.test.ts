@@ -4,7 +4,7 @@ import { getDocumentURI, activate } from './helper'
 
 const WOLLOK_AUTOCOMPLETE = 'wollok_autocomplete'
 
-suite.only('Should do completion', () => {
+suite('Should do completion', () => {
   const docUri = getDocumentURI('completion.wlk')
   const fileCompletion = {
     items: [
