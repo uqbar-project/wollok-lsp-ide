@@ -118,19 +118,19 @@ export const validateTextDocument = (connection: Connection, allDocuments: TextD
 }
 
 export const completions = (position: Position, textDocument: TextDocumentIdentifier, context?: CompletionContext): CompletionItem[] => {
+  const selectionNode = cursorNode(position, textDocument)
 
   if (context?.triggerCharacter === '.') {
     // ignore dot
     position.character -= 1
-    return completeMessages(environment, stableNode(position, textDocument))
+    return completeMessages(environment, findFirstStableNode(selectionNode))
   } else {
-    return completionsForNode(stableNode(position, textDocument))
+    return completionsForNode(findFirstStableNode(selectionNode))
   }
 }
 
-function stableNode(position: Position, textDocument: TextDocumentIdentifier): Node {
-  const cursorNode = getNodesByPosition(environment, { position, textDocument }).reverse()[0]
-  return findFirstStableNode(cursorNode)
+function cursorNode(position: Position, textDocument: TextDocumentIdentifier): Node {
+  return getNodesByPosition(environment, { position, textDocument }).reverse()[0]
 }
 
 export const definition = (textDocumentPosition: TextDocumentPositionParams): Location[] => {
