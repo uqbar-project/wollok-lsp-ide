@@ -1,3 +1,4 @@
+import { userInfo } from 'os'
 import { Uri, workspace } from 'vscode'
 
 export async function allWollokFiles(): Promise<Uri[]> {
@@ -10,7 +11,11 @@ export function replaceAll(string: string, search: string | RegExp, replace: str
 
 export function asOSString(string: string): string {
   if (process.platform === 'win32') {
-    return replaceAll(string, '"', '\\"')
+    userInfo
+    const config = workspace.getConfiguration('terminal')
+    const shell = config.get('integrated.shell.windows') ?? config.get('integrated.defaultProfile.windows')
+    if (shell === 'Command Prompt')
+      return `"${replaceAll(string, '"', '\\"')}"`
   }
   return string
 }
