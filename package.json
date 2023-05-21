@@ -130,9 +130,5 @@
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5"
-  },
-  "__metadata": {
-    "publisherDisplayName": "Uqbar",
-    "publisherId": "1a24489d-a5e7-4ea1-a73c-f3df82d39763"
   }
 }
