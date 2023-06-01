@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.0.3
+
+### Using wollok-ts v4.0.2
+
+- Upgrade Wollok-TS 4 ⬆️
+- Fix completion error while writing 🐛
+
 ## v0.0.2
 
 ### Using wollok-ts v3.1.6
