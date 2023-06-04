@@ -10,7 +10,7 @@ suite('Should run commands', () => {
   const pepitaURI = getDocumentURI('pepita.wlk')
 
   test('run program', async () => {
-    await testCommand(pepitaURI, () => runProgram('file.program'), ` run 'file.program' --skipValidations -p ${folderURI.fsPath}`)
+    await onWindowsBash(() => testCommand(pepitaURI, () => runProgram('file.program'), ` run 'file.program' --skipValidations -p ${expectedPathByShell('bash', folderURI.fsPath)}`) )
   })
 
   suite('run tests', () => {
@@ -31,11 +31,11 @@ suite('Should run commands', () => {
   })
 
   test('run all tests', async () => {
-    await testCommand(pepitaURI, runAllTests, ` test --skipValidations -p ${folderURI.fsPath}`)
+    await onWindowsBash(() => testCommand(pepitaURI, runAllTests, ` test --skipValidations -p ${expectedPathByShell('bash', folderURI.fsPath)}`))
   })
 
   test('repl on current file', async () => {
-    await testCommand(pepitaURI, startRepl, ` repl ${pepitaURI.fsPath} --skipValidations -p ${folderURI.fsPath}`)
+    await onWindowsBash(() => testCommand(pepitaURI, startRepl, ` repl ${toPosix(pepitaURI.fsPath)} --skipValidations -p ${expectedPathByShell('bash', folderURI.fsPath)}`))
   })
 })
 
@@ -52,4 +52,11 @@ function expectedPathByShell(cmd: Shell, originalPath: string ) {
   } else {
     return toWin(originalPath)
   }
+}
+
+async function onWindowsBash(test: () => Promise<any>){
+  sinon.stub(process, 'platform').value('win32')
+  sinon.stub(env, 'shell').value('bash')
+  await test()
+  sinon.restore()
 }

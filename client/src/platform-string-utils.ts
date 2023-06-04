@@ -50,7 +50,7 @@ export function transformSeparators(path: string, originalSep: string, targetSep
 }
 
 /**
- * @param shellPath 
+ * @param shellPath
  * @returns Matching shell identifier
  * @default 'bash'
  */
