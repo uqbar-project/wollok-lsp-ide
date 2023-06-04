@@ -1,4 +1,4 @@
-import { Uri, workspace } from 'vscode'
+import { Uri, env, workspace } from 'vscode'
 
 export async function allWollokFiles(): Promise<Uri[]> {
   return workspace.findFiles('**/*.{wlk,wtest,wpgm}')
@@ -13,4 +13,8 @@ export function asOSString(string: string): string {
     return replaceAll(string, '"', '\\"')
   }
   return string
+}
+
+export function asShellPath(string: string): string {
+  return env.shell
 }
