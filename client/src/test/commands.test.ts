@@ -1,38 +1,41 @@
 import * as assert from 'assert'
 import * as sinon from 'sinon'
-import { ShellExecution, Task, Uri } from 'vscode'
+import { ShellExecution, Task, Uri, env } from 'vscode'
 import { runAllTests, runProgram, runTests, startRepl } from '../commands'
 import { activate, getDocumentURI, getFolderURI } from './helper'
+import { toPosix, toWin, Shell } from '../platform-string-utils'
 
 suite('Should run commands', () => {
   const folderURI = getFolderURI()
   const pepitaURI = getDocumentURI('pepita.wlk')
 
   test('run program', async () => {
-    await testCommand(pepitaURI, () => runProgram('file.program'), ` run 'file.program' --skipValidations -p ${folderURI.fsPath}`)
+    await onWindowsBash(() => testCommand(pepitaURI, () => runProgram('file.program'), ` run 'file.program' --skipValidations -p ${expectedPathByShell('bash', folderURI.fsPath)}`) )
   })
 
   suite('run tests', () => {
     const testFQN = 'tests."tests de pepita"."something"'
-    const testFQNWindows = 'tests.\\"tests de pepita\\".\\"something\\"'
+    const testFQNCMD = 'tests.\\"tests de pepita\\".\\"something\\"'
 
-    async function runCommandOnPlatform(platform: string, expectedCommand: string) {
+    async function runCommandOnPlatform(platform: string, shell: Shell, expectedCommand: string) {
       sinon.stub(process, 'platform').value(platform)
-      await testCommand(pepitaURI, () => runTests(testFQN), ` test '${expectedCommand}' --skipValidations -p ${folderURI.fsPath}`)
+      sinon.stub(env, 'shell').value(shell)
+      await testCommand(pepitaURI, () => runTests(testFQN), ` test '${expectedCommand}' --skipValidations -p ${expectedPathByShell(shell, folderURI.fsPath )}`)
       sinon.restore()
     }
 
-    test('on Linux', () => runCommandOnPlatform('linux', testFQN))
-    test('on Mac', () => runCommandOnPlatform('darwin', testFQN))
-    test('on Windows', () => runCommandOnPlatform('win32', testFQNWindows))
+    test('on Linux', () => runCommandOnPlatform('linux', 'bash', testFQN))
+    test('on Mac', () => runCommandOnPlatform('darwin', 'bash', testFQN))
+    test('on Windows', () => runCommandOnPlatform('win32', 'cmd', testFQNCMD))
+    test('on Windows with Bash', () => runCommandOnPlatform('win32', 'bash', testFQN))
   })
 
   test('run all tests', async () => {
-    await testCommand(pepitaURI, runAllTests, ` test --skipValidations -p ${folderURI.fsPath}`)
+    await onWindowsBash(() => testCommand(pepitaURI, runAllTests, ` test --skipValidations -p ${expectedPathByShell('bash', folderURI.fsPath)}`))
   })
 
   test('repl on current file', async () => {
-    await testCommand(pepitaURI, startRepl, ` repl ${pepitaURI.fsPath} --skipValidations -p ${folderURI.fsPath}`)
+    await onWindowsBash(() => testCommand(pepitaURI, startRepl, ` repl ${toPosix(pepitaURI.fsPath)} --skipValidations -p ${expectedPathByShell('bash', folderURI.fsPath)}`))
   })
 })
 
@@ -41,4 +44,19 @@ async function testCommand(docUri: Uri, command: () => Task, expectedCommand: st
   const task = command()
   const execution = task.execution as ShellExecution
   assert.equal(execution.commandLine, expectedCommand)
+}
+
+function expectedPathByShell(cmd: Shell, originalPath: string ) {
+  if(['bash', 'zsh'].includes(cmd)){
+    return toPosix(originalPath)
+  } else {
+    return toWin(originalPath)
+  }
+}
+
+async function onWindowsBash(test: () => Promise<any>){
+  sinon.stub(process, 'platform').value('win32')
+  sinon.stub(env, 'shell').value('bash')
+  await test()
+  sinon.restore()
 }

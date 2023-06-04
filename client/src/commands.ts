@@ -1,6 +1,6 @@
 import * as path from 'path'
 import { commands, ExtensionContext, ShellExecution, Task, tasks, window, workspace } from 'vscode'
-import { asOSString } from './utils'
+import { asShellString, fsToShell, unknownToShell } from './platform-string-utils'
 
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
@@ -16,14 +16,14 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
 
 export const runProgram = (fqn: string): Task => wollokCLITask('run program', 'Wollok run program', ['run', `'${fqn}'`, '--skipValidations'])
 
-export const runTests = (filter: string): Task => wollokCLITask('run tests', 'Wollok run tests', ['test', `'${asOSString(filter)}'`, '--skipValidations'])
+export const runTests = (filter: string): Task => wollokCLITask('run tests', 'Wollok run tests', ['test', `'${asShellString(filter)}'`, '--skipValidations'])
 
 export const runAllTests = (): Task => wollokCLITask('run tests', 'Wollok run all tests', ['test', '--skipValidations'])
 
 export const startRepl = (): Task => {
   const currentDocument = window.activeTextEditor.document
   const currentFileName = path.basename(currentDocument.uri.path)
-  return wollokCLITask('repl', `Wollok Repl: ${currentFileName}`, ['repl', currentDocument.fileName, '--skipValidations'])
+  return wollokCLITask('repl', `Wollok Repl: ${currentFileName}`, ['repl', fsToShell(currentDocument.uri.fsPath), '--skipValidations'])
 }
 
 /**
@@ -34,9 +34,9 @@ const registerCLICommand = (command: string, taskBuilder: (...args: any[]) => Ta
   commands.registerCommand(command, (...args) => tasks.executeTask(taskBuilder(args)))
 
 const wollokCLITask = (task: string, name: string, cliCommands: string[]) => {
-  const wollokCli = workspace.getConfiguration('wollokLinter').get('cli-path')
+  const wollokCli = unknownToShell(workspace.getConfiguration('wollokLinter').get('cli-path'))
   const folder = workspace.workspaceFolders[0]
-  const shellCommand = [wollokCli, ...cliCommands, '-p', folder.uri.fsPath].join(' ')
+  const shellCommand = [wollokCli, ...cliCommands, '-p', fsToShell(folder.uri.fsPath)].join(' ')
 
   return new Task(
     { type: 'wollok', task },
