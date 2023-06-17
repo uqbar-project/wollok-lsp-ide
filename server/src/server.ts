@@ -1,12 +1,17 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
-import { codeLenses, completions, definition, documentSymbols, resetEnvironment, validateTextDocument, workspaceSymbols } from './linter'
+import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, ServerRequestHandler, TextDocuments, TextDocumentSyncKind, WorkDoneProgress } from 'vscode-languageserver/node'
+import { codeLenses, completions, definition, documentSymbols, validateTextDocument, workspaceSymbols } from './linter'
 import { initializeSettings, WollokLinterSettings } from './settings'
 import { templates } from './templates'
+import { Environment } from 'wollok-ts'
+import { EnvironmentProvider } from './environment-provider'
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all)
+
+
+const environmentProvider: EnvironmentProvider = new EnvironmentProvider(connection)
 
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
@@ -52,7 +57,7 @@ connection.onInitialized(() => {
   }
 
   initializeSettings(connection)
-  resetEnvironment()
+  environmentProvider.resetEnvironment()
 })
 
 // Cache the settings of all open documents
@@ -86,40 +91,37 @@ documents.onDidClose(e => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {
-  validateTextDocument(connection, documents.all())(change.document)
+  environmentProvider.rebuildTextDocument(change.document)
+  environmentProvider.withLatestEnvironment(validateTextDocument(connection, documents.all())(change.document))
 })
 
 documents.onDidOpen(change => {
-  validateTextDocument(connection, documents.all())(change.document)
+  environmentProvider.rebuildTextDocument(change.document)
+  environmentProvider.withLatestEnvironment(validateTextDocument(connection, documents.all())(change.document))
 })
 
 connection.onRequest(change => {
   if (change === 'STRONG_FILES_CHANGED') {
-    resetEnvironment()
+    environmentProvider.resetEnvironment()
   }
 })
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
-  (params): CompletionItem[] => {
-    // The pass parameter contains the position of the text document in
-    // which code complete got requested. For the example we ignore this
-    // info and always provide the same completion items.
-    const contextCompletions = completions(params.position, params.textDocument, params.context)
+  waitForEnvironment((params, env) => {
+    const contextCompletions = completions(params, env)
     return [
       ...contextCompletions,
       ...templates,
     ]
-  }
+  })
 )
 
 connection.onReferences((_params) => {
   return []
 })
 
-connection.onDefinition(async (params) => {
-  return definition(params)
-})
+connection.onDefinition(waitForEnvironment(definition))
 
 // This handler resolves additional information for the item selected in the completion list.
 connection.onCompletionResolve(
@@ -132,11 +134,11 @@ connection.onCompletionResolve(
   }
 )
 
-connection.onDocumentSymbol(documentSymbols)
+connection.onDocumentSymbol(waitForEnvironment(documentSymbols))
 
-connection.onWorkspaceSymbol(workspaceSymbols)
+connection.onWorkspaceSymbol(waitForEnvironment(workspaceSymbols))
 
-connection.onCodeLens(codeLenses)
+connection.onCodeLens(waitForEnvironment(codeLenses))
 /*
 connection.onDidOpenTextDocument((params) => {
   // A text document got opened in VSCode.
@@ -163,3 +165,13 @@ documents.listen(connection)
 
 // Listen on the connection
 connection.listen()
+
+function waitForEnvironment<P, R, PR, E>(cb: (params: P, env: Environment) => R): ServerRequestHandler<P, R, PR, E> {
+  return (params) => new Promise<R>((resolve) => {
+    connection.sendProgress(WorkDoneProgress.type, 'wollok-request', { kind: 'begin', title: 'Waiting for environment to be ready' })
+    environmentProvider.withLatestEnvironment((env) => {
+      connection.sendProgress(WorkDoneProgress.type, 'wollok-request', { kind: 'end' })
+      resolve(cb(params, env))
+    })
+  })
+}

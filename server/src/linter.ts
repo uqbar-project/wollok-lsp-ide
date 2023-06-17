@@ -1,6 +1,6 @@
-import { CodeLens, CodeLensParams, CompletionContext, CompletionItem, Connection, Diagnostic, DiagnosticSeverity, DocumentSymbol, DocumentSymbolParams, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams, WorkspaceSymbol, WorkspaceSymbolParams } from 'vscode-languageserver'
+import { CodeLens, CodeLensParams, CompletionItem, CompletionParams, Connection, Diagnostic, DiagnosticSeverity, DocumentSymbol, DocumentSymbolParams, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams, WorkspaceSymbol, WorkspaceSymbolParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { buildEnvironment, Environment, Node, Package, Problem, validate } from 'wollok-ts'
+import { Environment, Node, Package, Problem, validate } from 'wollok-ts'
 import { is, List } from 'wollok-ts/dist/extensions'
 import { completionsForNode } from './autocomplete/node-completion'
 import { completeMessages } from './autocomplete/send-completion'
@@ -12,6 +12,7 @@ import { documentSymbolsFor, workspaceSymbolsFor } from './symbols'
 import { TimeMeasurer } from './timeMeasurer'
 import { getNodesByPosition, getWollokFileExtension, nodeToLocation } from './utils/text-documents'
 import { isNodeURI, wollokURI, workspacePackage } from './utils/wollok'
+import { EnvironmentProvider } from './environment-provider'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -48,13 +49,6 @@ function findFirstStableNode(node: Node): Node {
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-
-let environment: Environment
-
-export const resetEnvironment = (): void => {
-  environment = buildEnvironment([])
-}
-
 const sendDiagnistics = (connection: Connection, problems: List<Problem>, documents: TextDocument[]): void => {
   for (const document of documents) {
     const diagnostics: Diagnostic[] = problems
@@ -66,23 +60,11 @@ const sendDiagnistics = (connection: Connection, problems: List<Problem>, docume
   }
 }
 
-const rebuildTextDocument = (document: TextDocument) => {
-  const uri = wollokURI(document.uri)
-  const content = document.getText()
-  const file: { name: string, content: string } = {
-    name: uri,
-    content: content,
-  }
-  environment = buildEnvironment([file], environment)
-}
-
-export const validateTextDocument = (connection: Connection, allDocuments: TextDocument[]) => async (textDocument: TextDocument): Promise<void> => {
+export const validateTextDocument = (connection: Connection, allDocuments: TextDocument[]) => (textDocument: TextDocument) => async (environment: Environment): Promise<void> => {
   await updateDocumentSettings(connection)
 
   try {
     const timeMeasurer = new TimeMeasurer()
-
-    rebuildTextDocument(textDocument)
     const problems = validate(environment)
     timeMeasurer.addTime('build environment for file')
 
@@ -117,8 +99,9 @@ export const validateTextDocument = (connection: Connection, allDocuments: TextD
   }
 }
 
-export const completions = (position: Position, textDocument: TextDocumentIdentifier, context?: CompletionContext): CompletionItem[] => {
-  const selectionNode = cursorNode(position, textDocument)
+export const completions = (params: CompletionParams, environment: Environment): CompletionItem[] => {
+  const { position, textDocument, context } = params
+  const selectionNode = cursorNode(environment, position, textDocument)
 
   if (context?.triggerCharacter === '.') {
     // ignore dot
@@ -129,20 +112,20 @@ export const completions = (position: Position, textDocument: TextDocumentIdenti
   }
 }
 
-function cursorNode(position: Position, textDocument: TextDocumentIdentifier): Node {
+function cursorNode(environment: Environment, position: Position, textDocument: TextDocumentIdentifier): Node {
   return getNodesByPosition(environment, { position, textDocument }).reverse()[0]
 }
 
-export const definition = (textDocumentPosition: TextDocumentPositionParams): Location[] => {
+export const definition = (textDocumentPosition: TextDocumentPositionParams, environment: Environment): Location[] => {
   const cursorNodes = getNodesByPosition(environment, textDocumentPosition)
   const definitions = getNodeDefinition(environment)(cursorNodes.reverse()[0])
   return definitions.map(nodeToLocation)
 }
 
 
-export const codeLenses = (params: CodeLensParams): CodeLens[] | null => {
+export const codeLenses = (params: CodeLensParams, environment: Environment): CodeLens[] | null => {
   const fileExtension = getWollokFileExtension(params.textDocument.uri)
-  const file = findPackage(params.textDocument.uri)
+  const file = findPackage(params.textDocument.uri, environment)
   if (!file) return null
 
   switch (fileExtension) {
@@ -155,20 +138,20 @@ export const codeLenses = (params: CodeLensParams): CodeLens[] | null => {
   }
 }
 
-export const documentSymbols = (params: DocumentSymbolParams): DocumentSymbol[] => {
+export const documentSymbols = (params: DocumentSymbolParams, environment: Environment): DocumentSymbol[] => {
   // ToDo this is a temporal fix for https://github.com/uqbar-project/wollok-lsp-ide/issues/61
   if(!workspacePackage(environment)){
     return []
   }
-  const document = findPackage(params.textDocument.uri)
+  const document = findPackage(params.textDocument.uri, environment)
   if (!document) throw new Error('Could not produce symbols: document not found')
   return documentSymbolsFor(document)
 }
 
-export const workspaceSymbols = (params: WorkspaceSymbolParams): WorkspaceSymbol[] =>
+export const workspaceSymbols = (params: WorkspaceSymbolParams, environment: Environment): WorkspaceSymbol[] =>
   workspaceSymbolsFor(environment, params.query)
 
-const findPackage = (uri: string): Package | undefined =>
+const findPackage = (uri: string, environment: Environment): Package | undefined =>
   environment
     .descendants
     .filter(is(Package))

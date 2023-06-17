@@ -4,11 +4,12 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path'
-import { ExtensionContext, workspace, languages } from 'vscode'
+import { ExtensionContext, workspace, languages, window, StatusBarAlignment } from 'vscode'
 import { LanguageClient,
   LanguageClientOptions,
   ServerOptions,
-  TransportKind } from 'vscode-languageclient/node'
+  TransportKind, 
+  WorkDoneProgress} from 'vscode-languageclient/node'
 import { subscribeWollokCommands } from './commands'
 import { allWollokFiles } from './utils'
 
@@ -58,6 +59,17 @@ export function activate(context: ExtensionContext): void {
 
   // Force first validation
   validateWorkspace()
+
+  const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left)
+
+  client.onProgress(WorkDoneProgress.type, 'wollok-build', progress => {
+    if (progress.kind === 'begin' || progress.kind === 'report') {
+      statusBarItem.text = '$(loading~spin) Wollok Building...'
+      statusBarItem.show()
+    } else {
+      statusBarItem.hide()
+    }
+  })
 
   // Force environment to restart
   const revalidateWorskpace = _event =>
