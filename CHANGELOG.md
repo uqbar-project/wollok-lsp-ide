@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.0.4
+
+### Using wollok-ts v4.0.2
+
+- Fix path issues using CLI on Windows 🪟
+
 ## v0.0.3
 
 ### Using wollok-ts v4.0.2
