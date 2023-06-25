@@ -5,7 +5,7 @@
   "author": "Uqbar Foundation",
   "license": "LGPL-3.0",
   "publisher": "uqbar",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "repository": {
     "type": "git",
     "url": "https://github.com/uqbar-project/wollok-lsp-ide"
@@ -112,6 +112,7 @@
     "test:e2e": "npm run lint && npm run compile && sh ./scripts/e2e.sh",
     "test:unit": "cd server && npm run test && cd ..",
     "prepare": "husky install",
+    "package": "vsce package",
     "lint-staged": "lint-staged"
   },
   "dependencies": {
@@ -124,6 +125,7 @@
     "@types/sinon": "^10.0.13",
     "@typescript-eslint/eslint-plugin": "^5.53.0",
     "@typescript-eslint/parser": "^5.53.0",
+    "@vscode/vsce": "^2.19.0",
     "eslint": "^8.35.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.1.2",
