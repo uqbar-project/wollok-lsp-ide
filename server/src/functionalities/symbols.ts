@@ -1,7 +1,7 @@
 import { DocumentSymbol, SymbolKind, WorkspaceSymbol } from 'vscode-languageserver'
 import { Environment, Field, Method, Module, Node, Package, Program, Test, Variable } from 'wollok-ts'
-import { toVSCRange } from './utils/text-documents'
-import { workspacePackage } from './utils/wollok'
+import { toVSCRange } from '../utils/text-documents'
+import { workspacePackage } from '../utils/wollok-ts/wollok'
 
 type Symbolyzable = Program | Test | Module | Variable | Field | Method | Test
 

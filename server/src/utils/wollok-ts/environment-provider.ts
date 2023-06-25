@@ -1,8 +1,8 @@
 import { Environment, buildEnvironment } from 'wollok-ts'
-import { wollokURI } from './utils/wollok'
+import { wollokURI } from './wollok'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Connection, ServerRequestHandler } from 'vscode-languageserver'
-import { ProgressReporter } from './utils/progress-reporter'
+import { ProgressReporter } from '../progress-reporter'
 
 type EnvironmentSubscription = (environment: Environment) => any
 export class EnvironmentProvider {

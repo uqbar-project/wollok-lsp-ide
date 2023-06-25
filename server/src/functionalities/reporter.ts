@@ -1,5 +1,5 @@
 import { Problem } from 'wollok-ts'
-import { lang } from './settings'
+import { lang } from '../settings'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // VALIDATION MESSAGES DEFINITION
