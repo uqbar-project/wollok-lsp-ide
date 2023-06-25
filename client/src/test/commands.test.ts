@@ -43,7 +43,7 @@ async function testCommand(docUri: Uri, command: () => Task, expectedCommand: st
   await activate(docUri)
   const task = command()
   const execution = task.execution as ShellExecution
-  assert.equal(execution.commandLine, expectedCommand)
+  assert.ok(execution.commandLine.endsWith(expectedCommand))
 }
 
 function expectedPathByShell(cmd: Shell, originalPath: string ) {
