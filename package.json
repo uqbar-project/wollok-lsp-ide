@@ -34,6 +34,10 @@
     "languages": [
       {
         "id": "wollok",
+        "icon": {
+          "dark": "./images/wollok.png",
+          "light": "./images/wollok.png"
+        },
         "aliases": [
           "Wollok",
           "wollok"
@@ -116,7 +120,7 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "wollok-ts": "4.0.2"
+    "wollok-ts": "4.0.3"
   },
   "devDependencies": {
     "@types/expect": "^24.3.0",
