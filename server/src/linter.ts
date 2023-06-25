@@ -11,7 +11,7 @@ import { updateDocumentSettings } from './settings'
 import { documentSymbolsFor, workspaceSymbolsFor } from './functionalities/symbols'
 import { TimeMeasurer } from './timeMeasurer'
 import { getNodesByPosition, getWollokFileExtension, nodeToLocation } from './utils/text-documents'
-import { isNodeURI, wollokURI, workspacePackage } from './utils/wollok-ts/wollok'
+import { isNodeURI, wollokURI, workspacePackage } from './utils/vm/wollok'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS

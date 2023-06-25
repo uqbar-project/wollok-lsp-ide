@@ -2,7 +2,7 @@ import { CodeLens, Position, Range } from 'vscode-languageserver'
 import { Describe, Node, Package, Test, Program } from 'wollok-ts'
 import { is } from 'wollok-ts/dist/extensions'
 import { toVSCRange } from '../utils/text-documents'
-import { fqnRelativeToPackage } from '../utils/wollok-ts/wollok'
+import { fqnRelativeToPackage } from '../utils/vm/wollok'
 
 
 export const getProgramCodeLenses = (file: Package): CodeLens[] =>

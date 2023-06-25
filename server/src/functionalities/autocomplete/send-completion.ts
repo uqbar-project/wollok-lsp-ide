@@ -1,7 +1,7 @@
 import { CompletionItem } from 'vscode-languageserver'
 import { Environment, Literal, Method, Node, Reference, Singleton } from 'wollok-ts'
 import { is, List } from 'wollok-ts/dist/extensions'
-import { literalValueToClass } from '../../utils/wollok-ts/wollok'
+import { literalValueToClass } from '../../utils/vm/wollok'
 import { methodCompletionItem } from './autocomplete'
 
 export function completeMessages(environment: Environment, node: Node): CompletionItem[] {

@@ -3,7 +3,7 @@ import { CompletionItem, createConnection, DidChangeConfigurationNotification, I
 import { codeLenses, completions, definition, documentSymbols, validateTextDocument, workspaceSymbols } from './linter'
 import { initializeSettings, WollokLinterSettings } from './settings'
 import { templates } from './functionalities/autocomplete/templates'
-import { EnvironmentProvider } from './utils/wollok-ts/environment-provider'
+import { EnvironmentProvider } from './utils/vm/environment-provider'
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
