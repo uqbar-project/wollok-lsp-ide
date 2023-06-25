@@ -1,4 +1,4 @@
-import { Connection, WorkDoneProgress, WorkDoneProgressBegin, WorkDoneProgressEnd, WorkDoneProgressReport } from 'vscode-languageserver';
+import { Connection, WorkDoneProgress, WorkDoneProgressBegin, WorkDoneProgressEnd, WorkDoneProgressReport } from 'vscode-languageserver'
 
 export class ProgressReporter {
   constructor(private connection: Connection, private process: { identifier: string, title: string }){}

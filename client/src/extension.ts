@@ -8,8 +8,8 @@ import { ExtensionContext, workspace, languages, window, StatusBarAlignment } fr
 import { LanguageClient,
   LanguageClientOptions,
   ServerOptions,
-  TransportKind, 
-  WorkDoneProgress} from 'vscode-languageclient/node'
+  TransportKind,
+  WorkDoneProgress } from 'vscode-languageclient/node'
 import { subscribeWollokCommands } from './commands'
 import { allWollokFiles } from './utils'
 
