@@ -1,5 +1,8 @@
 import { Connection, WorkDoneProgress, WorkDoneProgressBegin, WorkDoneProgressEnd, WorkDoneProgressReport } from 'vscode-languageserver'
 
+/**
+ * This class is a wrapper around the connection object that allows sending progress reports to the client.
+ */
 export class ProgressReporter {
   constructor(private connection: Connection, private process: { identifier: string, title: string }){}
 

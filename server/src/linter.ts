@@ -2,16 +2,16 @@ import { CodeLens, CodeLensParams, CompletionItem, CompletionParams, Connection,
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, Node, Package, Problem, validate } from 'wollok-ts'
 import { is, List } from 'wollok-ts/dist/extensions'
-import { completionsForNode } from './autocomplete/node-completion'
-import { completeMessages } from './autocomplete/send-completion'
-import { getProgramCodeLenses, getTestCodeLenses } from './code-lens'
-import { getNodeDefinition } from './definition'
-import { reportMessage } from './reporter'
+import { completionsForNode } from './functionalities/autocomplete/node-completion'
+import { completeMessages } from './functionalities/autocomplete/send-completion'
+import { getProgramCodeLenses, getTestCodeLenses } from './functionalities/code-lens'
+import { getNodeDefinition } from './functionalities/definition'
+import { reportMessage } from './functionalities/reporter'
 import { updateDocumentSettings } from './settings'
-import { documentSymbolsFor, workspaceSymbolsFor } from './symbols'
+import { documentSymbolsFor, workspaceSymbolsFor } from './functionalities/symbols'
 import { TimeMeasurer } from './timeMeasurer'
 import { getNodesByPosition, getWollokFileExtension, nodeToLocation } from './utils/text-documents'
-import { isNodeURI, wollokURI, workspacePackage } from './utils/wollok'
+import { isNodeURI, wollokURI, workspacePackage } from './utils/vm/wollok'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS

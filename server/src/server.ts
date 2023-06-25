@@ -2,8 +2,8 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
 import { codeLenses, completions, definition, documentSymbols, validateTextDocument, workspaceSymbols } from './linter'
 import { initializeSettings, WollokLinterSettings } from './settings'
-import { templates } from './templates'
-import { EnvironmentProvider } from './environment-provider'
+import { templates } from './functionalities/autocomplete/templates'
+import { EnvironmentProvider } from './utils/vm/environment-provider'
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
