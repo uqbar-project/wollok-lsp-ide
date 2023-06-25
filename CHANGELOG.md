@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.0.6
+### Using wollok-ts v4.0.3
+  
+- Added icon for Wollok files
+- Progress report
+
 ## v0.0.4
 
 ### Using wollok-ts v4.0.2
