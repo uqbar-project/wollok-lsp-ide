@@ -1,9 +1,8 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, ServerRequestHandler, TextDocuments, TextDocumentSyncKind, WorkDoneProgress } from 'vscode-languageserver/node'
+import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
 import { codeLenses, completions, definition, documentSymbols, validateTextDocument, workspaceSymbols } from './linter'
 import { initializeSettings, WollokLinterSettings } from './settings'
 import { templates } from './templates'
-import { Environment } from 'wollok-ts'
 import { EnvironmentProvider } from './environment-provider'
 
 // Create a connection for the server, using Node's IPC as a transport.
@@ -108,7 +107,7 @@ connection.onRequest(change => {
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
-  waitForEnvironment((params, env) => {
+  environmentProvider.requestWithEnvironment((params, env) => {
     const contextCompletions = completions(params, env)
     return [
       ...contextCompletions,
@@ -121,7 +120,7 @@ connection.onReferences((_params) => {
   return []
 })
 
-connection.onDefinition(waitForEnvironment(definition))
+connection.onDefinition(environmentProvider.requestWithEnvironment(definition))
 
 // This handler resolves additional information for the item selected in the completion list.
 connection.onCompletionResolve(
@@ -134,11 +133,11 @@ connection.onCompletionResolve(
   }
 )
 
-connection.onDocumentSymbol(waitForEnvironment(documentSymbols))
+connection.onDocumentSymbol(environmentProvider.requestWithEnvironment(documentSymbols))
 
-connection.onWorkspaceSymbol(waitForEnvironment(workspaceSymbols))
+connection.onWorkspaceSymbol(environmentProvider.requestWithEnvironment(workspaceSymbols))
 
-connection.onCodeLens(waitForEnvironment(codeLenses))
+connection.onCodeLens(environmentProvider.requestWithEnvironment(codeLenses))
 /*
 connection.onDidOpenTextDocument((params) => {
   // A text document got opened in VSCode.
@@ -165,13 +164,3 @@ documents.listen(connection)
 
 // Listen on the connection
 connection.listen()
-
-function waitForEnvironment<P, R, PR, E>(cb: (params: P, env: Environment) => R): ServerRequestHandler<P, R, PR, E> {
-  return (params) => new Promise<R>((resolve) => {
-    connection.sendProgress(WorkDoneProgress.type, 'wollok-request', { kind: 'begin', title: 'Waiting for environment to be ready' })
-    environmentProvider.withLatestEnvironment((env) => {
-      connection.sendProgress(WorkDoneProgress.type, 'wollok-request', { kind: 'end' })
-      resolve(cb(params, env))
-    })
-  })
-}
