@@ -146,8 +146,7 @@ const interpolateValidationMessage = (message: string, ...values: string[]) =>
   message.replace(/{\d*}/g, (match: string) => {
     const index = match.replace('{', '').replace('}', '') as unknown as number
     return values[index] || ''
-  }
-  )
+  })
 
 const getBasicMessage = (problem: Problem) => validationI18nized()[problem.code] || convertToHumanReadable(problem.code)
 
@@ -158,4 +157,5 @@ const validationI18nized = () =>
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-export const reportMessage = (problem: Problem): string => interpolateValidationMessage(getBasicMessage(problem))
+export const reportMessage = (problem: Problem): string =>
+  interpolateValidationMessage(getBasicMessage(problem), ...problem.values)
