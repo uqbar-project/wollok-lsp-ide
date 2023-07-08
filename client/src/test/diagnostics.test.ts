@@ -26,28 +26,49 @@ suite('Should get diagnostics', () => {
 
   test('Diagnoses lower / uppercase names for objects', async () => {
     await testDiagnostics(pepitaURI, [
-      { code: 'nameShouldBeginWithLowercase', severity: DiagnosticSeverity.Warning },
-      { code: 'nameShouldBeginWithUppercase', severity: DiagnosticSeverity.Warning },
+      {
+        code: 'nameShouldBeginWithLowercase',
+        severity: DiagnosticSeverity.Warning,
+      },
+      {
+        code: 'nameShouldBeginWithUppercase',
+        severity: DiagnosticSeverity.Warning,
+      },
     ])
   })
 })
 
 interface TestDiagnostic {
-  code: string,
+  code: string
   severity: DiagnosticSeverity
   // TODO: Use Range again for test comparison
 }
 
-async function testDiagnostics(docUri: Uri, expectedDiagnostics: TestDiagnostic[]) {
+async function testDiagnostics(
+  docUri: Uri,
+  expectedDiagnostics: TestDiagnostic[],
+) {
   await activate(docUri)
 
   const actualDiagnostics = languages.getDiagnostics(docUri)
 
-  assert.equal(actualDiagnostics.length, expectedDiagnostics.length, 'Diagnostics length differ')
+  assert.equal(
+    actualDiagnostics.length,
+    expectedDiagnostics.length,
+    'Diagnostics length differ',
+  )
 
   expectedDiagnostics.forEach((expectedDiagnostic, i) => {
     const actualDiagnostic = actualDiagnostics[i]
-    assert.equal(actualDiagnostic.code, expectedDiagnostic.code, 'Diagnostic code failed')
-    assert.equal(actualDiagnostic.severity, expectedDiagnostic.severity, 'Diagnostic severity failed')
+    assert.equal(
+      actualDiagnostic.code,
+      expectedDiagnostic.code,
+      'Diagnostic code failed',
+    )
+    assert.equal(
+      actualDiagnostic.severity,
+      expectedDiagnostic.severity,
+      'Diagnostic severity failed',
+    )
   })
 }

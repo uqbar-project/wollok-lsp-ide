@@ -4,7 +4,6 @@ import { env } from 'vscode'
 
 export type Shell = 'bash' | 'cmd' | 'powershell' | 'zsh'
 
-
 export function asShellString(string: string): string {
   if (activeShell() === 'cmd') {
     return replaceAll(string, '"', '\\"')
@@ -18,7 +17,7 @@ export function asShellPath(abstractPath: string[]): string {
 }
 
 function shellPathEncoding(): 'win32' | 'posix' {
-  if(process.platform === 'win32') {
+  if (process.platform === 'win32') {
     return activeShell() === 'bash' ? 'posix' : 'win32'
   } else {
     return 'posix'
@@ -45,7 +44,11 @@ export function toWin(path: string): string {
   return transformSeparators(path, '/', '\\')
 }
 
-export function transformSeparators(path: string, originalSep: string, targetSep: string): string {
+export function transformSeparators(
+  path: string,
+  originalSep: string,
+  targetSep: string,
+): string {
   return path.split(originalSep).join(targetSep)
 }
 
@@ -56,5 +59,5 @@ export function transformSeparators(path: string, originalSep: string, targetSep
  */
 function activeShell(): Shell {
   const shells = ['cmd', 'powershell', 'bash', 'zsh'] as const
-  return shells.find(shell => env.shell.includes(shell)) || 'bash'
+  return shells.find((shell) => env.shell.includes(shell)) || 'bash'
 }

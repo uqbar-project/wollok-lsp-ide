@@ -4,12 +4,20 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path'
-import { ExtensionContext, workspace, languages, window, StatusBarAlignment } from 'vscode'
-import { LanguageClient,
+import {
+  ExtensionContext,
+  workspace,
+  languages,
+  window,
+  StatusBarAlignment,
+} from 'vscode'
+import {
+  LanguageClient,
   LanguageClientOptions,
   ServerOptions,
   TransportKind,
-  WorkDoneProgress } from 'vscode-languageclient/node'
+  WorkDoneProgress,
+} from 'vscode-languageclient/node'
 import { subscribeWollokCommands } from './commands'
 import { allWollokFiles } from './utils'
 
@@ -18,7 +26,7 @@ let client: LanguageClient
 export function activate(context: ExtensionContext): void {
   // The server is implemented in node
   const serverModule = context.asAbsolutePath(
-    path.join('server', 'out', 'server.js')
+    path.join('server', 'out', 'server.js'),
   )
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
@@ -54,7 +62,7 @@ export function activate(context: ExtensionContext): void {
     'wollok-lsp-ide',
     'Wollok',
     serverOptions,
-    clientOptions
+    clientOptions,
   )
 
   // Force first validation
@@ -62,7 +70,7 @@ export function activate(context: ExtensionContext): void {
 
   const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left)
 
-  client.onProgress(WorkDoneProgress.type, 'wollok-build', progress => {
+  client.onProgress(WorkDoneProgress.type, 'wollok-build', (progress) => {
     if (progress.kind === 'begin' || progress.kind === 'report') {
       statusBarItem.text = '$(loading~spin) Wollok Building...'
       statusBarItem.show()
@@ -72,9 +80,8 @@ export function activate(context: ExtensionContext): void {
   })
 
   // Force environment to restart
-  const revalidateWorskpace = _event =>
+  const revalidateWorskpace = (_event) =>
     client.sendRequest('STRONG_FILES_CHANGED').then(validateWorkspace)
-
 
   workspace.onDidDeleteFiles(revalidateWorskpace)
   workspace.onDidRenameFiles(revalidateWorskpace)

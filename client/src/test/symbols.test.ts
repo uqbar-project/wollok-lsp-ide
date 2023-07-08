@@ -3,7 +3,7 @@ import { commands, SymbolKind, Uri } from 'vscode'
 import { DocumentSymbol, WorkspaceSymbol } from 'vscode-languageclient'
 import { activate, getDocumentURI } from './helper'
 
-type SymbolData = {kind: SymbolKind, name: string}
+type SymbolData = { kind: SymbolKind; name: string }
 
 suite('Should do symbols', () => {
   const docUri = getDocumentURI('pepita.wlk')
@@ -12,28 +12,29 @@ suite('Should do symbols', () => {
     await testDocumentSymbols(docUri, [
       { name: 'Pepita', kind: SymbolKind.Class },
       { name: 'a', kind: SymbolKind.Class },
-
     ])
   })
 
   test('Provides workspace symbols', async () => {
-    await testWorkspaceSymbols(docUri, [
-      { name: '"pepita is happy"', kind: SymbolKind.Event },
-    ], 'pepita is hap')
+    await testWorkspaceSymbols(
+      docUri,
+      [{ name: '"pepita is happy"', kind: SymbolKind.Event }],
+      'pepita is hap',
+    )
   })
 })
 
 async function testWorkspaceSymbols(
   docUri: Uri,
   expectedSymbolList: SymbolData[],
-  query: string
+  query: string,
 ) {
   await activate(docUri)
 
   // Executing the command `executeWorkspaceSymbolProvider` to simulate triggering workspace symbols search
   const actualSymbolsList: WorkspaceSymbol[] = await commands.executeCommand(
     'vscode.executeWorkspaceSymbolProvider',
-    query
+    query,
   )
 
   symbolsEqual(expectedSymbolList, actualSymbolsList)
@@ -48,14 +49,16 @@ async function testDocumentSymbols(
   // Executing the command `executeDocumentSymbolProvider` to simulate triggering document symbols search
   const actualSymbolsList: DocumentSymbol[] = await commands.executeCommand(
     'vscode.executeDocumentSymbolProvider',
-    docUri
+    docUri,
   )
 
   symbolsEqual(expectedSymbolList, actualSymbolsList)
 }
 
-
-function symbolsEqual(expectedSymbolList: {kind: SymbolKind, name: string}[], actualSymbolsList: DocumentSymbol[] | WorkspaceSymbol[]) {
+function symbolsEqual(
+  expectedSymbolList: { kind: SymbolKind; name: string }[],
+  actualSymbolsList: DocumentSymbol[] | WorkspaceSymbol[],
+) {
   assert.strictEqual(actualSymbolsList.length, expectedSymbolList.length)
   expectedSymbolList.forEach((expectedSymbol, i) => {
     const actualSymbol = actualSymbolsList[i]
