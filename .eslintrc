@@ -35,7 +35,6 @@
         "vars": "all"
       }
     ],
-    "@typescript-eslint/quotes": ["warn", "single"],
     "@typescript-eslint/semi": ["warn", "never"],
     "array-bracket-spacing": ["warn", "never"],
     "array-element-newline": ["warn", "consistent"],
@@ -59,17 +58,8 @@
         "before": false
       }
     ],
-    "eol-last": ["warn", "never"],
     "for-direction": "off",
     "function-call-argument-newline": ["warn", "consistent"],
-    "indent": [
-      "warn",
-      2,
-      {
-        "SwitchCase": 1,
-        "flatTernaryExpressions": true
-      }
-    ],
     "require-yield": "off",
     "no-case-declarations": "off",
     "no-console": [
@@ -96,22 +86,6 @@
       }
     ],
     "no-trailing-spaces": "warn",
-    "object-curly-newline": [
-      "warn",
-      {
-        "ExportDeclaration": {
-          "minProperties": 4,
-          "multiline": true
-        },
-        "ImportDeclaration": "never",
-        "ObjectExpression": {
-          "multiline": true
-        },
-        "ObjectPattern": {
-          "multiline": true
-        }
-      }
-    ],
     "object-curly-spacing": ["warn", "always"],
     "padding-line-between-statements": [
       "warn",
