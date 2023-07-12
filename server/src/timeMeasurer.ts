@@ -11,7 +11,7 @@ export class TimeMeasurer {
     if (!this.times) return
     console.info('Performance metrics')
     console.info('=========================')
-    this.times.forEach ((timeRow, index) => {
+    this.times.forEach((timeRow, index) => {
       const time = this.elapsedTime(index)
       console.info(`o- ${timeRow.processName} ${time}`)
     })
@@ -28,7 +28,8 @@ export class TimeMeasurer {
   }
 
   private elapsedTime(index: number): number {
-    const previousTime = index > 0 ? this.times[index - 1].time : this.initialTime
+    const previousTime =
+      index > 0 ? this.times[index - 1].time : this.initialTime
     const currentTime = this.times[index].time
     return currentTime - previousTime
   }
@@ -36,7 +37,6 @@ export class TimeMeasurer {
   private getTime(value: bigint): number {
     return Number(value / BigInt(1000000))
   }
-
 }
 
 class TimeElement {

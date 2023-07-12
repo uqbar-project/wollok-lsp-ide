@@ -1,7 +1,7 @@
 import { Connection } from 'vscode-languageserver/node'
 
 export interface WollokLinterSettings {
-  maxNumberOfProblems: number,
+  maxNumberOfProblems: number
   language: string
 }
 
@@ -26,19 +26,27 @@ const defaultSettings: WollokLinterSettings = {
 let globalSettings: WollokLinterSettings = defaultSettings
 
 const languageDescription: { [key: string]: string } = {
-  'Spanish': SPANISH,
-  'English': ENGLISH,
+  Spanish: SPANISH,
+  English: ENGLISH,
 }
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-export const updateDocumentSettings = async (connection: Connection): Promise<void> => {
-  globalSettings = await connection.workspace.getConfiguration({ section: 'wollokLinter' }) as WollokLinterSettings || defaultSettings
+export const updateDocumentSettings = async (
+  connection: Connection,
+): Promise<void> => {
+  globalSettings =
+    ((await connection.workspace.getConfiguration({
+      section: 'wollokLinter',
+    })) as WollokLinterSettings) || defaultSettings
 }
 
-export const initializeSettings = async (connection: Connection): Promise<void> => {
+export const initializeSettings = async (
+  connection: Connection,
+): Promise<void> => {
   await updateDocumentSettings(connection)
 }
 
-export const lang = (): string => languageDescription[globalSettings.language] || envLang()
+export const lang = (): string =>
+  languageDescription[globalSettings.language] || envLang()

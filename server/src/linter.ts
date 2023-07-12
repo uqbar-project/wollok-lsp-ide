@@ -1,16 +1,42 @@
-import { CodeLens, CodeLensParams, CompletionItem, CompletionParams, Connection, Diagnostic, DiagnosticSeverity, DocumentSymbol, DocumentSymbolParams, Location, Position, TextDocumentIdentifier, TextDocumentPositionParams, WorkspaceSymbol, WorkspaceSymbolParams } from 'vscode-languageserver'
+import {
+  CodeLens,
+  CodeLensParams,
+  CompletionItem,
+  CompletionParams,
+  Connection,
+  Diagnostic,
+  DiagnosticSeverity,
+  DocumentSymbol,
+  DocumentSymbolParams,
+  Location,
+  Position,
+  TextDocumentIdentifier,
+  TextDocumentPositionParams,
+  WorkspaceSymbol,
+  WorkspaceSymbolParams,
+} from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, Node, Package, Problem, validate } from 'wollok-ts'
 import { is, List } from 'wollok-ts/dist/extensions'
 import { completionsForNode } from './functionalities/autocomplete/node-completion'
 import { completeMessages } from './functionalities/autocomplete/send-completion'
-import { getProgramCodeLenses, getTestCodeLenses } from './functionalities/code-lens'
+import {
+  getProgramCodeLenses,
+  getTestCodeLenses,
+} from './functionalities/code-lens'
 import { getNodeDefinition } from './functionalities/definition'
 import { reportMessage } from './functionalities/reporter'
 import { updateDocumentSettings } from './settings'
-import { documentSymbolsFor, workspaceSymbolsFor } from './functionalities/symbols'
+import {
+  documentSymbolsFor,
+  workspaceSymbolsFor,
+} from './functionalities/symbols'
 import { TimeMeasurer } from './timeMeasurer'
-import { getNodesByPosition, getWollokFileExtension, nodeToLocation } from './utils/text-documents'
+import {
+  getNodesByPosition,
+  getWollokFileExtension,
+  nodeToLocation,
+} from './utils/text-documents'
 import { isNodeURI, wollokURI, workspacePackage } from './utils/vm/wollok'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -18,7 +44,9 @@ import { isNodeURI, wollokURI, workspacePackage } from './utils/vm/wollok'
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 const buildSeverity = (problem: Problem) =>
-  problem.level === 'error' ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning
+  problem.level === 'error'
+    ? DiagnosticSeverity.Error
+    : DiagnosticSeverity.Warning
 
 const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
   const source = problem.sourceMap
@@ -48,57 +76,69 @@ function findFirstStableNode(node: Node): Node {
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-const sendDiagnistics = (connection: Connection, problems: List<Problem>, documents: TextDocument[]): void => {
+const sendDiagnistics = (
+  connection: Connection,
+  problems: List<Problem>,
+  documents: TextDocument[],
+): void => {
   for (const document of documents) {
     const diagnostics: Diagnostic[] = problems
-      .filter(problem => isNodeURI(problem.node, document.uri))
-      .map(problem => createDiagnostic(document, problem))
+      .filter((problem) => isNodeURI(problem.node, document.uri))
+      .map((problem) => createDiagnostic(document, problem))
 
     const uri = wollokURI(document.uri)
     connection.sendDiagnostics({ uri, diagnostics })
   }
 }
 
-export const validateTextDocument = (connection: Connection, allDocuments: TextDocument[]) => (textDocument: TextDocument) => async (environment: Environment): Promise<void> => {
-  await updateDocumentSettings(connection)
+export const validateTextDocument =
+  (connection: Connection, allDocuments: TextDocument[]) =>
+  (textDocument: TextDocument) =>
+  async (environment: Environment): Promise<void> => {
+    await updateDocumentSettings(connection)
 
-  try {
-    const timeMeasurer = new TimeMeasurer()
-    const problems = validate(environment)
-    timeMeasurer.addTime('build environment for file')
+    try {
+      const timeMeasurer = new TimeMeasurer()
+      const problems = validate(environment)
+      timeMeasurer.addTime('build environment for file')
 
-    sendDiagnistics(connection, problems, allDocuments)
-    timeMeasurer.addTime('validation time')
+      sendDiagnistics(connection, problems, allDocuments)
+      timeMeasurer.addTime('validation time')
 
-    timeMeasurer.finalReport()
-  } catch (e) {
-    // TODO: Generate a high-level function
-    const uri = wollokURI(textDocument.uri)
-    const content = textDocument.getText()
+      timeMeasurer.finalReport()
+    } catch (e) {
+      // TODO: Generate a high-level function
+      const uri = wollokURI(textDocument.uri)
+      const content = textDocument.getText()
 
-    connection.sendDiagnostics({
-      uri: uri, diagnostics: [
-        createDiagnostic(textDocument, {
-          level: 'error',
-          code: 'FileCouldNotBeValidated',
-          node: { sourceFileName: () => uri },
-          values: [],
-          sourceMap: {
-            start: {
-              line: 1,
-              offset: 0,
-            }, end: {
-              line: Number.MAX_VALUE,
-              offset: content.length - 1,
+      connection.sendDiagnostics({
+        uri: uri,
+        diagnostics: [
+          createDiagnostic(textDocument, {
+            level: 'error',
+            code: 'FileCouldNotBeValidated',
+            node: { sourceFileName: () => uri },
+            values: [],
+            sourceMap: {
+              start: {
+                line: 1,
+                offset: 0,
+              },
+              end: {
+                line: Number.MAX_VALUE,
+                offset: content.length - 1,
+              },
             },
-          },
-        } as unknown as Problem),
-      ],
-    })
+          } as unknown as Problem),
+        ],
+      })
+    }
   }
-}
 
-export const completions = (params: CompletionParams, environment: Environment): CompletionItem[] => {
+export const completions = (
+  params: CompletionParams,
+  environment: Environment,
+): CompletionItem[] => {
   const { position, textDocument, context } = params
   const selectionNode = cursorNode(environment, position, textDocument)
 
@@ -111,18 +151,30 @@ export const completions = (params: CompletionParams, environment: Environment):
   }
 }
 
-function cursorNode(environment: Environment, position: Position, textDocument: TextDocumentIdentifier): Node {
-  return getNodesByPosition(environment, { position, textDocument }).reverse()[0]
+function cursorNode(
+  environment: Environment,
+  position: Position,
+  textDocument: TextDocumentIdentifier,
+): Node {
+  return getNodesByPosition(environment, {
+    position,
+    textDocument,
+  }).reverse()[0]
 }
 
-export const definition = (textDocumentPosition: TextDocumentPositionParams, environment: Environment): Location[] => {
+export const definition = (
+  textDocumentPosition: TextDocumentPositionParams,
+  environment: Environment,
+): Location[] => {
   const cursorNodes = getNodesByPosition(environment, textDocumentPosition)
   const definitions = getNodeDefinition(environment)(cursorNodes.reverse()[0])
   return definitions.map(nodeToLocation)
 }
 
-
-export const codeLenses = (params: CodeLensParams, environment: Environment): CodeLens[] | null => {
+export const codeLenses = (
+  params: CodeLensParams,
+  environment: Environment,
+): CodeLens[] | null => {
   const fileExtension = getWollokFileExtension(params.textDocument.uri)
   const file = findPackage(params.textDocument.uri, environment)
   if (!file) return null
@@ -137,21 +189,27 @@ export const codeLenses = (params: CodeLensParams, environment: Environment): Co
   }
 }
 
-export const documentSymbols = (params: DocumentSymbolParams, environment: Environment): DocumentSymbol[] => {
+export const documentSymbols = (
+  params: DocumentSymbolParams,
+  environment: Environment,
+): DocumentSymbol[] => {
   // ToDo this is a temporal fix for https://github.com/uqbar-project/wollok-lsp-ide/issues/61
-  if(!workspacePackage(environment)){
+  if (!workspacePackage(environment)) {
     return []
   }
   const document = findPackage(params.textDocument.uri, environment)
-  if (!document) throw new Error('Could not produce symbols: document not found')
+  if (!document)
+    throw new Error('Could not produce symbols: document not found')
   return documentSymbolsFor(document)
 }
 
-export const workspaceSymbols = (params: WorkspaceSymbolParams, environment: Environment): WorkspaceSymbol[] =>
-  workspaceSymbolsFor(environment, params.query)
+export const workspaceSymbols = (
+  params: WorkspaceSymbolParams,
+  environment: Environment,
+): WorkspaceSymbol[] => workspaceSymbolsFor(environment, params.query)
 
-const findPackage = (uri: string, environment: Environment): Package | undefined =>
-  environment
-    .descendants
-    .filter(is(Package))
-    .find(p => isNodeURI(p, uri))
+const findPackage = (
+  uri: string,
+  environment: Environment,
+): Package | undefined =>
+  environment.descendants.filter(is(Package)).find((p) => isNodeURI(p, uri))

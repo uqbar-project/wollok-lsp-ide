@@ -7,15 +7,16 @@ type PositionJSON = {
   /**
    * Line
    */
-  c: number,
+  c: number
   /**
    * Character
    */
   e: number
 }
-type CodeLensJSON = Omit<CodeLens, 'range'> & { range: {c: PositionJSON, e: PositionJSON} }
+type CodeLensJSON = Omit<CodeLens, 'range'> & {
+  range: { c: PositionJSON; e: PositionJSON }
+}
 type CodeLensLSPAnswer = CodeLensJSON[] | null
-
 
 suite('Should do code lenses', () => {
   const docUri = getDocumentURI('test.wtest')
@@ -36,9 +37,7 @@ suite('Should do code lenses', () => {
         command: {
           title: 'Run all tests',
           command: 'wollok.run.tests',
-          arguments: [
-            'test',
-          ],
+          arguments: ['test'],
         },
       },
       {
@@ -55,14 +54,12 @@ suite('Should do code lenses', () => {
         command: {
           title: 'Run describe',
           command: 'wollok.run.tests',
-          arguments: [
-            'test."pepita test"',
-          ],
+          arguments: ['test."pepita test"'],
         },
       },
       {
         range: {
-          c:{
+          c: {
             c: 1,
             e: 4,
           },
@@ -74,9 +71,7 @@ suite('Should do code lenses', () => {
         command: {
           title: 'Run test',
           command: 'wollok.run.tests',
-          arguments: [
-            'test."pepita test"."pepita is happy"',
-          ],
+          arguments: ['test."pepita test"."pepita is happy"'],
         },
       },
     ])
@@ -88,15 +83,19 @@ suite('Should do code lenses', () => {
 
 async function testCodeLenses(
   docUri: Uri,
-  expectedCodeLensesList: CodeLensLSPAnswer
+  expectedCodeLensesList: CodeLensLSPAnswer,
 ) {
   await activate(docUri)
 
   // Executing the command `vscode.executeCodeLensProvider` to simulate triggering code lenses
   const actualCodeLensesList = (await commands.executeCommand(
     'vscode.executeCodeLensProvider',
-    docUri
-  )) as (CodeLens & {range: Range})[] | null
+    docUri,
+  )) as (CodeLens & { range: Range })[] | null
 
-  assert.deepEqual(actualCodeLensesList, expectedCodeLensesList, 'Code lenses mismatch')
+  assert.deepEqual(
+    actualCodeLensesList,
+    expectedCodeLensesList,
+    'Code lenses mismatch',
+  )
 }
