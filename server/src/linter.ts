@@ -59,7 +59,7 @@ const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
     range,
     code: problem.code,
     message: reportMessage(problem),
-    source: problem.node.sourceFileName,
+    source: '',
   } as Diagnostic
 }
 
@@ -76,7 +76,7 @@ function findFirstStableNode(node: Node): Node {
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-const sendDiagnistics = (
+const sendDiagnostics = (
   connection: Connection,
   problems: List<Problem>,
   documents: TextDocument[],
@@ -102,7 +102,7 @@ export const validateTextDocument =
       const problems = validate(environment)
       timeMeasurer.addTime('build environment for file')
 
-      sendDiagnistics(connection, problems, allDocuments)
+      sendDiagnostics(connection, problems, allDocuments)
       timeMeasurer.addTime('validation time')
 
       timeMeasurer.finalReport()
