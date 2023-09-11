@@ -61,8 +61,10 @@ const validationMessagesEn: ValidationMessage = {
   shouldNotImportMoreThanOnce: 'This file is already imported',
   parameterShouldNotDuplicateExistingVariable: 'Duplicated Name',
   methodShouldExist: 'Method does not exist or invalid number of arguments',
-  shouldImplementAbstractMethods:
+  shouldImplementInheritedAbstractMethods:
     'You must implement all inherited abstract methods',
+  shouldHaveBody:
+    'Method without body. You must implement it',
   shouldNotUseVoidMethodAsValue:
     'Message send "{0}" produces no value (missing return in method?)',
   shouldInitializeGlobalReference: 'Reference is never initialized',
@@ -153,8 +155,10 @@ const validationMessagesEs: ValidationMessage = {
   parameterShouldNotDuplicateExistingVariable: 'Nombre duplicado',
   methodShouldExist:
     'El m\u00E9todo no existe o n\u00FAmero incorrecto de argumentos',
-  shouldImplementAbstractMethods:
+  shouldImplementInheritedAbstractMethods:
     'Debe implementar todos los m\u00E9todos abstractos heredados',
+  shouldHaveBody:
+    'El método debe tener una implementación',
   shouldNotUseVoidMethodAsValue:
     'El mensaje "{0}" no retorna ning\u00FAn valor (quiz\u00E1s te falte un return en el m\u00E9todo)',
   shouldInitializeGlobalReference: 'La referencia nunca se inicializa',
