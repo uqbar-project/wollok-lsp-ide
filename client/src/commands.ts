@@ -1,4 +1,5 @@
 import * as path from 'path'
+import * as vscode from 'vscode'
 import {
   commands,
   ExtensionContext,
@@ -52,11 +53,18 @@ export const runAllTests = (): Task =>
 export const startRepl = (): Task => {
   const currentDocument = window.activeTextEditor.document
   const currentFileName = path.basename(currentDocument.uri.path)
-  return wollokCLITask('repl', `Wollok Repl: ${currentFileName}`, [
+
+  const replTask = wollokCLITask('repl', `Wollok Repl: ${currentFileName}`, [
     'repl',
     fsToShell(currentDocument.uri.fsPath),
     '--skipValidations',
   ])
+
+  setTimeout(() => {
+    vscode.commands.executeCommand('simpleBrowser.show', 'http://localhost:3000/')
+  }, 1000)
+
+  return replTask
 }
 
 /**
