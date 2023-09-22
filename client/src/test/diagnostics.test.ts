@@ -1,6 +1,7 @@
 import * as assert from 'assert'
 import { DiagnosticSeverity, languages, Uri } from 'vscode'
 import { getDocumentURI, activate } from './helper'
+import { Position, Range } from 'vscode-languageclient'
 
 /** ATTENTION
  * These tests are NOT ATOMIC, they depend on each other, order matters. (Resolve TODO)
@@ -10,12 +11,17 @@ suite('Should get diagnostics', () => {
   const pepitaURI = getDocumentURI('pepita.wlk')
   const importerURI = getDocumentURI('importer.wlk')
   const importedURI = getDocumentURI('imported.wlk')
+  const manoloURI = getDocumentURI('manolo.wlk')
 
   //TODO: Restart server status after each test
 
   test('on file with missing imports', async () => {
     await testDiagnostics(lostURI, [
-      { code: 'missingReference', severity: DiagnosticSeverity.Error },
+      {
+        code: 'missingReference',
+        severity: DiagnosticSeverity.Error,
+        range: Range.create(Position.create(0, 7), Position.create(0, 14)),
+      },
     ])
   })
 
@@ -29,10 +35,22 @@ suite('Should get diagnostics', () => {
       {
         code: 'nameShouldBeginWithLowercase',
         severity: DiagnosticSeverity.Warning,
+        range: Range.create(Position.create(0, 7), Position.create(0, 13)),
       },
       {
         code: 'nameShouldBeginWithUppercase',
         severity: DiagnosticSeverity.Warning,
+        range: Range.create(Position.create(4, 6), Position.create(4, 7)),
+      },
+    ])
+  })
+
+  test('Should trim diagnostics', async () => {
+    await testDiagnostics(manoloURI, [
+      {
+        code: 'shouldNotDefineUnusedVariables',
+        severity: DiagnosticSeverity.Warning,
+        range: Range.create(Position.create(1, 2), Position.create(1, 12)),
       },
     ])
   })
@@ -41,7 +59,7 @@ suite('Should get diagnostics', () => {
 interface TestDiagnostic {
   code: string
   severity: DiagnosticSeverity
-  // TODO: Use Range again for test comparison
+  range: Range
 }
 
 async function testDiagnostics(
@@ -70,5 +88,18 @@ async function testDiagnostics(
       expectedDiagnostic.severity,
       'Diagnostic severity failed',
     )
+    positionEquals(actualDiagnostic.range.start, expectedDiagnostic.range.start)
+    positionEquals(actualDiagnostic.range.end, expectedDiagnostic.range.end)
   })
+}
+
+function positionEquals(actual: Position, expected: Position){
+  assert.equal(
+    actual.character,
+    expected.character
+  )
+  assert.equal(
+    actual.line,
+    expected.line
+  )
 }
