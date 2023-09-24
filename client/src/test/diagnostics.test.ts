@@ -96,10 +96,12 @@ async function testDiagnostics(
 function positionEquals(actual: Position, expected: Position){
   assert.equal(
     actual.character,
-    expected.character
+    expected.character,
+    `Expected character ${expected.character} but got ${actual.character}`
   )
   assert.equal(
     actual.line,
-    expected.line
+    expected.line,
+    `Expected line ${expected.line} but got ${actual.line}`
   )
 }
