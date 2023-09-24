@@ -1,8 +1,10 @@
 import { Connection } from 'vscode-languageserver/node'
 
-export interface WollokLinterSettings {
+export interface WollokLSPSettings {
   maxNumberOfProblems: number
-  language: string
+  language: string,
+  openDynamicDiagramOnRepl: boolean,
+  openInternalDynamicDiagram: boolean,
 }
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -18,12 +20,14 @@ const envLang = () => {
   return fullLanguage ? fullLanguage.substring(0, 2) : SPANISH
 }
 
-const defaultSettings: WollokLinterSettings = {
+const defaultSettings: WollokLSPSettings = {
   maxNumberOfProblems: 1000,
   language: envLang(),
+  openDynamicDiagramOnRepl: true,
+  openInternalDynamicDiagram: true,
 }
 
-let globalSettings: WollokLinterSettings = defaultSettings
+let globalSettings: WollokLSPSettings = defaultSettings
 
 const languageDescription: { [key: string]: string } = {
   Spanish: SPANISH,
@@ -38,8 +42,8 @@ export const updateDocumentSettings = async (
 ): Promise<void> => {
   globalSettings =
     ((await connection.workspace.getConfiguration({
-      section: 'wollokLinter',
-    })) as WollokLinterSettings) || defaultSettings
+      section: 'wollokLSP',
+    })) as WollokLSPSettings) || defaultSettings
 }
 
 export const initializeSettings = async (

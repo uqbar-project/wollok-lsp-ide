@@ -17,7 +17,7 @@ import {
   validateTextDocument,
   workspaceSymbols,
 } from './linter'
-import { initializeSettings, WollokLinterSettings } from './settings'
+import { initializeSettings, WollokLSPSettings } from './settings'
 import { templates } from './functionalities/autocomplete/templates'
 import { EnvironmentProvider } from './utils/vm/environment-provider'
 
@@ -77,27 +77,12 @@ connection.onInitialized(() => {
 })
 
 // Cache the settings of all open documents
-const documentSettings: Map<string, Thenable<WollokLinterSettings>> = new Map()
+const documentSettings: Map<string, Thenable<WollokLSPSettings>> = new Map()
 
 connection.onDidChangeConfiguration(() => {
   // Revalidate all open text documents
   documents.all().forEach(validateTextDocument(connection, documents.all()))
 })
-
-// function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
-//   if (!hasConfigurationCapability) {
-//     return Promise.resolve(globalSettings)
-//   }
-//   let result = documentSettings.get(resource)
-//   if (!result) {
-//     result = connection.workspace.getConfiguration({
-//       scopeUri: resource,
-//       section: 'languageServerExample',
-//     })
-//     documentSettings.set(resource, result)
-//   }
-//   return result
-// }
 
 // Only keep settings for open documents
 documents.onDidClose((e) => {

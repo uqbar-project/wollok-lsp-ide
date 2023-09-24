@@ -56,18 +56,13 @@
       "type": "object",
       "title": "Wollok LSP IDE",
       "properties": {
-        "wollokLinter.cli-path": {
+        "wollokLSP.cli-path": {
           "scope": "resource",
           "type": "string",
-          "description": "Path to Wollok-CLI."
+          "description": "Path to Wollok-CLI.",
+          "order": 0
         },
-        "wollokLinter.maxNumberOfProblems": {
-          "scope": "resource",
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
-        },
-        "wollokLinter.language": {
+        "wollokLSP.language": {
           "scope": "resource",
           "type": "string",
           "enum": [
@@ -76,9 +71,31 @@
             "Based on Local Environment"
           ],
           "default": "Based on Local Environment",
-          "description": "Language used while reporting linter errors and warnings."
+          "description": "Language used while reporting linter errors and warnings.",
+          "order": 1
         },
-        "wollokLinter.trace.server": {
+        "wollokLSP.maxNumberOfProblems": {
+          "scope": "resource",
+          "type": "number",
+          "default": 100,
+          "description": "Controls the maximum number of problems produced by the server.",
+          "order": 2
+        },
+        "wollokLSP.openDynamicDiagramOnRepl": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Opens the dynamic diagram when running the REPL.",
+          "order": 3
+        },
+        "wollokLSP.openInternalDynamicDiagram": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "If true, opens an internal dynamic diagram inside Wollok IDE. If false, it will open a new external browser.",
+          "order": 4
+        },
+        "wollokLSP.trace.server": {
           "scope": "window",
           "type": "string",
           "enum": [
@@ -87,7 +104,8 @@
             "verbose"
           ],
           "default": "off",
-          "description": "Traces the communication between VS Code and the language server."
+          "description": "Traces the communication between VS Code and the language server.",
+          "order": 5
         }
       }
     },

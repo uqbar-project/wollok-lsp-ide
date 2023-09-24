@@ -56,13 +56,24 @@ const getCurrentFileName = (document: vscode.TextDocument | undefined) =>
 const getFiles = (document: vscode.TextDocument | undefined) =>
   document ? [fsToShell(document.uri.fsPath)] : []
 
+const DYNAMIC_DIAGRAM_URI = 'http://localhost:3000/'
+
 export const startRepl = (): Task => {
   const currentDocument = window.activeTextEditor?.document
   const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations']
   const replTask = wollokCLITask('repl', `Wollok Repl: ${getCurrentFileName(currentDocument)}`, cliCommands)
-  setTimeout(() => {
-    vscode.commands.executeCommand('simpleBrowser.show', 'http://localhost:3000/')
-  }, 1000)
+
+  const openDynamicDiagram = workspace.getConfiguration('wollokLSP').get('openDynamicDiagramOnRepl') as boolean
+  if (openDynamicDiagram) {
+    setTimeout(() => {
+      const openInternalDynamicDiagram = workspace.getConfiguration('wollokLSP').get('openInternalDynamicDiagram') as boolean
+      if (openInternalDynamicDiagram) {
+        vscode.commands.executeCommand('simpleBrowser.show', DYNAMIC_DIAGRAM_URI)
+      } else {
+        vscode.env.openExternal(vscode.Uri.parse(DYNAMIC_DIAGRAM_URI))
+      }
+    }, 1000)
+  }
   return replTask
 }
 
@@ -80,7 +91,7 @@ const registerCLICommand = (
 
 const wollokCLITask = (task: string, name: string, cliCommands: string[]) => {
   const wollokCli = unknownToShell(
-    workspace.getConfiguration('wollokLinter').get('cli-path'),
+    workspace.getConfiguration('wollokLSP').get('cli-path'),
   )
   const folder = workspace.workspaceFolders[0]
   const shellCommand = [
