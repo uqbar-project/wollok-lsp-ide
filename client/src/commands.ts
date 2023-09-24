@@ -50,20 +50,19 @@ export const runAllTests = (): Task =>
     '--skipValidations',
   ])
 
+const getCurrentFileName = (document: vscode.TextDocument | undefined) =>
+  document ? path.basename(document.uri.path) : 'Synthetic File'
+
+const getFiles = (document: vscode.TextDocument | undefined) =>
+  document ? [fsToShell(document.uri.fsPath)] : []
+
 export const startRepl = (): Task => {
-  const currentDocument = window.activeTextEditor.document
-  const currentFileName = path.basename(currentDocument.uri.path)
-
-  const replTask = wollokCLITask('repl', `Wollok Repl: ${currentFileName}`, [
-    'repl',
-    fsToShell(currentDocument.uri.fsPath),
-    '--skipValidations',
-  ])
-
+  const currentDocument = window.activeTextEditor?.document
+  const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations']
+  const replTask = wollokCLITask('repl', `Wollok Repl: ${getCurrentFileName(currentDocument)}`, cliCommands)
   setTimeout(() => {
     vscode.commands.executeCommand('simpleBrowser.show', 'http://localhost:3000/')
   }, 1000)
-
   return replTask
 }
 
