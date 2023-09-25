@@ -36,6 +36,7 @@ import {
   getNodesByPosition,
   getWollokFileExtension,
   nodeToLocation,
+  trimIn,
 } from './utils/text-documents'
 import { isNodeURI, wollokURI, workspacePackage } from './utils/vm/wollok'
 
@@ -54,9 +55,10 @@ const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
     start: textDocument.positionAt(source ? source.start.offset : 0),
     end: textDocument.positionAt(source ? source.end.offset : 0),
   }
+
   return {
     severity: buildSeverity(problem),
-    range,
+    range: trimIn(range, textDocument),
     code: problem.code,
     message: reportMessage(problem),
     source: '',

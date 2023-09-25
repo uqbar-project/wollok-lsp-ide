@@ -1,4 +1,5 @@
 import { Location, Position, Range, TextDocumentPositionParams } from 'vscode-languageserver'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, Node, SourceIndex, SourceMap } from 'wollok-ts'
 
 // TODO: Refactor
@@ -59,6 +60,19 @@ export const nodeToLocation = (node: Node): Location => {
     uri: node.sourceFileName!,
     range: toVSCRange(node.sourceMap),
   }
+}
+
+export function trimIn(range: Range, textDocument: TextDocument): Range {
+  const start = textDocument.offsetAt(range.start)
+  const end = textDocument.offsetAt(range.end)
+  const text = textDocument.getText().substring(start, end)
+  const trimmed = text.trim()
+  const startOffset = text.indexOf(trimmed)
+  const endOffset = startOffset + trimmed.length
+  return Range.create(
+    textDocument.positionAt(start + startOffset),
+    textDocument.positionAt(start + endOffset),
+  )
 }
 
 
