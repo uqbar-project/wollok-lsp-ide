@@ -25,7 +25,7 @@ import {
   getTestCodeLenses,
 } from './functionalities/code-lens'
 import { getNodeDefinition } from './functionalities/definition'
-import { reportMessage } from './functionalities/reporter'
+import { reportValidationMessage } from './functionalities/reporter'
 import { updateDocumentSettings } from './settings'
 import {
   documentSymbolsFor,
@@ -58,7 +58,7 @@ const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
     severity: buildSeverity(problem),
     range,
     code: problem.code,
-    message: reportMessage(problem),
+    message: reportValidationMessage(problem),
     source: '',
   } as Diagnostic
 }

@@ -90,9 +90,10 @@ const registerCLICommand = (
   )
 
 const wollokCLITask = (task: string, name: string, cliCommands: string[]) => {
-  const wollokCli = unknownToShell(
-    workspace.getConfiguration('wollokLSP').get('cli-path'),
-  )
+  const wollokCliPath: string = workspace.getConfiguration('wollokLSP').get('cli-path')
+  // TODO: i18n - but it's in the server
+  if (!wollokCliPath) throw new Error('Missing configuration WollokLSP/cli-pat in order to run Wollok tasks')
+  const wollokCli = unknownToShell(wollokCliPath)
   const folder = workspace.workspaceFolders[0]
   const shellCommand = [
     wollokCli,
