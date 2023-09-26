@@ -81,20 +81,6 @@
           "description": "Controls the maximum number of problems produced by the server.",
           "order": 2
         },
-        "wollokLSP.openDynamicDiagramOnRepl": {
-          "scope": "resource",
-          "type": "boolean",
-          "default": true,
-          "description": "Opens the dynamic diagram when running the REPL.",
-          "order": 3
-        },
-        "wollokLSP.openInternalDynamicDiagram": {
-          "scope": "resource",
-          "type": "boolean",
-          "default": true,
-          "description": "If true, opens an internal dynamic diagram inside Wollok IDE. If false, it will open a new external browser.",
-          "order": 4
-        },
         "wollokLSP.trace.server": {
           "scope": "window",
           "type": "string",
@@ -105,7 +91,28 @@
           ],
           "default": "off",
           "description": "Traces the communication between VS Code and the language server.",
+          "order": 3
+        },
+        "wollokLSP.openDynamicDiagramOnRepl": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "Opens the dynamic diagram when running the REPL.",
+          "order": 4
+        },
+        "wollokLSP.openInternalDynamicDiagram": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "If true, opens an internal dynamic diagram inside Wollok IDE. If false, it will open a new external browser.",
           "order": 5
+        },
+        "wollokLSP.dynamicDiagramDarkMode": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "If true, opens dynamic diagram in Dark Mode. Otherwise, it uses Light Mode.",
+          "order": 6
         }
       }
     },
@@ -113,7 +120,7 @@
       {
         "command": "wollok.start.repl",
         "title": "Start a new REPL session",
-        "category": "Wollok"
+                "category": "Wollok"
       },
       {
         "command": "wollok.run.allTests",

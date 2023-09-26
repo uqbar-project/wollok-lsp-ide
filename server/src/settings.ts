@@ -5,6 +5,7 @@ export interface WollokLSPSettings {
   language: string,
   openDynamicDiagramOnRepl: boolean,
   openInternalDynamicDiagram: boolean,
+  dynamicDiagramDarkMode: boolean,
 }
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -25,6 +26,7 @@ const defaultSettings: WollokLSPSettings = {
   language: envLang(),
   openDynamicDiagramOnRepl: true,
   openInternalDynamicDiagram: true,
+  dynamicDiagramDarkMode: true,
 }
 
 let globalSettings: WollokLSPSettings = defaultSettings
