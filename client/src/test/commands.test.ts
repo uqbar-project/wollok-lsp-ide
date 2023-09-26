@@ -82,7 +82,7 @@ suite('Should run commands', () => {
         startRepl,
         ` repl ${toPosix(
           pepitaURI.fsPath,
-        )} --skipValidations -p ${expectedPathByShell(
+        )} --skipValidations --darkMode -p ${expectedPathByShell(
           'bash',
           folderURI.fsPath,
         )}`,
