@@ -61,6 +61,8 @@ const DYNAMIC_DIAGRAM_URI = 'http://localhost:3000/'
 export const startRepl = (): Task => {
   const currentDocument = window.activeTextEditor?.document
   const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations']
+  // Terminate previous tasks
+  vscode.commands.executeCommand('workbench.action.terminal.killAll')
   const replTask = wollokCLITask('repl', `Wollok Repl: ${getCurrentFileName(currentDocument)}`, cliCommands)
 
   const openDynamicDiagram = workspace.getConfiguration('wollokLSP').get('openDynamicDiagramOnRepl') as boolean
