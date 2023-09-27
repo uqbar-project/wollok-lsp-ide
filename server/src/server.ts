@@ -1,12 +1,34 @@
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { CompletionItem, createConnection, DidChangeConfigurationNotification, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver/node'
-import { codeLenses, completions, definition, formatDocument, resetEnvironment, validateTextDocument } from './linter'
-import { WollokLinterSettings, initializeSettings } from './settings'
-import { templates } from './templates'
+import {
+  CompletionItem,
+  createConnection,
+  DidChangeConfigurationNotification,
+  InitializeParams,
+  InitializeResult,
+  ProposedFeatures,
+  TextDocuments,
+  TextDocumentSyncKind,
+} from 'vscode-languageserver/node'
+import { templates } from './functionalities/autocomplete/templates'
+import {
+  codeLenses,
+  completions,
+  definition,
+  documentSymbols,
+  formatDocument,
+  validateTextDocument,
+  workspaceSymbols,
+} from './linter'
+import { initializeSettings, WollokLinterSettings } from './settings'
+import { EnvironmentProvider } from './utils/vm/environment-provider'
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all)
+
+const environmentProvider: EnvironmentProvider = new EnvironmentProvider(
+  connection,
+)
 
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
@@ -29,10 +51,12 @@ connection.onInitialize((params: InitializeParams) => {
         triggerCharacters: ['.'],
         completionItem: { labelDetailsSupport: true },
       },
-      codeLensProvider : { resolveProvider: true },
+      codeLensProvider: { resolveProvider: true },
       referencesProvider: true,
       definitionProvider: true,
       documentFormattingProvider: true,
+      documentSymbolProvider: true,
+      workspaceSymbolProvider: true,
     },
   }
   if (hasWorkspaceFolderCapability) {
@@ -45,12 +69,13 @@ connection.onInitialized(() => {
   connection.client.register(DidChangeConfigurationNotification.type, null)
 
   if (hasWorkspaceFolderCapability) {
-    connection.workspace.onDidChangeWorkspaceFolders(_event => {
+    connection.workspace.onDidChangeWorkspaceFolders((_event) => {
       connection.console.log('Workspace folder change event received.')
     })
   }
 
   initializeSettings(connection)
+  environmentProvider.resetEnvironment()
 })
 
 // Cache the settings of all open documents
@@ -58,7 +83,7 @@ const documentSettings: Map<string, Thenable<WollokLinterSettings>> = new Map()
 
 connection.onDidChangeConfiguration(() => {
   // Revalidate all open text documents
-  documents.all().forEach(validateTextDocument(connection))
+  documents.all().forEach(validateTextDocument(connection, documents.all()))
 })
 
 // function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
@@ -77,60 +102,65 @@ connection.onDidChangeConfiguration(() => {
 // }
 
 // Only keep settings for open documents
-documents.onDidClose(e => {
+documents.onDidClose((e) => {
   documentSettings.delete(e.document.uri)
 })
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent(change => {
-  validateTextDocument(connection)(change.document)
+documents.onDidChangeContent((change) => {
+  environmentProvider.rebuildTextDocument(change.document)
+  environmentProvider.withLatestEnvironment(
+    validateTextDocument(connection, documents.all())(change.document),
+  )
 })
 
-connection.onRequest(change => {
+documents.onDidOpen((change) => {
+  environmentProvider.rebuildTextDocument(change.document)
+  environmentProvider.withLatestEnvironment(
+    validateTextDocument(connection, documents.all())(change.document),
+  )
+})
+
+connection.onRequest((change) => {
   if (change === 'STRONG_FILES_CHANGED') {
-    resetEnvironment()
+    environmentProvider.resetEnvironment()
   }
 })
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
-  (params): CompletionItem[] => {
-    // The pass parameter contains the position of the text document in
-    // which code complete got requested. For the example we ignore this
-    // info and always provide the same completion items.
-    const contextCompletions = completions(params.position, params.textDocument, params.context)
-    return [
-      ...contextCompletions,
-      ...templates,
-    ]
-  }
+  environmentProvider.requestWithEnvironment((params, env) => {
+    const contextCompletions = completions(params, env)
+    return [...contextCompletions, ...templates]
+  }),
 )
 
 connection.onReferences((_params) => {
   return []
 })
 
-connection.onDefinition(async (params) => {
-  return definition(params)
-})
+connection.onDefinition(environmentProvider.requestWithEnvironment(definition))
 
 // This handler resolves additional information for the item selected in the completion list.
-connection.onCompletionResolve(
-  (item: CompletionItem): CompletionItem => {
-    // if (item.data === 1) {
-    //   item.detail = 'TypeScript details'
-    //   item.documentation = 'TypeScript documentation'
-    // }
-    return item
-  }
+connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
+  // if (item.data === 1) {
+  //   item.detail = 'TypeScript details'
+  //   item.documentation = 'TypeScript documentation'
+  // }
+  return item
+})
+
+connection.onDocumentSymbol(
+  environmentProvider.requestWithEnvironment(documentSymbols),
 )
 
-connection.onCodeLens(
-  (params) => params.textDocument.uri.endsWith('wtest') ? codeLenses(params) : null
+connection.onWorkspaceSymbol(
+  environmentProvider.requestWithEnvironment(workspaceSymbols),
 )
 
-connection.onDocumentFormatting(formatDocument)
+connection.onDocumentFormatting(environmentProvider.requestWithEnvironment(formatDocument))
+connection.onCodeLens(environmentProvider.requestWithEnvironment(codeLenses))
 /*
 connection.onDidOpenTextDocument((params) => {
   // A text document got opened in VSCode.

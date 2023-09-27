@@ -1,15 +1,19 @@
 import { CompletionItem, CompletionItemKind } from 'vscode-languageserver'
-import { Node, Body, Method, Singleton } from 'wollok-ts'
+import { Node, Body, Method, Singleton, Module, Environment, Package } from 'wollok-ts'
+import { is, match, when } from 'wollok-ts/dist/extensions'
 import { fieldCompletionItem, parameterCompletionItem, singletonCompletionItem } from './autocomplete'
 
 export const completionsForNode = (node: Node): CompletionItem[] => {
-  switch (node.kind) {
-    case 'Environment': return []
-    case 'Package': return completePackage()
-    case 'Singleton': return completeSingleton()
-    case 'Body': return completeBody(node)
-    case 'Method': return completeMethod(node)
-    default: return completeForParent(node)
+  try{
+    return match(node)(
+      when(Environment)(_ => []),
+      when(Package)(completePackage),
+      when(Singleton)(completeSingleton),
+      when(Body)(completeBody),
+      when(Method)(completeMethod)
+    )
+  } catch {
+    return completeForParent(node)
   }
 }
 
@@ -52,11 +56,11 @@ const completeBody = (node: Body): CompletionItem[] => completeForParent(node)
 
 const completeMethod = (node: Method): CompletionItem[] => {
   const parent = node.parent
-  const fields = parent.is('Module') ? parent.fields() : []
+  const fields = is(Module) ? parent.fields : []
   return [
     ...node.parameters.map(parameterCompletionItem),
     ...fields.map(fieldCompletionItem),
-    ...(node.environment.filter(node => node.is('Singleton') && !!node.name) as Singleton[]).map(singletonCompletionItem),
+    ...(node.environment.descendants.filter(node => node.is(Singleton) && !!node.name) as Singleton[]).map(singletonCompletionItem),
   ]
 }
 

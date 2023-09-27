@@ -8,7 +8,7 @@
       "name": "Launch Client",
       "runtimeExecutable": "${execPath}",
       "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
-      "outFiles": ["${workspaceRoot}/client/out/**/*.js"],
+      "outFiles": ["${workspaceRoot}/client/out/*.js"],
       "preLaunchTask": {
         "type": "npm",
         "script": "watch"
@@ -20,7 +20,7 @@
       "name": "Attach to Server",
       "port": 6009,
       "restart": true,
-      "outFiles": ["${workspaceRoot}/server/out/**/*.js"]
+      "outFiles": ["${workspaceRoot}/server/out/*.js"]
     },
     {
       "name": "Language Server E2E Test",
@@ -33,7 +33,11 @@
         "--extensionTestsPath=${workspaceRoot}/client/out/test",
         "${workspaceRoot}/client/testFixture"
       ],
-      "outFiles": ["${workspaceRoot}/client/out/test/**/*.js"]
+      "outFiles": ["${workspaceRoot}/client/out/test/**/*.js"],
+      "preLaunchTask": {
+        "type": "npm",
+        "script": "watch"
+      }
     }
   ],
   "compounds": [

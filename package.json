@@ -5,7 +5,7 @@
   "author": "Uqbar Foundation",
   "license": "LGPL-3.0",
   "publisher": "uqbar",
-  "version": "0.0.2",
+  "version": "0.0.7",
   "repository": {
     "type": "git",
     "url": "https://github.com/uqbar-project/wollok-lsp-ide"
@@ -26,13 +26,19 @@
   "capabilities": {
     "referencesProvider": true,
     "definitionProvider": true,
-    "documentFormattingProvider": true
+    "documentFormattingProvider": true,
+    "documentSymbolProvider": true,
+    "workspaceSymbolProvider": true
   },
   "main": "./client/out/extension",
   "contributes": {
     "languages": [
       {
         "id": "wollok",
+        "icon": {
+          "dark": "./images/wollok.png",
+          "light": "./images/wollok.png"
+        },
         "aliases": [
           "Wollok",
           "wollok"
@@ -111,26 +117,27 @@
     "test:e2e": "npm run lint && npm run compile && sh ./scripts/e2e.sh",
     "test:unit": "cd server && npm run test && cd ..",
     "prepare": "husky install",
+    "package": "vsce package",
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "wollok-ts": "3.1.5"
+    "wollok-ts": "4.0.4"
   },
   "devDependencies": {
     "@types/expect": "^24.3.0",
-    "@types/mocha": "^9.1.1",
-    "@types/node": "^17.0.40",
-    "@typescript-eslint/eslint-plugin": "^5.27.1",
-    "@typescript-eslint/parser": "^5.27.1",
-    "eslint": "^8.17.0",
-    "husky": "^8.0.2",
-    "lint-staged": "^13.0.3",
-    "mocha": "^10.0.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.14.1",
+    "@types/sinon": "^10.0.13",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/parser": "^5.53.0",
+    "@vscode/vsce": "^2.19.0",
+    "eslint": "^8.35.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.1.2",
+    "mocha": "^10.2.0",
+    "sinon": "^15.0.3",
     "ts-mocha": "^10.0.0",
-    "typescript": "^4.7.3"
-  },
-  "__metadata": {
-    "publisherDisplayName": "Uqbar",
-    "publisherId": "1a24489d-a5e7-4ea1-a73c-f3df82d39763"
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.5"
   }
 }

@@ -3,16 +3,16 @@ import { Environment, Node, SourceIndex, SourceMap } from 'wollok-ts'
 
 // TODO: Refactor
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
-  if (!node.sourceFileName()) return false
+  if (!node.sourceFileName) return false
   if (node.kind === 'Package') {
-    return uri === node.sourceFileName()
+    return uri.includes(node.sourceFileName)
   }
   if(!node.sourceMap) return false
 
   const startPosition = toVSCPosition(node.sourceMap.start)
   const endPosition = toVSCPosition(node.sourceMap.end)
 
-  return uri.includes(node.sourceFileName()!)
+  return uri.includes(node.sourceFileName!)
     && node.sourceMap
     && between(position, startPosition, endPosition)
 }
@@ -35,32 +35,43 @@ export const between = (pointer: Position, start: Position, end: Position): bool
 }
 
 export const getNodesByPosition = (environment: Environment, textDocumentPosition: TextDocumentPositionParams): Node[] => {
-  return environment.filter(node => !!node.sourceFileName() && include(node, textDocumentPosition))
+  return environment.descendants.filter(node => !!node.sourceFileName && include(node, textDocumentPosition))
 }
 
 export const toVSCPosition = (position: SourceIndex): Position => {
   const max0 = (n: number) => n < 0 ? 0 : n
 
-  return {
-    line: max0(position.line - 1),
-    character: max0(position.column - 1),
-  }
+  return Position.create(
+    max0(position.line - 1),
+    max0(position.column - 1)
+  )
 }
 
+export const toVSCRange = (sourceMap: SourceMap): Range =>
+  Range.create(toVSCPosition(sourceMap.start), toVSCPosition(sourceMap.end))
+
 export const nodeToLocation = (node: Node): Location => {
-  if(!node.sourceMap || !node.sourceFileName()){
+  if(!node.sourceMap || !node.sourceFileName){
     throw new Error('No source map found for node')
   }
 
   return {
-    uri: node.sourceFileName()!,
-    range: sourceMapToRange(node.sourceMap),
+    uri: node.sourceFileName!,
+    range: toVSCRange(node.sourceMap),
   }
 }
 
-export const sourceMapToRange = (sourceMap: SourceMap): Range => {
-  return {
-    start: toVSCPosition(sourceMap.start),
-    end: toVSCPosition(sourceMap.end),
+
+export const getWollokFileExtension = (uri: string): 'wlk' | 'wpgm' | 'wtest' => {
+  const extension = uri.split('.').pop()
+  if(!extension) throw new Error('Could not determine file extension')
+
+  switch(extension) {
+    case 'wlk':
+    case 'wpgm':
+    case 'wtest':
+      return extension
+    default:
+      throw new Error('Invalid file extension')
   }
 }

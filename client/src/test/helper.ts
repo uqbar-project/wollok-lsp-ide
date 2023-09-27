@@ -4,7 +4,15 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path'
-import { extensions, Range, TextDocument, TextEditor, Uri, window, workspace } from 'vscode'
+import {
+  extensions,
+  Range,
+  TextDocument,
+  TextEditor,
+  Uri,
+  window,
+  workspace,
+} from 'vscode'
 
 export let document: TextDocument
 export let editor: TextEditor
@@ -29,7 +37,7 @@ export async function activate(docUri: Uri, timeToWait = 2000): Promise<void> {
 }
 
 async function sleep(milliseconds: number) {
-  return new Promise(resolve => setTimeout(resolve, milliseconds))
+  return new Promise((resolve) => setTimeout(resolve, milliseconds))
 }
 
 export const getDocumentPath = (docPath: string): string => {
@@ -38,15 +46,14 @@ export const getDocumentPath = (docPath: string): string => {
 export const getDocumentURI = (docPath: string): Uri => {
   return Uri.file(getDocumentPath(docPath))
 }
+export const getFolderURI = (): Uri => {
+  return Uri.file(getDocumentPath(''))
+}
 
 export async function setTestContent(content: string): Promise<boolean> {
   const all = new Range(
     document.positionAt(0),
-    document.positionAt(document.getText().length)
+    document.positionAt(document.getText().length),
   )
-  return editor.edit(editBuilder => editBuilder.replace(all, content))
-}
-
-export async function allWollokFiles(): Promise<Uri[]> {
-  return workspace.findFiles('**/*.{wlk,wtest,wpgm}')
+  return editor.edit((editBuilder) => editBuilder.replace(all, content))
 }

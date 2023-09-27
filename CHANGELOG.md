@@ -1,7 +1,38 @@
 # Changelog
 
+## v0.0.6
+
+### Using wollok-ts v4.0.3
+
+- Added icon for Wollok files
+- Progress report
+
+## v0.0.4
+
+### Using wollok-ts v4.0.2
+
+- Fix path issues using CLI on Windows 🪟
+
+## v0.0.3
+
+### Using wollok-ts v4.0.2
+
+- Upgrade Wollok-TS 4 ⬆️
+- Fix completion error while writing 🐛
+
+## v0.0.2
+
+### Using wollok-ts v3.1.6
+
+- New autocomplete 🔢
+- New code lenses for tests and programs 😎
+- New Workspace and Document Symbols support for navigation ↩️
+- Fix files validator bugs 🐛
+
 ## v0.0.1
+
 First release which includes
+
 - Runs diagnostics and displays them as problems
 - Autocompletion for scope references
 - Go-to definition

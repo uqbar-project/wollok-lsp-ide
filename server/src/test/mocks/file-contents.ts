@@ -1,3 +1,4 @@
+// TODO: Create a .wlk file
 export const pepitaFile = `object pepita {
   var peso = 0
 
