@@ -5,11 +5,11 @@ import { lang } from '../settings'
 // VALIDATION MESSAGES DEFINITION
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-type ValidationMessage = { [key: string]: string }
+type Message = { [key: string]: string }
 
 const FAILURE = 'failure'
 
-const validationMessagesEn: ValidationMessage = {
+const validationMessagesEn: Message = {
   nameShouldBeginWithLowercase: 'The name {0} must start with lowercase',
   nameShouldBeginWithUppercase: 'The name {0} must start with uppercase',
   nameShouldNotBeKeyword:
@@ -95,7 +95,7 @@ const validationMessagesEn: ValidationMessage = {
   [FAILURE]: 'Rule failure: ',
 }
 
-const validationMessagesEs: ValidationMessage = {
+const validationMessagesEs: Message = {
   nameShouldBeginWithLowercase:
     'El nombre {0} debe comenzar con min\u00FAsculas',
   nameShouldBeginWithUppercase:
@@ -195,9 +195,25 @@ const validationMessagesEs: ValidationMessage = {
   [FAILURE]: 'La siguiente regla fall\u00F3: ',
 }
 
-const validationMessages: { [key: string]: ValidationMessage } = {
-  en: validationMessagesEn,
-  es: validationMessagesEs,
+const MISSING_WOLLOK_TS_CLI = 'missing_wollok_ts_cli'
+
+const lspMessagesEn = {
+  [MISSING_WOLLOK_TS_CLI]: 'Missing configuration WollokLSP/cli-pat in order to run Wollok tasks',
+}
+
+const lspMessagesEs = {
+  [MISSING_WOLLOK_TS_CLI]: 'Falta la configuración WollokLSP/cli-path para poder ejecutar tareas de Wollok',
+}
+
+const messages: { [key: string]: Message } = {
+  en: {
+    ...validationMessagesEn,
+    ...lspMessagesEn,
+  },
+  es: {
+    ...validationMessagesEs,
+    ...lspMessagesEs,
+  },
 }
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -225,14 +241,14 @@ const interpolateValidationMessage = (message: string, ...values: string[]) =>
     return values[index] || ''
   })
 
-const getBasicMessage = (problem: Problem) =>
-  validationI18nized()[problem.code] || convertToHumanReadable(problem.code)
-
-const validationI18nized = () => validationMessages[lang()] as ValidationMessage
+const validationI18nized = () => messages[lang()] as Message
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-export const reportMessage = (problem: Problem): string =>
-  interpolateValidationMessage(getBasicMessage(problem), ...problem.values)
+export const reportValidationMessage = (problem: Problem): string =>
+  getMessage(problem.code, problem.values.concat())
+
+export const getMessage = (message: string, values: string[]): string =>
+  interpolateValidationMessage(validationI18nized()[message] || convertToHumanReadable(message), ...values)

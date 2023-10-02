@@ -1,13 +1,24 @@
 import * as assert from 'assert'
 import * as sinon from 'sinon'
-import { ShellExecution, Task, Uri, env } from 'vscode'
+import { ShellExecution, Task, Uri, env, workspace } from 'vscode'
 import { runAllTests, runProgram, runTests, startRepl } from '../commands'
 import { activate, getDocumentURI, getFolderURI } from './helper'
 import { toPosix, toWin, Shell } from '../platform-string-utils'
+import { afterEach, beforeEach } from 'mocha'
 
 suite('Should run commands', () => {
   const folderURI = getFolderURI()
   const pepitaURI = getDocumentURI('pepita.wlk')
+
+  beforeEach(() => {
+    sinon.stub(workspace, 'getConfiguration').value((_configuration: string) => ({
+      get: (_value: string) => '/usr/bin/wollok-ts-cli',
+    }))
+  })
+
+  afterEach(() => {
+    sinon.restore()
+  })
 
   test('run program', async () => {
     await onWindowsBash(() =>
@@ -71,7 +82,7 @@ suite('Should run commands', () => {
         startRepl,
         ` repl ${toPosix(
           pepitaURI.fsPath,
-        )} --skipValidations -p ${expectedPathByShell(
+        )} --skipValidations --darkMode -p ${expectedPathByShell(
           'bash',
           folderURI.fsPath,
         )}`,

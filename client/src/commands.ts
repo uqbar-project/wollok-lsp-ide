@@ -50,20 +50,34 @@ export const runAllTests = (): Task =>
     '--skipValidations',
   ])
 
+const getCurrentFileName = (document: vscode.TextDocument | undefined) =>
+  document ? path.basename(document.uri.path) : 'Synthetic File'
+
+const getFiles = (document: vscode.TextDocument | undefined) =>
+  document ? [fsToShell(document.uri.fsPath)] : []
+
+const DYNAMIC_DIAGRAM_URI = 'http://localhost:3000/'
+
 export const startRepl = (): Task => {
-  const currentDocument = window.activeTextEditor.document
-  const currentFileName = path.basename(currentDocument.uri.path)
+  const currentDocument = window.activeTextEditor?.document
+  const wollokLSPConfiguration = workspace.getConfiguration('wollokLSP')
+  const dynamicDiagramDarkMode = wollokLSPConfiguration.get('dynamicDiagramDarkMode') ?? false
+  const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations', dynamicDiagramDarkMode ? '--darkMode' : '']
+  // Terminate previous tasks
+  vscode.commands.executeCommand('workbench.action.terminal.killAll')
+  const replTask = wollokCLITask('repl', `Wollok Repl: ${getCurrentFileName(currentDocument)}`, cliCommands)
 
-  const replTask = wollokCLITask('repl', `Wollok Repl: ${currentFileName}`, [
-    'repl',
-    fsToShell(currentDocument.uri.fsPath),
-    '--skipValidations',
-  ])
-
-  setTimeout(() => {
-    vscode.commands.executeCommand('simpleBrowser.show', 'http://localhost:3000/')
-  }, 1000)
-
+  const openDynamicDiagram = wollokLSPConfiguration.get('openDynamicDiagramOnRepl') as boolean
+  if (openDynamicDiagram) {
+    setTimeout(() => {
+      const openInternalDynamicDiagram = wollokLSPConfiguration.get('openInternalDynamicDiagram') as boolean
+      if (openInternalDynamicDiagram) {
+        vscode.commands.executeCommand('simpleBrowser.show', DYNAMIC_DIAGRAM_URI)
+      } else {
+        vscode.env.openExternal(vscode.Uri.parse(DYNAMIC_DIAGRAM_URI))
+      }
+    }, 1000)
+  }
   return replTask
 }
 
@@ -80,9 +94,10 @@ const registerCLICommand = (
   )
 
 const wollokCLITask = (task: string, name: string, cliCommands: string[]) => {
-  const wollokCli = unknownToShell(
-    workspace.getConfiguration('wollokLinter').get('cli-path'),
-  )
+  const wollokCliPath: string = workspace.getConfiguration('wollokLSP').get('cli-path')
+  // TODO: i18n - but it's in the server
+  if (!wollokCliPath) throw new Error('Missing configuration WollokLSP/cli-path in order to run Wollok tasks')
+  const wollokCli = unknownToShell(wollokCliPath)
   const folder = workspace.workspaceFolders[0]
   const shellCommand = [
     wollokCli,
