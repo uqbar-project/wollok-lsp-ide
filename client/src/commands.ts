@@ -14,6 +14,7 @@ import {
   fsToShell,
   unknownToShell,
 } from './platform-string-utils'
+import { wollokLSPExtensionCode } from './constants'
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
   context.subscriptions.push(registerCLICommand('wollok.start.repl', startRepl))
@@ -60,7 +61,7 @@ const DYNAMIC_DIAGRAM_URI = 'http://localhost:3000/'
 
 export const startRepl = (): Task => {
   const currentDocument = window.activeTextEditor?.document
-  const wollokLSPConfiguration = workspace.getConfiguration('wollokLSP')
+  const wollokLSPConfiguration = workspace.getConfiguration(wollokLSPExtensionCode)
   const dynamicDiagramDarkMode = wollokLSPConfiguration.get('dynamicDiagramDarkMode') ?? false
   const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations', dynamicDiagramDarkMode ? '--darkMode' : '']
   // Terminate previous tasks
@@ -94,9 +95,12 @@ const registerCLICommand = (
   )
 
 const wollokCLITask = (task: string, name: string, cliCommands: string[]) => {
-  const wollokCliPath: string = workspace.getConfiguration('wollokLSP').get('cli-path')
+  const wollokCliPath: string = workspace.getConfiguration(wollokLSPExtensionCode).get('cli-path')
   // TODO: i18n - but it's in the server
-  if (!wollokCliPath) throw new Error('Missing configuration WollokLSP/cli-path in order to run Wollok tasks')
+  if (!wollokCliPath) {
+    vscode.commands.executeCommand('workbench.action.openSettings', wollokLSPExtensionCode)
+    throw new Error('Missing configuration WollokLSP/cli-path. Set the path where wollok-ts-cli is located in order to run Wollok tasks')
+  }
   const wollokCli = unknownToShell(wollokCliPath)
   const folder = workspace.workspaceFolders[0]
   const shellCommand = [
