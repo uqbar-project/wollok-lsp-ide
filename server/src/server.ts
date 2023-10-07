@@ -20,6 +20,7 @@ import {
 import { initializeSettings, WollokLSPSettings } from './settings'
 import { templates } from './functionalities/autocomplete/templates'
 import { EnvironmentProvider } from './utils/vm/environment-provider'
+import { formatDocument, formatRange } from './functionalities/formatter'
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -55,6 +56,8 @@ connection.onInitialize((params: InitializeParams) => {
       definitionProvider: true,
       documentSymbolProvider: true,
       workspaceSymbolProvider: true,
+      documentFormattingProvider: true,
+      documentRangeFormattingProvider: true,
     },
   }
   if (hasWorkspaceFolderCapability) {
@@ -143,6 +146,11 @@ connection.onWorkspaceSymbol(
 )
 
 connection.onCodeLens(environmentProvider.requestWithEnvironment(codeLenses))
+
+connection.onDocumentFormatting(environmentProvider.requestWithEnvironment(formatDocument))
+
+connection.onDocumentRangeFormatting(environmentProvider.requestWithEnvironment(formatRange))
+
 /*
 connection.onDidOpenTextDocument((params) => {
   // A text document got opened in VSCode.

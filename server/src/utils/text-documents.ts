@@ -1,6 +1,6 @@
 import { Location, Position, Range, TextDocumentPositionParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Environment, Node, SourceIndex, SourceMap } from 'wollok-ts'
+import { Environment, Node, Package, SourceIndex, SourceMap } from 'wollok-ts'
 
 // TODO: Refactor
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
@@ -75,6 +75,9 @@ export function trimIn(range: Range, textDocument: TextDocument): Range {
   )
 }
 
+export const packageFromURI = (uri: string, environment: Environment): Package | undefined => {
+  return environment.descendants.find(node => node.is(Package) && node.fileName === uri) as Package | undefined
+}
 
 export const getWollokFileExtension = (uri: string): 'wlk' | 'wpgm' | 'wtest' => {
   const extension = uri.split('.').pop()
