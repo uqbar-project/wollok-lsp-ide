@@ -1,14 +1,16 @@
-import { CompletionItem, CompletionItemKind } from 'vscode-languageserver'
-import { Node, Body, Method, Singleton, Module, Environment, Package } from 'wollok-ts'
+import { CompletionItem, CompletionItemKind, InsertTextFormat } from 'vscode-languageserver'
+import { Node, Body, Method, Singleton, Module, Environment, Package, Class } from 'wollok-ts'
 import { is, match, when } from 'wollok-ts/dist/extensions'
 import { fieldCompletionItem, parameterCompletionItem, singletonCompletionItem } from './autocomplete'
 
 export const completionsForNode = (node: Node): CompletionItem[] => {
+  console.info('**********', node.kind)
   try{
     return match(node)(
       when(Environment)(_ => []),
       when(Package)(completePackage),
-      when(Singleton)(completeSingleton),
+      when(Singleton)(completeObject),
+      when(Class)(completeObject),
       when(Body)(completeBody),
       when(Method)(completeMethod)
     )
@@ -20,35 +22,77 @@ export const completionsForNode = (node: Node): CompletionItem[] => {
 const completePackage = (): CompletionItem[] => [
   {
     label: 'object',
-    kind: CompletionItemKind.Class,
-    insertText: 'object ${1:pepita} { $0}',
+    kind: CompletionItemKind.Module,
+    insertTextFormat: InsertTextFormat.Snippet,
+    sortText: 'a',
+    insertText: 'object ${1:name} {\n  ${0}\n}',
   },
   {
     label: 'class',
     kind: CompletionItemKind.Class,
-    insertText: 'class ${1:Golondrina} { $0}',
+    sortText: 'b',
+    insertTextFormat: InsertTextFormat.Snippet,
+    insertText: 'class ${1:Name} {\n  ${0}\n}',
+  },
+  {
+    label: 'describe',
+    kind: CompletionItemKind.Folder,
+    insertTextFormat: InsertTextFormat.Snippet,
+    sortText: 'c',
+    insertText: 'describe ${1:name} {\n  test "${2:description}" {\n    ${0}\n  }\n}',
+  },
+  {
+    label: 'test',
+    kind: CompletionItemKind.Event,
+    sortText: 'd',
+    insertTextFormat: InsertTextFormat.Snippet,
+    insertText: 'test "${1:description}" {\n  ${0}\n}',
   },
 ]
 
 
-const completeSingleton = (): CompletionItem[] => [
+const completeObject = (): CompletionItem[] => [
   {
     label: 'var attribute',
     kind: CompletionItemKind.Field,
     sortText: 'a',
-    insertText: 'var ${1:energia} = ${0:0}',
+    insertTextFormat: InsertTextFormat.Snippet,
+    insertText: 'var ${1:name} = ${0:0}',
+  },
+  {
+    label: 'var property',
+    kind: CompletionItemKind.Property,
+    sortText: 'a',
+    insertTextFormat: InsertTextFormat.Snippet,
+    insertText: 'var property ${1:name} = ${0}',
   },
   {
     label: 'const attribute',
     kind: CompletionItemKind.Field,
-    sortText: 'a',
-    insertText: 'const ${1:energia} = ${0:0}',
+    sortText: 'b',
+    insertTextFormat: InsertTextFormat.Snippet,
+    insertText: 'const ${1:name} = ${0}',
   },
   {
-    label: 'method',
-    kind: CompletionItemKind.Method,
+    label: 'const property',
+    kind: CompletionItemKind.Property,
     sortText: 'b',
-    insertText: 'method ${1:volar}($2) { $0}',
+    insertTextFormat: InsertTextFormat.Snippet,
+    insertText: 'const property ${1:propertyName} = ${0:0}',
+  },
+  {
+    label: 'method (effect)',
+    kind: CompletionItemKind.Method,
+    sortText: 'c',
+    insertTextFormat: InsertTextFormat.Snippet,
+    insertText: 'method ${1:name}($2) {\n  ${0}\n}',
+  },
+  {
+    label: 'method (return)',
+    kind: CompletionItemKind.Method,
+    sortText: 'c',
+    insertTextFormat: InsertTextFormat.Snippet,
+    insertText: 'method ${1:name}($2) = ${0}',
   },
 ]
 

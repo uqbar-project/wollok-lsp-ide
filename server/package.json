@@ -1,6 +1,6 @@
 {
   "name": "wollok-lsp-ide-server",
-  "description": "Wollok Linter - LSP implementation in node.",
+  "description": "Wollok IDE - LSP implementation in node.",
   "version": "0.0.1",
   "author": "Uqbar Foundation",
   "license": "LGPL-3.0",
