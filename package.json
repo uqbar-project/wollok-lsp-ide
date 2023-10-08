@@ -5,7 +5,7 @@
   "author": "Uqbar Foundation",
   "license": "LGPL-3.0",
   "publisher": "uqbar",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/uqbar-project/wollok-lsp-ide"
@@ -120,7 +120,7 @@
       {
         "command": "wollok.start.repl",
         "title": "Start a new REPL session",
-                "category": "Wollok"
+        "category": "Wollok"
       },
       {
         "command": "wollok.run.allTests",
