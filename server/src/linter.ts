@@ -149,7 +149,7 @@ export const completions = (
     position.character -= 1
     return completeMessages(environment, findFirstStableNode(selectionNode))
   } else {
-    return completionsForNode(findFirstStableNode(selectionNode))
+    return completionsForNode(selectionNode)
   }
 }
 
