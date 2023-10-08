@@ -1,5 +1,5 @@
 import { CompletionItem, CompletionItemKind, InsertTextFormat } from 'vscode-languageserver'
-import { Node, Body, Method, Singleton, Module, Environment, Package, Class } from 'wollok-ts'
+import { Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin } from 'wollok-ts'
 import { is, match, when } from 'wollok-ts/dist/extensions'
 import { fieldCompletionItem, parameterCompletionItem, singletonCompletionItem } from './autocomplete'
 
@@ -9,8 +9,9 @@ export const completionsForNode = (node: Node): CompletionItem[] => {
     return match(node)(
       when(Environment)(_ => []),
       when(Package)(completePackage),
-      when(Singleton)(completeObject),
-      when(Class)(completeObject),
+      when(Singleton)(completeModule),
+      when(Class)(completeModule),
+      when(Mixin)(completeModule),
       when(Body)(completeBody),
       when(Method)(completeMethod)
     )
@@ -20,6 +21,10 @@ export const completionsForNode = (node: Node): CompletionItem[] => {
 }
 
 const completePackage = (): CompletionItem[] => [
+  // TODO: consider wlk vs. wtest vs. wpgm
+  // TODO 2: add program
+  // TODO 3: describe -> va con strings?
+  // TODO 4: test?
   {
     label: 'object',
     kind: CompletionItemKind.Module,
@@ -51,7 +56,7 @@ const completePackage = (): CompletionItem[] => [
 ]
 
 
-const completeObject = (): CompletionItem[] => [
+const completeModule = (): CompletionItem[] => [
   {
     label: 'var attribute',
     kind: CompletionItemKind.Field,
