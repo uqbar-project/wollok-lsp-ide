@@ -3,6 +3,10 @@
 .husky/**
 .vscode/**
 .vscode-test/**
+.github/**
+.husky/**
+**/*.ts
+**/*.map
 .gitignore
 **/tsconfig.json
 **/tsconfig.base.json
@@ -13,21 +17,18 @@
 **/.gitignore
 **/scripts
 contributing.md
-
-# ts files are deployed as compiled js
-**/*.ts
-**/*.map
-
-# no tests needed
-client/out/test/**
-client/out/testFixture/**
-server/out/test/**
-
-# node_modules, except by vscode and needed dependencies
-client/node_modules/**
-!client/node_modules/vscode-jsonrpc/**
-!client/node_modules/vscode-languageclient/**
-!client/node_modules/vscode-languageserver-protocol/**
-!client/node_modules/vscode-languageserver-types/**
-!client/node_modules/{minimatch,brace-expansion,concat-map,balanced-match}/**
-!client/node_modules/{semver,lru-cache,yallist}/**
+.travis.yml
+**/node_modules/**
+# !client/node_modules/vscode-jsonrpc/**
+# !client/node_modules/vscode-languageclient/**
+# !client/node_modules/vscode-languageserver-protocol/**
+# !client/node_modules/vscode-languageserver-types/**
+# !client/node_modules/{minimatch,brace-expansion,concat-map,balanced-match}/**
+# !client/node_modules/{semver,lru-cache,yallist}/**
+**/test/**
+**/.mocharc.js
+**/.prettierrc
+**/.eslintrc
+**/.gitignore
+**/scripts
+**/testFixture/*
