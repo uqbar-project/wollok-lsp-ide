@@ -1,6 +1,5 @@
 # Wollok IDE
 
-[![Node.js CI](https://github.com/uqbar-project/wollok-lsp-ide/actions/workflows/node.js.yml/badge.svg)](https://github.com/uqbar-project/wollok-lsp-ide/actions/workflows/node.js.yml)
 
 Starting from [LSP sample code](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide) for Visual Studio Code, we developed a couple of tools for Wollok using Language Server Protocol (for Visual Studio Code, IntelliJ, Eclipse, Atom, etc.)
 
