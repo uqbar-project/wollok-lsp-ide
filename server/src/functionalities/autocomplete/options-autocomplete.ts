@@ -13,7 +13,7 @@ export const optionImports = [
 export const optionPrograms = [
   {
     label: 'program',
-    kind: CompletionItemKind.Snippet,
+    kind: CompletionItemKind.Unit,
     sortText: 'd',
     insertTextFormat: InsertTextFormat.Snippet,
     insertText: 'program "${1:name}" {\n  ${0}\n}',
@@ -30,15 +30,14 @@ export const optionTests = [
   },
 ]
 
-export const optionDescribes = [
+export const optionConstReferences = [
   {
-    label: 'describe',
-    kind: CompletionItemKind.Folder,
+    label: 'const attribute',
+    kind: CompletionItemKind.Field,
+    sortText: 'b',
     insertTextFormat: InsertTextFormat.Snippet,
-    sortText: 'c',
-    insertText: 'describe "${1:name}" {\n  test "${2:description}" {\n    ${0}\n  }\n}',
+    insertText: 'const ${1:name} = ${0}',
   },
-  ...optionTests,
 ]
 
 export const optionReferences = [
@@ -56,36 +55,13 @@ export const optionReferences = [
     insertTextFormat: InsertTextFormat.Snippet,
     insertText: 'var property ${1:name} = ${0}',
   },
-  {
-    label: 'const attribute',
-    kind: CompletionItemKind.Field,
-    sortText: 'b',
-    insertTextFormat: InsertTextFormat.Snippet,
-    insertText: 'const ${1:name} = ${0}',
-  },
+  ...optionConstReferences,
   {
     label: 'const property',
     kind: CompletionItemKind.Property,
     sortText: 'b',
     insertTextFormat: InsertTextFormat.Snippet,
     insertText: 'const property ${1:propertyName} = ${0}',
-  },
-]
-
-export const optionMethods = [
-  {
-    label: 'method (effect)',
-    kind: CompletionItemKind.Method,
-    sortText: 'c',
-    insertTextFormat: InsertTextFormat.Snippet,
-    insertText: 'method ${1:name}($2) {\n  ${0}\n}',
-  },
-  {
-    label: 'method (return)',
-    kind: CompletionItemKind.Method,
-    sortText: 'c',
-    insertTextFormat: InsertTextFormat.Snippet,
-    insertText: 'method ${1:name}($2) = ${0}',
   },
 ]
 
@@ -103,6 +79,37 @@ export const optionModules = [
     sortText: 'b',
     insertTextFormat: InsertTextFormat.Snippet,
     insertText: 'class ${1:Name} {\n  ${0}\n}',
+  },
+]
+
+export const optionDescribes = [
+  {
+    label: 'describe',
+    kind: CompletionItemKind.Folder,
+    insertTextFormat: InsertTextFormat.Snippet,
+    sortText: 'c',
+    insertText: 'describe "${1:name}" {\n  test "${2:description}" {\n    ${0}\n  }\n}',
+  },
+  ...optionTests,
+  // we could potentially hide modules autocompletion, but when you design unit tests you need some abstraction
+  ...optionModules,
+  //
+]
+
+export const optionMethods = [
+  {
+    label: 'method (effect)',
+    kind: CompletionItemKind.Method,
+    sortText: 'c',
+    insertTextFormat: InsertTextFormat.Snippet,
+    insertText: 'method ${1:name}($2) {\n  ${0}\n}',
+  },
+  {
+    label: 'method (return)',
+    kind: CompletionItemKind.Method,
+    sortText: 'c',
+    insertTextFormat: InsertTextFormat.Snippet,
+    insertText: 'method ${1:name}($2) = ${0}',
   },
 ]
 

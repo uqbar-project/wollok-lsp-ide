@@ -8,28 +8,68 @@ import {
 } from 'vscode'
 import { getDocumentURI, activate } from './helper'
 
-const WOLLOK_AUTOCOMPLETE = 'wollok_autocomplete'
-
 suite('Should do completion', () => {
-  const docUri = getDocumentURI('completion.wlk')
-  const fileCompletion = {
-    items: [
-      { label: 'class', kind: CompletionItemKind.Class },
-      { label: 'describe', kind: CompletionItemKind.Event },
-      { label: 'method (with effect)', kind: CompletionItemKind.Method },
-      { label: 'method (without effect)', kind: CompletionItemKind.Method },
-      { label: 'object', kind: CompletionItemKind.Text },
-      { label: 'test', kind: CompletionItemKind.Event },
-    ],
-  }
 
-  test('Completes Wollok file', async () => {
-    await testCompletion(docUri, new Position(0, 0), fileCompletion)
+  test('Completes Wollok definition file', async () => {
+      await testCompletion(getDocumentURI('completion.wlk'), new Position(0, 0), { items: [
+        {
+          label:"import",
+          kind: CompletionItemKind.File,
+        }, {
+          label:"object",
+          kind: CompletionItemKind.Module,
+        }, {
+          label:"class",
+          kind: CompletionItemKind.Class,
+        }, {
+          label: "const attribute",
+          kind: CompletionItemKind.Field,
+        },
+      ],
+    })
   })
 
-  test('Completes unparsed node', async () => {
-    await testCompletion(docUri, new Position(2, 3), fileCompletion)
+  test('Completes Wollok test file', async () => {
+      await testCompletion(getDocumentURI('completionTest.wtest'), new Position(0, 0), { items: [
+        {
+          label:"import",
+          kind: CompletionItemKind.File,
+        }, {
+          label:"object",
+          kind: CompletionItemKind.Module,
+        }, {
+          label:"class",
+          kind: CompletionItemKind.Class,
+        }, {
+          label: "const attribute",
+          kind: CompletionItemKind.Field,
+        }, {
+          label: "describe",
+          kind: CompletionItemKind.Folder,
+        }, {
+          label: "test",
+          kind: CompletionItemKind.Event,
+        },
+      ],
+    })
   })
+
+  test('Completes Wollok program file', async () => {
+      await testCompletion(getDocumentURI('completionProgram.wpgm'), new Position(0, 0), { items: [
+        {
+          label:"import",
+          kind: CompletionItemKind.File,
+        }, {
+          label: "const attribute",
+          kind: CompletionItemKind.Field,
+        }, {
+          label: "program",
+          kind: CompletionItemKind.Unit,
+        },
+      ],
+    })
+  })
+
 })
 
 async function testCompletion(
@@ -40,22 +80,19 @@ async function testCompletion(
   await activate(docUri)
 
   // Executing the command `executeCompletionItemProvider` to simulate triggering completion
-  const actualCompletionList = (await commands.executeCommand(
+  const wollokCompletionList = (await commands.executeCommand(
     'vscode.executeCompletionItemProvider',
     docUri,
     position,
   )) as CompletionList
 
-  const wollokCompletionList = actualCompletionList.items.filter(
-    (completionElement) => completionElement.detail === WOLLOK_AUTOCOMPLETE,
-  )
   assert.equal(
     expectedCompletionList.items.length,
-    wollokCompletionList.length,
-    JSON.stringify(actualCompletionList),
+    wollokCompletionList.items.length,
+    JSON.stringify(wollokCompletionList),
   )
   expectedCompletionList.items.forEach((expectedItem, i) => {
-    const actualItem = wollokCompletionList[i]
+    const actualItem = wollokCompletionList.items[i]
     assert.equal(actualItem.label, expectedItem.label)
     assert.equal(actualItem.kind, expectedItem.kind)
   })

@@ -2,7 +2,7 @@ import { CompletionItem } from 'vscode-languageserver'
 import { Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin, Describe, Program, Test } from 'wollok-ts'
 import { is, match, when } from 'wollok-ts/dist/extensions'
 import { fieldCompletionItem, parameterCompletionItem, singletonCompletionItem } from './autocomplete'
-import { optionModules, optionImports, optionDescribes, optionTests, optionReferences, optionMethods, optionPrograms, optionAsserts } from './options-autocomplete'
+import { optionModules, optionImports, optionDescribes, optionTests, optionReferences, optionMethods, optionPrograms, optionAsserts, optionConstReferences } from './options-autocomplete'
 
 export const completionsForNode = (node: Node): CompletionItem[] => {
   try{
@@ -29,6 +29,7 @@ const isProgramFile = (node: Node) => node.sourceFileName?.endsWith('wpgm')
 
 const completePackage = (node: Package): CompletionItem[] => [
   ...optionImports,
+  ...optionConstReferences,
   ...isTestFile(node) ? optionDescribes : isProgramFile(node) ? optionPrograms : optionModules,
 ]
 

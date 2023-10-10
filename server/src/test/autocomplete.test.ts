@@ -14,11 +14,11 @@ describe('autocomplete', () => {
     })
 
     it('package should complete with snippets', () => {
-      testCompletionLabelsForNode(pepitaEnvironment.getNodeByFQN('pepita'), ['object', 'class'])
+      testCompletionLabelsForNode(pepitaEnvironment.getNodeByFQN('pepita'), ['import', 'const attribute', 'object', 'class'])
     })
 
     it('singleton should complete with snippets', () => {
-      testCompletionLabelsForNode(pepita, ['var attribute', 'const attribute', 'method'])
+      testCompletionLabelsForNode(pepita, ['var attribute', 'var property', 'const attribute', 'const property', 'method (effect)', 'method (return)'])
     })
 
     it('method should complete with module fields, parameters and WKOs', () => {
