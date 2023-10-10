@@ -10,23 +10,26 @@ import { getDocumentURI, activate } from './helper'
 
 suite('Should do completion', () => {
 
+  const fileSnippets = {
+    items: [
+      {
+        label: "import",
+        kind: CompletionItemKind.File,
+      }, {
+        label: "object",
+        kind: CompletionItemKind.Module,
+      }, {
+        label: "class",
+        kind: CompletionItemKind.Class,
+      }, {
+        label: "const attribute",
+        kind: CompletionItemKind.Field,
+      },
+    ],
+  }
+
   test('Completes Wollok definition file', async () => {
-      await testCompletion(getDocumentURI('completion.wlk'), new Position(0, 0), { items: [
-        {
-          label:"import",
-          kind: CompletionItemKind.File,
-        }, {
-          label:"object",
-          kind: CompletionItemKind.Module,
-        }, {
-          label:"class",
-          kind: CompletionItemKind.Class,
-        }, {
-          label: "const attribute",
-          kind: CompletionItemKind.Field,
-        },
-      ],
-    })
+    await testCompletion(getDocumentURI('completion.wlk'), new Position(0, 0), fileSnippets)
   })
 
   test('Completes Wollok test file', async () => {
@@ -68,6 +71,10 @@ suite('Should do completion', () => {
         },
       ],
     })
+  })
+
+  test('Completes unparsed node', async () => {
+    await testCompletion(getDocumentURI('completion.wlk'), new Position(2, 3), fileSnippets)
   })
 
 })
