@@ -1,18 +1,31 @@
-import { DocumentFormattingParams, DocumentRangeFormattingParams, Position, TextEdit } from 'vscode-languageserver'
-import { Environment } from 'wollok-ts'
+import { DocumentFormattingParams, DocumentRangeFormattingParams, Position, Range, TextEdit } from 'vscode-languageserver'
+import { Environment, Package } from 'wollok-ts'
 import { packageFromURI } from '../utils/text-documents'
 import { wollokURI } from '../utils/vm/wollok'
+import { print } from '../utils/code-generation/format'
 
 export const formatRange = (params: DocumentRangeFormattingParams, environment: Environment): TextEdit[] => {
-  const file = packageFromURI(wollokURI(params.textDocument.uri), environment)
-  if(!file){
-    throw new Error('Could not find file to format')
-  }
+  const file = getPackage(params, environment)
 
 
   return [TextEdit.insert(Position.create(0, 0), `// ${file.fileName}\n`)]
 }
 
 export const formatDocument = (params: DocumentFormattingParams, environment: Environment): TextEdit[] => {
-  return [TextEdit.insert(Position.create(0, 0), '// holaaaaa\n')]
+  const file = getPackage(params, environment)
+  return [
+    TextEdit.replace(
+      Range.create(Position.create(0, 0), Position.create(file.children[file.children.length -1].sourceMap!.end.line+1, 0)),
+      print(file)
+    ),
+  ]
+}
+
+
+function getPackage(params: DocumentFormattingParams, environment: Environment): Package {
+  const file = packageFromURI(wollokURI(params.textDocument.uri), environment)
+  if(!file){
+    throw new Error('Could not find file to format')
+  }
+  return file
 }

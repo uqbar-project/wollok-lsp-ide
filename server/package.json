@@ -12,6 +12,7 @@
     "url": "https://github.com/uqbar-project/wollok-lsp-ide"
   },
   "dependencies": {
+    "prettier-printer": "^1.1.4",
     "vscode-languageserver": "^8.0.1",
     "vscode-languageserver-textdocument": "^1.0.5"
   },

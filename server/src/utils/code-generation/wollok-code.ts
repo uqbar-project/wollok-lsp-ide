@@ -8,6 +8,7 @@ export default {
 	OP_BOOLEAN_OR: ["or", "||"],
 	OP_BOOLEAN: ['and', "&&", "or", "||"],
 	OP_UNARY_BOOLEAN: ['!', "not"],
+  PARAM_SEPARATOR: ',',
 	SELF: "self",
 	SUPER: "super",
 	NULL: "null",
@@ -42,4 +43,4 @@ export default {
 	END_PARAMETER_LIST: ")",
 	INSTANTIATION: "new",
 	TRY: "try",
-}
+} as const
