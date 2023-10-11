@@ -16,7 +16,7 @@ export const optionPrograms = [
     kind: CompletionItemKind.Unit,
     sortText: 'd',
     insertTextFormat: InsertTextFormat.Snippet,
-    insertText: 'program "${1:name}" {\n  ${0}\n}',
+    insertText: 'program ${1:name} {\n  ${0}\n}',
   },
 ]
 
@@ -40,7 +40,7 @@ export const optionConstReferences = [
   },
 ]
 
-export const optionReferences = [
+const optionVarReferences = [
   {
     label: 'var attribute',
     kind: CompletionItemKind.Field,
@@ -48,6 +48,15 @@ export const optionReferences = [
     insertTextFormat: InsertTextFormat.Snippet,
     insertText: 'var ${1:name} = ${0}',
   },
+]
+
+export const optionReferences = [
+  ...optionVarReferences,
+  ...optionConstReferences,
+]
+
+export const optionPropertiesAndReferences = [
+  ...optionVarReferences,
   {
     label: 'var property',
     kind: CompletionItemKind.Property,
@@ -142,5 +151,14 @@ export const optionAsserts = [
     insertTextFormat: InsertTextFormat.Snippet,
     insertText: 'assert.throwsExceptionWithMessage(${1:message}, { ${2:expression} })${0}',
   },
+]
 
+export const optionInitialize = [
+  {
+    label: 'initializer',
+    kind: CompletionItemKind.Constructor,
+    sortText: 'c',
+    insertTextFormat: InsertTextFormat.Snippet,
+    insertText: 'method initialize() {\n  ${0}\n}',
+  },
 ]

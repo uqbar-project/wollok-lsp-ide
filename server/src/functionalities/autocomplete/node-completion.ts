@@ -2,7 +2,7 @@ import { CompletionItem } from 'vscode-languageserver'
 import { Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin, Describe, Program, Test } from 'wollok-ts'
 import { is, match, when } from 'wollok-ts/dist/extensions'
 import { fieldCompletionItem, parameterCompletionItem, singletonCompletionItem } from './autocomplete'
-import { optionModules, optionImports, optionDescribes, optionTests, optionReferences, optionMethods, optionPrograms, optionAsserts, optionConstReferences } from './options-autocomplete'
+import { optionModules, optionImports, optionDescribes, optionTests, optionReferences, optionMethods, optionPrograms, optionAsserts, optionConstReferences, optionInitialize, optionPropertiesAndReferences } from './options-autocomplete'
 
 export const completionsForNode = (node: Node): CompletionItem[] => {
   try{
@@ -43,7 +43,7 @@ const completeTest = (): CompletionItem[] => [
 ]
 
 const completeModule = (): CompletionItem[] => [
-  ...optionReferences,
+  ...optionPropertiesAndReferences,
   ...optionMethods,
 ]
 
@@ -59,7 +59,7 @@ const completeMethod = (node: Method): CompletionItem[] => {
   ]
 }
 
-const completeDescribe = (node: Describe): CompletionItem[] => isTestFile(node) ? optionTests : []
+const completeDescribe = (node: Describe): CompletionItem[] => isTestFile(node) ? [...optionConstReferences, ...optionTests, ...optionInitialize] : []
 
 export const completeForParent = (node: Node): CompletionItem[] => {
   if(!node.parent) throw new Error('Node has no parent')
