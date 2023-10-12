@@ -13,8 +13,19 @@ export const fieldCompletionItem: CompletionItemMapper<Field> = namedCompletionI
 
 export const singletonCompletionItem: CompletionItemMapper<Singleton> = moduleCompletionItem(CompletionItemKind.Class)
 
+const getSortText = (node: Node, method: Method) => {
+  console.info(method.sourceFileName)
+  if (method.sourceFileName?.startsWith('wollok/lang'))
+    return 'h'
+  if (method.sourceFileName?.startsWith('wollok/lib'))
+    return 'm'
+  if (method.sourceFileName?.startsWith('wollok/game'))
+    return 'v'
 
-export const methodCompletionItem: CompletionItemMapper<Method> = (method) => {
+  return node.sourceFileName === method.sourceFileName ? 'a' : 'd'
+}
+
+export const methodCompletionItem = (node: Node, method: Method): CompletionItem => {
   const params = method.parameters.map((parameter, i) => `\${${i+1}:${parameter.name}}`).join(', ')
   return {
     label: method.name,
@@ -24,6 +35,7 @@ export const methodCompletionItem: CompletionItemMapper<Method> = (method) => {
     kind: CompletionItemKind.Method,
     detail: `${method.parent.name} \n\n\n File ${method.parent.sourceFileName?.split('/').pop()}`,
     labelDetails: { description: method.parent.name, detail: `(${method.parameters.map(parameter => parameter.name).join(', ')})` },
+    sortText: getSortText(node, method),
   }
 }
 
