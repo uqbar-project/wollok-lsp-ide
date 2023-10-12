@@ -84,8 +84,8 @@ connection.onDidChangeConfiguration(() => {
 })
 
 // Only keep settings for open documents
-documents.onDidClose((e) => {
-  documentSettings.delete(e.document.uri)
+documents.onDidClose((change) => {
+  documentSettings.delete(change.document.uri)
 })
 
 // The content of a text document has changed. This event is emitted
@@ -112,9 +112,7 @@ connection.onRequest((change) => {
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion(
-  environmentProvider.requestWithEnvironment((params, env) => {
-    return completions(params, env)
-  }),
+  environmentProvider.requestWithEnvironment((params, env) => completions(params, env)),
 )
 
 connection.onReferences((_params) => {

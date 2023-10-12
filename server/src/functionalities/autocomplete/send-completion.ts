@@ -23,6 +23,8 @@ function literalMethods(environment: Environment, literal: Literal){
   return literalValueToClass(environment, literal.value).allMethods
 }
 
-function allPossibleMethods(environment: Environment): Method[]{
-  return environment.descendants.filter(is(Method)) as Method[]
+const isSymbol = (message: string) => /^[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑäëïöüàèìòù]+$/g.test(message)
+
+function allPossibleMethods(environment: Environment): Method[] {
+  return (environment.descendants.filter(is(Method)) as Method[]).filter(method => !isSymbol(method.name) && method.name !== '<apply>')
 }

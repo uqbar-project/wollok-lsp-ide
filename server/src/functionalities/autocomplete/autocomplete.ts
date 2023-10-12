@@ -1,6 +1,7 @@
 import { CompletionItem, CompletionItemKind, InsertTextFormat } from 'vscode-languageserver'
 import { Field, Method, Module, Name, Node, Parameter, Singleton } from 'wollok-ts'
 
+
 // -----------------
 // -----MAPPERS-----
 // -----------------
@@ -12,8 +13,9 @@ export const fieldCompletionItem: CompletionItemMapper<Field> = namedCompletionI
 
 export const singletonCompletionItem: CompletionItemMapper<Singleton> = moduleCompletionItem(CompletionItemKind.Class)
 
+
 export const methodCompletionItem: CompletionItemMapper<Method> = (method) => {
-  const params = method.parameters.map((p, i) => `\${${i+1}:${p.name}}`).join(', ')
+  const params = method.parameters.map((parameter, i) => `\${${i+1}:${parameter.name}}`).join(', ')
   return {
     label: method.name,
     filterText: method.name,
@@ -21,7 +23,7 @@ export const methodCompletionItem: CompletionItemMapper<Method> = (method) => {
     insertText: `${method.name}(${params})`,
     kind: CompletionItemKind.Method,
     detail: `${method.parent.name} \n\n\n File ${method.parent.sourceFileName?.split('/').pop()}`,
-    labelDetails: { description: method.parent.name, detail: `(${method.parameters.map(p => p.name).join(', ')})` },
+    labelDetails: { description: method.parent.name, detail: `(${method.parameters.map(parameter => parameter.name).join(', ')})` },
   }
 }
 
