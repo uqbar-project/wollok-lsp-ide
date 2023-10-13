@@ -15,13 +15,13 @@ function methodPool(environment: Environment, node: Node): List<Method> {
   if (node.is(Literal)) {
     return literalMethods(environment, node)
   }
+  if (node.is(New)) {
+    return allMethods(environment, node.instantiated)
+  }
   if (node.is(Body) && node.hasProblems) {
     const childAutocomplete = firstNodeWithProblems(node)
-    if (childAutocomplete?.is(Literal)) {
-      return literalMethods(environment, childAutocomplete)
-    }
-    if (childAutocomplete?.is(New)) {
-      return allMethods(environment, childAutocomplete.instantiated)
+    if (childAutocomplete) {
+      return methodPool(environment, childAutocomplete)
     }
   }
   return allPossibleMethods(environment, node)
