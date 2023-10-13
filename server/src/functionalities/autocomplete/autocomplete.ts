@@ -14,7 +14,6 @@ export const fieldCompletionItem: CompletionItemMapper<Field> = namedCompletionI
 export const singletonCompletionItem: CompletionItemMapper<Singleton> = moduleCompletionItem(CompletionItemKind.Class)
 
 const getSortText = (node: Node, method: Method) => {
-  console.info(method.sourceFileName)
   if (method.sourceFileName?.startsWith('wollok/lang'))
     return 'h'
   if (method.sourceFileName?.startsWith('wollok/lib'))

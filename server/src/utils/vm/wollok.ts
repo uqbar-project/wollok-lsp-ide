@@ -1,16 +1,37 @@
-import { Class, Entity, Environment, LiteralValue, Node, Package } from 'wollok-ts'
+import { is } from 'wollok-ts/dist/extensions'
+import { Class, Entity, Environment, LiteralValue, Method, Node, Package, Reference } from 'wollok-ts'
 
 export const literalValueToClass = (environment: Environment, literal: LiteralValue): Class => {
-  switch (typeof literal) {
+  const clazz = (() => { switch (typeof literal) {
     case 'number':
-      return environment.getNodeByFQN('wollok.lang.Number')
+      return 'wollok.lang.Number'
     case 'string':
-      return environment.getNodeByFQN('wollok.lang.String')
+      return 'wollok.lang.String'
     case 'boolean':
-      return environment.getNodeByFQN('wollok.lang.Boolean')
+      return 'wollok.lang.Boolean'
     case 'object':
-      return environment.getNodeByFQN('wollok.lang.Object')
-  }
+      try {
+        const referenceClasses = literal as unknown as Reference<Class>[]
+        return referenceClasses[0].name
+      } catch (e) {
+        return 'wollok.lang.Object'
+      }
+    }
+  })()
+  return environment.getNodeByFQN(clazz)
+}
+
+export const allAvailableMethods = (environment: Environment): Method[] =>
+  environment.descendants.filter(is(Method)) as Method[]
+
+export const allMethods = (environment: Environment, referenceClass: Reference<Class>): Method[] =>
+  (environment.getNodeByFQN(referenceClass.name) as Class).allMethods as Method[]
+
+export const firstNodeWithProblems = (node: Node): Node | undefined => {
+  const { start, end } = node.problems![0].sourceMap ?? { start: { offset: -1 }, end: { offset: -1 } }
+  return node.children.find(child =>
+    child.sourceMap?.covers(start.offset) || child.sourceMap?.covers(end.offset)
+  )
 }
 
 // @ToDo Workaround because package fqn is absolute in the lsp.

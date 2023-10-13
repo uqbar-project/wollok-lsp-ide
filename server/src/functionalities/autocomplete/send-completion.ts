@@ -1,7 +1,7 @@
 import { CompletionItem } from 'vscode-languageserver'
-import { Describe, Environment, Literal, Method, Node, Reference, Singleton } from 'wollok-ts'
-import { is, List } from 'wollok-ts/dist/extensions'
-import { literalValueToClass } from '../../utils/vm/wollok'
+import { Body, Describe, Environment, Literal, Method, New, Node, Reference, Singleton } from 'wollok-ts'
+import { List, is } from 'wollok-ts/dist/extensions'
+import { allAvailableMethods, allMethods, firstNodeWithProblems, literalValueToClass } from '../../utils/vm/wollok'
 import { methodCompletionItem } from './autocomplete'
 
 export function completeMessages(environment: Environment, node: Node): CompletionItem[] {
@@ -9,11 +9,20 @@ export function completeMessages(environment: Environment, node: Node): Completi
 }
 
 function methodPool(environment: Environment, node: Node): List<Method> {
-  if(node.is(Reference) && node.target?.is(Singleton)) {
+  if (node.is(Reference) && node.target?.is(Singleton)) {
     return node.target.allMethods
   }
-  if(node.is(Literal)){
+  if (node.is(Literal)) {
     return literalMethods(environment, node)
+  }
+  if (node.is(Body) && node.hasProblems) {
+    const childAutocomplete = firstNodeWithProblems(node)
+    if (childAutocomplete?.is(Literal)) {
+      return literalMethods(environment, childAutocomplete)
+    }
+    if (childAutocomplete?.is(New)) {
+      return allMethods(environment, childAutocomplete.instantiated)
+    }
   }
   return allPossibleMethods(environment, node)
 }
@@ -22,12 +31,22 @@ function literalMethods(environment: Environment, literal: Literal){
   return literalValueToClass(environment, literal.value).allMethods
 }
 
-const isSymbol = (message: string) => /^[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑäëïöüàèìòù]+$/g.test(message)
-
-function availableAtAutocomplete(method: Method, node: Node) {
-  return method.sourceFileName && !['wollok/vm.wlk', 'wollok/mirror.wlk'].includes(method.sourceFileName) && !isSymbol(method.name) && method.name !== '<apply>' && (!method.parent.is(Describe) || node.ancestors.some(is(Describe)))
+function isSymbol(message: string) {
+  return /^[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑäëïöüàèìòù]+$/g.test(message)
 }
 
 function allPossibleMethods(environment: Environment, node: Node): Method[] {
-  return (environment.descendants.filter(is(Method)) as Method[]).filter(method => availableAtAutocomplete(method, node))
+  return allAvailableMethods(environment).filter(method => availableForAutocomplete(method, node))
+}
+
+function availableForAutocomplete(method: Method, node: Node) {
+  return fileValidForAutocomplete(method.sourceFileName) && methodNameValidForAutocomplete(method) && (!method.parent.is(Describe) || node.ancestors.some(is(Describe)))
+}
+
+function fileValidForAutocomplete(sourceFileName: string | undefined) {
+  return sourceFileName && !['wollok/vm.wlk', 'wollok/mirror.wlk'].includes(sourceFileName)
+}
+
+function methodNameValidForAutocomplete(method: Method) {
+  return !isSymbol(method.name) && method.name !== '<apply>'
 }

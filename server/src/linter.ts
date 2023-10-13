@@ -65,16 +65,6 @@ const createDiagnostic = (textDocument: TextDocument, problem: Problem) => {
   } as Diagnostic
 }
 
-function findFirstStableNode(node: Node): Node {
-  if (!node.problems || node.problems.length === 0) {
-    return node
-  }
-  if (node.parent.kind === 'Environment') {
-    throw new Error('No stable node found')
-  }
-  return findFirstStableNode(node.parent)
-}
-
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // PUBLIC INTERFACE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -141,14 +131,19 @@ export const completions = (
   params: CompletionParams,
   environment: Environment,
 ): CompletionItem[] => {
+  const timeMeasurer = new TimeMeasurer()
   const { position, textDocument, context } = params
   const selectionNode = cursorNode(environment, position, textDocument)
 
   if (context?.triggerCharacter === '.') {
     // ignore dot
     position.character -= 1
-    return completeMessages(environment, findFirstStableNode(selectionNode))
+    timeMeasurer.addTime("Autocomplete - messages")
+    timeMeasurer.finalReport()
+    return completeMessages(environment, selectionNode)
   } else {
+    timeMeasurer.addTime("Autocomplete - node")
+    timeMeasurer.finalReport()
     return completionsForNode(selectionNode)
   }
 }
