@@ -82,16 +82,26 @@ function namedCompletionItem<T extends {name: string}>(kind: CompletionItemKind)
   }
 }
 
-export const classCompletionItem = (clazz: Class, initializing = false): CompletionItem => {
-  // TODO: export getAllUninitializedAttributes from wollok-ts and use it
-  const initializers = '(' + clazz.allFields.map((member, i) => `\${${2*i+1}:${member.name}} = \${${2*i+2}}`).join(', ') + ')'
+export const classCompletionItem = (clazz: Class): CompletionItem => {
   return {
     label: clazz.name,
     filterText: clazz.name,
-    insertTextFormat: InsertTextFormat.Snippet,
-    insertText: `${clazz.name}${initializing ? initializers : ''}`,
+    insertTextFormat: InsertTextFormat.PlainText,
+    insertText: `${clazz.name}`,
     kind: CompletionItemKind.Class,
     detail: `${clazz.name} \n\n\n File ${clazz.parent.sourceFileName?.split('/').pop()}`,
     sortText: formatSortText(getLibraryIndex(clazz)),
+  }
+}
+
+export const initializerCompletionItem = (clazz: Class): CompletionItem => {
+  // TODO: export getAllUninitializedAttributes from wollok-ts and use it
+  const initializers = clazz.allFields.map((member, i) => `\${${2*i+1}:${member.name}} = \${${2*i+2}}`).join(', ')
+  return {
+    label: 'initializers',
+    filterText: 'initializers',
+    insertTextFormat: InsertTextFormat.Snippet,
+    insertText: initializers,
+    kind: CompletionItemKind.Constructor,
   }
 }

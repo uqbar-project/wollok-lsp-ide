@@ -1,7 +1,7 @@
 import { CompletionItem } from 'vscode-languageserver'
-import { Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin, Describe, Program, Test, Reference } from 'wollok-ts'
+import { Assignment, Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin, Describe, Program, Test, Reference, New, Return } from 'wollok-ts'
 import { is, match, when } from 'wollok-ts/dist/extensions'
-import { classCompletionItem, fieldCompletionItem, parameterCompletionItem, singletonCompletionItem } from './autocomplete'
+import { classCompletionItem, fieldCompletionItem, initializerCompletionItem, parameterCompletionItem, singletonCompletionItem } from './autocomplete'
 import { optionModules, optionImports, optionDescribes, optionTests, optionReferences, optionMethods, optionPrograms, optionAsserts, optionConstReferences, optionInitialize, optionPropertiesAndReferences } from './options-autocomplete'
 
 export const completionsForNode = (node: Node): CompletionItem[] => {
@@ -18,7 +18,8 @@ export const completionsForNode = (node: Node): CompletionItem[] => {
       when(Body)(completeBody),
       when(Method)(completeMethod),
       when(Describe)(completeDescribe),
-      when(Reference<Class>)(completeReference)
+      when(Reference<Class>)(completeReference),
+      when(New)(completeNew)
     )
   } catch {
     return completeForParent(node)
@@ -68,7 +69,16 @@ export const completeForParent = (node: Node): CompletionItem[] => {
   return completionsForNode(node.parent)
 }
 
+// It only works for new if you complete the parentheses
 const completeReference = (node: Reference<Class>): CompletionItem[] => {
+  const parent = node.parent
+  if (parent.is(Return) || parent.is(Assignment) || parent.is(Body)) {
+    return completeForParent(node)
+  }
   const classes = node.environment.descendants.filter(child => child.is(Class) && !child.isAbstract) as Class[]
-  return classes.map(clazz => classCompletionItem(clazz, false))
+  return classes.map(classCompletionItem)
 }
+
+// it assumes you need just the initializers
+const completeNew = (node: New): CompletionItem[] =>
+  node.instantiated.target ? [initializerCompletionItem(node.instantiated.target)] : []
