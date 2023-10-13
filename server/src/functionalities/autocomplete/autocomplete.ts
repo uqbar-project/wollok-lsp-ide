@@ -1,5 +1,6 @@
 import { CompletionItem, CompletionItemKind, InsertTextFormat } from 'vscode-languageserver'
-import { Field, Method, Module, Name, Node, Parameter, Singleton } from 'wollok-ts'
+import { Class, Field, Method, Module, Name, Node, Parameter, Singleton } from 'wollok-ts'
+import { OBJECT_CLASS, parentClass } from '../../utils/vm/wollok'
 
 
 // -----------------
@@ -13,15 +14,42 @@ export const fieldCompletionItem: CompletionItemMapper<Field> = namedCompletionI
 
 export const singletonCompletionItem: CompletionItemMapper<Singleton> = moduleCompletionItem(CompletionItemKind.Class)
 
+/**
+ * We want
+ * - first: methods belonging to the same file we are using
+ * - then, concrete classes/singletons
+ * - then, library methods having this order: 1. lang, 2. lib, 3. game
+ * - and last: object
+ */
 const getSortText = (node: Node, method: Method) => {
-  if (method.sourceFileName?.startsWith('wollok/lang'))
-    return 'h'
-  if (method.sourceFileName?.startsWith('wollok/lib'))
-    return 'm'
-  if (method.sourceFileName?.startsWith('wollok/game'))
-    return 'v'
+  const methodClass = parentClass(method)
+  return node.sourceFileName === method.sourceFileName ? '001' : formatSortText(getLibraryIndex(method) + additionalIndex(method, methodClass))
+}
 
-  return node.sourceFileName === method.sourceFileName ? 'a' : 'd'
+const getLibraryIndex = (node: Node) => {
+  switch (node.sourceFileName) {
+    case 'wollok/lang.wlk': {
+      return 20
+    }
+    case 'wollok/lib.wlk': {
+      return 30
+    }
+    case 'wollok/game.wlk': {
+      return 40
+    }
+    default: {
+      return 10
+    }
+  }
+}
+
+const formatSortText = (index: number) => ('000' + index).slice(-3)
+
+const additionalIndex = (method: Method, methodClass: Class): number => {
+  if (methodClass.fullyQualifiedName === OBJECT_CLASS) return 6
+  if (methodClass.isAbstract) return 5
+  if (method.isAbstract()) return 3
+  return 1
 }
 
 export const methodCompletionItem = (node: Node, method: Method): CompletionItem => {
@@ -51,5 +79,19 @@ function namedCompletionItem<T extends {name: string}>(kind: CompletionItemKind)
       insertTextFormat: InsertTextFormat.PlainText,
       kind,
     }
+  }
+}
+
+export const classCompletionItem = (clazz: Class, initializing = false): CompletionItem => {
+  // TODO: export getAllUninitializedAttributes from wollok-ts and use it
+  const initializers = '(' + clazz.allFields.map((member, i) => `\${${2*i+1}:${member.name}} = \${${2*i+2}}`).join(', ') + ')'
+  return {
+    label: clazz.name,
+    filterText: clazz.name,
+    insertTextFormat: InsertTextFormat.Snippet,
+    insertText: `${clazz.name}${initializing ? initializers : ''}`,
+    kind: CompletionItemKind.Class,
+    detail: `${clazz.name} \n\n\n File ${clazz.parent.sourceFileName?.split('/').pop()}`,
+    sortText: formatSortText(getLibraryIndex(clazz)),
   }
 }

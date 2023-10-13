@@ -1,10 +1,11 @@
 import { CompletionItem } from 'vscode-languageserver'
-import { Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin, Describe, Program, Test } from 'wollok-ts'
+import { Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin, Describe, Program, Test, Reference } from 'wollok-ts'
 import { is, match, when } from 'wollok-ts/dist/extensions'
-import { fieldCompletionItem, parameterCompletionItem, singletonCompletionItem } from './autocomplete'
+import { classCompletionItem, fieldCompletionItem, parameterCompletionItem, singletonCompletionItem } from './autocomplete'
 import { optionModules, optionImports, optionDescribes, optionTests, optionReferences, optionMethods, optionPrograms, optionAsserts, optionConstReferences, optionInitialize, optionPropertiesAndReferences } from './options-autocomplete'
 
 export const completionsForNode = (node: Node): CompletionItem[] => {
+  console.info(node.label, node.kind, node.parent.kind)
   try{
     return match(node)(
       when(Environment)(_ => []),
@@ -16,7 +17,8 @@ export const completionsForNode = (node: Node): CompletionItem[] => {
       when(Test)(completeTest),
       when(Body)(completeBody),
       when(Method)(completeMethod),
-      when(Describe)(completeDescribe)
+      when(Describe)(completeDescribe),
+      when(Reference<Class>)(completeReference)
     )
   } catch {
     return completeForParent(node)
@@ -64,4 +66,9 @@ const completeDescribe = (node: Describe): CompletionItem[] => isTestFile(node) 
 export const completeForParent = (node: Node): CompletionItem[] => {
   if(!node.parent) throw new Error('Node has no parent')
   return completionsForNode(node.parent)
+}
+
+const completeReference = (node: Reference<Class>): CompletionItem[] => {
+  const classes = node.environment.descendants.filter(child => child.is(Class) && !child.isAbstract) as Class[]
+  return classes.map(clazz => classCompletionItem(clazz, false))
 }
