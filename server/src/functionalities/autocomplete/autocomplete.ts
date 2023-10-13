@@ -46,7 +46,7 @@ const getLibraryIndex = (node: Node) => {
 const formatSortText = (index: number) => ('000' + index).slice(-3)
 
 const additionalIndex = (method: Method, methodClass: Class): number => {
-  if (methodClass.fullyQualifiedName === OBJECT_CLASS) return 6
+  if (methodClass.fullyQualifiedName === OBJECT_CLASS) return 50
   if (methodClass.isAbstract) return 5
   if (method.isAbstract()) return 3
   return 1
