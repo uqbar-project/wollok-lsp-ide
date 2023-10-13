@@ -5,7 +5,6 @@ import { classCompletionItem, fieldCompletionItem, initializerCompletionItem, pa
 import { optionModules, optionImports, optionDescribes, optionTests, optionReferences, optionMethods, optionPrograms, optionAsserts, optionConstReferences, optionInitialize, optionPropertiesAndReferences } from './options-autocomplete'
 
 export const completionsForNode = (node: Node): CompletionItem[] => {
-  console.info(node.label, node.kind, node.parent.kind)
   try{
     return match(node)(
       when(Environment)(_ => []),
@@ -65,18 +64,13 @@ const completeMethod = (node: Method): CompletionItem[] => {
 const completeDescribe = (node: Describe): CompletionItem[] => isTestFile(node) ? [...optionConstReferences, ...optionTests, ...optionInitialize] : []
 
 export const completeForParent = (node: Node): CompletionItem[] => {
-  if(!node.parent) throw new Error('Node has no parent')
+  if (!node.parent) throw new Error('Node has no parent')
   return completionsForNode(node.parent)
 }
 
-// It only works for new if you complete the parentheses
 const completeReference = (node: Reference<Class>): CompletionItem[] => {
-  const parent = node.parent
-  if (parent.is(Return) || parent.is(Assignment) || parent.is(Body)) {
-    return completeForParent(node)
-  }
   const classes = node.environment.descendants.filter(child => child.is(Class) && !child.isAbstract) as Class[]
-  return classes.map(classCompletionItem)
+  return classes.map(classCompletionItem).concat(completeForParent(node))
 }
 
 // it assumes you need just the initializers
