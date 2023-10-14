@@ -1,6 +1,7 @@
 import { CompletionItem, CompletionItemKind, InsertTextFormat } from 'vscode-languageserver'
-import { Class, Field, Method, Module, Name, Node, Parameter, Singleton } from 'wollok-ts'
-import { OBJECT_CLASS, parentClass } from '../../utils/vm/wollok'
+import { Class, Entity, Field, Method, Mixin, Module, Name, Node, Parameter, Reference, Singleton } from 'wollok-ts'
+import { OBJECT_CLASS, parentClass, projectFQN } from '../../utils/vm/wollok'
+import { match, when } from 'wollok-ts/dist/extensions'
 
 
 // -----------------
@@ -103,5 +104,21 @@ export const initializerCompletionItem = (clazz: Class): CompletionItem => {
     insertTextFormat: InsertTextFormat.Snippet,
     insertText: initializers,
     kind: CompletionItemKind.Constructor,
+  }
+}
+
+export const entityCompletionItem = (entity: Entity): CompletionItem => {
+  const label = projectFQN(entity)
+  return {
+    label,
+    filterText: label,
+    insertTextFormat: InsertTextFormat.PlainText,
+    kind: match(entity)(
+      when(Class)(() => CompletionItemKind.Class),
+      when(Mixin)(() => CompletionItemKind.Interface),
+      when(Reference)(() => CompletionItemKind.Reference),
+      when(Singleton)(() => CompletionItemKind.Module),
+    ),
+    sortText: formatSortText(getLibraryIndex(entity)),
   }
 }

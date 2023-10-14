@@ -1,5 +1,7 @@
 import { is } from 'wollok-ts/dist/extensions'
 import { Class, Entity, Environment, Import, LiteralValue, Method, Node, Package, Reference } from 'wollok-ts'
+import fs from 'fs'
+import path from 'path'
 
 export const OBJECT_CLASS = 'wollok.lang.Object'
 
@@ -40,6 +42,8 @@ export const parentClass = (node: Node): Class => (node.ancestors.find(ancestor 
 
 export const parentImport = (node: Node): Import | undefined => node.ancestors.find(ancestor => ancestor.is(Import)) as Import
 
+export const implicitImport = (node: Node): boolean => ['wollok/lang.wlk', 'wollok/lib.wlk'].includes(node.sourceFileName ?? '')
+
 // @ToDo Workaround because package fqn is absolute in the lsp.
 export const fqnRelativeToPackage =
   (pckg: Package, node: Entity): string =>
@@ -51,3 +55,20 @@ export const isNodeURI = (node: Node, uri: string): boolean => node.sourceFileNa
 
 export const workspacePackage = (environment: Environment): Package =>
   environment.members[1]
+
+export const rootFolder = (uri: string): string => {
+  let folderPath = path.sep + uri
+  while (!fs.existsSync(folderPath + path.sep + 'package.json') && folderPath) {
+    const lastIndex = folderPath.lastIndexOf(path.sep)
+    if (!lastIndex) return ''
+    folderPath = folderPath?.slice(0, lastIndex)
+  }
+  return folderPath
+}
+
+export const projectFQN = (node: Entity): string => {
+  if (node.fullyQualifiedName.startsWith('wollok')) return node.fullyQualifiedName
+  const rootPath = rootFolder(node.sourceFileName ?? '').slice(1)
+  const rootFQN = rootPath.replaceAll(path.sep, '.')
+  return node.fullyQualifiedName?.replaceAll(rootFQN + '.', '') ?? ''
+}

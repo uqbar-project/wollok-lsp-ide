@@ -16,7 +16,7 @@ import {
   WorkspaceSymbolParams,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Environment, Node, Package, Problem, validate } from 'wollok-ts'
+import { Environment, Import, Node, Package, Problem, validate } from 'wollok-ts'
 import { is, List } from 'wollok-ts/dist/extensions'
 import { completionsForNode } from './functionalities/autocomplete/node-completion'
 import { completeMessages } from './functionalities/autocomplete/send-completion'
@@ -132,20 +132,20 @@ export const completions = (
   environment: Environment,
 ): CompletionItem[] => {
   const timeMeasurer = new TimeMeasurer()
+
   const { position, textDocument, context } = params
   const selectionNode = cursorNode(environment, position, textDocument)
 
-  if (context?.triggerCharacter === '.') {
+  timeMeasurer.addTime(`Autocomplete - ${selectionNode?.kind}`)
+
+  const autocompleteMessages = context?.triggerCharacter === '.' && !selectionNode.parent.is(Import)
+  if (autocompleteMessages) {
     // ignore dot
     position.character -= 1
-    timeMeasurer.addTime("Autocomplete - messages")
-    timeMeasurer.finalReport()
-    return completeMessages(environment, selectionNode)
-  } else {
-    timeMeasurer.addTime("Autocomplete - node")
-    timeMeasurer.finalReport()
-    return completionsForNode(selectionNode)
   }
+  const result = autocompleteMessages ? completeMessages(environment, selectionNode) : completionsForNode(selectionNode)
+  timeMeasurer.finalReport()
+  return result
 }
 
 function cursorNode(

@@ -1,8 +1,9 @@
 import { CompletionItem } from 'vscode-languageserver'
-import { Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin, Describe, Program, Test, Reference, New } from 'wollok-ts'
+import { Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin, Describe, Program, Test, Reference, New, Import, Entity } from 'wollok-ts'
 import { is, match, when } from 'wollok-ts/dist/extensions'
-import { classCompletionItem, fieldCompletionItem, initializerCompletionItem, parameterCompletionItem, singletonCompletionItem } from './autocomplete'
+import { classCompletionItem, fieldCompletionItem, initializerCompletionItem, parameterCompletionItem, singletonCompletionItem, entityCompletionItem } from './autocomplete'
 import { optionModules, optionImports, optionDescribes, optionTests, optionReferences, optionMethods, optionPrograms, optionAsserts, optionConstReferences, optionInitialize, optionPropertiesAndReferences } from './options-autocomplete'
+import { implicitImport, parentImport } from '../../utils/vm/wollok'
 
 export const completionsForNode = (node: Node): CompletionItem[] => {
   try {
@@ -69,6 +70,8 @@ export const completeForParent = (node: Node): CompletionItem[] => {
 }
 
 const completeReference = (node: Reference<Class>): CompletionItem[] => {
+  const nodeImport = parentImport(node)
+  if (nodeImport) return completeImports(nodeImport)
   const classes = node.environment.descendants.filter(child => child.is(Class) && !child.isAbstract) as Class[]
   return classes.map(classCompletionItem).concat(completeForParent(node))
 }
@@ -76,3 +79,7 @@ const completeReference = (node: Reference<Class>): CompletionItem[] => {
 // it assumes you need just the initializers
 const completeNew = (node: New): CompletionItem[] =>
   node.instantiated.target ? [initializerCompletionItem(node.instantiated.target)] : []
+
+const availableForImport = (node: Node) => (node.is(Class) || node.is(Singleton) || node.is(Reference) || node.is(Mixin)) && node.name && (node as Entity).fullyQualifiedName && !implicitImport(node)
+
+const completeImports = (node: Import) => (node.environment.descendants.filter(availableForImport) as Entity[]).map(entityCompletionItem)
