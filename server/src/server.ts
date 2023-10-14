@@ -6,6 +6,7 @@ import {
   InitializeParams,
   InitializeResult,
   ProposedFeatures,
+  TextDocumentChangeEvent,
   TextDocuments,
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node'
@@ -88,21 +89,21 @@ documents.onDidClose((change) => {
   documentSettings.delete(change.document.uri)
 })
 
+const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
+  try {
+    environmentProvider.rebuildTextDocument(change.document)
+    environmentProvider.withLatestEnvironment(
+      validateTextDocument(connection, documents.all())(change.document),
+    )
+  } catch (e) {
+    connection.console.error(`Failed to rebuild document: ${e}`)
+  }
+}
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent((change) => {
-  environmentProvider.rebuildTextDocument(change.document)
-  environmentProvider.withLatestEnvironment(
-    validateTextDocument(connection, documents.all())(change.document),
-  )
-})
+documents.onDidChangeContent(rebuildTextDocument)
 
-documents.onDidOpen((change) => {
-  environmentProvider.rebuildTextDocument(change.document)
-  environmentProvider.withLatestEnvironment(
-    validateTextDocument(connection, documents.all())(change.document),
-  )
-})
+documents.onDidOpen(rebuildTextDocument)
 
 connection.onRequest((change) => {
   if (change === 'STRONG_FILES_CHANGED') {
@@ -111,13 +112,12 @@ connection.onRequest((change) => {
 })
 
 // This handler provides the initial list of the completion items.
+// TODO: handle exceptions and fail silently
 connection.onCompletion(
   environmentProvider.requestWithEnvironment((params, env) => completions(params, env)),
 )
 
-connection.onReferences((_params) => {
-  return []
-})
+connection.onReferences((_params) => [])
 
 connection.onDefinition(environmentProvider.requestWithEnvironment(definition))
 
