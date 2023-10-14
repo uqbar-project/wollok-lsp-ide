@@ -9,11 +9,9 @@ export class TimeMeasurer {
 
   finalReport(): void {
     if (!this.times) return
-    console.info('Performance metrics')
-    console.info('=========================')
     this.times.forEach((timeRow, index) => {
       const time = this.elapsedTime(index)
-      console.info(`o- ${timeRow.processName} ${time}`)
+      console.info(`🕒 ${timeRow.processName} | ${time} ms ${time > 200 ? '⌛' : ''}`)
     })
     console.info('')
     this.reset()
