@@ -1,5 +1,5 @@
 import { is } from 'wollok-ts/dist/extensions'
-import { Class, Entity, Environment, LiteralValue, Method, Node, Package, Reference } from 'wollok-ts'
+import { Class, Entity, Environment, Import, LiteralValue, Method, Node, Package, Reference } from 'wollok-ts'
 
 export const OBJECT_CLASS = 'wollok.lang.Object'
 
@@ -27,7 +27,7 @@ export const allAvailableMethods = (environment: Environment): Method[] =>
   environment.descendants.filter(is(Method)) as Method[]
 
 export const allMethods = (environment: Environment, referenceClass: Reference<Class>): Method[] =>
-  (referenceClass.target ?? objectClass(environment)).allMethods as Method[]
+  (referenceClass.target ?? environment.objectClass).allMethods as Method[]
 
 export const firstNodeWithProblems = (node: Node): Node | undefined => {
   const { start, end } = node.problems![0].sourceMap ?? { start: { offset: -1 }, end: { offset: -1 } }
@@ -36,7 +36,9 @@ export const firstNodeWithProblems = (node: Node): Node | undefined => {
   )
 }
 
-export const parentClass = (node: Node): Class => (node.ancestors.find(ancestor => ancestor.is(Class)) ?? objectClass) as Class
+export const parentClass = (node: Node): Class => (node.ancestors.find(ancestor => ancestor.is(Class)) ?? node.environment.objectClass) as Class
+
+export const parentImport = (node: Node): Import | undefined => node.ancestors.find(ancestor => ancestor.is(Import)) as Import
 
 // @ToDo Workaround because package fqn is absolute in the lsp.
 export const fqnRelativeToPackage =
@@ -49,5 +51,3 @@ export const isNodeURI = (node: Node, uri: string): boolean => node.sourceFileNa
 
 export const workspacePackage = (environment: Environment): Package =>
   environment.members[1]
-
-export const objectClass = (environment: Environment): Class => environment.getNodeByFQN(OBJECT_CLASS) as Class
