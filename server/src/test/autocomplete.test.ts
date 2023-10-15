@@ -1,6 +1,6 @@
 import { expect } from 'expect'
 import { CompletionItem } from 'vscode-languageserver'
-import { Body, Class, Describe, Environment, Literal, Method, Mixin, Node, Package, Program, Reference, Sentence, Singleton, buildEnvironment, link } from 'wollok-ts'
+import { Body, Class, Describe, Environment, Import, Literal, Method, Mixin, Node, Package, Program, Reference, Sentence, Singleton, buildEnvironment, link } from 'wollok-ts'
 import { completeForParent, completionsForNode } from '../functionalities/autocomplete/node-completion'
 import { completeMessages } from '../functionalities/autocomplete/send-completion'
 import { buildPepitaEnvironment } from './utils/wollok-test-utils'
@@ -68,7 +68,6 @@ describe('autocomplete', () => {
         }
         
       }
-      
       ` }])
       birdClass = environment.getNodeByFQN<Class>(className)
     })
@@ -201,10 +200,26 @@ describe('autocomplete', () => {
       testCompletionOrderMessage(completions, 'map', 'identity')
     })
 
+    it('literal inside a body show number methods first and then object methods', () => {
+      const completions = completionsForMessageInBody('2.')
+      testFirstCompletionShouldBe(completions, 'Number')
+      testCompletionOrderMessage(completions, 'square', 'identity')
+    })
+
+    it('literal inside a body show Singleton methods first and then object methods', () => {
+      const completions = completionsForMessage(new Reference({ name: 'wollok.lib.assert' }))
+      testCompletionOrderMessage(completions, 'throwsException', 'identity')
+    })
+
+    it('literal inside a body show Singleton methods first and then object methods', () => {
+      const completions = completionsForMessage(new Reference({ name: 'example.pepita' }), getPepitaEnvironment(''))
+      testFirstCompletionShouldBe(completions, 'pepita')
+      expect(completions.map(completion => completion.label).slice(0, 3)).toEqual(['fly', 'eat', 'energy'])
+    })
+
   })
 
 })
-
 
 function testCompletionLabelsForNodeIncludes(node: Node, expectedLabels: string[]) {
   const completions = completionsForNode(node).map(completion => completion.label)
@@ -216,7 +231,7 @@ function testCompletionLabelsForNode(node: Node, expectedLabels: string[]) {
   expect(completions.map(completion => completion.label)).toStrictEqual(expectedLabels)
 }
 
-function completionsForMessage(node: Sentence): CompletionItem[] {
+function completionsForMessage(node: Sentence, baseEnvironment: Environment | undefined = undefined): CompletionItem[] {
   const environment = link([
     new Package({
       name:'aPackage',
@@ -236,13 +251,12 @@ function completionsForMessage(node: Sentence): CompletionItem[] {
         }),
       ],
     }),
-  ], buildEnvironment([]))
+  ], baseEnvironment ?? buildEnvironment([]))
   const linkedNode = ((environment.getNodeByFQN('aPackage.anObject') as Singleton).allMethods[0].body as Body)!.sentences[0]
   return completeMessages(linkedNode.environment, linkedNode)
 }
 
 function testFirstCompletionShouldBe(completions: CompletionItem[], moduleName: string) {
-  console.info(completions[0].detail)
   expect((completions[0].detail ?? '').startsWith(moduleName)).toBeTruthy()
 }
 
@@ -251,4 +265,26 @@ function testCompletionOrderMessage(completions: CompletionItem[], firstMessage:
   const firstMessageIndex = completionMessages.findIndex(message => message.startsWith(firstMessage))
   const secondMessageIndex = completionMessages.findIndex(message => message.startsWith(secondMessage))
   expect(firstMessageIndex).toBeLessThan(secondMessageIndex)
+}
+
+function completionsForMessageInBody(code: string) {
+  const environment = getPepitaEnvironment(code)
+  const pepitaSingleton = environment.getNodeByFQN<Class>('example.pepita')
+  return completionsForMessage((pepitaSingleton.methods[0].body as Body).sentences[0])
+}
+
+function getPepitaEnvironment(code: string) {
+  return buildEnvironment([{ name: 'example.wlk', content: `
+    object pepita {
+      var energy = 100
+
+      method fly(minutes) {
+        ${code}
+      }
+
+      method eat(food) {}
+      method energy() = energy
+    }
+    `,
+  }])
 }
