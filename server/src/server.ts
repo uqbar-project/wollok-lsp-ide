@@ -96,7 +96,7 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
       validateTextDocument(connection, documents.all())(change.document),
     )
   } catch (e) {
-    connection.console.error(`Failed to rebuild document: ${e}`)
+    connection.console.error(`✘ Failed to rebuild document: ${e}`)
   }
 }
 // The content of a text document has changed. This event is emitted

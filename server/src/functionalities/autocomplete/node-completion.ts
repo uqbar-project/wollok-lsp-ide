@@ -76,7 +76,6 @@ const completeReference = (node: Reference<Class>): CompletionItem[] => {
   return classes.map(classCompletionItem).concat(completeForParent(node))
 }
 
-// it assumes you need just the initializers
 const completeNew = (node: New): CompletionItem[] =>
   node.instantiated.target ? [initializerCompletionItem(node.instantiated.target)] : []
 
