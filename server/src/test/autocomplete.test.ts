@@ -1,6 +1,6 @@
 import { expect } from 'expect'
 import { CompletionItem } from 'vscode-languageserver'
-import { Body, Class, Describe, Environment, Literal, Method, Mixin, Node, Package, Program, Sentence, Singleton, buildEnvironment, link } from 'wollok-ts'
+import { Body, Class, Describe, Environment, Literal, Method, Mixin, Node, Package, Program, Reference, Sentence, Singleton, buildEnvironment, link } from 'wollok-ts'
 import { completeForParent, completionsForNode } from '../functionalities/autocomplete/node-completion'
 import { completeMessages } from '../functionalities/autocomplete/send-completion'
 import { buildPepitaEnvironment } from './utils/wollok-test-utils'
@@ -175,6 +175,32 @@ describe('autocomplete', () => {
       testCompletionOrderMessage(completions, 'square', 'identity')
     })
 
+    it('literal should show boolean methods first and then object methods', () => {
+      const completions = completionsForMessage(new Literal({ value: true }))
+      testFirstCompletionShouldBe(completions, 'Boolean')
+      testCompletionOrderMessage(completions, 'negate', 'identity')
+    })
+
+    it('literal should show string methods first and then object methods', () => {
+      const completions = completionsForMessage(new Literal({ value: "pepita" }))
+      testFirstCompletionShouldBe(completions, 'String')
+      testCompletionOrderMessage(completions, 'trim', 'identity')
+    })
+
+    it('literal should show list methods first, then collection methods and finally object methods', () => {
+      const completions = completionsForMessage(new Literal({ value: [new Reference({ name: 'wollok.lang.List' }), []]  }))
+      testFirstCompletionShouldBe(completions, 'List')
+      testCompletionOrderMessage(completions, 'size', 'map')
+      testCompletionOrderMessage(completions, 'map', 'identity')
+    })
+
+    it('literal should show set methods first, then collection methods and finally object methods', () => {
+      const completions = completionsForMessage(new Literal({ value: [new Reference({ name: 'wollok.lang.Set' }), []]  }))
+      testFirstCompletionShouldBe(completions, 'Set')
+      testCompletionOrderMessage(completions, 'union', 'map')
+      testCompletionOrderMessage(completions, 'map', 'identity')
+    })
+
   })
 
 })
@@ -216,6 +242,7 @@ function completionsForMessage(node: Sentence): CompletionItem[] {
 }
 
 function testFirstCompletionShouldBe(completions: CompletionItem[], moduleName: string) {
+  console.info(completions[0].detail)
   expect((completions[0].detail ?? '').startsWith(moduleName)).toBeTruthy()
 }
 
