@@ -1,7 +1,9 @@
-import { Body, Class, Describe, Environment, Mixin, Node, Package, Program, Singleton, buildEnvironment } from 'wollok-ts'
-import { buildPepitaEnvironment } from './utils/wollok-test-utils'
 import { expect } from 'expect'
-import { completionsForNode, completeForParent } from '../functionalities/autocomplete/node-completion'
+import { CompletionItem } from 'vscode-languageserver'
+import { Body, Class, Describe, Environment, Literal, Method, Mixin, Node, Package, Program, Sentence, Singleton, buildEnvironment, link } from 'wollok-ts'
+import { completeForParent, completionsForNode } from '../functionalities/autocomplete/node-completion'
+import { completeMessages } from '../functionalities/autocomplete/send-completion'
+import { buildPepitaEnvironment } from './utils/wollok-test-utils'
 
 describe('autocomplete', () => {
   describe('completions for singleton node', () => {
@@ -165,6 +167,16 @@ describe('autocomplete', () => {
 
   })
 
+  describe('completions for messages', () => {
+
+    it('literal should show number methods first and then object methods', () => {
+      const completions = completionsForMessage(new Literal({ value: 5 }))
+      testFirstCompletionShouldBe(completions, 'Number')
+      testCompletionOrderMessage(completions, 'square', 'identity')
+    })
+
+  })
+
 })
 
 
@@ -176,4 +188,40 @@ function testCompletionLabelsForNodeIncludes(node: Node, expectedLabels: string[
 function testCompletionLabelsForNode(node: Node, expectedLabels: string[]) {
   const completions = completionsForNode(node)
   expect(completions.map(completion => completion.label)).toStrictEqual(expectedLabels)
+}
+
+function completionsForMessage(node: Sentence): CompletionItem[] {
+  const environment = link([
+    new Package({
+      name:'aPackage',
+      members: [
+        new Singleton({
+          name: 'anObject',
+          members: [
+            new Method({
+              name: 'aMethod',
+              body: new Body({
+                sentences: [
+                  node,
+                ],
+              }),
+            }),
+          ],
+        }),
+      ],
+    }),
+  ], buildEnvironment([]))
+  const linkedNode = ((environment.getNodeByFQN('aPackage.anObject') as Singleton).allMethods[0].body as Body)!.sentences[0]
+  return completeMessages(linkedNode.environment, linkedNode)
+}
+
+function testFirstCompletionShouldBe(completions: CompletionItem[], moduleName: string) {
+  expect((completions[0].detail ?? '').startsWith(moduleName)).toBeTruthy()
+}
+
+function testCompletionOrderMessage(completions: CompletionItem[], firstMessage: string, secondMessage: string) {
+  const completionMessages = completions.map(completion => completion.label)
+  const firstMessageIndex = completionMessages.findIndex(message => message.startsWith(firstMessage))
+  const secondMessageIndex = completionMessages.findIndex(message => message.startsWith(secondMessage))
+  expect(firstMessageIndex).toBeLessThan(secondMessageIndex)
 }
