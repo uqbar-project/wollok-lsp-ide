@@ -1,6 +1,6 @@
 import { expect } from 'expect'
 import { CompletionItem } from 'vscode-languageserver'
-import { Body, Class, Describe, Environment, Import, Literal, Method, Mixin, Node, Package, Program, Reference, Sentence, Singleton, buildEnvironment, link } from 'wollok-ts'
+import { Body, Class, Describe, Environment, Literal, Method, Mixin, New, Node, Package, Program, Reference, Sentence, Singleton, buildEnvironment, link } from 'wollok-ts'
 import { completeForParent, completionsForNode } from '../functionalities/autocomplete/node-completion'
 import { completeMessages } from '../functionalities/autocomplete/send-completion'
 import { buildPepitaEnvironment } from './utils/wollok-test-utils'
@@ -200,21 +200,40 @@ describe('autocomplete', () => {
       testCompletionOrderMessage(completions, 'map', 'identity')
     })
 
-    it('literal inside a body show number methods first and then object methods', () => {
-      const completions = completionsForMessageInBody('2.')
-      testFirstCompletionShouldBe(completions, 'Number')
-      testCompletionOrderMessage(completions, 'square', 'identity')
+    it('literal inside a body should show number methods first and then object methods', () => {
+      const environment = getPepitaEnvironment('2.')
+      const body = (environment.getNodeByFQN('example.pepita') as Singleton).allMethods[0].body as Body
+      return completeMessages(body.environment, body)
     })
 
-    it('literal inside a body show Singleton methods first and then object methods', () => {
+    it('should show singleton methods first and then object methods', () => {
       const completions = completionsForMessage(new Reference({ name: 'wollok.lib.assert' }))
       testCompletionOrderMessage(completions, 'throwsException', 'identity')
     })
 
-    it('literal inside a body show Singleton methods first and then object methods', () => {
+    it('should show custom singleton methods first and then object methods', () => {
       const completions = completionsForMessage(new Reference({ name: 'example.pepita' }), getPepitaEnvironment(''))
       testFirstCompletionShouldBe(completions, 'pepita')
       expect(completions.map(completion => completion.label).slice(0, 3)).toEqual(['fly', 'eat', 'energy'])
+      testCompletionOrderMessage(completions, 'energy', 'equals')
+    })
+
+    it('instantiation should show target class methods first and then object methods', () => {
+      const completions = completionsForMessage(new New({ instantiated: new Reference({ name: 'wollok.lang.Date' }) }))
+      testFirstCompletionShouldBe(completions, 'Date')
+      testCompletionOrderMessage(completions, 'isLeapYear', 'kindName')
+    })
+
+    it('default message autocompletion should show all possible options', () => {
+      const testModulesContains = (modules: string[], startModule: string) => modules.find(module => module.startsWith(startModule))
+      const environment = getPepitaEnvironment('(1..2)')
+      const body = (environment.getNodeByFQN('example.pepita') as Singleton).allMethods[0].body as Body
+      const completions = completeMessages(body.environment, body)
+      const modules: string[] = [...new Set(completions.map((completion) => completion.detail ?? ''))]
+      const allModules = ['pepita', 'Object', 'game', 'assert', 'Number', 'Set', 'io', 'String', 'Boolean', 'keyboard']
+      allModules.forEach(module => {
+        expect(testModulesContains(modules, module)).toBeTruthy()
+      })
     })
 
   })
@@ -232,7 +251,13 @@ function testCompletionLabelsForNode(node: Node, expectedLabels: string[]) {
 }
 
 function completionsForMessage(node: Sentence, baseEnvironment: Environment | undefined = undefined): CompletionItem[] {
-  const environment = link([
+  const environment = getBaseEnvironment(node, baseEnvironment)
+  const sentence = ((environment.getNodeByFQN('aPackage.anObject') as Singleton).allMethods[0].body as Body)!.sentences[0]
+  return completeMessages(sentence.environment, sentence)
+}
+
+function getBaseEnvironment(node: Sentence, baseEnvironment: Environment  | undefined = undefined): Environment {
+  return link([
     new Package({
       name:'aPackage',
       members: [
@@ -252,8 +277,6 @@ function completionsForMessage(node: Sentence, baseEnvironment: Environment | un
       ],
     }),
   ], baseEnvironment ?? buildEnvironment([]))
-  const linkedNode = ((environment.getNodeByFQN('aPackage.anObject') as Singleton).allMethods[0].body as Body)!.sentences[0]
-  return completeMessages(linkedNode.environment, linkedNode)
 }
 
 function testFirstCompletionShouldBe(completions: CompletionItem[], moduleName: string) {
@@ -261,16 +284,10 @@ function testFirstCompletionShouldBe(completions: CompletionItem[], moduleName: 
 }
 
 function testCompletionOrderMessage(completions: CompletionItem[], firstMessage: string, secondMessage: string) {
-  const completionMessages = completions.map(completion => completion.label)
-  const firstMessageIndex = completionMessages.findIndex(message => message.startsWith(firstMessage))
-  const secondMessageIndex = completionMessages.findIndex(message => message.startsWith(secondMessage))
-  expect(firstMessageIndex).toBeLessThan(secondMessageIndex)
-}
-
-function completionsForMessageInBody(code: string) {
-  const environment = getPepitaEnvironment(code)
-  const pepitaSingleton = environment.getNodeByFQN<Class>('example.pepita')
-  return completionsForMessage((pepitaSingleton.methods[0].body as Body).sentences[0])
+  const completionLabels = completions.map(completion => completion.label)
+  const firstIndex = completionLabels.findIndex(message => message.startsWith(firstMessage))
+  const secondIndex = completionLabels.findIndex(message => message.startsWith(secondMessage))
+  expect(firstIndex).toBeLessThan(secondIndex)
 }
 
 function getPepitaEnvironment(code: string) {
