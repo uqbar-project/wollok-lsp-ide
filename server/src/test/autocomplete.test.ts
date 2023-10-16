@@ -1,6 +1,6 @@
 import { expect } from 'expect'
 import { CompletionItem } from 'vscode-languageserver'
-import { Body, Class, Describe, Environment, Literal, Method, Mixin, New, Node, Package, Program, Reference, Sentence, Singleton, buildEnvironment, link } from 'wollok-ts'
+import { Body, Class, Describe, Environment, Import, Literal, Method, Mixin, New, Node, Package, Program, Reference, Sentence, Singleton, buildEnvironment, link } from 'wollok-ts'
 import { completeForParent, completionsForNode } from '../functionalities/autocomplete/node-completion'
 import { completeMessages } from '../functionalities/autocomplete/send-completion'
 import { buildPepitaEnvironment } from './utils/wollok-test-utils'
@@ -249,6 +249,35 @@ describe('autocomplete', () => {
     })
 
   })
+
+  describe('completion for references', () => {
+
+    it('autocomplete options for reference inside imports shows imports in the right order (custom, lang, lib, etc.)', () => {
+      const environment = link([
+        new Package({
+          name:'aPackage',
+          imports: [
+            new Import({ isGeneric: true, entity: new Reference({ name: 'wollok.game.*' }) }),
+          ],
+        }),
+      ], getBirdEnvironment())
+      const nodeImport = (environment.getNodeByFQN('aPackage') as Package).imports[0].children[0]
+      const completions = completionsForNode(nodeImport)
+      console.info(completions)
+      expect(completions[0].label).toEqual('example.Bird')
+      expect(completions[1].label).toEqual('example.Food')
+      testCompletionOrderMessage(completions, 'wollok.game.Position', 'wollok.vm.runtime')
+    })
+
+    it('autocomplete options for common references shows imports in the right order (custom, lang, lib, etc.)', () => {
+      // const environment = getBaseEnvironment(new Reference({ name: 'wollok.lang.Date' }))
+      // const sentence = ((environment.getNodeByFQN('aPackage.anObject') as Singleton).allMethods[0].body as Body)!.sentences[0]
+      // const completions = completionsForNode(sentence)
+      // expect(completions.length).toBe(1)
+      // expect(completions[0].label).toEqual('initializers')
+    })
+
+  })
 })
 
 function testCompletionLabelsForNodeIncludes(node: Node, expectedLabels: string[]) {
@@ -313,6 +342,20 @@ function getPepitaEnvironment(code: string) {
       method eat(food) {}
       method energy() = energy
     }
+    `,
+  }])
+}
+
+function getBirdEnvironment() {
+  return buildEnvironment([{ name: 'example.wlk', content: `
+    class Bird {
+      var energy = 100
+
+      method fly(minutes) {
+      }
+    }
+
+    class Food {}
     `,
   }])
 }

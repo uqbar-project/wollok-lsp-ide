@@ -68,7 +68,9 @@ export const rootFolder = (uri: string): string => {
 
 export const projectFQN = (node: Entity): string => {
   if (node.fullyQualifiedName.startsWith('wollok')) return node.fullyQualifiedName
-  const rootPath = rootFolder(node.sourceFileName ?? '').slice(1)
+  const fileName = node.sourceFileName ?? ''
+  const rootPath = rootFolder(fileName).slice(1)
+  if (!rootPath) return node.fullyQualifiedName
   const rootFQN = rootPath.replaceAll(path.sep, '.')
   return node.fullyQualifiedName?.replaceAll(rootFQN + '.', '') ?? ''
 }
