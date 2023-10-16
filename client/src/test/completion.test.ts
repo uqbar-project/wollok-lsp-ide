@@ -16,14 +16,14 @@ suite('Should do completion', () => {
         label: "import",
         kind: CompletionItemKind.File,
       }, {
+        label: "const attribute",
+        kind: CompletionItemKind.Field,
+      }, {
         label: "object",
         kind: CompletionItemKind.Module,
       }, {
         label: "class",
         kind: CompletionItemKind.Class,
-      }, {
-        label: "const attribute",
-        kind: CompletionItemKind.Field,
       },
     ],
   }
@@ -38,14 +38,14 @@ suite('Should do completion', () => {
           label:"import",
           kind: CompletionItemKind.File,
         }, {
+          label: "const attribute",
+          kind: CompletionItemKind.Field,
+        }, {
           label:"object",
           kind: CompletionItemKind.Module,
         }, {
           label:"class",
           kind: CompletionItemKind.Class,
-        }, {
-          label: "const attribute",
-          kind: CompletionItemKind.Field,
         }, {
           label: "describe",
           kind: CompletionItemKind.Folder,

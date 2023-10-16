@@ -85,7 +85,7 @@ export const optionModules = [
   {
     label: 'class',
     kind: CompletionItemKind.Class,
-    sortText: '030',
+    sortText: '035',
     insertTextFormat: InsertTextFormat.Snippet,
     insertText: 'class ${1:Name} {\n  ${0}\n}',
   },
@@ -133,21 +133,21 @@ export const optionAsserts = [
   {
     label: 'assert boolean',
     kind: CompletionItemKind.Snippet,
-    sortText: '060',
+    sortText: '065',
     insertTextFormat: InsertTextFormat.Snippet,
     insertText: 'assert.that(${1:booleanExpression})${0}',
   },
   {
     label: 'assert throws',
     kind: CompletionItemKind.Snippet,
-    sortText: '060',
+    sortText: '070',
     insertTextFormat: InsertTextFormat.Snippet,
     insertText: 'assert.throwsException({ ${1:expression} })${0}',
   },
   {
     label: 'assert throws message',
     kind: CompletionItemKind.Snippet,
-    sortText: '060',
+    sortText: '075',
     insertTextFormat: InsertTextFormat.Snippet,
     insertText: 'assert.throwsExceptionWithMessage(${1:message}, { ${2:expression} })${0}',
   },
