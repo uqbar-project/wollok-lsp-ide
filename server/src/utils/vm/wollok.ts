@@ -1,5 +1,5 @@
 import { is } from 'wollok-ts/dist/extensions'
-import { Class, Entity, Environment, Import, LiteralValue, Method, Node, Package, Reference } from 'wollok-ts'
+import { Class, Entity, Environment, Import, LiteralValue, Method, Module, Node, Package, Reference } from 'wollok-ts'
 import fs from 'fs'
 import path from 'path'
 
@@ -38,7 +38,7 @@ export const firstNodeWithProblems = (node: Node): Node | undefined => {
   )
 }
 
-export const parentClass = (node: Node): Class => (node.ancestors.find(ancestor => ancestor.is(Class)) ?? node.environment.objectClass) as Class
+export const parentModule = (node: Node): Module => (node.ancestors.find(ancestor => ancestor.is(Module))) as Module ?? node.environment.objectClass
 
 export const parentImport = (node: Node): Import | undefined => node.ancestors.find(ancestor => ancestor.is(Import)) as Import
 

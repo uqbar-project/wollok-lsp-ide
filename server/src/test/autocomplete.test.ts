@@ -1,6 +1,6 @@
 import { expect } from 'expect'
 import { CompletionItem } from 'vscode-languageserver'
-import { Body, Class, Describe, Environment, Import, Literal, Method, Mixin, New, Node, Package, Program, Reference, Sentence, Singleton, buildEnvironment, link } from 'wollok-ts'
+import { Body, Class, Describe, Environment, Field, Import, Literal, Method, Mixin, New, Node, Package, Program, Reference, Sentence, Singleton, buildEnvironment, link } from 'wollok-ts'
 import { completeForParent, completionsForNode } from '../functionalities/autocomplete/node-completion'
 import { completeMessages } from '../functionalities/autocomplete/send-completion'
 import { buildPepitaEnvironment } from './utils/wollok-test-utils'
@@ -33,12 +33,12 @@ describe('autocomplete', () => {
         kind: 'UnhandledNode',
         parent: pepita,
       } as unknown as Node
-      expect(completionsForNode(unhandledNodeMock)).toEqual(completeForParent(unhandledNodeMock))
+      expect(completionsForNodeSorted(unhandledNodeMock)).toEqual(completeForParent(unhandledNodeMock))
     })
 
     it('should return parents completion', () => {
       const peso = pepita.lookupField('peso')!
-      expect(completeForParent(peso)).toEqual(completionsForNode(pepita))
+      expect(completeForParent(peso)).toEqual(completionsForNodeSorted(pepita))
     })
 
     it('should throw error when no parent available', () => {
@@ -49,7 +49,7 @@ describe('autocomplete', () => {
     it('body should complete with parent completions', () => {
       const comer = pepita.lookupMethod('comer', 1)!
       const body = comer.body! as Body
-      expect(completionsForNode(body)).toEqual(completeForParent(body))
+      expect(completionsForNodeSorted(body)).toEqual(completeForParent(body))
     })
   })
 
@@ -79,7 +79,7 @@ describe('autocomplete', () => {
     it('body should complete with parent completions', () => {
       const fly = birdClass.lookupMethod('fly', 1)!
       const body = fly.body! as Body
-      expect(completionsForNode(body)).toEqual(completeForParent(body))
+      expect(completionsForNodeSorted(body)).toEqual(completeForParent(body))
     })
   })
 
@@ -110,7 +110,7 @@ describe('autocomplete', () => {
     it('body should complete with parent completions', () => {
       const fly = aMixin.lookupMethod('fly', 1)!
       const body = fly.body! as Body
-      expect(completionsForNode(body)).toEqual(completeForParent(body))
+      expect(completionsForNodeSorted(body)).toEqual(completeForParent(body))
     })
   })
 
@@ -135,7 +135,7 @@ describe('autocomplete', () => {
     })
 
     it('describe should complete with snippets', () => {
-      testCompletionLabelsForNode(aDescribe, ['const attribute', 'test', 'initializer'])
+      testCompletionLabelsForNode(aDescribe, ['const attribute', 'initializer', 'test'])
     })
 
     it('test should complete with snippets', () => {
@@ -243,7 +243,7 @@ describe('autocomplete', () => {
     it('autocomplete options should include initializers', () => {
       const environment = getBaseEnvironment(new New({ instantiated: new Reference({ name: 'wollok.lang.Date' }) }))
       const sentence = ((environment.getNodeByFQN('aPackage.anObject') as Singleton).allMethods[0].body as Body)!.sentences[0]
-      const completions = completionsForNode(sentence)
+      const completions = completionsForNodeSorted(sentence)
       expect(completions.length).toBe(1)
       expect(completions[0].label).toEqual('initializers')
     })
@@ -262,38 +262,43 @@ describe('autocomplete', () => {
         }),
       ], getBirdEnvironment())
       const nodeImport = (environment.getNodeByFQN('aPackage') as Package).imports[0].children[0]
-      const completions = completionsForNode(nodeImport)
-      console.info(completions)
+      const completions = completionsForNodeSorted(nodeImport).sort(bySortText)
       expect(completions[0].label).toEqual('example.Bird')
       expect(completions[1].label).toEqual('example.Food')
-      testCompletionOrderMessage(completions, 'wollok.game.Position', 'wollok.vm.runtime')
     })
 
     it('autocomplete options for common references shows imports in the right order (custom, lang, lib, etc.)', () => {
-      // const environment = getBaseEnvironment(new Reference({ name: 'wollok.lang.Date' }))
-      // const sentence = ((environment.getNodeByFQN('aPackage.anObject') as Singleton).allMethods[0].body as Body)!.sentences[0]
-      // const completions = completionsForNode(sentence)
-      // expect(completions.length).toBe(1)
-      // expect(completions[0].label).toEqual('initializers')
+      const environment = link([
+        new Package({
+          name:'aPackage',
+          members: [
+            new Singleton({
+              name: 'pepita',
+              members: [
+                new Field({ name: 'x', isConstant: false, value: new Reference({ name: 'x' }) }),
+              ],
+            }),
+          ],
+        }),
+      ], getBirdEnvironment())
+      const nodeReference = ((environment.getNodeByFQN('aPackage.pepita') as Singleton).members[0] as Field).value
+      const completions = completionsForNodeSorted(nodeReference)
+      expect(completions[0].label).toEqual('Bird')
+      expect(completions[1].label).toEqual('Food')
+      testCompletionOrderMessage(completions, 'Date', 'Position')
     })
 
   })
 })
 
 function testCompletionLabelsForNodeIncludes(node: Node, expectedLabels: string[]) {
-  const completions = completionsForNode(node).map(completion => completion.label)
+  const completions = completionsForNodeSorted(node).map(completion => completion.label)
   expectedLabels.forEach(label => expect(completions).toContain(label))
 }
 
 function testCompletionLabelsForNode(node: Node, expectedLabels: string[]) {
-  const completions = completionsForNode(node)
+  const completions = completionsForNodeSorted(node).sort(bySortText)
   expect(completions.map(completion => completion.label)).toStrictEqual(expectedLabels)
-}
-
-function completionsForMessage(node: Sentence, baseEnvironment: Environment | undefined = undefined): CompletionItem[] {
-  const environment = getBaseEnvironment(node, baseEnvironment)
-  const sentence = ((environment.getNodeByFQN('aPackage.anObject') as Singleton).allMethods[0].body as Body)!.sentences[0]
-  return completeMessages(sentence.environment, sentence)
 }
 
 function getBaseEnvironment(node: Sentence, baseEnvironment: Environment  | undefined = undefined): Environment {
@@ -358,4 +363,18 @@ function getBirdEnvironment() {
     class Food {}
     `,
   }])
+}
+
+function bySortText(a: CompletionItem, b: CompletionItem) {
+  return a.sortText!.localeCompare(b.sortText!)
+}
+
+function completionsForNodeSorted(node: Node) {
+  return completionsForNode(node).sort(bySortText)
+}
+
+function completionsForMessage(node: Sentence, baseEnvironment: Environment | undefined = undefined): CompletionItem[] {
+  const environment = getBaseEnvironment(node, baseEnvironment)
+  const sentence = ((environment.getNodeByFQN('aPackage.anObject') as Singleton).allMethods[0].body as Body)!.sentences[0]
+  return completeMessages(sentence.environment, sentence).sort(bySortText)
 }

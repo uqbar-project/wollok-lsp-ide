@@ -1,6 +1,6 @@
 import { CompletionItem, CompletionItemKind, InsertTextFormat } from 'vscode-languageserver'
 import { Class, Entity, Field, Method, Mixin, Module, Name, Node, Parameter, Reference, Singleton } from 'wollok-ts'
-import { OBJECT_CLASS, parentClass, projectFQN } from '../../utils/vm/wollok'
+import { OBJECT_CLASS, parentModule, projectFQN } from '../../utils/vm/wollok'
 import { match, when } from 'wollok-ts/dist/extensions'
 
 
@@ -23,8 +23,8 @@ export const singletonCompletionItem: CompletionItemMapper<Singleton> = moduleCo
  * - and last: object
  */
 const getSortText = (node: Node, method: Method) => {
-  const methodClass = parentClass(method)
-  return node.sourceFileName === method.sourceFileName ? '001' : formatSortText(getLibraryIndex(method) + additionalIndex(method, methodClass))
+  const methodContainer = parentModule(method)
+  return node.sourceFileName === method.sourceFileName ? '001' : formatSortText(getLibraryIndex(method) + additionalIndex(method, methodContainer))
 }
 
 const getLibraryIndex = (node: Node) => {
@@ -46,9 +46,9 @@ const getLibraryIndex = (node: Node) => {
 
 const formatSortText = (index: number) => ('000' + index).slice(-3)
 
-const additionalIndex = (method: Method, methodClass: Class): number => {
-  if (methodClass.fullyQualifiedName === OBJECT_CLASS) return 50
-  if (methodClass.isAbstract) return 5
+const additionalIndex = (method: Method, methodContainer: Module): number => {
+  if (methodContainer.fullyQualifiedName === OBJECT_CLASS) return 50
+  if (methodContainer instanceof Class && methodContainer.isAbstract) return 5
   if (method.isAbstract()) return 3
   return 1
 }
@@ -79,6 +79,7 @@ function namedCompletionItem<T extends {name: string}>(kind: CompletionItemKind)
       insertText: namedNode.name,
       insertTextFormat: InsertTextFormat.PlainText,
       kind,
+      sortText: '001',
     }
   }
 }
@@ -104,6 +105,7 @@ export const initializerCompletionItem = (clazz: Class): CompletionItem => {
     insertTextFormat: InsertTextFormat.Snippet,
     insertText: initializers,
     kind: CompletionItemKind.Constructor,
+    sortText: '010',
   }
 }
 
