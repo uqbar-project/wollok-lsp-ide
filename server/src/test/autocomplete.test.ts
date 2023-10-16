@@ -238,6 +238,17 @@ describe('autocomplete', () => {
 
   })
 
+  describe('completion for new', () => {
+
+    it('autocomplete options should include initializers', () => {
+      const environment = getBaseEnvironment(new New({ instantiated: new Reference({ name: 'wollok.lang.Date' }) }))
+      const sentence = ((environment.getNodeByFQN('aPackage.anObject') as Singleton).allMethods[0].body as Body)!.sentences[0]
+      const completions = completionsForNode(sentence)
+      expect(completions.length).toBe(1)
+      expect(completions[0].label).toEqual('initializers')
+    })
+
+  })
 })
 
 function testCompletionLabelsForNodeIncludes(node: Node, expectedLabels: string[]) {
