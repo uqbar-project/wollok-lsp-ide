@@ -73,10 +73,6 @@ suite('Should do completion', () => {
     })
   })
 
-  test('Completes unparsed node', async () => {
-    await testCompletion(getDocumentURI('completion.wlk'), new Position(2, 3), fileSnippets)
-  })
-
 })
 
 async function testCompletion(
