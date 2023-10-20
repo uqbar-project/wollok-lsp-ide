@@ -1,55 +1,53 @@
-import { CompletionItem, CompletionItemKind } from 'vscode-languageserver'
-import { Node, Body, Method, Singleton, Module, Environment, Package } from 'wollok-ts'
+import { CompletionItem } from 'vscode-languageserver'
+import { Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin, Describe, Program, Test, Reference, New, Import, Entity } from 'wollok-ts'
 import { is, match, when } from 'wollok-ts/dist/extensions'
-import { fieldCompletionItem, parameterCompletionItem, singletonCompletionItem } from './autocomplete'
+import { classCompletionItem, fieldCompletionItem, initializerCompletionItem, parameterCompletionItem, singletonCompletionItem, entityCompletionItem } from './autocomplete'
+import { optionModules, optionImports, optionDescribes, optionTests, optionReferences, optionMethods, optionPrograms, optionAsserts, optionConstReferences, optionInitialize, optionPropertiesAndReferences } from './options-autocomplete'
+import { implicitImport, parentImport } from '../../utils/vm/wollok'
 
 export const completionsForNode = (node: Node): CompletionItem[] => {
-  try{
+  try {
     return match(node)(
       when(Environment)(_ => []),
       when(Package)(completePackage),
-      when(Singleton)(completeSingleton),
+      when(Singleton)(completeModule),
+      when(Class)(completeModule),
+      when(Mixin)(completeModule),
+      when(Program)(completeProgram),
+      when(Test)(completeTest),
       when(Body)(completeBody),
-      when(Method)(completeMethod)
+      when(Method)(completeMethod),
+      when(Describe)(completeDescribe),
+      when(Reference<Class>)(completeReference),
+      when(New)(completeNew)
     )
   } catch {
     return completeForParent(node)
   }
 }
 
-const completePackage = (): CompletionItem[] => [
-  {
-    label: 'object',
-    kind: CompletionItemKind.Class,
-    insertText: 'object ${1:pepita} { $0}',
-  },
-  {
-    label: 'class',
-    kind: CompletionItemKind.Class,
-    insertText: 'class ${1:Golondrina} { $0}',
-  },
+const isTestFile = (node: Node) => node.sourceFileName?.endsWith('wtest')
+
+const isProgramFile = (node: Node) => node.sourceFileName?.endsWith('wpgm')
+
+const completePackage = (node: Package): CompletionItem[] => [
+  ...optionImports,
+  ...optionConstReferences,
+  ...isTestFile(node) ? optionDescribes : isProgramFile(node) ? optionPrograms : optionModules,
 ]
 
+const completeProgram = (): CompletionItem[] => [
+  ...optionReferences,
+]
 
-const completeSingleton = (): CompletionItem[] => [
-  {
-    label: 'var attribute',
-    kind: CompletionItemKind.Field,
-    sortText: 'a',
-    insertText: 'var ${1:energia} = ${0:0}',
-  },
-  {
-    label: 'const attribute',
-    kind: CompletionItemKind.Field,
-    sortText: 'a',
-    insertText: 'const ${1:energia} = ${0:0}',
-  },
-  {
-    label: 'method',
-    kind: CompletionItemKind.Method,
-    sortText: 'b',
-    insertText: 'method ${1:volar}($2) { $0}',
-  },
+const completeTest = (): CompletionItem[] => [
+  ...optionReferences,
+  ...optionAsserts,
+]
+
+const completeModule = (): CompletionItem[] => [
+  ...optionPropertiesAndReferences,
+  ...optionMethods,
 ]
 
 const completeBody = (node: Body): CompletionItem[] => completeForParent(node)
@@ -64,7 +62,23 @@ const completeMethod = (node: Method): CompletionItem[] => {
   ]
 }
 
+const completeDescribe = (node: Describe): CompletionItem[] => isTestFile(node) ? [...optionConstReferences, ...optionTests, ...optionInitialize] : []
+
 export const completeForParent = (node: Node): CompletionItem[] => {
-  if(!node.parent) throw new Error('Node has no parent')
+  if (!node.parent) throw new Error('Node has no parent')
   return completionsForNode(node.parent)
 }
+
+const completeReference = (node: Reference<Class>): CompletionItem[] => {
+  const nodeImport = parentImport(node)
+  if (nodeImport) return completeImports(nodeImport)
+  const classes = node.environment.descendants.filter(child => child.is(Class) && !child.isAbstract) as Class[]
+  return classes.map(classCompletionItem).concat(completeForParent(node))
+}
+
+const completeNew = (node: New): CompletionItem[] =>
+  node.instantiated.target ? [initializerCompletionItem(node.instantiated.target)] : []
+
+const availableForImport = (node: Node) => (node.is(Class) || node.is(Singleton) || node.is(Reference) || node.is(Mixin)) && node.name && (node as Entity).fullyQualifiedName && !implicitImport(node)
+
+const completeImports = (node: Import) => (node.environment.descendants.filter(availableForImport) as Entity[]).map(entityCompletionItem)

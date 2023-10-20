@@ -6,6 +6,7 @@ import {
   InitializeParams,
   InitializeResult,
   ProposedFeatures,
+  TextDocumentChangeEvent,
   TextDocuments,
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node'
@@ -18,7 +19,6 @@ import {
   workspaceSymbols,
 } from './linter'
 import { initializeSettings, WollokLSPSettings } from './settings'
-import { templates } from './functionalities/autocomplete/templates'
 import { EnvironmentProvider } from './utils/vm/environment-provider'
 
 // Create a connection for the server, using Node's IPC as a transport.
@@ -85,25 +85,25 @@ connection.onDidChangeConfiguration(() => {
 })
 
 // Only keep settings for open documents
-documents.onDidClose((e) => {
-  documentSettings.delete(e.document.uri)
+documents.onDidClose((change) => {
+  documentSettings.delete(change.document.uri)
 })
 
+const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
+  try {
+    environmentProvider.rebuildTextDocument(change.document)
+    environmentProvider.withLatestEnvironment(
+      validateTextDocument(connection, documents.all())(change.document),
+    )
+  } catch (e) {
+    connection.console.error(`✘ Failed to rebuild document: ${e}`)
+  }
+}
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent((change) => {
-  environmentProvider.rebuildTextDocument(change.document)
-  environmentProvider.withLatestEnvironment(
-    validateTextDocument(connection, documents.all())(change.document),
-  )
-})
+documents.onDidChangeContent(rebuildTextDocument)
 
-documents.onDidOpen((change) => {
-  environmentProvider.rebuildTextDocument(change.document)
-  environmentProvider.withLatestEnvironment(
-    validateTextDocument(connection, documents.all())(change.document),
-  )
-})
+documents.onDidOpen(rebuildTextDocument)
 
 connection.onRequest((change) => {
   if (change === 'STRONG_FILES_CHANGED') {
@@ -112,27 +112,17 @@ connection.onRequest((change) => {
 })
 
 // This handler provides the initial list of the completion items.
+// TODO: handle exceptions and fail silently
 connection.onCompletion(
-  environmentProvider.requestWithEnvironment((params, env) => {
-    const contextCompletions = completions(params, env)
-    return [...contextCompletions, ...templates]
-  }),
+  environmentProvider.requestWithEnvironment((params, env) => completions(params, env)),
 )
 
-connection.onReferences((_params) => {
-  return []
-})
+connection.onReferences((_params) => [])
 
 connection.onDefinition(environmentProvider.requestWithEnvironment(definition))
 
 // This handler resolves additional information for the item selected in the completion list.
-connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
-  // if (item.data === 1) {
-  //   item.detail = 'TypeScript details'
-  //   item.documentation = 'TypeScript documentation'
-  // }
-  return item
-})
+connection.onCompletionResolve((item: CompletionItem): CompletionItem => item)
 
 connection.onDocumentSymbol(
   environmentProvider.requestWithEnvironment(documentSymbols),
@@ -143,25 +133,6 @@ connection.onWorkspaceSymbol(
 )
 
 connection.onCodeLens(environmentProvider.requestWithEnvironment(codeLenses))
-/*
-connection.onDidOpenTextDocument((params) => {
-  // A text document got opened in VSCode.
-  // params.textDocument.uri uniquely identifies the document. For documents store on disk this is a file URI.
-  // params.textDocument.text the initial full content of the document.
-  connection.console.log(`${params.textDocument.uri} opened.`)
-})
-connection.onDidChangeTextDocument((params) => {
-  // The content of a text document did change in VSCode.
-  // params.textDocument.uri uniquely identifies the document.
-  // params.contentChanges describe the content changes to the document.
-  connection.console.log(`${params.textDocument.uri} changed: ${JSON.stringify(params.contentChanges)}`)
-})
-connection.onDidCloseTextDocument((params) => {
-  // A text document got closed in VSCode.
-  // params.textDocument.uri uniquely identifies the document.
-  connection.console.log(`${params.textDocument.uri} closed.`)
-})
-*/
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events

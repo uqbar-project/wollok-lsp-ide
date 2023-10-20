@@ -1,5 +1,5 @@
 {
-  "name": "wollok-linter-client",
+  "name": "wollok-lsp-ide-client",
   "description": "VSCode part of a language server",
   "author": "Microsoft Corporation",
   "license": "LGPL-3.0",
