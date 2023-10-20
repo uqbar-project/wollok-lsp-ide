@@ -24,7 +24,7 @@ export const singletonCompletionItem: CompletionItemMapper<Singleton> = moduleCo
  */
 const getSortText = (node: Node, method: Method) => {
   const methodContainer = parentModule(method)
-  return node.sourceFileName === method.sourceFileName ? '001' : formatSortText(getLibraryIndex(method) + additionalIndex(method, methodContainer))
+  return formatSortText((node.sourceFileName === method.sourceFileName ? 1 : getLibraryIndex(method)) + additionalIndex(method, methodContainer))
 }
 
 const getLibraryIndex = (node: Node) => {

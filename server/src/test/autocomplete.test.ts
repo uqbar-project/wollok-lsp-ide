@@ -218,6 +218,14 @@ describe('autocomplete', () => {
       testCompletionOrderMessage(completions, 'energy', 'equals')
     })
 
+    it('should show custom classes methods first, then abstract classes and finally objects', () => {
+      const completions = completionsForMessage(new New({ instantiated: new Reference({ name: 'example.Cebra' }) }), getInheritanceEnvironment())
+      testFirstCompletionShouldBe(completions, 'Cebra')
+      testCompletionOrderMessage(completions, 'comer', 'dormir')
+      testCompletionOrderMessage(completions, 'dormir', 'aparearse')
+      testCompletionOrderMessage(completions, 'aparearse', '==')
+    })
+
     it('instantiation should show target class methods first and then object methods', () => {
       const completions = completionsForMessage(new New({ instantiated: new Reference({ name: 'wollok.lang.Date' }) }))
       testFirstCompletionShouldBe(completions, 'Date')
@@ -349,6 +357,35 @@ function getPepitaEnvironment(code: string) {
     }
     `,
   }])
+}
+
+function getInheritanceEnvironment() {
+  return buildEnvironment([{ name: 'example.wlk', content: `
+    class Animal {
+      var enCelo = true
+      var apareamientos = 0
+
+      method comer(comida)
+      method aparearse() {
+        if (enCelo) {
+          apareamientos = apareamientos + 1
+        }
+      }
+    }
+
+    class Cebra inherits Animal {
+      var energia = 100
+
+      override method comer(comida) {
+        energia = energia + (comida * 2)
+      }
+      override method dormir() {
+        energia = 100
+      }
+    }
+    `,
+  }])
+
 }
 
 function getBirdEnvironment() {
