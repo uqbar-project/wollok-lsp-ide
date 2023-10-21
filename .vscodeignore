@@ -1,22 +1,24 @@
-.vscode/**
-.vscode-test/**
 .github/**
 .husky/**
+.vscode/**
+.vscode-test/**
 **/*.ts
 **/*.map
 .gitignore
 **/tsconfig.json
 **/tsconfig.base.json
 contributing.md
-.travis.yml
-**/node_modules/**
+client/out/test/**
+client/out/testFixture/**
+server/out/test/**
+# client/node_modules/**
 # !client/node_modules/vscode-jsonrpc/**
 # !client/node_modules/vscode-languageclient/**
 # !client/node_modules/vscode-languageserver-protocol/**
 # !client/node_modules/vscode-languageserver-types/**
 # !client/node_modules/{minimatch,brace-expansion,concat-map,balanced-match}/**
 # !client/node_modules/{semver,lru-cache,yallist}/**
-**/test/**
+# **/node_modules/**
 **/.mocharc.js
 **/.prettierrc
 **/.eslintrc
