@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.1.1
+
+- Upgrade Wollok-TS 4.0.5 ⬆️
+- Published in Marketplace 🌈
+- Dynamic diagram enhancements 🔵
+- Autocomplete enhancements ✍🏼
+- Fix REPL command sessions 🐛
+
 ## v0.0.6
 
 ### Using wollok-ts v4.0.3
