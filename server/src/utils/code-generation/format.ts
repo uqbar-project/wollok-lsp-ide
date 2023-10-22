@@ -1,13 +1,13 @@
-import { Assignment, Field, Literal, Method, Node, Package, Parameter, Singleton, Test } from 'wollok-ts'
-import { IDoc, align, dquotes, enclose, group, intersperse, lineBreak, parens, render, softLine } from 'prettier-printer'
-import { match, when } from 'wollok-ts/dist/extensions'
-import constants from './wollok-code'
-import { body } from './pretty-print'
+import { Assignment, Body, Expression, Field, Literal, Method, Node, Package, Parameter, Reference, Return, Send, Sentence, Singleton, Test, Variable } from 'wollok-ts'
+import { IDoc, braces, dquotes, enclose, group, intersperse, lineBreak, lineBreaks, parens, render, softBreak, softLine } from 'prettier-printer'
+import { List, match, when } from 'wollok-ts/dist/extensions'
+import { CONSTANTS, INFIX_OPERATORS } from './wollok-code'
+import { body, indent } from './pretty-print'
 
  const WS = ' ' as IDoc
 
 export const print = (node: Node): string => {
-  return render(50, format(node))
+  return render(30, format(node))
 }
 
 // --------------------------
@@ -22,71 +22,70 @@ export const format: Formatter<Node> = (node) => {
     when(Assignment)(formatAssignment),
     when(Singleton)(formatSingleton),
     when(Method)(formatMethod),
-    when(Field)(formatField),
+    when(Field)(formatVariable),
+    when(Variable)(formatVariable),
     when(Test)(formatTest),
     when(Parameter)(formatParameter),
-    when(Literal)(formatLiteral)
+    when(Literal)(formatLiteral),
+    when(Body)(formatBody),
+    when(Send)(formatSend),
+    when(Return)(formatReturn),
+    when(Reference)(formatReference),
   )
 }
 
 const formatPackage: Formatter<Package> = (node: Package) => {
-  return intersperse([lineBreak, lineBreak], node.children.map(format))
-}
-
-const formatSingleton: Formatter<Singleton>=(node: Singleton) => {
-  if(node.name){
-    return intersperse(WS, [
-      constants.WKO,
-      node.name,
-      body(intersperse([lineBreak, lineBreak], node.members.map(format))),
-    ])
-  } else {
-    return 'ToDo'
-  }
+  return intersperse(lineBreaks, node.children.map(format))
 }
 
 const formatMethod: Formatter<Method> = (node: Method) => {
-
-  //ToDo body (abstract, native, etc)
-  return intersperse(WS, [
-    constants.METHOD,
+  // ToDo metodos de consulta
+  const signature = [
+    CONSTANTS.METHOD,
+    WS,
     node.name,
-    enclose(parens, intersperse(constants.PARAM_SEPARATOR, node.parameters.map(format))),
-  ])
+    enclose(parens, formatParameters(node.parameters)),
+  ]
+
+  if(node.body){
+    if(node.body === 'native')
+      return [signature, WS, CONSTANTS.NATIVE]
+    else if(node.body.sentences.length === 1 && node.body.sentences[0].is(Return) && node.body.sentences[0].value)
+      return intersperse(WS, [signature, CONSTANTS.ASIGNATION, format(node.body.sentences[0].value)])
+    else
+    return [signature, WS, format(node.body)]
+  } else {
+    return signature
+  }
 }
 
-const formatField: Formatter<Field> = (node: Field) => {
-  //ToDo
-  return intersperse(WS, [
-    node.isConstant ? constants.CONST : constants.VAR,
-    node.name,
-    constants.ASIGNATION,
-    format(node.value),
-  ])
+const formatBody: Formatter<Body> = (node: Body) => body(formatSentences(node.sentences))
+
+const formatReturn = (node: Return) => node.value ?
+  [CONSTANTS.RETURN, WS,  format(node.value)]
+  : CONSTANTS.RETURN
+
+const formatReference = (node: Reference<Node>) => node.name
+
+const formatVariable: Formatter<Field | Variable> = (node) => {
+  return [
+    node.isConstant ? CONSTANTS.CONST : CONSTANTS.VAR,
+    WS,
+    formatAssign(node.name, node.value),
+  ]
 }
 
-const formatParameter: Formatter<Parameter> = (node: Parameter) => {
-  return node.name
-}
+const formatParameter: Formatter<Parameter> = (node: Parameter) => node.name
 
 const formatTest: Formatter<Test> = (node: Test) => {
   return intersperse(WS, [
-    constants.TEST,
+    CONSTANTS.TEST,
     node.name,
   ])
 }
 
-const formatAssignment: Formatter<Assignment>=(node: Assignment) => {
-  return align(
-    group([
-      intersperse(WS, [
-        node.variable.name,
-        constants.ASIGNATION,
-      ]),
-      softLine,
-      format(node.value),
-    ]))
-}
+const formatAssignment: Formatter<Assignment>=(node: Assignment) => formatAssign(node.variable.name, node.value)
+
 
 const formatLiteral: Formatter<Literal> = (node: Literal) => {
   switch(typeof node.value) {
@@ -97,14 +96,86 @@ const formatLiteral: Formatter<Literal> = (node: Literal) => {
     case 'boolean':
       return `${node.value}`
     case 'undefined':
-      return constants.NULL
+      return CONSTANTS.NULL
     default:
       return node.value?.toString() + typeof node.value //ToDo  lists, sets, etc
   }
 }
 
 
-// --------------------------
-// ----UTIL FORMATTERS-------
-// --------------------------
+// SINGLETON FORMATTERS
 
+const formatSingleton: Formatter<Singleton> = (node: Singleton) => {
+  if(node.name){
+    return formatWKO(node)
+  } else {
+    if(node.isClosure()){
+      return  formatClosure(node)
+    } else {
+      return formatAnonymousSingleton(node)
+    }
+  }
+}
+
+const formatClosure: Formatter<Singleton> = (node: Singleton) => {
+  const applyMethod = node.members[0] as Method
+  const parameters = applyMethod.parameters.length > 0 ?
+    [WS, formatParameters(applyMethod.parameters), WS, CONSTANTS.CLOSURE_BEGIN]
+    : []
+  return enclose(braces, [parameters, lineBreak, indent(formatSentences((applyMethod.body! as Body).sentences, true)), lineBreak])
+}
+
+const formatAnonymousSingleton: Formatter<Singleton> = (node: Singleton) => intersperse(WS, [
+  CONSTANTS.WKO,
+  body(intersperse(lineBreaks, node.members.map(format))),
+])
+
+const formatWKO: Formatter<Singleton> = (node: Singleton) => intersperse(WS, [
+  CONSTANTS.WKO,
+  node.name!,
+  body(intersperse(lineBreaks, node.members.map(format))),
+])
+
+// SEND FORMATTERS
+
+const formatSend = (node: Send) => {
+  return INFIX_OPERATORS.includes(node.message) ?
+    formatInfixSend(node)
+    : formatDotSend(node)
+}
+
+const formatDotSend = (node: Send) => [
+  format(node.receiver),
+  CONSTANTS.SEND_OPERATOR,
+  node.message,
+  enclose(parens, intersperse(CONSTANTS.PARAM_SEPARATOR, node.args.map(format))),
+]
+
+
+const formatInfixSend = (node: Send) => intersperse(WS, [
+  format(node.receiver),
+  node.message,
+  format(node.args[0]),
+])
+
+// UTILS
+
+const formatParameters = (parameters: Parameter[] | List<Parameter>) => intersperse([CONSTANTS.PARAM_SEPARATOR, WS], parameters.map(format))
+
+const formatSentences = (sentences: List<Sentence>, ignoreLastReturn = false) => sentences.reduce<IDoc>((formatted, sentence, i, sentences) => {
+  const shouldShortenReturn = i === sentences.length - 1 && sentence.is(Return) && sentence.value && ignoreLastReturn
+  const previousSentence = sentences[i-1]
+  return [formatted, formatSentenceInBody( !shouldShortenReturn ? sentence : sentence.value,  previousSentence)]
+}, [])
+
+const formatSentenceInBody = (sentence: Sentence, previousSentence: Sentence | undefined): IDoc => {
+  const distanceFromLastSentence = previousSentence ? sentence.sourceMap!.start.line - previousSentence.sourceMap!.end.line : -1
+  return [Array(distanceFromLastSentence + 1).fill(lineBreak), format(sentence)]
+}
+
+const formatAssign = (name: string, value: Expression) => group(intersperse(WS, [
+  name,
+  CONSTANTS.ASIGNATION,
+  lineBreak,
+  format(value),
+]))

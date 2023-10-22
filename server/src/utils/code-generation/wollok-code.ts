@@ -1,14 +1,16 @@
 // grammar elements here for being used in quickfixes, validators, and
 // any code that generates wollok code
-export default {
+export const CONSTANTS =  {
 	OPMULTIASSIGN: ['+=', '-=', '*=', '/=', '%=', '<<=', '>>='],
 	OP_EQUALITY: ['==', '!=', '===', '!=='],
 	ASIGNATION: '=',
+  CLOSURE_BEGIN: '=>',
 	OP_BOOLEAN_AND: ['and', "&&"],
 	OP_BOOLEAN_OR: ["or", "||"],
 	OP_BOOLEAN: ['and', "&&", "or", "||"],
 	OP_UNARY_BOOLEAN: ['!', "not"],
   PARAM_SEPARATOR: ',',
+  SEND_OPERATOR: '.',
 	SELF: "self",
 	SUPER: "super",
 	NULL: "null",
@@ -44,3 +46,15 @@ export default {
 	INSTANTIATION: "new",
 	TRY: "try",
 } as const
+
+// ToDo this array was copied from wollok-ts, use it
+export const INFIX_OPERATORS = [
+  ['||', 'or'],
+  ['&&', 'and'],
+  ['===', '==', '!==', '!='],
+  ['>=', '>', '<=', '<'],
+  ['?:', '>>>', '>>', '>..', '<>', '<=>', '<<<', '<<', '..<', '..', '->'],
+  ['-', '+'],
+  ['/', '*'],
+  ['**', '%'],
+].flat()

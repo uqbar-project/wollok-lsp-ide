@@ -2,17 +2,16 @@ import { expect } from 'expect'
 import { buildEnvironment } from 'wollok-ts'
 import { print } from '../utils/code-generation/format'
 
-describe('formatter', () => {
-  it('should format singletons', () => {
+describe('printer', () => {
+  it('should print singletons', () => {
     testFormat(
-      `object     pepita {var energia =    10}`,
-      `object pepita {\n var energia = 10\n}`
+      `object     pepita {var energia =    10
+      method comer(comida){energia += comida.calorias()}
+      }`,
+      `object pepita {\n var energia = 10\n method comer(comida) {\n  energia += comida.calorias()\n }\n}`
     )
   })
-
-
 })
-
 
 
 function testFormat(unformatted: string, expectedFormat: string) {

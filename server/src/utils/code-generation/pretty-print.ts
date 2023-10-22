@@ -1,3 +1,5 @@
-import { IDoc, braces, enclose, indent, lineBreak } from 'prettier-printer'
+import { IDoc, braces, enclose, indent as nativeIndent, lineBreak } from 'prettier-printer'
 
-export const body = (content: IDoc): IDoc => enclose(braces, [lineBreak, indent(1, content), lineBreak])
+export const indent = nativeIndent('\t')
+
+export const body = (content: IDoc): IDoc => enclose(braces, [lineBreak, indent(content), lineBreak])
