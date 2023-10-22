@@ -5,7 +5,7 @@
   "author": "Uqbar Foundation",
   "license": "LGPL-3.0",
   "publisher": "uqbar",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/uqbar-project/wollok-lsp-ide"
@@ -14,11 +14,11 @@
     "Programming Languages"
   ],
   "keywords": [
-    "linter validator wollok oop educative objects learning"
+    "ide wollok oop educative objects learning"
   ],
   "icon": "images/wollokLinterLogo.png",
   "engines": {
-    "vscode": "^1.71.0"
+    "vscode": "^1.83.0"
   },
   "activationEvents": [
     "onLanguage:wollok"

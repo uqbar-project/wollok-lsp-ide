@@ -1,11 +1,29 @@
+# development folders
+.github/**
+.husky/**
 .vscode/**
-**/*.ts
-**/*.map
+.vscode-test/**
 .gitignore
 **/tsconfig.json
 **/tsconfig.base.json
+**/node_modules/**
+**/.mocharc.js
+**/.prettierrc
+**/.eslintrc
+**/.gitignore
+**/scripts
 contributing.md
-.travis.yml
+
+# ts files are deployed as compiled js
+**/*.ts
+**/*.map
+
+# no tests needed
+client/out/test/**
+client/out/testFixture/**
+server/out/test/**
+
+# node_modules, except by vscode and needed dependencies
 client/node_modules/**
 !client/node_modules/vscode-jsonrpc/**
 !client/node_modules/vscode-languageclient/**
