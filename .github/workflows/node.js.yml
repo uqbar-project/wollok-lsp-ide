@@ -12,12 +12,13 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
+    # runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
 
-    strategy:
-        matrix:
-            os: [ubuntu-latest, macos-latest] # windows-latest is failing!!
-            node-version: [lts/hydrogen]
+    # strategy:
+    #     matrix:
+    #         os: [ubuntu-latest, macos-latest] # windows-latest is failing!!
+    #         node-version: [lts/hydrogen]
 
     steps:
     - uses: actions/checkout@v3
