@@ -16,8 +16,8 @@ jobs:
 
     strategy:
         matrix:
-            os: [ubuntu-latest, windows-latest]
-            node-version: [lts/hydrogen]
+            os: [ubuntu-latest, windows-latest, macos-latest]
+            node-version: [lts/gallium]
 
     steps:
     - uses: actions/checkout@v3
@@ -34,6 +34,7 @@ jobs:
     - name: Unit Tests
       run: npm run test:unit
     - name: Contribute List
+      if: matrix.os == 'ubuntu-latest'
       uses: akhilmhdh/contributors-readme-action@v2.3.6
       with:
         image_size: 100
