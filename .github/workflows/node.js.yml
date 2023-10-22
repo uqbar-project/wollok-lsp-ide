@@ -16,7 +16,7 @@ jobs:
 
     strategy:
         matrix:
-            os: [windows-latest, macos-latest] # ubuntu-latest is failing!!
+            os: [windows-latest, ubuntu-latest, macos-latest]
             node-version: [lts/gallium]
 
     steps:
