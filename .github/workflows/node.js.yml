@@ -12,12 +12,11 @@ on:
 
 jobs:
   test:
-    # runs-on: ${{ matrix.os }}
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
         matrix:
-    #         os: [ubuntu-latest, macos-latest] # windows-latest is failing!!
+            os: [windows-latest, macos-latest] # ubuntu-latest is failing!!
             node-version: [lts/gallium]
 
     steps:
@@ -34,11 +33,11 @@ jobs:
         run: npm run test:e2e
     - name: Unit Tests
       run: npm run test:unit
-    - name: Contribute List
-      # if: matrix.os == 'ubuntu-latest'
-      uses: akhilmhdh/contributors-readme-action@v2.3.6
-      with:
-        image_size: 100
-        auto_detect_branch_protection: true
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # - name: Contribute List
+    #   # if: matrix.os == 'ubuntu-latest'
+    #   uses: akhilmhdh/contributors-readme-action@v2.3.6
+    #   with:
+    #     image_size: 100
+    #     auto_detect_branch_protection: true
+    #   env:
+    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
