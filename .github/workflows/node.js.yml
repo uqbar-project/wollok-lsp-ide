@@ -28,7 +28,7 @@ jobs:
     - run: npm install
     - run: npm run compile
     - name: Run headless test
-      uses: coactions/setup-xvfb@v1
+      uses: coactions/setup-xvfb@v1.0.1
       with:
         run: npm run test:e2e
     - name: Unit Tests
