@@ -27,6 +27,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm install
     - run: npm run compile
+    - run: dbus-daemon --system &> /dev/null
     - name: Run headless test
       uses: coactions/setup-xvfb@v1.0.1
       with:
