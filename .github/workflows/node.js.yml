@@ -10,15 +10,14 @@ on:
   pull_request:
 
 
-
 jobs:
   test:
 
-    runs-on: windows-latest
+    runs-on: [windows-latest, ubuntu-latest, macos-latest]
 
     strategy:
       matrix:
-        node-version: [lts/gallium]
+        node-version: [lts/hydrogen]
 
     steps:
     - uses: actions/checkout@v3
