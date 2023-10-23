@@ -5,13 +5,26 @@
 
 Starting from [LSP sample code](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide) for Visual Studio Code, we developed a couple of tools for Wollok using Language Server Protocol (for Visual Studio Code, IntelliJ, Eclipse, Atom, etc.)
 
-## Developer Instructions
+## Welcome to Wollok!
 
-By now we have a first working version of a linter, calling wollok-ts implementation. For a deeper developer guide, please refer to the [wiki](https://github.com/uqbar-project/wollok-lsp-ide/wiki). See [installation instructions for developers](https://github.com/uqbar-project/wollok-lsp-ide/wiki/Development-Environment).
+Here you can see how to develop a Wollok example using autocompletion tools:
+
+<img src="./images/demo1.gif" title="first example" alt="first example" height="70%" width="70%"/>
+
+___
+
+Once you have defined your objects and classes, you can test it in the REPL using a dynamic diagram:
+
+<img src="./images/demo2.gif" title="repl - dynamic diagram" alt="repl - dynamic diagram" height="70%" width="70%"/>
 
 ## Features
 
 See [Tools](https://github.com/uqbar-project/wollok-lsp-ide/wiki/Tools) wiki.
+
+## Developer Instructions
+
+If you want to contribute, please refer to the [wiki](https://github.com/uqbar-project/wollok-lsp-ide/wiki). See [installation instructions for developers](https://github.com/uqbar-project/wollok-lsp-ide/wiki/Development-Environment), and you can also [join the Discord channel!](https://discord.gg/MWK9fafk)
+
 
 #### Powered by [Uqbar](https://uqbar.org/)
 
