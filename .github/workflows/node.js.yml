@@ -37,8 +37,7 @@ jobs:
     - name: Contribute List
       if: github.ref != 'refs/heads/master'
       uses: akhilmhdh/contributors-readme-action@v2.3.6
-      with:
-        image_size: 100
-        auto_detect_branch_protection: true
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # with:
+      #     image_size: 100

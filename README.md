@@ -13,6 +13,7 @@ By now we have a first working version of a linter, calling wollok-ts implementa
 See [Tools](https://github.com/uqbar-project/wollok-lsp-ide/wiki/Tools) wiki.
 
 <!-- readme: contributors -start -->
+
 <!-- readme: contributors -end -->
 
 #### Powered by [Uqbar](https://uqbar.org/)
