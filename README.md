@@ -1,3 +1,4 @@
+<!-- DO NOT REMOVE - contributor_list:data:start:["fdodino", "ivojawer", "PalumboN", "npasserini", "FerRomMu", "dependabot[bot]"]:end -->
 
 # Wollok IDE
 
@@ -15,3 +16,23 @@ See [Tools](https://github.com/uqbar-project/wollok-lsp-ide/wiki/Tools) wiki.
 
 #### Powered by [Uqbar](https://uqbar.org/)
 
+
+<!-- prettier-ignore-start -->
+<!-- DO NOT REMOVE - contributor_list:start -->
+## 👥 Contributors
+
+
+- **[@fdodino](https://github.com/fdodino)**
+
+- **[@ivojawer](https://github.com/ivojawer)**
+
+- **[@PalumboN](https://github.com/PalumboN)**
+
+- **[@npasserini](https://github.com/npasserini)**
+
+- **[@FerRomMu](https://github.com/FerRomMu)**
+
+- **[@dependabot[bot]](https://github.com/apps/dependabot)**
+
+<!-- DO NOT REMOVE - contributor_list:end -->
+<!-- prettier-ignore-end -->
