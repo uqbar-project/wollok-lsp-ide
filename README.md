@@ -1,4 +1,3 @@
-<!-- DO NOT REMOVE - contributor_list:data:start:["fdodino", "ivojawer", "PalumboN", "npasserini", "FerRomMu", "dependabot[bot]"]:end -->
 
 # Wollok IDE
 
@@ -16,23 +15,3 @@ See [Tools](https://github.com/uqbar-project/wollok-lsp-ide/wiki/Tools) wiki.
 
 #### Powered by [Uqbar](https://uqbar.org/)
 
-
-<!-- prettier-ignore-start -->
-<!-- DO NOT REMOVE - contributor_list:start -->
-## 👥 Contributors
-
-
-  ![https://avatars.githubusercontent.com/u/4549002?v=4](https://avatars.githubusercontent.com/u/4549002?v=4) [@fdodino](https://github.com/fdodino)
-
-  ![https://avatars.githubusercontent.com/u/18614957?v=4](https://avatars.githubusercontent.com/u/18614957?v=4) [@ivojawer](https://github.com/ivojawer)
-
-  ![https://avatars.githubusercontent.com/u/4098184?v=4](https://avatars.githubusercontent.com/u/4098184?v=4) [@PalumboN](https://github.com/PalumboN)
-
-  ![https://avatars.githubusercontent.com/u/4633913?v=4](https://avatars.githubusercontent.com/u/4633913?v=4) [@npasserini](https://github.com/npasserini)
-
-  ![https://avatars.githubusercontent.com/u/70177008?v=4](https://avatars.githubusercontent.com/u/70177008?v=4) [@FerRomMu](https://github.com/FerRomMu)
-
-  ![https://avatars.githubusercontent.com/in/29110?v=4](https://avatars.githubusercontent.com/in/29110?v=4) [@dependabot[bot]](https://github.com/apps/dependabot)
-
-<!-- DO NOT REMOVE - contributor_list:end -->
-<!-- prettier-ignore-end -->

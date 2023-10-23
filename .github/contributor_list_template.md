@@ -1,5 +1,5 @@
 {{ header_level }} 👥 Contributors
 
 {% for contributor in contributors %}
-  ![{{ contributor.avatar_url}}]({{ contributor.avatar_url}}) [@{{ contributor.login }}]({{ contributor.html_url }})
+  <img src="{{ contributor.avatar_url }}" size="40px" style="border-radius: 50%;"/> [@{{ contributor.login }}]({{ contributor.html_url }}) - 
 {% endfor %}
