@@ -34,14 +34,3 @@ jobs:
         run: npm run test:e2e
     - name: Unit Tests
       run: npm run test:unit
-    - name: Contribute List
-      uses: docker://cjdenio/contributor_list:latest
-      if: matrix.os == 'ubuntu-latest'
-      with:
-        commit_message: 📝 Update contributors list
-        # Max number of contributors to display on the README
-        max_contributors: 15
-        # Markdown heading level for the contributors section
-        header_level: 2 # Default: 2
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
