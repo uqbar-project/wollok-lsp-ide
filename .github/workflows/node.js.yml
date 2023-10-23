@@ -28,7 +28,7 @@ jobs:
     - run: npm install
     - run: npm run compile
     - name: Run headless test
-      uses: coactions/setup-xvfb@v1.0.1
+      uses: smithki/xvfb-action@v1.1.2
       with:
         run: npm run test:e2e
         options: --disable-features=NetworkService --disable-gpu
