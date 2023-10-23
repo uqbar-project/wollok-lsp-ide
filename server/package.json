@@ -1,7 +1,7 @@
 {
   "name": "wollok-lsp-ide-server",
   "description": "Wollok IDE - LSP implementation in node.",
-  "version": "0.0.1",
+  "version": "0.1.2",
   "author": "Uqbar Foundation",
   "license": "LGPL-3.0",
   "engines": {
@@ -12,8 +12,8 @@
     "url": "https://github.com/uqbar-project/wollok-lsp-ide"
   },
   "dependencies": {
-    "vscode-languageserver": "^8.0.1",
-    "vscode-languageserver-textdocument": "^1.0.5"
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.11"
   },
   "scripts": {
     "test": "ts-mocha -p tsconfig.json --config ./.mocharc.js"
