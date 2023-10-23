@@ -1,19 +1,16 @@
-name: Contributors List
 on:
   push:
     branches:
-      - master
+      - main
+
 jobs:
-  contributor_list:
-    name: Contributors List
+  contrib-readme-job:
     runs-on: ubuntu-latest
+    name: A job to automate contrib in readme
     steps:
-      - uses: actions/checkout@master
-      - uses: docker://cjdenio/contributor_list:latest
+      - name: Contribute List
+        uses: akhilmhdh/contributors-readme-action@v2.3.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          commit_message: 📝 Update contributors list
-          # Max number of contributors to display on the README
-          max_contributors: 15 # Default: 10
-          # Markdown heading level for the contributors section
-          header_level: 2 # Default: 2
-          
+          image_size: 60
