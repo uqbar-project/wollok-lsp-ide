@@ -27,11 +27,12 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm install
     - run: npm run compile
-    - name: Run headless test
-      uses: smithki/xvfb-action@v1.1.2
-      with:
-        run: npm run test:e2e
-        options: --disable-features=NetworkService --disable-gpu
+    # - name: Run headless test
+    #   uses: smithki/xvfb-action@v1.1.2
+    #   with:
+    #     run: npm run test:e2e
+    #     options: --disable-features=NetworkService --disable-gpu
+    - run: npm run test
     - name: Unit Tests
       run: npm run test:unit
     # - name: Contribute List
