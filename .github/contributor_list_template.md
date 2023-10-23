@@ -1,9 +1,3 @@
 {{ header_level }} 👥 Contributors
 
-<div>
-{% for contributor in contributors %}
-  <a href="{{ contributor.html_url }}"><img src="{{ contributor.avatar_url }}" width="40" height="40" style="border-radius: 50%;" alt="{{ contributor.login }}"></a> - 
-{% endfor %}
-</div>
-
-
+{% for contributor in contributors %}![{{ contributor.avatar_url}}&h=40&w=40&fit=cover&mask=circle]({{ contributor.avatar_url}}){% endfor %}
