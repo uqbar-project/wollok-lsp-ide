@@ -16,7 +16,7 @@ jobs:
 
     strategy:
         matrix:
-            os: [ubuntu-latest] # [windows-latest, ubuntu-latest, macos-latest]
+            os: [windows-latest, ubuntu-latest, macos-latest]
             node-version: [lts/gallium]
 
     steps:
@@ -27,12 +27,11 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm install
     - run: npm run compile
-    # - name: Run headless test
-    #   uses: smithki/xvfb-action@v1.1.2
-    #   with:
-    #     run: npm run test:e2e
-    #     options: --disable-features=NetworkService --disable-gpu
-    - run: npm test
+    - name: Run headless test
+      if: matrix.os != 'ubuntu-latest' # we need to fix ubuntu-latest first
+      uses: smithki/xvfb-action@v1.1.2
+      with:
+        run: npm run test:e2e
     - name: Unit Tests
       run: npm run test:unit
     # - name: Contribute List
