@@ -16,7 +16,7 @@ ___
 
 Once you have defined your objects and classes, you can test it in the REPL using a dynamic diagram:
 
-<img src="./images/demo2.gif" title="repl - dynamic diagram" alt="repl - dynamic diagram" height="70%" width="70%"/>
+<img src="./images/demo2.gif" title="repl - dynamic diagram" alt="repl - dynamic diagram" height="80%" width="80%"/>
 
 ## Features
 
