@@ -32,7 +32,7 @@ jobs:
     #   with:
     #     run: npm run test:e2e
     #     options: --disable-features=NetworkService --disable-gpu
-    - run: npm run test
+    - run: npm test
     - name: Unit Tests
       run: npm run test:unit
     # - name: Contribute List
