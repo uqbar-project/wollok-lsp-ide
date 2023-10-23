@@ -1,4 +1,3 @@
-<!-- DO NOT REMOVE - contributor_list:data:start:["fdodino", "ivojawer", "PalumboN", "npasserini", "FerRomMu", "dependabot[bot]"]:end -->
 
 # Wollok IDE
 
@@ -21,18 +20,6 @@ See [Tools](https://github.com/uqbar-project/wollok-lsp-ide/wiki/Tools) wiki.
 <!-- DO NOT REMOVE - contributor_list:start -->
 ## 👥 Contributors
 
-
-  <img src="https://avatars.githubusercontent.com/u/4549002?v=4" size="40px" style="border-radius: 50%;"/> [@fdodino](https://github.com/fdodino) - 
-
-  <img src="https://avatars.githubusercontent.com/u/18614957?v=4" size="40px" style="border-radius: 50%;"/> [@ivojawer](https://github.com/ivojawer) - 
-
-  <img src="https://avatars.githubusercontent.com/u/4098184?v=4" size="40px" style="border-radius: 50%;"/> [@PalumboN](https://github.com/PalumboN) - 
-
-  <img src="https://avatars.githubusercontent.com/u/4633913?v=4" size="40px" style="border-radius: 50%;"/> [@npasserini](https://github.com/npasserini) - 
-
-  <img src="https://avatars.githubusercontent.com/u/70177008?v=4" size="40px" style="border-radius: 50%;"/> [@FerRomMu](https://github.com/FerRomMu) - 
-
-  <img src="https://avatars.githubusercontent.com/in/29110?v=4" size="40px" style="border-radius: 50%;"/> [@dependabot[bot]](https://github.com/apps/dependabot) - 
 
 <!-- DO NOT REMOVE - contributor_list:end -->
 <!-- prettier-ignore-end -->
