@@ -35,9 +35,10 @@ jobs:
     - name: Unit Tests
       run: npm run test:unit
     - name: Contribute List
-      if: github.ref != 'refs/heads/master'
+      if: github.ref != 'refs/heads/master' && matrix.os == 'ubuntu-latest'
       uses: akhilmhdh/contributors-readme-action@v2.3.6
-      env:
+      with:
+        image_size: 100
+        readme_path: "README.md"
+    env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # with:
-      #     image_size: 100
