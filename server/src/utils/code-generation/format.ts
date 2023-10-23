@@ -1,5 +1,5 @@
-import { Assignment, Body, Expression, Field, Literal, Method, Node, Package, Parameter, Reference, Return, Send, Sentence, Singleton, Test, Variable } from 'wollok-ts'
-import { IDoc, braces, dquotes, enclose, group, intersperse, lineBreak, lineBreaks, parens, render, softBreak, softLine } from 'prettier-printer'
+import { Assignment, Body, Class, Expression, Field, Id, Literal, Method, Node, Package, Parameter, Reference, Return, Self, Send, Sentence, Singleton, Test, Variable } from 'wollok-ts'
+import { IDoc, append, braces, choice, dquotes, enclose, group, intersperse, lineBreak, lineBreaks, parens, render, softBreak, softLine } from 'prettier-printer'
 import { List, match, when } from 'wollok-ts/dist/extensions'
 import { CONSTANTS, INFIX_OPERATORS } from './wollok-code'
 import { body, indent } from './pretty-print'
@@ -21,6 +21,7 @@ export const format: Formatter<Node> = (node) => {
     when(Package)(formatPackage),
     when(Assignment)(formatAssignment),
     when(Singleton)(formatSingleton),
+    when(Class)(formatClass),
     when(Method)(formatMethod),
     when(Field)(formatVariable),
     when(Variable)(formatVariable),
@@ -31,6 +32,7 @@ export const format: Formatter<Node> = (node) => {
     when(Send)(formatSend),
     when(Return)(formatReturn),
     when(Reference)(formatReference),
+    when(Self)(formatSelf),
   )
 }
 
@@ -88,20 +90,45 @@ const formatAssignment: Formatter<Assignment>=(node: Assignment) => formatAssign
 
 
 const formatLiteral: Formatter<Literal> = (node: Literal) => {
-  switch(typeof node.value) {
-    case 'string':
-      return enclose(dquotes, node.value)
-    case 'number':
-      return node.value.toString() //ToDo presition
-    case 'boolean':
-      return `${node.value}`
-    case 'undefined':
-      return CONSTANTS.NULL
-    default:
-      return node.value?.toString() + typeof node.value //ToDo  lists, sets, etc
+  if(node.isBoolean()){
+    return `${node.value}`
+  } else if(node.isNumeric()) {
+    return node.value.toString() //ToDo presition
+  } else if(node.isNull()){
+    return CONSTANTS.NULL
+  } else if(node.isString()){
+    return enclose(dquotes, `${node.value}`)
+  } else if(node.isCollection()){
+    const [{ name: moduleName }, elements] = node.value as any
+    switch(moduleName){
+      case CONSTANTS.LIST_MODULE:
+        return formatCollection(elements as Expression[], [CONSTANTS.BEGIN_LIST_LITERAL, CONSTANTS.END_LIST_LITERAL])
+      case CONSTANTS.SET_MODULE:
+        return formatCollection(elements as Expression[], [CONSTANTS.BEGIN_SET_LITERAL, CONSTANTS.END_SET_LITERAL])
+      default:
+        throw new Error('Unknown collection type')
+    }
+  } else {
+    throw new Error('Unknown literal type')
   }
 }
 
+const formatSelf: Formatter<Self> = (_: Self) => CONSTANTS.SELF
+
+const formatClass: Formatter<Class> = (node: Class) => {
+  const header = [
+    CONSTANTS.CLASS,
+    WS,
+    node.name,
+    node.superclass && node.superclass?.fullyQualifiedName !== CONSTANTS.OBJECT_MODULE ? [WS, CONSTANTS.INHERITS, WS, node.superclass.name] : [],
+  ]
+
+  return [
+    header,
+    WS,
+    formatModuleBody(node.members),
+  ]
+}
 
 // SINGLETON FORMATTERS
 
@@ -122,18 +149,23 @@ const formatClosure: Formatter<Singleton> = (node: Singleton) => {
   const parameters = applyMethod.parameters.length > 0 ?
     [WS, formatParameters(applyMethod.parameters), WS, CONSTANTS.CLOSURE_BEGIN]
     : []
-  return enclose(braces, [parameters, lineBreak, indent(formatSentences((applyMethod.body! as Body).sentences, true)), lineBreak])
+
+  const sentences = (applyMethod.body! as Body).sentences
+
+  return sentences.length === 1 ?
+    enclose(braces, append(WS, [parameters, WS, format(sentences[0])]))
+    : enclose(braces, [parameters, lineBreak, indent(formatSentences((applyMethod.body! as Body).sentences)), lineBreak])
 }
 
 const formatAnonymousSingleton: Formatter<Singleton> = (node: Singleton) => intersperse(WS, [
   CONSTANTS.WKO,
-  body(intersperse(lineBreaks, node.members.map(format))),
+  formatModuleBody(node.members),
 ])
 
 const formatWKO: Formatter<Singleton> = (node: Singleton) => intersperse(WS, [
   CONSTANTS.WKO,
   node.name!,
-  body(intersperse(lineBreaks, node.members.map(format))),
+  formatModuleBody(node.members),
 ])
 
 // SEND FORMATTERS
@@ -173,9 +205,31 @@ const formatSentenceInBody = (sentence: Sentence, previousSentence: Sentence | u
   return [Array(distanceFromLastSentence + 1).fill(lineBreak), format(sentence)]
 }
 
-const formatAssign = (name: string, value: Expression) => group(intersperse(WS, [
+const formatAssign = (name: string, value: Expression) => [
   name,
+  WS,
   CONSTANTS.ASIGNATION,
-  lineBreak,
-  format(value),
-]))
+  softBreak,
+  choice([WS, format(value)], indent(format(value))),
+]
+
+const formatCollection = (values: Expression[], enclosers: [IDoc, IDoc]) => {
+  return choice(
+    enclose(
+      enclosers,
+      [
+        intersperse([CONSTANTS.COLLECTION_SEPARATOR, WS], values.map(format)),
+      ]
+    ),
+    enclose(
+      enclosers,
+      [
+        lineBreak,
+        indent(intersperse([CONSTANTS.COLLECTION_SEPARATOR, softLine], values.map(format))),
+        lineBreak,
+      ]
+    )
+  )
+}
+
+const formatModuleBody = (members: List<Field | Method>): IDoc => body(intersperse(lineBreaks, members.map(format)))

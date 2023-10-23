@@ -10,6 +10,7 @@ export const CONSTANTS =  {
 	OP_BOOLEAN: ['and', "&&", "or", "||"],
 	OP_UNARY_BOOLEAN: ['!', "not"],
   PARAM_SEPARATOR: ',',
+  COLLECTION_SEPARATOR: ',',
   SEND_OPERATOR: '.',
 	SELF: "self",
 	SUPER: "super",
@@ -45,6 +46,9 @@ export const CONSTANTS =  {
 	END_PARAMETER_LIST: ")",
 	INSTANTIATION: "new",
 	TRY: "try",
+  LIST_MODULE: "wollok.lang.List",
+  SET_MODULE: "wollok.lang.Set",
+  OBJECT_MODULE: "wollok.lang.Object",
 } as const
 
 // ToDo this array was copied from wollok-ts, use it
