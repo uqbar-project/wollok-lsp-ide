@@ -35,10 +35,16 @@ jobs:
     - name: Unit Tests
       run: npm run test:unit
     - name: Contribute List
-      if: github.ref != 'refs/heads/master' && matrix.os == 'ubuntu-latest'
-      uses: akhilmhdh/contributors-readme-action@v2.3.6
+      uses: docker://cjdenio/contributor_list:latest
+      if: matrix.os == 'ubuntu-latest'
       with:
-        image_size: 100
-        readme_path: "README.md"
-    env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        commit_message: 📝 Update contributors list
+        # Max number of contributors to display on the README
+        max_contributors: 15
+        # This enables showing contribution numbers on the README.
+        # ⚠️ THIS WILL PUSH TO THE REPO AFTER EVERY COMMIT ⚠️
+        show_numbers: true # Default: false
+        # Markdown heading level for the contributors section
+        header_level: 2 # Default: 2
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
