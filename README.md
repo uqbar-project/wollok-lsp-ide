@@ -10,13 +10,13 @@ Starting from [LSP sample code](https://code.visualstudio.com/api/language-exten
 
 Here you can see how to develop a Wollok example using autocompletion tools:
 
-<img src="./images/demo1.gif" title="first example" alt="first example" height="70%" width="70%"/>
+<img src="./images/demo1.gif" title="first example" alt="first example" height="80%" width="80%"/>
 
 ___
 
 Once you have defined your objects and classes, you can test it in the REPL using a dynamic diagram:
 
-<img src="./images/demo2.gif" title="repl - dynamic diagram" alt="repl - dynamic diagram" height="80%" width="80%"/>
+<img src="./images/demo2.gif" title="repl - dynamic diagram" alt="repl - dynamic diagram" height="75%" width="75%"/>
 
 ## Features
 
