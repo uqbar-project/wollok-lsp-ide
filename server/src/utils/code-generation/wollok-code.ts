@@ -1,8 +1,8 @@
 // grammar elements here for being used in quickfixes, validators, and
 // any code that generates wollok code
 export const CONSTANTS =  {
-	OPMULTIASSIGN: ['+=', '-=', '*=', '/=', '%=', '<<=', '>>='],
-	OP_EQUALITY: ['==', '!=', '===', '!=='],
+  OPMULTIASSIGN: ['+=', '-=', '*=', '/=', '%=', '<<=', '>>='],
+  OP_EQUALITY: ['==', '!=', '===', '!=='],
 	ASIGNATION: '=',
   CLOSURE_BEGIN: '=>',
 	OP_BOOLEAN_AND: ['and', "&&"],
@@ -12,6 +12,9 @@ export const CONSTANTS =  {
   PARAM_SEPARATOR: ',',
   COLLECTION_SEPARATOR: ',',
   SEND_OPERATOR: '.',
+  IF: 'if',
+  ELSE: 'else',
+  NEW: 'new',
 	SELF: "self",
 	SUPER: "super",
 	NULL: "null",
