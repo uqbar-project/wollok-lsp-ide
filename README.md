@@ -18,7 +18,3 @@ See [Tools](https://github.com/uqbar-project/wollok-lsp-ide/wiki/Tools) wiki.
 
 #### Powered by [Uqbar](https://uqbar.org/)
 
-## 👥 Contributors
-
-<!-- readme: contributors -start -->
-<!-- readme: contributors -end -->
