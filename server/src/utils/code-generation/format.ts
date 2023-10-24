@@ -50,15 +50,23 @@ const formatMethod: Formatter<Method> = (node: Method) => {
     enclosedList(parens, node.parameters.map(format)),
   ]
 
-  if(node.body){
-    if(node.body === 'native')
-      return [signature, WS, CONSTANTS.NATIVE]
-    else if(node.body.sentences.length === 1 && node.body.sentences[0].is(Return) && node.body.sentences[0].value)
-      return intersperse(WS, [signature, CONSTANTS.ASIGNATION, format(node.body.sentences[0].value)])
-    else
-    return [signature, WS, format(node.body)]
-  } else {
+  if(node.isNative()){
+    return [signature, WS, CONSTANTS.NATIVE]
+  } else if (node.isAbstract()){
     return signature
+  } else if(node.isConcrete()) {
+    if(
+      node.body.sentences.length === 1 &&
+      node.body.sentences[0].is(Return) &&
+      node.body.sentences[0].value
+    ) {
+      return intersperse(WS, [signature, CONSTANTS.ASIGNATION, format(node.body!.sentences[0].value)])
+    }
+    else {
+      return [signature, WS, format(node.body as Body)]
+    }
+  } else {
+    throw Error('Malformed method')
   }
 }
 
