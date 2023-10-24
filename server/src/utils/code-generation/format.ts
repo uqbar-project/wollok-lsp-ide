@@ -1,10 +1,8 @@
-import { Assignment, Body, Class, Describe, Expression, Field, If, Literal, Method, Mixin, New, Node, Package, Parameter, ParameterizedType, Reference, Return, Self, Send, Sentence, Singleton, Test, Variable } from 'wollok-ts'
-import { IDoc, append, braces, choice, dquotes, enclose, intersperse, lineBreak, lineBreaks, parens, render, softBreak } from 'prettier-printer'
+import { Assignment, Body, Class, Describe, Expression, Field, If, Import, Literal, Method, Mixin, New, Node, Package, Parameter, ParameterizedType, Reference, Return, Self, Send, Sentence, Singleton, Test, Variable } from 'wollok-ts'
+import { IDoc, append, braces, choice, enclose, intersperse, lineBreak, lineBreaks, parens, render, softBreak } from 'prettier-printer'
 import { List, match, when } from 'wollok-ts/dist/extensions'
 import { CONSTANTS, INFIX_OPERATORS } from './wollok-code'
-import { body, enclosedList, indent, listed, stringify } from './pretty-print'
-
- const WS = ' ' as IDoc
+import { WS, body, enclosedList, indent, listEnclosers, listed, setEnclosers, stringify } from './pretty-print'
 
 export const print = (node: Node): string => {
   return render(30, format(node))
@@ -16,7 +14,7 @@ export const print = (node: Node): string => {
 
 export type Formatter<T extends Node> = (node: T) => IDoc
 
-export const format: Formatter<Node> = (node) => {
+export const format: Formatter<Node> = node => {
   return match(node)(
     when(Package)(formatPackage),
     when(Assignment)(formatAssignment),
@@ -34,15 +32,22 @@ export const format: Formatter<Node> = (node) => {
     when(Send)(formatSend),
     when(If)(formatIf),
     when(New)(formatNew),
+    when(ParameterizedType)(formatParameterizedType),
     when(Return)(formatReturn),
     when(Reference)(formatReference),
     when(Self)(formatSelf),
-    when(ParameterizedType)(formatParameterizedType),
+    when(Import)(formatImport),
   )
 }
 
 const formatPackage: Formatter<Package> = (node: Package) => {
   return intersperse(lineBreaks, node.children.map(format))
+}
+
+const formatImport: Formatter<Import> = node => {
+  const wildcard = node.entity.target?.is(Package) ? '.*' : ''
+
+  return [CONSTANTS.IMPORT, WS, node.entity.name, wildcard]
 }
 
 const formatMethod: Formatter<Method> = (node: Method) => {
@@ -81,7 +86,7 @@ const formatReturn = (node: Return) => node.value ?
 
 const formatReference = (node: Reference<Node>) => node.name
 
-const formatField: Formatter<Field> = (node) => {
+const formatField: Formatter<Field> = node => {
   let modifiers: IDoc = [node.isConstant ? CONSTANTS.CONST : CONSTANTS.VAR]
   if(node.isProperty){
     modifiers = append([WS, CONSTANTS.PROPERTY], modifiers)
@@ -93,7 +98,7 @@ const formatField: Formatter<Field> = (node) => {
   ]
 }
 
-const formatVariable: Formatter<Variable> = (node) => {
+const formatVariable: Formatter<Variable> = node => {
   return [
     node.isConstant ? CONSTANTS.CONST : CONSTANTS.VAR,
     WS,
@@ -101,7 +106,7 @@ const formatVariable: Formatter<Variable> = (node) => {
   ]
 }
 
-const formatParameter: Formatter<Parameter> = (node) => node.name
+const formatParameter: Formatter<Parameter> = node => node.name
 
 const formatTest: Formatter<Test> = (node: Test) => {
   return intersperse(WS, [
@@ -119,7 +124,7 @@ const formatDescribe: Formatter<Describe> = node => intersperse(
 
 const formatAssignment: Formatter<Assignment>= node => formatAssign(node.variable.name, node.value)
 
-const formatIf: Formatter<If> = (node) => {
+const formatIf: Formatter<If> = node => {
   const condition = [CONSTANTS.IF, WS, enclose(parens, format(node.condition))]
   const thenBody = body(formatSentences(node.thenBody.sentences))
   const elseBody = node.elseBody.sentences.length > 0 ? body(formatSentences(node.elseBody.sentences)) : undefined
@@ -131,7 +136,7 @@ const formatIf: Formatter<If> = (node) => {
   ]
 }
 
-const formatNew: Formatter<New> = (node) => {
+const formatNew: Formatter<New> = node => {
   const args =
     enclosedList(parens, node.args.map(arg => intersperse(WS, [arg.name, CONSTANTS.ASIGNATION, format(arg.value)])))
   return [
@@ -142,7 +147,7 @@ const formatNew: Formatter<New> = (node) => {
   ]
 }
 
-const formatLiteral: Formatter<Literal> = (node) => {
+const formatLiteral: Formatter<Literal> = node => {
   if(node.isBoolean()){
     return `${node.value}`
   } else if(node.isNumeric()) {
@@ -155,9 +160,9 @@ const formatLiteral: Formatter<Literal> = (node) => {
     const [{ name: moduleName }, elements] = node.value as any
     switch(moduleName){
       case CONSTANTS.LIST_MODULE:
-        return formatCollection(elements as Expression[], [CONSTANTS.BEGIN_LIST_LITERAL, CONSTANTS.END_LIST_LITERAL])
+        return formatCollection(elements as Expression[], listEnclosers)
       case CONSTANTS.SET_MODULE:
-        return formatCollection(elements as Expression[], [CONSTANTS.BEGIN_SET_LITERAL, CONSTANTS.END_SET_LITERAL])
+        return formatCollection(elements as Expression[], setEnclosers)
       default:
         throw new Error('Unknown collection type')
     }
@@ -183,7 +188,7 @@ const formatClass: Formatter<Class> = (node: Class) => {
   ]
 }
 
-const formatMixin: Formatter<Mixin> = (node) => {
+const formatMixin: Formatter<Mixin> = node => {
   const declaration = [
     CONSTANTS.MIXIN,
     WS,
@@ -194,7 +199,7 @@ const formatMixin: Formatter<Mixin> = (node) => {
   return [declaration, WS, formatModuleBody(node.members)]
 }
 
-const formatParameterizedType: Formatter<ParameterizedType> = (node) => node.reference.name
+const formatParameterizedType: Formatter<ParameterizedType> = node => node.reference.name
 
 // SINGLETON FORMATTERS
 
@@ -210,7 +215,7 @@ const formatSingleton: Formatter<Singleton> = (node: Singleton) => {
   }
 }
 
-const formatClosure: Formatter<Singleton> = (node) => {
+const formatClosure: Formatter<Singleton> = node => {
   const applyMethod = node.members[0] as Method
   const parameters = applyMethod.parameters.length > 0 ?
     [WS, listed(applyMethod.parameters.map(format)), WS, CONSTANTS.CLOSURE_BEGIN]
@@ -223,12 +228,12 @@ const formatClosure: Formatter<Singleton> = (node) => {
     : enclose(braces, [parameters, lineBreak, indent(formatSentences((applyMethod.body! as Body).sentences)), lineBreak])
 }
 
-const formatAnonymousSingleton: Formatter<Singleton> = (node) => intersperse(WS, [
+const formatAnonymousSingleton: Formatter<Singleton> = node => intersperse(WS, [
   CONSTANTS.WKO,
   formatModuleBody(node.members),
 ])
 
-const formatWKO: Formatter<Singleton> = (node) => intersperse(WS, [
+const formatWKO: Formatter<Singleton> = node => intersperse(WS, [
   CONSTANTS.WKO,
   node.name!,
   formatModuleBody(node.members),
@@ -236,30 +241,30 @@ const formatWKO: Formatter<Singleton> = (node) => intersperse(WS, [
 
 // SEND FORMATTERS
 
-const formatSend: Formatter<Send> = (node) => {
+const formatSend: Formatter<Send> = node => {
   return INFIX_OPERATORS.includes(node.message) ?
     formatInfixSend(node)
     : formatDotSend(node)
 }
 
-const formatDotSend: Formatter<Send> = (node) => [
+const formatDotSend: Formatter<Send> = node => [
   format(node.receiver),
   CONSTANTS.SEND_OPERATOR,
   node.message,
   enclosedList(parens, node.args.map(format)),
 ]
 
-const formatInfixSend: Formatter<Send> = (node) => {
+const formatInfixSend: Formatter<Send> = node => {
   function addParenthesisIfNeeded(expression: Expression): IDoc {
     // ToDo: add more cases where parenthesis aren't needed
     const formatted = format(expression)
-    return expression.is(Send) ? enclose(parens, formatted) : formatted
+    return expression.is(Send) && INFIX_OPERATORS.includes(expression.message) ? enclose(parens, formatted) : formatted
   }
 
   return intersperse(WS, [
-  addParenthesisIfNeeded(node.receiver),
-  node.message,
-  addParenthesisIfNeeded(node.args[0]),
+    addParenthesisIfNeeded(node.receiver),
+    node.message,
+    addParenthesisIfNeeded(node.args[0]),
   ]
 )}
 
