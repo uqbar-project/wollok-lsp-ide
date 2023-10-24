@@ -1,5 +1,5 @@
-import { Assignment, Body, Class, Expression, Field, If, Literal, Method, New, Node, Package, Parameter, Reference, Return, Self, Send, Sentence, Singleton, Test, Variable } from 'wollok-ts'
-import { IDoc, append, braces, choice, dquotes, enclose, intersperse, lineBreak, lineBreaks, parens, render, softBreak, softLine } from 'prettier-printer'
+import { Assignment, Body, Class, Expression, Field, If, Literal, Method, Mixin, New, Node, Package, Parameter, ParameterizedType, Reference, Return, Self, Send, Sentence, Singleton, Test, Variable } from 'wollok-ts'
+import { IDoc, append, braces, choice, dquotes, enclose, intersperse, lineBreak, lineBreaks, parens, render, softBreak } from 'prettier-printer'
 import { List, match, when } from 'wollok-ts/dist/extensions'
 import { CONSTANTS, INFIX_OPERATORS } from './wollok-code'
 import { body, enclosedList, indent, listed } from './pretty-print'
@@ -10,9 +10,9 @@ export const print = (node: Node): string => {
   return render(30, format(node))
 }
 
-// --------------------------
-// ----NODE FORMATTERS-------
-// --------------------------
+// -----------------------
+// ----NODE FORMATTERS----
+// -----------------------
 
 export type Formatter<T extends Node> = (node: T) => IDoc
 
@@ -22,6 +22,7 @@ export const format: Formatter<Node> = (node) => {
     when(Assignment)(formatAssignment),
     when(Singleton)(formatSingleton),
     when(Class)(formatClass),
+    when(Mixin)(formatMixin),
     when(Method)(formatMethod),
     when(Field)(formatField),
     when(Variable)(formatVariable),
@@ -35,6 +36,7 @@ export const format: Formatter<Node> = (node) => {
     when(Return)(formatReturn),
     when(Reference)(formatReference),
     when(Self)(formatSelf),
+    when(ParameterizedType)(formatParameterizedType),
   )
 }
 
@@ -98,7 +100,7 @@ const formatVariable: Formatter<Variable> = (node) => {
   ]
 }
 
-const formatParameter: Formatter<Parameter> = (node: Parameter) => node.name
+const formatParameter: Formatter<Parameter> = (node) => node.name
 
 const formatTest: Formatter<Test> = (node: Test) => {
   return intersperse(WS, [
@@ -173,6 +175,19 @@ const formatClass: Formatter<Class> = (node: Class) => {
   ]
 }
 
+const formatMixin: Formatter<Mixin> = (node) => {
+  const declaration = [
+    CONSTANTS.MIXIN,
+    WS,
+    node.name,
+    node.supertypes.length > 0 ? [WS, CONSTANTS.INHERITS, WS, intersperse([WS, CONSTANTS.MIXED_AND, WS], node.supertypes.map(format))] : [],
+  ]
+
+  return [declaration, WS, formatModuleBody(node.members)]
+}
+
+const formatParameterizedType: Formatter<ParameterizedType> = (node) => node.reference.name
+
 // SINGLETON FORMATTERS
 
 const formatSingleton: Formatter<Singleton> = (node: Singleton) => {
@@ -187,7 +202,7 @@ const formatSingleton: Formatter<Singleton> = (node: Singleton) => {
   }
 }
 
-const formatClosure: Formatter<Singleton> = (node: Singleton) => {
+const formatClosure: Formatter<Singleton> = (node) => {
   const applyMethod = node.members[0] as Method
   const parameters = applyMethod.parameters.length > 0 ?
     [WS, listed(applyMethod.parameters.map(format)), WS, CONSTANTS.CLOSURE_BEGIN]
@@ -200,12 +215,12 @@ const formatClosure: Formatter<Singleton> = (node: Singleton) => {
     : enclose(braces, [parameters, lineBreak, indent(formatSentences((applyMethod.body! as Body).sentences)), lineBreak])
 }
 
-const formatAnonymousSingleton: Formatter<Singleton> = (node: Singleton) => intersperse(WS, [
+const formatAnonymousSingleton: Formatter<Singleton> = (node) => intersperse(WS, [
   CONSTANTS.WKO,
   formatModuleBody(node.members),
 ])
 
-const formatWKO: Formatter<Singleton> = (node: Singleton) => intersperse(WS, [
+const formatWKO: Formatter<Singleton> = (node) => intersperse(WS, [
   CONSTANTS.WKO,
   node.name!,
   formatModuleBody(node.members),
@@ -213,20 +228,20 @@ const formatWKO: Formatter<Singleton> = (node: Singleton) => intersperse(WS, [
 
 // SEND FORMATTERS
 
-const formatSend = (node: Send) => {
+const formatSend: Formatter<Send> = (node) => {
   return INFIX_OPERATORS.includes(node.message) ?
     formatInfixSend(node)
     : formatDotSend(node)
 }
 
-const formatDotSend = (node: Send) => [
+const formatDotSend: Formatter<Send> = (node) => [
   format(node.receiver),
   CONSTANTS.SEND_OPERATOR,
   node.message,
   enclose(parens, intersperse(CONSTANTS.PARAM_SEPARATOR, node.args.map(format))),
 ]
 
-const formatInfixSend = (node: Send) => {
+const formatInfixSend: Formatter<Send> = (node) => {
   function addParenthesisIfNeeded(expression: Expression): IDoc {
     // ToDo: add more cases where parenthesis aren't needed
     const formatted = format(expression)
