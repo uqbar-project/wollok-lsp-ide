@@ -1,8 +1,8 @@
-import { Assignment, Body, Class, Expression, Field, If, Literal, Method, Mixin, New, Node, Package, Parameter, ParameterizedType, Reference, Return, Self, Send, Sentence, Singleton, Test, Variable } from 'wollok-ts'
+import { Assignment, Body, Class, Describe, Expression, Field, If, Literal, Method, Mixin, New, Node, Package, Parameter, ParameterizedType, Reference, Return, Self, Send, Sentence, Singleton, Test, Variable } from 'wollok-ts'
 import { IDoc, append, braces, choice, dquotes, enclose, intersperse, lineBreak, lineBreaks, parens, render, softBreak } from 'prettier-printer'
 import { List, match, when } from 'wollok-ts/dist/extensions'
 import { CONSTANTS, INFIX_OPERATORS } from './wollok-code'
-import { body, enclosedList, indent, listed } from './pretty-print'
+import { body, enclosedList, indent, listed, stringify } from './pretty-print'
 
  const WS = ' ' as IDoc
 
@@ -26,6 +26,7 @@ export const format: Formatter<Node> = (node) => {
     when(Method)(formatMethod),
     when(Field)(formatField),
     when(Variable)(formatVariable),
+    when(Describe)(formatDescribe),
     when(Test)(formatTest),
     when(Parameter)(formatParameter),
     when(Literal)(formatLiteral),
@@ -106,10 +107,17 @@ const formatTest: Formatter<Test> = (node: Test) => {
   return intersperse(WS, [
     CONSTANTS.TEST,
     node.name,
+    body(formatSentences(node.body.sentences)),
   ])
 }
 
-const formatAssignment: Formatter<Assignment>=(node) => formatAssign(node.variable.name, node.value)
+const formatDescribe: Formatter<Describe> = node => intersperse(
+  WS,
+  [CONSTANTS.SUITE, node.name, formatModuleBody(node.members)]
+)
+
+
+const formatAssignment: Formatter<Assignment>= node => formatAssign(node.variable.name, node.value)
 
 const formatIf: Formatter<If> = (node) => {
   const condition = [CONSTANTS.IF, WS, enclose(parens, format(node.condition))]
@@ -142,7 +150,7 @@ const formatLiteral: Formatter<Literal> = (node) => {
   } else if(node.isNull()){
     return CONSTANTS.NULL
   } else if(node.isString()){
-    return enclose(dquotes, `${node.value}`)
+    return stringify(`${node.value}`)
   } else if(node.isCollection()){
     const [{ name: moduleName }, elements] = node.value as any
     switch(moduleName){
@@ -238,7 +246,7 @@ const formatDotSend: Formatter<Send> = (node) => [
   format(node.receiver),
   CONSTANTS.SEND_OPERATOR,
   node.message,
-  enclose(parens, intersperse(CONSTANTS.PARAM_SEPARATOR, node.args.map(format))),
+  enclosedList(parens, node.args.map(format)),
 ]
 
 const formatInfixSend: Formatter<Send> = (node) => {
@@ -257,8 +265,8 @@ const formatInfixSend: Formatter<Send> = (node) => {
 
 // AUXILIARY FORMATTERS
 
-const formatSentences = (sentences: List<Sentence>, ignoreLastReturn = false) => sentences.reduce<IDoc>((formatted, sentence, i, sentences) => {
-  const shouldShortenReturn = i === sentences.length - 1 && sentence.is(Return) && sentence.value && ignoreLastReturn
+const formatSentences = (sentences: List<Sentence>, simplifyLastReturn = false) => sentences.reduce<IDoc>((formatted, sentence, i, sentences) => {
+  const shouldShortenReturn = i === sentences.length - 1 && sentence.is(Return) && sentence.value && simplifyLastReturn
   const previousSentence = sentences[i-1]
   return [formatted, formatSentenceInBody( !shouldShortenReturn ? sentence : sentence.value,  previousSentence)]
 }, [])
@@ -280,4 +288,4 @@ const formatCollection = (values: Expression[], enclosers: [IDoc, IDoc]) => {
   return enclosedList(enclosers, values.map(format))
 }
 
-const formatModuleBody = (members: List<Field | Method>): IDoc => body(intersperse(lineBreaks, members.filter(member => !member.isSynthetic).map(format)))
+const formatModuleBody = (members: List<Field | Method | Test>): IDoc => body(intersperse(lineBreaks, members.filter(member => !member.isSynthetic).map(format)))

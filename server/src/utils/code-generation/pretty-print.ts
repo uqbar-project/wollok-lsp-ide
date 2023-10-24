@@ -1,4 +1,4 @@
-import { IDoc, braces, enclose, indent as nativeIndent, lineBreak, intersperse, softLine, choice } from 'prettier-printer'
+import { IDoc, braces, enclose, indent as nativeIndent, lineBreak, intersperse, softLine, choice, dquotes } from 'prettier-printer'
 
 export const indent = nativeIndent('\t')
 
@@ -15,3 +15,5 @@ export const enclosedList = (enclosers: [IDoc, IDoc], content: IDoc[], separator
     enclose(enclosers, [lineBreak, indent(listed(content, separator)), lineBreak])
   )
 }
+
+export const stringify = enclose(dquotes)
