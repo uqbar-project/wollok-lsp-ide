@@ -140,7 +140,7 @@
     "test": "npm run test:e2e && npm run test:unit",
     "test:e2e": "npm run lint && npm run compile && sh ./scripts/e2e.sh",
     "test:unit": "cd server && npm run test && cd ..",
-    "test-with-coverage:unit": "cd server && npm run test && cd ..",
+    "test-with-coverage:unit": "cd server && npm run test-with-coverage && cd ..",
     "prepare": "husky install",
     "package": "vsce package",
     "lint-staged": "lint-staged"

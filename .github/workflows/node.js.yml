@@ -40,3 +40,4 @@ jobs:
       with:
         files: ./server/coverage/coverage-final.json
         verbose: true
+        flags: lsp-ide-server
