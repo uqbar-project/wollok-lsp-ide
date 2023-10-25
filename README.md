@@ -6,14 +6,16 @@
 
 Starting from [LSP sample code](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide) for Visual Studio Code, we developed a couple of tools for Wollok using Language Server Protocol (for Visual Studio Code, IntelliJ, Eclipse, Atom, etc.)
 
+## Pre-requisites
+
+- You need to install [wollok-ts command line interface](https://github.com/uqbar-project/wollok-ts-cli) tool in order to run unit tests, REPL session & dynamic diagram. Go to [latest release](https://github.com/uqbar-project/wollok-ts-cli/releases/latest), download the executable based on your operating system and add it to the PATH (here are instructions to do so in [Mac](https://apple.stackexchange.com/questions/41542/adding-a-new-executable-to-the-path-environment-variable), [Windows](https://medium.com/@kevinmarkvi/how-to-add-executables-to-your-path-in-windows-5ffa4ce61a53) and [Linux](https://unix.stackexchange.com/questions/183295/adding-programs-to-path))
+- Recommended additional extensions are [JEST](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest) and [Wollok Highlight](https://marketplace.visualstudio.com/items?itemName=uqbar.wollok-highlight)
+
 ## Welcome to Wollok!
 
 Here you can see how to develop a Wollok example using autocompletion tools. Once you have defined your objects and classes, you can test it in the REPL using a dynamic diagram:
 
 <img src="./images/demo.gif" title="first example" alt="first example" height="80%" width="80%"/>
-
-
-> **IMPORTANT**: you must install [wollok-ts-cli](https://github.com/uqbar-project/wollok-ts-cli) tool in order to run unit tests, REPL session & dynamic diagram
 
 ## Features
 
