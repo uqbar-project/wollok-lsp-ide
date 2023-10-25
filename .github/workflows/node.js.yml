@@ -33,4 +33,10 @@ jobs:
       with:
         run: npm run test:e2e
     - name: Unit Tests
-      run: npm run test:unit
+      run: npm run test-with-coverage:unit
+    - name: Update coverage badge
+      uses: codecov/codecov-action@v3
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        files: ./server/coverage/coverage-final.json
+        verbose: true

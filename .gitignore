@@ -7,3 +7,5 @@ client/server
 .yalc
 yalc.lock
 .DS_Store
+coverage
+.nyc_output

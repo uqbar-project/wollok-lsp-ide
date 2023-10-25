@@ -16,6 +16,10 @@
     "vscode-languageserver-textdocument": "^1.0.11"
   },
   "scripts": {
-    "test": "ts-mocha -p tsconfig.json --config ./.mocharc.js"
+    "test": "ts-mocha -p tsconfig.json --config ./.mocharc.js",
+    "test-with-coverage": "nyc --reporter=json --lines 70 ts-mocha"
+  },
+  "devDependencies": {
+    "nyc": "^15.1.0"
   }
 }
