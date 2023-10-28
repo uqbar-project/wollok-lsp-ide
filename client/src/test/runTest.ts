@@ -15,16 +15,20 @@ async function main() {
     // Passed to --extensionTestsPath
     const extensionTestsPath = path.resolve(__dirname, './index')
 
+    const coverage = !!process.env.COVERAGE
+    console.info(`Running e2e tests ${coverage ? 'with coverage' : ''}...`)
+
     // Download VS Code, unzip it and run the integration test
     await runTests({
       extensionDevelopmentPath,
       extensionTestsPath,
       launchArgs: [
         path.resolve(extensionDevelopmentPath, './client/testFixture'),
+        coverage ? 'coverage' : 'normal',
       ],
     })
   } catch (err) {
-    console.error('Failed to run tests')
+    console.error('Failed to run tests', err)
     process.exit(1)
   }
 }
