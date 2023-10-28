@@ -24,7 +24,6 @@ async function main() {
       extensionTestsPath,
       launchArgs: [
         path.resolve(extensionDevelopmentPath, './client/testFixture'),
-        coverage ? 'coverage' : 'normal',
       ],
     })
   } catch (err) {

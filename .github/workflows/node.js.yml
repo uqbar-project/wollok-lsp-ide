@@ -31,13 +31,20 @@ jobs:
       if: matrix.os != 'ubuntu-latest' # we need to fix ubuntu-latest first
       uses: smithki/xvfb-action@v1.1.2
       with:
-        run: npm run test:e2e
+        run: npm run test-with-coverage:e2e
     - name: Unit Tests
       run: npm run test-with-coverage:unit
-    - name: Update coverage badge
+    - name: Update server coverage badge
       uses: codecov/codecov-action@v3
       if: matrix.os == 'ubuntu-latest'
       with:
         files: ./server/coverage/coverage-final.json
         verbose: true
         flags: lsp-ide-server
+    - name: Update client coverage badge
+      uses: codecov/codecov-action@v3
+      if: matrix.os == 'windows-latest'
+      with:
+        files: ./client/coverage/coverage-final.json
+        verbose: true
+        flags: lsp-ide-client
