@@ -10,6 +10,8 @@ import 'ts-node/register'
 import 'source-map-support/register'
 
 
+// Thanks to https://frenya.net/blog/vscode-extension-code-coverage-nyc
+// based on https://github.com/frenya/vscode-recall/blob/master/src/test/suite/index.ts
 export async function run(): Promise<void> {
   let nyc: NYC | undefined
 
