@@ -6,7 +6,6 @@
 .gitignore
 **/tsconfig.json
 **/tsconfig.base.json
-**/node_modules/**
 **/.mocharc.js
 **/.prettierrc
 **/.eslintrc
