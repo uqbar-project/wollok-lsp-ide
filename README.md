@@ -2,7 +2,7 @@
 
 # Wollok IDE
 
-[![Node.js CI](https://github.com/uqbar-project/wollok-lsp-ide/actions/workflows/node.js.yml/badge.svg)](https://github.com/uqbar-project/wollok-lsp-ide/actions/workflows/node.js.yml) [![server coverage](https://codecov.io/gh/uqbar-project/wollok-lsp-ide/graph/badge.svg?token=OT11UZ38OM)](https://codecov.io/gh/uqbar-project/wollok-lsp-ide)
+[![Node.js CI](https://github.com/uqbar-project/wollok-lsp-ide/actions/workflows/node.js.yml/badge.svg)](https://github.com/uqbar-project/wollok-lsp-ide/actions/workflows/node.js.yml) [![server coverage](https://codecov.io/gh/uqbar-project/wollok-lsp-ide/branch/master/graph/badge.svg?token=OT11UZ38OM&flag=lsp-ide-server)](https://codecov.io/gh/uqbar-project/wollok-lsp-ide) [![client coverage](https://codecov.io/gh/uqbar-project/wollok-lsp-ide/branch/master/graph/badge.svg?token=OT11UZ38OM&flag=lsp-ide-client)](https://codecov.io/gh/uqbar-project/wollok-lsp-ide)
 
 Starting from [LSP sample code](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide) for Visual Studio Code, we developed a couple of tools for Wollok using Language Server Protocol (for Visual Studio Code, IntelliJ, Eclipse, Atom, etc.)
 
