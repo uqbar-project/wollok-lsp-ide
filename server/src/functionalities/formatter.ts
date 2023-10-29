@@ -1,8 +1,7 @@
 import { DocumentFormattingParams, DocumentRangeFormattingParams, Position, Range, TextEdit } from 'vscode-languageserver'
-import { Environment, Package } from 'wollok-ts'
+import { Environment, Package, print } from 'wollok-ts'
 import { packageFromURI } from '../utils/text-documents'
 import { wollokURI } from '../utils/vm/wollok'
-import { print } from '../utils/code-generation/format'
 
 export const formatRange = (params: DocumentRangeFormattingParams, environment: Environment): TextEdit[] => {
   const file = getPackage(params, environment)

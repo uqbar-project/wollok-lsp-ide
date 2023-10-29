@@ -11,7 +11,7 @@ suite('Should format', () => {
   //TODO: Restart server status after each test
 
   test('format document', async () => {
-    await testFormat(formatterURI, `object pepita {\n var energia = 100\n}`)
+    await testFormat(formatterURI, `object pepita {\n\tvar energia = 100\n}`)
   })
 })
 
