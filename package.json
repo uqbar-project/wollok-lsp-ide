@@ -16,7 +16,7 @@
   "keywords": [
     "ide wollok oop educative objects learning"
   ],
-  "icon": "images/wollokLinterLogo.png",
+  "icon": "images/wollokIdeLogo.png",
   "engines": {
     "vscode": "^1.80.0"
   },
