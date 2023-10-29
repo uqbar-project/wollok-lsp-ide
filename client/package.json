@@ -3,7 +3,6 @@
   "description": "VSCode part of a language server",
   "author": "Microsoft Corporation",
   "license": "LGPL-3.0",
-  "version": "0.1.2",
   "publisher": "vscode",
   "repository": {
     "type": "git",
