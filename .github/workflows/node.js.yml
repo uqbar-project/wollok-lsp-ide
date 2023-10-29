@@ -48,3 +48,18 @@ jobs:
         files: ./client/coverage/coverage-final.json
         verbose: true
         flags: lsp-ide-client
+    - name: Generate VSIX file
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        npm i -g vsce
+        vsce package
+    - name: Add VSIX to the latest release
+      if: matrix.os == 'ubuntu-latest'
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "draft"
+        prerelease: true
+        title: "Draft"
+        files: |
+          ./*.vsix
