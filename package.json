@@ -23,6 +23,9 @@
   "activationEvents": [
     "onLanguage:wollok"
   ],
+  "extensionDependencies": [
+    "uqbar.wollok-highlight"
+  ],
   "capabilities": {
     "referencesProvider": true,
     "definitionProvider": true,
