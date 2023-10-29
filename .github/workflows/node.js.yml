@@ -49,12 +49,12 @@ jobs:
         verbose: true
         flags: lsp-ide-client
     - name: Generate VSIX file
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-latest' && github.ref == 'refs/heads/master'
       run: |
         npm i -g vsce
         vsce package
     - name: Add VSIX to the latest release
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-latest' && github.ref == 'refs/heads/master'
       uses: "marvinpinto/action-automatic-releases@latest"
       with:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
