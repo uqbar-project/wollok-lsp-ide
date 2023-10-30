@@ -14,9 +14,14 @@ if [ $? -ne 0 ]; then
   exit 2
 fi
 
+if ! grep -q -F $TAG "package.json"; then
+  echo "publish: version $TAG does not match package.json"
+  exit 3
+fi
+
 if ! grep -q -F $TAG "CHANGELOG.md"; then
   echo "publish: version $TAG missing in CHANGELOG.md"
-  exit 3
+  exit 4
 fi
 
 echo "Everything ok. Publishing $TAG in Marketplace..."
