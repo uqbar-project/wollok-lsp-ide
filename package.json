@@ -5,7 +5,7 @@
   "author": "Uqbar Foundation",
   "license": "LGPL-3.0",
   "publisher": "uqbar",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/uqbar-project/wollok-lsp-ide"
@@ -16,9 +16,9 @@
   "keywords": [
     "ide wollok oop educative objects learning"
   ],
-  "icon": "images/wollokLinterLogo.png",
+  "icon": "images/wollokIdeLogo.png",
   "engines": {
-    "vscode": "^1.83.0"
+    "vscode": "^1.80.0"
   },
   "activationEvents": [
     "onLanguage:wollok"
@@ -139,7 +139,9 @@
     "lint:fix": "cd client && eslint . --fix && cd ../server && eslint . --fix && cd ..",
     "test": "npm run test:e2e && npm run test:unit",
     "test:e2e": "npm run lint && npm run compile && sh ./scripts/e2e.sh",
+    "test-with-coverage:e2e": "npm run lint && npm run compile && env COVERAGE=true sh ./scripts/e2e.sh",
     "test:unit": "cd server && npm run test && cd ..",
+    "test-with-coverage:unit": "cd server && npm run test-with-coverage && cd ..",
     "prepare": "husky install",
     "package": "vsce package",
     "lint-staged": "lint-staged"
@@ -159,6 +161,7 @@
     "husky": "^8.0.3",
     "lint-staged": "^13.1.2",
     "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
     "sinon": "^15.0.3",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.1",

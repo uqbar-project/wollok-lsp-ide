@@ -10,15 +10,14 @@ on:
   pull_request:
 
 
-
 jobs:
   test:
-
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
-      matrix:
-        node-version: [lts/gallium]
+        matrix:
+            os: [windows-latest, ubuntu-latest, macos-latest]
+            node-version: [lts/hydrogen]
 
     steps:
     - uses: actions/checkout@v3
@@ -29,8 +28,38 @@ jobs:
     - run: npm install
     - run: npm run compile
     - name: Run headless test
-      uses: coactions/setup-xvfb@v1
+      if: matrix.os != 'ubuntu-latest' # we need to fix ubuntu-latest first
+      uses: smithki/xvfb-action@v1.1.2
       with:
-        run: npm run test:e2e
+        run: npm run test-with-coverage:e2e
     - name: Unit Tests
-      run: npm run test:unit
+      run: npm run test-with-coverage:unit
+    - name: Update server coverage badge
+      uses: codecov/codecov-action@v3
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        files: ./server/coverage/coverage-final.json
+        verbose: true
+        flags: lsp-ide-server
+    - name: Update client coverage badge
+      uses: codecov/codecov-action@v3
+      if: matrix.os == 'windows-latest'
+      with:
+        files: ./client/coverage/coverage-final.json
+        verbose: true
+        flags: lsp-ide-client
+    - name: Generate VSIX file
+      if: matrix.os == 'ubuntu-latest' && github.ref == 'refs/heads/master'
+      run: |
+        npm i -g vsce
+        vsce package
+    - name: Add VSIX to the latest release
+      if: matrix.os == 'ubuntu-latest' && github.ref == 'refs/heads/master'
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "draft"
+        prerelease: true
+        title: "Draft"
+        files: |
+          ./*.vsix
