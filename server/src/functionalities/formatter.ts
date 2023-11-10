@@ -15,7 +15,11 @@ export const formatDocument = (params: DocumentFormattingParams, environment: En
   return [
     TextEdit.replace(
       Range.create(Position.create(0, 0), Position.create(file.children[file.children.length -1].sourceMap!.end.line+1, 0)),
-      print(file)
+      print(file, {
+        maxWidth: 80,
+        indentation: { useSpaces: true, size: 2 },
+        abbreviateAssignments: true,
+      })
     ),
   ]
 }
