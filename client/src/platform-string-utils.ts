@@ -2,13 +2,13 @@ import path = require('path')
 import { replaceAll } from './utils'
 import { env } from 'vscode'
 
-export type Shell = 'bash' | 'cmd' | 'powershell' | 'zsh'
+export type Shell = 'bash' | 'cmd' | 'pwsh' | 'zsh'
 
 export function asShellString(string: string): string {
   if (activeShell() === 'cmd') {
-    return replaceAll(string, '"', '\\"')
+    return `"${replaceAll(string, '"', '')}"`
   }
-  return string
+  return `'${string}'`
 }
 
 export function asShellPath(abstractPath: string[]): string {
@@ -58,6 +58,6 @@ export function transformSeparators(
  * @default 'bash'
  */
 function activeShell(): Shell {
-  const shells = ['cmd', 'powershell', 'bash', 'zsh'] as const
+  const shells = ['cmd', 'pwsh', 'bash', 'zsh'] as const
   return shells.find((shell) => env.shell.includes(shell)) || 'bash'
 }

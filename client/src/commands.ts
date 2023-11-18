@@ -41,7 +41,7 @@ export const runProgram = (fqn: string): Task =>
 export const runTests = (filter: string): Task =>
   wollokCLITask('run tests', 'Wollok run tests', [
     'test',
-    `'${asShellString(filter)}'`,
+    `${asShellString(filter)}`,
     '--skipValidations',
   ])
 
@@ -101,6 +101,7 @@ const wollokCLITask = (task: string, name: string, cliCommands: string[]) => {
     vscode.commands.executeCommand('workbench.action.openSettings', wollokLSPExtensionCode)
     throw new Error('Missing configuration WollokLSP/cli-path. Set the path where wollok-ts-cli is located in order to run Wollok tasks')
   }
+
   const wollokCli = unknownToShell(wollokCliPath)
   const folder = workspace.workspaceFolders[0]
   const shellCommand = [
