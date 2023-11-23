@@ -1,6 +1,7 @@
 import { DocumentFormattingParams, DocumentRangeFormattingParams, Position, Range, TextEdit } from 'vscode-languageserver'
 import { Environment, Package, print } from 'wollok-ts'
 import { packageFromURI } from '../utils/text-documents'
+import { ClientConfigurations } from '../utils/vm/environment-provider'
 import { wollokURI } from '../utils/vm/wollok'
 
 export const formatRange = (params: DocumentRangeFormattingParams, environment: Environment): TextEdit[] => {
@@ -10,15 +11,15 @@ export const formatRange = (params: DocumentRangeFormattingParams, environment: 
   return [TextEdit.insert(Position.create(0, 0), `// ${file.fileName}\n`)]
 }
 
-export const formatDocument = (params: DocumentFormattingParams, environment: Environment): TextEdit[] => {
+export const formatDocument = (params: DocumentFormattingParams, environment: Environment, { formatter: formatterConfig }: ClientConfigurations): TextEdit[] => {
   const file = getPackage(params, environment)
   return [
     TextEdit.replace(
       Range.create(Position.create(0, 0), Position.create(file.children[file.children.length -1].sourceMap!.end.line+1, 0)),
       print(file, {
         maxWidth: 80,
-        indentation: { useSpaces: true, size: 2 },
-        abbreviateAssignments: true,
+        useSpaces: params.options.insertSpaces,
+        abbreviateAssignments: formatterConfig.abbreviateAssignments,
       })
     ),
   ]

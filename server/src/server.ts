@@ -19,16 +19,15 @@ import {
 } from './linter'
 import { initializeSettings, WollokLSPSettings } from './settings'
 import { templates } from './functionalities/autocomplete/templates'
-import { EnvironmentProvider } from './utils/vm/environment-provider'
+import { ClientConfigurations, EnvironmentProvider } from './utils/vm/environment-provider'
 import { formatDocument, formatRange } from './functionalities/formatter'
+
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all)
 
-const environmentProvider: EnvironmentProvider = new EnvironmentProvider(
-  connection,
-)
+const environmentProvider: EnvironmentProvider = new EnvironmentProvider(connection)
 
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
@@ -38,10 +37,13 @@ let hasWorkspaceFolderCapability = false
 connection.onInitialize((params: InitializeParams) => {
   const capabilities = params.capabilities
 
+  // connection.workspace.getConfiguration('WollokLSP').then(settings => {
+  //   environmentProvider.updateConfigs(settings as ClientConfigurations)
+  // })
+
   hasWorkspaceFolderCapability = !!(
     capabilities.workspace && !!capabilities.workspace.workspaceFolders
   )
-
   const result: InitializeResult = {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
@@ -83,6 +85,10 @@ connection.onInitialized(() => {
 const documentSettings: Map<string, Thenable<WollokLSPSettings>> = new Map()
 
 connection.onDidChangeConfiguration(() => {
+  connection.workspace.getConfiguration('wollokLSP').then(settings => {
+    environmentProvider.setConfigs(settings as ClientConfigurations)
+  })
+
   // Revalidate all open text documents
   documents.all().forEach(validateTextDocument(connection, documents.all()))
 })

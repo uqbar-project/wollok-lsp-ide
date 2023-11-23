@@ -1,8 +1,19 @@
-import { Environment, buildEnvironment } from 'wollok-ts'
-import { wollokURI } from './wollok'
+import { Connection, LSPAny, ServerRequestHandler } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Connection, ServerRequestHandler } from 'vscode-languageserver'
+import { Environment, buildEnvironment } from 'wollok-ts'
 import { ProgressReporter } from '../progress-reporter'
+import { wollokURI } from './wollok'
+
+export type ClientConfigurations = {
+  'formatter': {abbreviateAssignments: boolean}
+  'cli-path': string
+  'language': "Spanish"|"English"|"Based on Local Environment",
+  'maxNumberOfProblems': number
+  'trace': {server: "off" |  "messages" | "verbose"}
+  'openDynamicDiagramOnRepl': boolean
+  'openInternalDynamicDiagram': boolean
+  'dynamicDiagramDarkMode': boolean
+}
 
 type EnvironmentSubscription = (environment: Environment) => any
 export class EnvironmentProvider {
@@ -10,6 +21,7 @@ export class EnvironmentProvider {
   private subscriptions: EnvironmentSubscription[] = []
   private buildProgressReporter: ProgressReporter
   private requestProgressReporter: ProgressReporter
+  private configs!: ClientConfigurations
 
   constructor(connection: Connection) {
     this.buildProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-build', title: 'Wollok Building...' })
@@ -17,18 +29,18 @@ export class EnvironmentProvider {
   }
 
 
-  requestWithEnvironment<P, R, PR, E>(cb: (params: P, env: Environment) => R): ServerRequestHandler<P, R, PR, E> {
+  requestWithEnvironment<P, R, PR, E>(cb: (params: P, env: Environment, config: LSPAny) => R): ServerRequestHandler<P, R, PR, E> {
     return (params) => new Promise<R>((resolve) => {
       this.requestProgressReporter.begin()
       this.withLatestEnvironment((env) => {
         this.requestProgressReporter.end()
-        resolve(cb(params, env))
+        resolve(cb(params, env, this.configs))
       })
     })
   }
 
   withLatestEnvironment(cb: EnvironmentSubscription): void {
-    if(this.environment){
+    if(this.environment) {
       cb(this.environment)
     } else {
       this.subscriptions.push(cb)
@@ -49,6 +61,10 @@ export class EnvironmentProvider {
 
   resetEnvironment(): void {
     this.changeEnvironment(() => buildEnvironment([]))
+  }
+
+  setConfigs(newConfigs: ClientConfigurations): void {
+    this.configs = newConfigs
   }
 
   private changeEnvironment(build: () => Environment): void {
