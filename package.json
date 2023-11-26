@@ -64,10 +64,10 @@
           "description": "Abbreviate assignments",
           "default": true
         },
-        "wollokLSP.formatter.maxWith": {
+        "wollokLSP.formatter.maxWidth": {
           "scope": "resource",
           "type": "number",
-          "description": "Maximum with allowed in a line",
+          "description": "Maximum width allowed in a line",
           "default": 80
         },
         "wollokLSP.cli-path": {

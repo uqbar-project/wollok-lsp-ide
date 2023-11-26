@@ -28,7 +28,7 @@ import { ProgressReporter } from './utils/progress-reporter'
 import { EnvironmentProvider } from './utils/vm/environment'
 
 export type ClientConfigurations = {
-  formatter: { abbreviateAssignments: boolean, maxWith: number }
+  formatter: { abbreviateAssignments: boolean, maxWidth: number }
   'cli-path': string
   language: "Spanish" | "English" | "Based on Local Environment",
   maxNumberOfProblems: number

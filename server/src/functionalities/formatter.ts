@@ -17,7 +17,7 @@ export const formatDocument = (environment: Environment, { formatter: formatterC
     TextEdit.replace(
       Range.create(Position.create(0, 0), Position.create(file.children[file.children.length -1].sourceMap!.end.line+1, 0)),
       print(file, {
-        maxWidth: formatterConfig.maxWith,
+        maxWidth: formatterConfig.maxWidth,
         useSpaces: params.options.insertSpaces,
         abbreviateAssignments: formatterConfig.abbreviateAssignments,
       })
