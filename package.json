@@ -58,6 +58,18 @@
       "type": "object",
       "title": "Wollok LSP IDE",
       "properties": {
+        "wollokLSP.formatter.abbreviateAssignments": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Abbreviate assignments",
+          "default": true
+        },
+        "wollokLSP.formatter.maxWith": {
+          "scope": "resource",
+          "type": "number",
+          "description": "Maximum with allowed in a line",
+          "default": 80
+        },
         "wollokLSP.cli-path": {
           "scope": "resource",
           "type": "string",
@@ -122,7 +134,7 @@
       {
         "command": "wollok.start.repl",
         "title": "Start a new REPL session",
-                "category": "Wollok"
+        "category": "Wollok"
       },
       {
         "command": "wollok.run.allTests",
@@ -147,7 +159,7 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "wollok-ts": "4.0.4"
+    "wollok-ts": "../wollok-ts"
   },
   "devDependencies": {
     "@types/expect": "^24.3.0",

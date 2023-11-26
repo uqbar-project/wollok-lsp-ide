@@ -1,14 +1,18 @@
+import { BehaviorSubject, combineLatest, filter, Subject } from 'rxjs'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import {
-  CompletionItem,
   createConnection,
   DidChangeConfigurationNotification,
   InitializeParams,
   InitializeResult,
   ProposedFeatures,
+  ServerRequestHandler,
   TextDocuments,
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node'
+import { buildEnvironment, Environment } from 'wollok-ts'
+import { templates } from './functionalities/autocomplete/templates'
+import { formatDocument, formatRange } from './functionalities/formatter'
 import {
   codeLenses,
   completions,
@@ -18,28 +22,46 @@ import {
   workspaceSymbols,
 } from './linter'
 import { initializeSettings, WollokLSPSettings } from './settings'
-import { templates } from './functionalities/autocomplete/templates'
-import { ClientConfigurations, EnvironmentProvider } from './utils/vm/environment-provider'
-import { formatDocument, formatRange } from './functionalities/formatter'
+import { EnvironmentProvider } from './utils/vm/environment'
+import { ProgressReporter } from './utils/progress-reporter'
+
+export type ClientConfigurations = {
+  formatter: { abbreviateAssignments: boolean, maxWith: number }
+  'cli-path': string
+  language: "Spanish" | "English" | "Based on Local Environment",
+  maxNumberOfProblems: number
+  trace: { server: "off" |  "messages" | "verbose" }
+  openDynamicDiagramOnRepl: boolean
+  openInternalDynamicDiagram: boolean
+  dynamicDiagramDarkMode: boolean
+}
 
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all)
 
-const environmentProvider: EnvironmentProvider = new EnvironmentProvider(connection)
-
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
+
+const environmentProvider = new EnvironmentProvider(connection)
+const config = new Subject<ClientConfigurations>()
+
+const requestProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-request', title: 'Processing Request...' })
+
+function handler<Params, Return, PR, E>(requestHandler: (params: Params) =>  Return): ServerRequestHandler<Params, Return, PR, E>{
+  return (params: Params) => {
+    requestProgressReporter.begin()
+    const result = requestHandler(params)
+    requestProgressReporter.end()
+    return result
+  }
+}
 
 let hasWorkspaceFolderCapability = false
 
 connection.onInitialize((params: InitializeParams) => {
   const capabilities = params.capabilities
-
-  // connection.workspace.getConfiguration('WollokLSP').then(settings => {
-  //   environmentProvider.updateConfigs(settings as ClientConfigurations)
-  // })
 
   hasWorkspaceFolderCapability = !!(
     capabilities.workspace && !!capabilities.workspace.workspaceFolders
@@ -76,9 +98,8 @@ connection.onInitialized(() => {
       connection.console.log('Workspace folder change event received.')
     })
   }
-
   initializeSettings(connection)
-  environmentProvider.resetEnvironment()
+  environmentProvider.$environment.next(buildEnvironment([]))
 })
 
 // Cache the settings of all open documents
@@ -86,11 +107,8 @@ const documentSettings: Map<string, Thenable<WollokLSPSettings>> = new Map()
 
 connection.onDidChangeConfiguration(() => {
   connection.workspace.getConfiguration('wollokLSP').then(settings => {
-    environmentProvider.setConfigs(settings as ClientConfigurations)
+    config.next(settings as ClientConfigurations)
   })
-
-  // Revalidate all open text documents
-  documents.all().forEach(validateTextDocument(connection, documents.all()))
 })
 
 // Only keep settings for open documents
@@ -100,62 +118,47 @@ documents.onDidClose((e) => {
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent((change) => {
-  environmentProvider.rebuildTextDocument(change.document)
-  environmentProvider.withLatestEnvironment(
-    validateTextDocument(connection, documents.all())(change.document),
-  )
-})
+documents.onDidChangeContent(change =>
+  environmentProvider.$environment.next(environmentProvider.updateEnvironmentWith(change.document))
+)
 
 documents.onDidOpen((change) => {
-  environmentProvider.rebuildTextDocument(change.document)
-  environmentProvider.withLatestEnvironment(
-    validateTextDocument(connection, documents.all())(change.document),
-  )
+  const newEnvironment = environmentProvider.updateEnvironmentWith(change.document)
+  environmentProvider.$environment.next(newEnvironment)
+  validateTextDocument(connection, documents.all())(change.document)(newEnvironment)
 })
 
 connection.onRequest((change) => {
   if (change === 'STRONG_FILES_CHANGED') {
-    environmentProvider.resetEnvironment()
+    environmentProvider.$environment.next(buildEnvironment([]))
   }
 })
-
-// This handler provides the initial list of the completion items.
-connection.onCompletion(
-  environmentProvider.requestWithEnvironment((params, env) => {
-    const contextCompletions = completions(params, env)
-    return [...contextCompletions, ...templates]
-  }),
-)
 
 connection.onReferences((_params) => {
   return []
 })
 
-connection.onDefinition(environmentProvider.requestWithEnvironment(definition))
-
-// This handler resolves additional information for the item selected in the completion list.
-connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
-  // if (item.data === 1) {
-  //   item.detail = 'TypeScript details'
-  //   item.documentation = 'TypeScript documentation'
-  // }
-  return item
+config.subscribe(() => {
+    // Revalidate all open text documents
+    documents.all().forEach(validateTextDocument(connection, documents.all()))
 })
 
-connection.onDocumentSymbol(
-  environmentProvider.requestWithEnvironment(documentSymbols),
-)
+combineLatest([environmentProvider.$environment.pipe(filter(environment => environment!=null)), config]).subscribe(([newEnvironment, newSettings]) => {
+  connection.onDocumentSymbol(handler(documentSymbols(newEnvironment!)))
+  connection.onWorkspaceSymbol(handler(workspaceSymbols(newEnvironment!)))
 
-connection.onWorkspaceSymbol(
-  environmentProvider.requestWithEnvironment(workspaceSymbols),
-)
+  connection.onCodeLens(handler(codeLenses(newEnvironment!)))
 
-connection.onCodeLens(environmentProvider.requestWithEnvironment(codeLenses))
+  connection.onDocumentFormatting(handler(formatDocument(newSettings, newEnvironment!)))
+  connection.onDocumentRangeFormatting(handler(formatRange(newEnvironment!)))
 
-connection.onDocumentFormatting(environmentProvider.requestWithEnvironment(formatDocument))
+  connection.onCompletion(handler((params) => {
+    const contextCompletions = completions(params, newEnvironment!)
+    return [...contextCompletions, ...templates]
+  }))
 
-connection.onDocumentRangeFormatting(environmentProvider.requestWithEnvironment(formatRange))
+  connection.onDefinition(handler(definition(newEnvironment!)))
+})
 
 /*
 connection.onDidOpenTextDocument((params) => {

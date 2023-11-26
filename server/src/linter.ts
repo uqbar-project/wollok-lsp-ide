@@ -164,18 +164,16 @@ function cursorNode(
   }).reverse()[0]
 }
 
-export const definition = (
-  textDocumentPosition: TextDocumentPositionParams,
-  environment: Environment,
+export const definition = (environment: Environment) => (
+  textDocumentPosition: TextDocumentPositionParams
 ): Location[] => {
   const cursorNodes = getNodesByPosition(environment, textDocumentPosition)
   const definitions = getNodeDefinition(environment)(cursorNodes.reverse()[0])
   return definitions.map(nodeToLocation)
 }
 
-export const codeLenses = (
+export const codeLenses = (environment: Environment) => (
   params: CodeLensParams,
-  environment: Environment,
 ): CodeLens[] | null => {
   const fileExtension = getWollokFileExtension(params.textDocument.uri)
   const file = findPackage(params.textDocument.uri, environment)
@@ -191,10 +189,7 @@ export const codeLenses = (
   }
 }
 
-export const documentSymbols = (
-  params: DocumentSymbolParams,
-  environment: Environment,
-): DocumentSymbol[] => {
+export const documentSymbols = (environment: Environment) => (params: DocumentSymbolParams): DocumentSymbol[] => {
   // ToDo this is a temporal fix for https://github.com/uqbar-project/wollok-lsp-ide/issues/61
   if (!workspacePackage(environment)) {
     return []
@@ -206,9 +201,8 @@ export const documentSymbols = (
 }
 
 export const workspaceSymbols = (
-  params: WorkspaceSymbolParams,
-  environment: Environment,
-): WorkspaceSymbol[] => workspaceSymbolsFor(environment, params.query)
+  environment: Environment
+) => (params: WorkspaceSymbolParams): WorkspaceSymbol[] => workspaceSymbolsFor(environment, params.query)
 
 const findPackage = (
   uri: string,
