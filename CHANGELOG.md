@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.1.2
+
+- Upgrade Node to lts/hydrogen 18 ⬆️
+- Fix Marketplace extension error 🩹
+- Add coverage badges 🎯
+- README enhancements for user & developers ✨
+
+## v0.1.1
+
+- Minor change in extension published 🔴
+
+## v0.1.0
+
+- Upgrade Wollok-TS 4.0.5 ⬆️
+- Published in Marketplace 🌈
+- Dynamic diagram enhancements 🔵
+- Autocomplete enhancements ✍🏼
+- Fix REPL command sessions 🐛
+
 ## v0.0.6
 
 ### Using wollok-ts v4.0.3

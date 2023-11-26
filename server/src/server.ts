@@ -1,7 +1,6 @@
 import { combineLatest, filter, firstValueFrom, Subject } from 'rxjs'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import {
-  CompletionParams,
   createConnection,
   DidChangeConfigurationNotification,
   Disposable,
@@ -9,11 +8,11 @@ import {
   InitializeResult,
   ProposedFeatures,
   ServerRequestHandler,
+  TextDocumentChangeEvent,
   TextDocuments,
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node'
 import { Environment } from 'wollok-ts'
-import { templates } from './functionalities/autocomplete/templates'
 import { formatDocument, formatRange } from './functionalities/formatter'
 import {
   codeLenses,
@@ -128,22 +127,25 @@ connection.onDidChangeConfiguration(() => {
 })
 
 // Only keep settings for open documents
-documents.onDidClose((e) => {
-  documentSettings.delete(e.document.uri)
+documents.onDidClose((change) => {
+  documentSettings.delete(change.document.uri)
 })
 
+const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
+  try {
+    environmentProvider.updateEnvironmentWith(change.document)
+    validateTextDocument(connection, documents.all())(change.document)(
+      environmentProvider.$environment.getValue()!
+    )
+  } catch (e) {
+    connection.console.error(`✘ Failed to rebuild document: ${e}`)
+  }
+}
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent(change =>
-  environmentProvider.updateEnvironmentWith(change.document)
-)
+documents.onDidChangeContent(rebuildTextDocument)
 
-documents.onDidOpen((change) => {
-  environmentProvider.updateEnvironmentWith(change.document)
-  validateTextDocument(connection, documents.all())(change.document)(
-    environmentProvider.$environment.getValue()!
-  )
-})
+documents.onDidOpen(rebuildTextDocument)
 
 connection.onRequest((change) => {
   if (change === 'STRONG_FILES_CHANGED') {
@@ -170,10 +172,7 @@ const handlers: readonly [
   [connection.onDefinition, definition],
   [connection.onDocumentFormatting, formatDocument],
   [connection.onDocumentRangeFormatting, formatRange],
-  [connection.onCompletion, (newEnvironment: Environment) => (params: CompletionParams) => {
-    const contextCompletions = completions(params, newEnvironment!)
-    return [...contextCompletions, ...templates]
-  }],
+  [connection.onCompletion, completions],
   [connection.onDefinition, definition],
 ]
 
@@ -186,26 +185,6 @@ requestContext.subscribe(([newEnvironment, newSettings]) => {
     handlerRegistration(syncHandler(requestHandler(newEnvironment!, newSettings)))
   }
 })
-
-/*
-connection.onDidOpenTextDocument((params) => {
-  // A text document got opened in VSCode.
-  // params.textDocument.uri uniquely identifies the document. For documents store on disk this is a file URI.
-  // params.textDocument.text the initial full content of the document.
-  connection.console.log(`${params.textDocument.uri} opened.`)
-})
-connection.onDidChangeTextDocument((params) => {
-  // The content of a text document did change in VSCode.
-  // params.textDocument.uri uniquely identifies the document.
-  // params.contentChanges describe the content changes to the document.
-  connection.console.log(`${params.textDocument.uri} changed: ${JSON.stringify(params.contentChanges)}`)
-})
-connection.onDidCloseTextDocument((params) => {
-  // A text document got closed in VSCode.
-  // params.textDocument.uri uniquely identifies the document.
-  connection.console.log(`${params.textDocument.uri} closed.`)
-})
-*/
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events

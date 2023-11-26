@@ -1,7 +1,6 @@
 {
   "name": "wollok-lsp-ide-server",
-  "description": "Wollok Linter - LSP implementation in node.",
-  "version": "0.0.1",
+  "description": "Wollok IDE - LSP implementation in node.",
   "author": "Uqbar Foundation",
   "license": "LGPL-3.0",
   "engines": {
@@ -12,12 +11,15 @@
     "url": "https://github.com/uqbar-project/wollok-lsp-ide"
   },
   "dependencies": {
-    "prettier-printer": "^1.1.4",
     "rxjs": "^7.8.1",
-    "vscode-languageserver": "^8.0.1",
-    "vscode-languageserver-textdocument": "^1.0.5"
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.11"
   },
   "scripts": {
-    "test": "ts-mocha -p tsconfig.json --config ./.mocharc.js"
+    "test": "ts-mocha -p tsconfig.json --config ./.mocharc.js",
+    "test-with-coverage": "nyc --reporter=json --lines 70 ts-mocha"
+  },
+  "devDependencies": {
+    "nyc": "^15.1.0"
   }
 }

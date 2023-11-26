@@ -1,0 +1,20 @@
+name: Contributors List
+on:
+  push:
+    branches:
+      - '*'
+      - '!master'
+
+jobs:
+  contributor_list:
+    name: Contributors List
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: docker://cjdenio/contributor_list:latest
+        with:
+          commit_message: 📝 Update contributors list
+          # Max number of contributors to display on the README
+          max_contributors: 20 # Default: 10
+          # Markdown heading level for the contributors section
+          header_level: 2 # Default: 2
