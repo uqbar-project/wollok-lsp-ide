@@ -172,9 +172,7 @@ export const definition = (environment: Environment) => (
   return definitions.map(nodeToLocation)
 }
 
-export const codeLenses = (environment: Environment) => (
-  params: CodeLensParams,
-): CodeLens[] | null => {
+export const codeLenses = (environment: Environment) => (params: CodeLensParams): CodeLens[] | null => {
   const fileExtension = getWollokFileExtension(params.textDocument.uri)
   const file = findPackage(params.textDocument.uri, environment)
   if (!file) return null

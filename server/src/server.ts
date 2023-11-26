@@ -1,8 +1,10 @@
-import { BehaviorSubject, combineLatest, filter, Subject } from 'rxjs'
+import { combineLatest, filter, firstValueFrom, Subject } from 'rxjs'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import {
+  CompletionParams,
   createConnection,
   DidChangeConfigurationNotification,
+  Disposable,
   InitializeParams,
   InitializeResult,
   ProposedFeatures,
@@ -10,7 +12,7 @@ import {
   TextDocuments,
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node'
-import { buildEnvironment, Environment } from 'wollok-ts'
+import { Environment } from 'wollok-ts'
 import { templates } from './functionalities/autocomplete/templates'
 import { formatDocument, formatRange } from './functionalities/formatter'
 import {
@@ -22,8 +24,8 @@ import {
   workspaceSymbols,
 } from './linter'
 import { initializeSettings, WollokLSPSettings } from './settings'
-import { EnvironmentProvider } from './utils/vm/environment'
 import { ProgressReporter } from './utils/progress-reporter'
+import { EnvironmentProvider } from './utils/vm/environment'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWith: number }
@@ -46,15 +48,29 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
 const environmentProvider = new EnvironmentProvider(connection)
 const config = new Subject<ClientConfigurations>()
+const requestContext = combineLatest([environmentProvider.$environment.pipe(filter(environment => environment != null)), config])
 
 const requestProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-request', title: 'Processing Request...' })
 
-function handler<Params, Return, PR, E>(requestHandler: (params: Params) =>  Return): ServerRequestHandler<Params, Return, PR, E>{
-  return (params: Params) => {
+function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return, PR, void>{
+  return (params, cancel, workDoneProgress, resultProgress) => {
     requestProgressReporter.begin()
-    const result = requestHandler(params)
+    const result = requestHandler(params, cancel, workDoneProgress, resultProgress)
     requestProgressReporter.end()
     return result
+  }
+}
+
+function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: Environment, settings: ClientConfigurations) => ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return, PR, void>{
+  return (params, cancel, workDoneProgress, resultProgress) => {
+    requestProgressReporter.begin()
+    return new Promise(resolve => {
+      firstValueFrom(requestContext).then(([newEnvironment, newSettings]) => {
+        const result = syncHandler(requestHandler(newEnvironment!, newSettings))(params, cancel, workDoneProgress, resultProgress)
+        requestProgressReporter.end()
+        resolve(result)
+      })
+    })
   }
 }
 
@@ -99,7 +115,7 @@ connection.onInitialized(() => {
     })
   }
   initializeSettings(connection)
-  environmentProvider.$environment.next(buildEnvironment([]))
+  environmentProvider.resetEnvironment()
 })
 
 // Cache the settings of all open documents
@@ -119,18 +135,19 @@ documents.onDidClose((e) => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change =>
-  environmentProvider.$environment.next(environmentProvider.updateEnvironmentWith(change.document))
+  environmentProvider.updateEnvironmentWith(change.document)
 )
 
 documents.onDidOpen((change) => {
-  const newEnvironment = environmentProvider.updateEnvironmentWith(change.document)
-  environmentProvider.$environment.next(newEnvironment)
-  validateTextDocument(connection, documents.all())(change.document)(newEnvironment)
+  environmentProvider.updateEnvironmentWith(change.document)
+  validateTextDocument(connection, documents.all())(change.document)(
+    environmentProvider.$environment.getValue()!
+  )
 })
 
 connection.onRequest((change) => {
   if (change === 'STRONG_FILES_CHANGED') {
-    environmentProvider.$environment.next(buildEnvironment([]))
+    environmentProvider.resetEnvironment()
   }
 })
 
@@ -143,21 +160,31 @@ config.subscribe(() => {
     documents.all().forEach(validateTextDocument(connection, documents.all()))
 })
 
-combineLatest([environmentProvider.$environment.pipe(filter(environment => environment!=null)), config]).subscribe(([newEnvironment, newSettings]) => {
-  connection.onDocumentSymbol(handler(documentSymbols(newEnvironment!)))
-  connection.onWorkspaceSymbol(handler(workspaceSymbols(newEnvironment!)))
-
-  connection.onCodeLens(handler(codeLenses(newEnvironment!)))
-
-  connection.onDocumentFormatting(handler(formatDocument(newSettings, newEnvironment!)))
-  connection.onDocumentRangeFormatting(handler(formatRange(newEnvironment!)))
-
-  connection.onCompletion(handler((params) => {
+const handlers: readonly [
+  (handler: ServerRequestHandler<any, any, any, any>) =>  Disposable,
+  (environment: Environment, settings: ClientConfigurations) => ServerRequestHandler<any, any, any, any>
+][] = [
+  [connection.onDocumentSymbol, documentSymbols],
+  [connection.onWorkspaceSymbol, workspaceSymbols],
+  [connection.onCodeLens, codeLenses],
+  [connection.onDefinition, definition],
+  [connection.onDocumentFormatting, formatDocument],
+  [connection.onDocumentRangeFormatting, formatRange],
+  [connection.onCompletion, (newEnvironment: Environment) => (params: CompletionParams) => {
     const contextCompletions = completions(params, newEnvironment!)
     return [...contextCompletions, ...templates]
-  }))
+  }],
+  [connection.onDefinition, definition],
+]
 
-  connection.onDefinition(handler(definition(newEnvironment!)))
+for(const [handlerRegistration, requestHandler] of handlers){
+  handlerRegistration(waitForFirstHandler(requestHandler))
+}
+
+requestContext.subscribe(([newEnvironment, newSettings]) => {
+  for(const [handlerRegistration, requestHandler] of handlers){
+    handlerRegistration(syncHandler(requestHandler(newEnvironment!, newSettings)))
+  }
 })
 
 /*

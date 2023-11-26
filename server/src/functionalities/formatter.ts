@@ -11,7 +11,7 @@ export const formatRange = (environment: Environment) => (params: DocumentRangeF
   return [TextEdit.insert(Position.create(0, 0), `// ${file.fileName}\n`)]
 }
 
-export const formatDocument = ({ formatter: formatterConfig }: ClientConfigurations, environment: Environment) => (params: DocumentFormattingParams): TextEdit[] => {
+export const formatDocument = (environment: Environment, { formatter: formatterConfig }: ClientConfigurations) => (params: DocumentFormattingParams): TextEdit[] => {
   const file = getPackage(params, environment)
   return [
     TextEdit.replace(

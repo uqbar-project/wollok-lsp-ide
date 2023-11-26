@@ -13,19 +13,18 @@ export class EnvironmentProvider {
     this.buildProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-build', title: 'Wollok Building...' })
   }
 
-  updateEnvironmentWith(document: TextDocument): Environment {
+  updateEnvironmentWith(document: TextDocument): void {
     const uri = wollokURI(document.uri)
     const content = document.getText()
     const file: { name: string, content: string } = {
       name: uri,
       content: content,
     }
-    return this.buildEnvironmentFrom([file], this.$environment.getValue() ?? undefined
-    )
+    this.$environment.next(this.buildEnvironmentFrom([file], this.$environment.getValue() ?? undefined))
   }
 
-  resetEnvironment(): Environment {
-    return this.buildEnvironmentFrom([])
+  resetEnvironment(): void {
+    return this.$environment.next(this.buildEnvironmentFrom([]))
   }
 
   private buildEnvironmentFrom(files: Parameters<typeof buildEnvironment>[0], baseEnvironment?: Environment): Environment {
