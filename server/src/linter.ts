@@ -127,7 +127,7 @@ export const validateTextDocument =
     }
   }
 
-export const completions = (  environment: Environment) => (
+export const completions = (environment: Environment) => (
   params: CompletionParams,
 ): CompletionItem[] => {
   const timeMeasurer = new TimeMeasurer()
