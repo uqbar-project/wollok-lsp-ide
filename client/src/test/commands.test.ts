@@ -35,7 +35,6 @@ suite('Should run commands', () => {
 
   suite('run tests', () => {
     const testFQN = 'tests."tests de pepita"."something"'
-    const testFQNCMD = 'tests.\\"tests de pepita\\".\\"something\\"'
 
     async function runCommandOnPlatform(
       platform: string,
@@ -44,10 +43,11 @@ suite('Should run commands', () => {
     ) {
       sinon.stub(process, 'platform').value(platform)
       sinon.stub(env, 'shell').value(shell)
+      const separator = shell == 'cmd' ? '"' : '\''
       await testCommand(
         pepitaURI,
         () => runTests(testFQN),
-        ` test '${expectedCommand}' --skipValidations -p ${expectedPathByShell(
+        ` test ${separator}${expectedCommand}${separator} --skipValidations -p ${expectedPathByShell(
           shell,
           folderURI.fsPath,
         )}`,
@@ -57,7 +57,8 @@ suite('Should run commands', () => {
 
     test('on Linux', () => runCommandOnPlatform('linux', 'bash', testFQN))
     test('on Mac', () => runCommandOnPlatform('darwin', 'bash', testFQN))
-    test('on Windows', () => runCommandOnPlatform('win32', 'cmd', testFQNCMD))
+    test('on Windows with Command', () => runCommandOnPlatform('win32', 'cmd', 'tests.tests de pepita.something'))
+    test('on Windows with Powershell', () => runCommandOnPlatform('win32', 'pwsh', testFQN))
     test('on Windows with Bash', () =>
       runCommandOnPlatform('win32', 'bash', testFQN))
   })
@@ -99,7 +100,7 @@ async function testCommand(
   await activate(docUri)
   const task = command()
   const execution = task.execution as ShellExecution
-  assert.ok(execution.commandLine.endsWith(expectedCommand))
+  assert.ok(execution.commandLine.endsWith(expectedCommand), `[NOT MATCH]: [${execution.commandLine}] vs. [${expectedCommand}]`)
 }
 
 function expectedPathByShell(cmd: Shell, originalPath: string) {
