@@ -28,7 +28,7 @@ export const literalValueToClass = (environment: Environment, literal: LiteralVa
 export const allAvailableMethods = (environment: Environment): Method[] =>
   environment.descendants.filter(is(Method)) as Method[]
 
-export const allMethods = (environment: Environment, referenceClass: Reference<Class>): Method[] =>
+export const allMethods = (environment: Environment, referenceClass: Reference<Module>): Method[] =>
   (referenceClass.target ?? environment.objectClass).allMethods as Method[]
 
 export const firstNodeWithProblems = (node: Node): Node | undefined => {

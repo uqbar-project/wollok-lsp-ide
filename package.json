@@ -27,7 +27,9 @@
     "referencesProvider": true,
     "definitionProvider": true,
     "documentSymbolProvider": true,
-    "workspaceSymbolProvider": true
+    "workspaceSymbolProvider": true,
+    "documentFormattingProvider": true,
+    "documentRangeFormattingProvider": true
   },
   "main": "./client/out/extension",
   "contributes": {
@@ -56,6 +58,18 @@
       "type": "object",
       "title": "Wollok LSP IDE",
       "properties": {
+        "wollokLSP.formatter.abbreviateAssignments": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Abbreviate assignments",
+          "default": true
+        },
+        "wollokLSP.formatter.maxWidth": {
+          "scope": "resource",
+          "type": "number",
+          "description": "Maximum width allowed in a line",
+          "default": 80
+        },
         "wollokLSP.cli-path": {
           "scope": "resource",
           "type": "string",
@@ -147,7 +161,7 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "wollok-ts": "4.0.5"
+    "wollok-ts": "4.0.6"
   },
   "devDependencies": {
     "@types/expect": "^24.3.0",
