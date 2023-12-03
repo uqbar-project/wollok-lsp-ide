@@ -173,7 +173,6 @@ const handlers: readonly [
   [connection.onDocumentFormatting, formatDocument],
   [connection.onDocumentRangeFormatting, formatRange],
   [connection.onCompletion, completions],
-  [connection.onDefinition, definition],
 ]
 
 for(const [handlerRegistration, requestHandler] of handlers){

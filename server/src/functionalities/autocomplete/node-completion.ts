@@ -77,7 +77,7 @@ const completeReference = (node: Reference<Class>): CompletionItem[] => {
 }
 
 const completeNew = (node: New): CompletionItem[] =>
-  node.instantiated.target ? [initializerCompletionItem(node.instantiated.target)] : []
+  node.instantiated.target && node.instantiated.target.is(Class) ? [initializerCompletionItem(node.instantiated.target)] : []
 
 const availableForImport = (node: Node) => (node.is(Class) || node.is(Singleton) || node.is(Reference) || node.is(Mixin)) && node.name && (node as Entity).fullyQualifiedName && !implicitImport(node)
 
