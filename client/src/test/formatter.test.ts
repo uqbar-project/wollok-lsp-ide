@@ -1,6 +1,7 @@
 import * as assert from 'assert'
 import { commands, Uri } from 'vscode'
-import { getDocumentURI, activate, document } from './helper'
+import { activate, document, getDocumentURI } from './helper'
+import * as os from 'os'
 
 /** ATTENTION
  * These tests are NOT ATOMIC, they depend on each other, order matters. (Resolve TODO)
@@ -11,7 +12,7 @@ suite('Should format', () => {
   //TODO: Restart server status after each test
 
   test('format document', async () => {
-    await testFormat(formatterURI, `object pepita {\n  var energia = 100\n}`)
+    await testFormat(formatterURI, `object pepita {${os.EOL}  var energia = 100${os.EOL}}`)
   })
 })
 
