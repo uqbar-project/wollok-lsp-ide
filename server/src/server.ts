@@ -4,6 +4,7 @@ import {
   createConnection,
   DidChangeConfigurationNotification,
   Disposable,
+  GenericRequestHandler,
   InitializeParams,
   InitializeResult,
   ProposedFeatures,
@@ -25,6 +26,7 @@ import {
 import { initializeSettings, WollokLSPSettings } from './settings'
 import { ProgressReporter } from './utils/progress-reporter'
 import { EnvironmentProvider } from './utils/vm/environment'
+import { rename, requestIsRenamable as isRenamable } from './functionalities/rename'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -95,6 +97,7 @@ connection.onInitialize((params: InitializeParams) => {
       definitionProvider: true,
       documentSymbolProvider: true,
       workspaceSymbolProvider: true,
+      renameProvider: { prepareProvider: true },
       documentFormattingProvider: true,
       documentRangeFormattingProvider: true,
     },
@@ -163,8 +166,8 @@ config.subscribe(() => {
 })
 
 const handlers: readonly [
-  (handler: ServerRequestHandler<any, any, any, any>) =>  Disposable,
-  (environment: Environment, settings: ClientConfigurations) => ServerRequestHandler<any, any, any, any>
+  (handler: GenericRequestHandler<any, any>)  =>  Disposable,
+  (environment: Environment, settings: ClientConfigurations) => GenericRequestHandler<any, any>
 ][] = [
   [connection.onDocumentSymbol, documentSymbols],
   [connection.onWorkspaceSymbol, workspaceSymbols],
@@ -173,6 +176,8 @@ const handlers: readonly [
   [connection.onDocumentFormatting, formatDocument],
   [connection.onDocumentRangeFormatting, formatRange],
   [connection.onCompletion, completions],
+  [connection.onPrepareRename, isRenamable],
+  [connection.onRenameRequest, rename(documents)],
 ]
 
 for(const [handlerRegistration, requestHandler] of handlers){

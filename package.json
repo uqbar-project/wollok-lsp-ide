@@ -29,7 +29,10 @@
     "documentSymbolProvider": true,
     "workspaceSymbolProvider": true,
     "documentFormattingProvider": true,
-    "documentRangeFormattingProvider": true
+    "documentRangeFormattingProvider": true,
+    "renameProvider": {
+      "prepareProvider": true
+    }
   },
   "main": "./client/out/extension",
   "contributes": {

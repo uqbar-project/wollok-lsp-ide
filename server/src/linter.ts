@@ -9,14 +9,12 @@ import {
   DocumentSymbol,
   DocumentSymbolParams,
   Location,
-  Position,
-  TextDocumentIdentifier,
   TextDocumentPositionParams,
   WorkspaceSymbol,
   WorkspaceSymbolParams,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Environment, Import, Node, Package, Problem, validate } from 'wollok-ts'
+import { Environment, Import, Package, Problem, validate } from 'wollok-ts'
 import { is, List } from 'wollok-ts/dist/extensions'
 import { completionsForNode } from './functionalities/autocomplete/node-completion'
 import { completeMessages } from './functionalities/autocomplete/send-completion'
@@ -39,6 +37,7 @@ import {
   trimIn,
 } from './utils/text-documents'
 import { isNodeURI, wollokURI, workspacePackage } from './utils/vm/wollok'
+import { cursorNode } from './utils/text-documents'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -145,17 +144,6 @@ export const completions = (environment: Environment) => (
   const result = autocompleteMessages ? completeMessages(environment, selectionNode) : completionsForNode(selectionNode)
   timeMeasurer.finalReport()
   return result
-}
-
-function cursorNode(
-  environment: Environment,
-  position: Position,
-  textDocument: TextDocumentIdentifier,
-): Node {
-  return getNodesByPosition(environment, {
-    position,
-    textDocument,
-  }).reverse()[0]
 }
 
 export const definition = (environment: Environment) => (
