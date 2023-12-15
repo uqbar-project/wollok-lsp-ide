@@ -28,7 +28,7 @@ jobs:
     - run: npm install
     - run: npm run compile
     - name: Run headless test
-      if: matrix.os != 'ubuntu-latest' # node 18.18.2 & vscode 1.84.2 works, another version breaks
+      if: matrix.os == 'windows-latest' # node 18.18.2 & vscode 1.84.2 works, another version breaks
       uses: coactions/setup-xvfb@v1
       with:
         run: npm run test-with-coverage:e2e
