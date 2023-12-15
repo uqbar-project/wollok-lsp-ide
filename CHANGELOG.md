@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.0
+
+- New feature released: Formatter! 💅🏼
+- Fixing Test Runner for Windows 🩹
+- Upgrade Wollok-TS 4.0.6 ⬆️
+
 ## v0.1.2
 
 - Upgrade Node to lts/hydrogen 18 ⬆️
