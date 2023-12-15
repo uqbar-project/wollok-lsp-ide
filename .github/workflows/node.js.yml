@@ -29,7 +29,7 @@ jobs:
     - run: npm run compile
     - name: Run headless test
       if: matrix.os != 'ubuntu-latest' # node 18.18.2 & vscode 1.84.2 works, another version breaks
-      uses: smithki/xvfb-action@v1.1.2
+      uses: coactions/setup-xvfb@v1
       with:
         run: npm run test-with-coverage:e2e
     - name: Unit Tests
