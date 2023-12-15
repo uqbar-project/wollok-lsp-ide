@@ -9,10 +9,10 @@
     "url": "https://github.com/uqbar-project/wollok-lsp-ide"
   },
   "engines": {
-    "vscode": "~1.84.0"
+    "vscode": "~1.83.0"
   },
   "dependencies": {
-    "@types/vscode": "~1.84.0"
+    "@types/vscode": "~1.83.0"
   },
   "devDependencies": {
     "@vscode/test-electron": "^2.3.5",
