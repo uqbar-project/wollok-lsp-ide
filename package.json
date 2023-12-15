@@ -18,7 +18,7 @@
   ],
   "icon": "images/wollokIdeLogo.png",
   "engines": {
-    "vscode": "^1.80.0"
+    "vscode": "~1.84.0"
   },
   "activationEvents": [
     "onLanguage:wollok"
