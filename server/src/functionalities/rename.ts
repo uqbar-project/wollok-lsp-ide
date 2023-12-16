@@ -6,33 +6,34 @@ import { cursorNode, fileNameToURI, toVSCRange } from '../utils/text-documents'
 import { referenceOf } from '../utils/vm/wollok'
 
 export const rename = (documents: TextDocuments<TextDocument>) => (environment: Environment) => (params: RenameParams): WorkspaceEdit | null => {
-  const renamedNode = cursorNode(environment, params.position, params.textDocument)
-
+  // cast cursor node as it's already validated in prepareRename request
+  const renamedNode = cursorNode(environment, params.position, params.textDocument) as Renamable | Reference<Renamable> | undefined
   if(!renamedNode) throw new Error('No node found at position')
-  if(renamedNode.is(Reference)  && renamedNode.target && isRenamable(renamedNode.target)){
-    return { changes: groupByURI(renameNode(renamedNode.target, params.newName, environment, documents)) }
-  }
 
-  if(isRenamable(renamedNode)) {
-    return { changes: groupByURI(renameNode(renamedNode, params.newName, environment, documents)) }
+  return {
+    changes: renamedNode.is(Reference) ?
+      groupByURI(renameNode(renamedNode.target!, params.newName, environment, documents)) :
+      groupByURI(renameNode(renamedNode, params.newName, environment, documents)),
   }
-
-  return null
 }
 
 export const requestIsRenamable = (environment: Environment) => (params: RenameParams): any => {
   const renamedNode = cursorNode(environment, params.position, params.textDocument)
   if(!renamedNode) return null
-  if( renamedNode.is(Reference)  && renamedNode.target && isRenamable(renamedNode.target) ||  isRenamable(renamedNode)){
-    return { defaultBehavior: true }
+  if( renamedNode.is(Reference)  && renamedNode.target && isRenamable(renamedNode.target) ||  isRenamable(renamedNode)) {
+    // ToDo: switch back to defaultBehavior when https://github.com/microsoft/vscode/issues/198423 is released
+    return {
+      range: toVSCRange(renamedNode.sourceMap!),
+      placeholder: renamedNode.name,
+    }
   }
   return null
 }
 
 type Renamable = Field | Parameter | Variable
 
-function isRenamable<T extends Node>(aNode: T): aNode is T & Renamable {
-  return aNode.is(Field) || aNode.is(Parameter) || aNode.is(Variable)
+function isRenamable(aNode: Node): aNode is Renamable {
+  return aNode.is(Field) && !aNode.isProperty || aNode.is(Parameter) || aNode.is(Variable)
 }
 
 function renameNode(node: Renamable, newName: string, environment: Environment, documents: TextDocuments<TextDocument>): {uri: string, edit: TextEdit}[]{
