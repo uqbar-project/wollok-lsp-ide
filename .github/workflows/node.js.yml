@@ -31,9 +31,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest' # node 18.18.2 & vscode 1.84.2 works, another version breaks
       run: |
         sudo apt-get install xvfb
-        sudo apt-get install dclock
-        export DISPLAY=host.docker.internal.0.0
-        dclock
+        export DISPLAY=10.0.75.1:0.0
         xvfb-run npm run test-with-coverage:e2e
       # uses: coactions/setup-xvfb@v1
       # with:
