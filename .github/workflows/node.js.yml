@@ -30,7 +30,7 @@ jobs:
     - name: Run headless test
       if: matrix.os == 'ubuntu-latest' # node 18.18.2 & vscode 1.84.2 works, another version breaks
       run: |
-        sudo apt-get install xvfb-run
+        sudo apt-get install xvfb
         xvfb-run npm run test-with-coverage:e2e
       # uses: coactions/setup-xvfb@v1
       # with:
