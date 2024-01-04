@@ -18,11 +18,10 @@ import { formatDocument, formatRange } from './functionalities/formatter'
 import {
   codeLenses,
   completions,
-  definition,
-  documentSymbols,
   validateTextDocument,
-  workspaceSymbols,
 } from './linter'
+import { documentSymbols, workspaceSymbols } from './functionalities/symbols'
+import { definition } from './functionalities/definition'
 import { initializeSettings, WollokLSPSettings } from './settings'
 import { ProgressReporter } from './utils/progress-reporter'
 import { EnvironmentProvider } from './utils/vm/environment'

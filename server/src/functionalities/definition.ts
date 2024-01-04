@@ -1,5 +1,15 @@
+import { Location, TextDocumentPositionParams } from 'vscode-languageserver'
 import { Environment, Method, Module, New, Node, Reference, Self, Send, Singleton, Super } from 'wollok-ts'
 import { is, match, when } from 'wollok-ts/dist/extensions'
+import { getNodesByPosition, nodeToLocation } from '../utils/text-documents'
+
+export const definition = (environment: Environment) => (
+  textDocumentPosition: TextDocumentPositionParams
+): Location[] => {
+  const cursorNodes = getNodesByPosition(environment, textDocumentPosition)
+  const definitions = getNodeDefinition(environment)(cursorNodes.reverse()[0])
+  return definitions.map(nodeToLocation)
+}
 
 export const getNodeDefinition = (environment: Environment) => (node: Node): Node[] => {
   try {

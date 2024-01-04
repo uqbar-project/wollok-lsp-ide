@@ -6,37 +6,25 @@ import {
   Connection,
   Diagnostic,
   DiagnosticSeverity,
-  DocumentSymbol,
-  DocumentSymbolParams,
-  Location,
-  TextDocumentPositionParams,
-  WorkspaceSymbol,
-  WorkspaceSymbolParams,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Environment, Import, Package, Problem, validate } from 'wollok-ts'
-import { is, List } from 'wollok-ts/dist/extensions'
+import { Environment, Import, Problem, validate } from 'wollok-ts'
+import { List } from 'wollok-ts/dist/extensions'
 import { completionsForNode } from './functionalities/autocomplete/node-completion'
 import { completeMessages } from './functionalities/autocomplete/send-completion'
 import {
   getProgramCodeLenses,
   getTestCodeLenses,
 } from './functionalities/code-lens'
-import { getNodeDefinition } from './functionalities/definition'
 import { reportValidationMessage } from './functionalities/reporter'
 import { updateDocumentSettings } from './settings'
-import {
-  documentSymbolsFor,
-  workspaceSymbolsFor,
-} from './functionalities/symbols'
 import { TimeMeasurer } from './timeMeasurer'
 import {
-  getNodesByPosition,
   getWollokFileExtension,
-  nodeToLocation,
+  packageFromURI,
   trimIn,
 } from './utils/text-documents'
-import { isNodeURI, wollokURI, workspacePackage } from './utils/vm/wollok'
+import { isNodeURI, wollokURI } from './utils/vm/wollok'
 import { cursorNode } from './utils/text-documents'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -146,17 +134,9 @@ export const completions = (environment: Environment) => (
   return result
 }
 
-export const definition = (environment: Environment) => (
-  textDocumentPosition: TextDocumentPositionParams
-): Location[] => {
-  const cursorNodes = getNodesByPosition(environment, textDocumentPosition)
-  const definitions = getNodeDefinition(environment)(cursorNodes.reverse()[0])
-  return definitions.map(nodeToLocation)
-}
-
 export const codeLenses = (environment: Environment) => (params: CodeLensParams): CodeLens[] | null => {
   const fileExtension = getWollokFileExtension(params.textDocument.uri)
-  const file = findPackage(params.textDocument.uri, environment)
+  const file = packageFromURI(params.textDocument.uri, environment)
   if (!file) return null
 
   switch (fileExtension) {
@@ -168,24 +148,3 @@ export const codeLenses = (environment: Environment) => (params: CodeLensParams)
       return null
   }
 }
-
-export const documentSymbols = (environment: Environment) => (params: DocumentSymbolParams): DocumentSymbol[] => {
-  // ToDo this is a temporal fix for https://github.com/uqbar-project/wollok-lsp-ide/issues/61
-  if (!workspacePackage(environment)) {
-    return []
-  }
-  const document = findPackage(params.textDocument.uri, environment)
-  if (!document)
-    throw new Error('Could not produce symbols: document not found')
-  return documentSymbolsFor(document)
-}
-
-export const workspaceSymbols = (
-  environment: Environment
-) => (params: WorkspaceSymbolParams): WorkspaceSymbol[] => workspaceSymbolsFor(environment, params.query)
-
-const findPackage = (
-  uri: string,
-  environment: Environment,
-): Package | undefined =>
-  environment.descendants.filter(is(Package)).find((p) => isNodeURI(p, uri))
