@@ -14,7 +14,7 @@ suite('Should do renames', () => {
     )
   })
 
-  test('Renaming', async () => {
+  test('Renaming target', async () => {
     const edition = new WorkspaceEdit()
     edition.replace(docUri, new Range(new Position(3, 15), new Position(3, 21)), 'unaComida')
     edition.replace(docUri, new Range(new Position(4, 24), new Position(4, 30)), 'unaComida')
@@ -22,6 +22,18 @@ suite('Should do renames', () => {
     await testRename(
       docUri,
       { position: new Position(3, 18), newName: 'unaComida' },
+      edition
+    )
+  })
+
+  test('Renaming reference', async () => {
+    const edition = new WorkspaceEdit()
+    edition.replace(docUri, new Range(new Position(3, 15), new Position(3, 21)), 'unaComida')
+    edition.replace(docUri, new Range(new Position(4, 24), new Position(4, 30)), 'unaComida')
+
+    await testRename(
+      docUri,
+      { position: new Position(4, 26), newName: 'unaComida' },
       edition
     )
   })
