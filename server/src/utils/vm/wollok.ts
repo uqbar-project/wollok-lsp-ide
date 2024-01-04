@@ -75,6 +75,6 @@ export const projectFQN = (node: Entity): string => {
   return node.fullyQualifiedName?.replaceAll(rootFQN + '.', '') ?? ''
 }
 
-export const referenceOf = <T extends Node>(aNode: T) => (anotherNode: Node): anotherNode is Reference<T>  => {
+export const targettingAt = <T extends Node>(aNode: T) => (anotherNode: Node): anotherNode is Reference<T>  => {
   return anotherNode.is(Reference) && anotherNode.target === aNode
 }
