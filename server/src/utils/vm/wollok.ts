@@ -74,3 +74,7 @@ export const projectFQN = (node: Entity): string => {
   const rootFQN = rootPath.replaceAll(path.sep, '.')
   return node.fullyQualifiedName?.replaceAll(rootFQN + '.', '') ?? ''
 }
+
+export const targettingAt = <T extends Node>(aNode: T) => (anotherNode: Node): anotherNode is Reference<T>  => {
+  return anotherNode.is(Reference) && anotherNode.target === aNode
+}
