@@ -50,7 +50,7 @@ suite('Should get diagnostics', () => {
       {
         code: 'shouldNotDefineUnusedVariables',
         severity: DiagnosticSeverity.Warning,
-        range: Range.create(Position.create(1, 2), Position.create(1, 12)),
+        range: Range.create(Position.create(1, 6), Position.create(1, 7)),
       },
     ])
   })
