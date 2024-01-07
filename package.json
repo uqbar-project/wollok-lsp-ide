@@ -32,7 +32,8 @@
     "documentRangeFormattingProvider": true,
     "renameProvider": {
       "prepareProvider": true
-    }
+    },
+    "hoverProvider": true
   },
   "main": "./client/out/extension",
   "contributes": {

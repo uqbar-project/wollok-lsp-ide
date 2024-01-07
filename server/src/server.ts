@@ -26,6 +26,7 @@ import { initializeSettings, WollokLSPSettings } from './settings'
 import { ProgressReporter } from './utils/progress-reporter'
 import { EnvironmentProvider } from './utils/vm/environment'
 import { rename, requestIsRenamable as isRenamable } from './functionalities/rename'
+import { typeDescriptionOnHover } from './functionalities/hover'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -96,6 +97,7 @@ connection.onInitialize((params: InitializeParams) => {
       definitionProvider: true,
       documentSymbolProvider: true,
       workspaceSymbolProvider: true,
+      hoverProvider: true,
       renameProvider: { prepareProvider: true },
       documentFormattingProvider: true,
       documentRangeFormattingProvider: true,
@@ -177,6 +179,7 @@ const handlers: readonly [
   [connection.onCompletion, completions],
   [connection.onPrepareRename, isRenamable],
   [connection.onRenameRequest, rename(documents)],
+  [connection.onHover, typeDescriptionOnHover],
 ]
 
 for(const [handlerRegistration, requestHandler] of handlers){

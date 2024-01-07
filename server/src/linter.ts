@@ -79,11 +79,9 @@ export const validateTextDocument =
     try {
       const timeMeasurer = new TimeMeasurer()
       const problems = validate(environment)
-      timeMeasurer.addTime('build environment for file')
-
-      sendDiagnostics(connection, problems, allDocuments)
       timeMeasurer.addTime('validation time')
 
+      sendDiagnostics(connection, problems, allDocuments)
       timeMeasurer.finalReport()
     } catch (e) {
       // TODO: Generate a high-level function
