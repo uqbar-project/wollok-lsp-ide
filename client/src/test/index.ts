@@ -66,7 +66,7 @@ async function runTests(): Promise<void> {
   const testsRoot = __dirname
 
   return new Promise((resolve, reject) => {
-    glob('hover.test.js', { cwd: testsRoot }, (err, files) => {
+    glob('**.test.js', { cwd: testsRoot }, (err, files) => {
       if (err) {
         return reject(err)
       }
