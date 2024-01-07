@@ -12,18 +12,16 @@ export const typeDescriptionOnHover = (environment: Environment) => (params: Hov
   }
 
   try{
-    return {
-      contents: {
-        kind: 'markdown',
-        value: [
-          '```wollok',
-          `${node.kind}: ${node.type.name}`,
-          print(node, { maxWidth: 30, useSpaces: true, abbreviateAssignments: true }),
-          '```',
 
-        ].join('\n'),
-      },
-      range: node.sourceMap ? toVSCRange(node.sourceMap) : Range.create(params.position, params.position),
+    return {
+      contents: [
+        `${node.kind}: ${node.type.name}`,
+        {
+          language: 'wollok',
+          value: print(node, { maxWidth: 30, useSpaces: true, abbreviateAssignments: true }),
+        },
+      ],
+      range: node.sourceMap ? toVSCRange(node.sourceMap) : undefined,
     }
   } catch {
     return null
