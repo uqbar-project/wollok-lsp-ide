@@ -66,6 +66,10 @@ export const rootFolder = (uri: string): string => {
   return folderPath
 }
 
+export const relativeFilePath = (uri: string): string => {
+  return path.relative(rootFolder(uri), uri).split('.')[0]
+}
+
 export const projectFQN = (node: Entity): string => {
   if (node.fullyQualifiedName.startsWith('wollok')) return node.fullyQualifiedName
   const fileName = node.sourceFileName ?? ''

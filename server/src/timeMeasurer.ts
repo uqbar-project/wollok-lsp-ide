@@ -1,3 +1,5 @@
+import { logger } from './utils/logger'
+
 export class TimeMeasurer {
   private times: Array<TimeElement> = []
   private initialTime: number = this.now()
@@ -11,9 +13,8 @@ export class TimeMeasurer {
     if (!this.times) return
     this.times.forEach((timeRow, index) => {
       const time = this.elapsedTime(index)
-      console.info(`🕒 ${timeRow.processName} | ${time} ms ${time > 200 ? '⌛' : ''}`)
+      logger.info(`🕒 ${timeRow.processName} | ${time} ms ${time > 200 ? '⌛' : ''}`)
     })
-    console.info('')
     this.reset()
   }
 
