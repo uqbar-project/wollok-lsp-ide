@@ -57,7 +57,7 @@ export const workspacePackage = (environment: Environment): Package =>
   environment.members[1]
 
 export const rootFolder = (uri: string): string => {
-  let folderPath = path.sep + uri
+  let folderPath = uri
   while (!fs.existsSync(folderPath + path.sep + 'package.json') && folderPath) {
     const lastIndex = folderPath.lastIndexOf(path.sep)
     if (!lastIndex) return ''
@@ -67,13 +67,16 @@ export const rootFolder = (uri: string): string => {
 }
 
 export const relativeFilePath = (uri: string): string => {
-  return path.relative(rootFolder(uri), uri).split('.')[0]
+  const sanitizedUri = uri.replace('file:///', path.sep)
+  const rootPath = rootFolder(sanitizedUri)
+  if (!rootPath) return sanitizedUri
+  return sanitizedUri.replaceAll(rootPath + path.sep, '')
 }
 
 export const projectFQN = (node: Entity): string => {
   if (node.fullyQualifiedName.startsWith('wollok')) return node.fullyQualifiedName
   const fileName = node.sourceFileName ?? ''
-  const rootPath = rootFolder(fileName).slice(1)
+  const rootPath = rootFolder(path.sep + fileName).slice(1)
   if (!rootPath) return node.fullyQualifiedName
   const rootFQN = rootPath.replaceAll(path.sep, '.')
   return node.fullyQualifiedName?.replaceAll(rootFQN + '.', '') ?? ''
