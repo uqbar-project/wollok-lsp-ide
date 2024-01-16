@@ -1,5 +1,7 @@
 import { logger } from './utils/logger'
 
+const THRESHOLD = 100
+
 export class TimeMeasurer {
   private times: Array<TimeElement> = []
   private initialTime: number = this.now()
@@ -13,7 +15,13 @@ export class TimeMeasurer {
     if (!this.times) return
     this.times.forEach((timeRow, index) => {
       const time = this.elapsedTime(index)
-      logger.info(`🕒 ${timeRow.processName} | ${time} ms ${time > 200 ? '⌛' : ''}`)
+      // TODO: configure threshold
+      const thresholdReached = time > THRESHOLD
+      const icon = thresholdReached ? '⌛' : '🕒'
+      logger.info({
+        message: `${icon} ${timeRow.processName} | ${time} ms`,
+        private: !thresholdReached,
+      })
     })
     this.reset()
   }
