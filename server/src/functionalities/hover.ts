@@ -15,7 +15,10 @@ export const typeDescriptionOnHover = (environment: Environment) => (params: Hov
 
     return {
       contents: [
-        `${node.kind}: ${node.type.name}`,
+        {
+          language: 'text',
+          value: `${node.kind}: ${node.type.name}`,
+        },
         {
           language: 'wollok',
           value: print(node, { maxWidth: 30, useSpaces: true, abbreviateAssignments: true }),
