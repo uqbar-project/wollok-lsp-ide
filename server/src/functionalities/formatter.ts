@@ -1,5 +1,6 @@
 import { DocumentFormattingParams, DocumentRangeFormattingParams, Position, Range, TextEdit } from 'vscode-languageserver'
 import { Environment, Package, print } from 'wollok-ts'
+import { PrintingMalformedNodeError } from 'wollok-ts/dist/printer/exceptions'
 import { packageFromURI } from '../utils/text-documents'
 import { wollokURI } from '../utils/vm/wollok'
 import { ClientConfigurations } from '../server'
@@ -26,8 +27,8 @@ export const formatDocument = (environment: Environment, { formatter: formatterC
     ]
   } catch(err) {
     let message = `Could not format file '${file.fileName}'`
-    if(err instanceof Error){
-      message += `: ${err.message}`
+    if(err instanceof PrintingMalformedNodeError){
+      message += `: ${err.message} {${err.node.toString()}}`
     }
     console.error(message)
     return null
