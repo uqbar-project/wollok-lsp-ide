@@ -152,6 +152,7 @@ documents.onDidOpen(rebuildTextDocument)
 connection.onRequest((change) => {
   if (change === 'STRONG_FILES_CHANGED') {
     environmentProvider.resetEnvironment()
+    documents.all().forEach(doc => environmentProvider.updateEnvironmentWith(doc))
   }
 })
 
