@@ -20,6 +20,7 @@ export class TimeMeasurer {
       const icon = thresholdReached ? '⌛' : '🕒'
       logger.info({
         message: `${icon} ${timeRow.processName} | ${time} ms`,
+        timeElapsed: time,
         private: !thresholdReached,
       })
     })

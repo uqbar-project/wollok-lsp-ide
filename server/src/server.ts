@@ -143,6 +143,7 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
   } catch (e) {
     const message = `✘ Failed to rebuild document: ${e}`
     logger.error({
+      level: 'error',
       file: change.document.uri,
       message,
     })
