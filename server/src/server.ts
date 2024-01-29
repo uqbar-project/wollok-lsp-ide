@@ -36,7 +36,8 @@ export type ClientConfigurations = {
   trace: { server: "off" |  "messages" | "verbose" }
   openDynamicDiagramOnRepl: boolean
   openInternalDynamicDiagram: boolean
-  dynamicDiagramDarkMode: boolean
+  dynamicDiagramDarkMode: boolean,
+  maxThreshold: number,
 }
 
 
