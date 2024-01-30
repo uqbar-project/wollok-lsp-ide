@@ -18,7 +18,7 @@ import {
 } from './functionalities/code-lens'
 import { reportValidationMessage } from './functionalities/reporter'
 import { updateDocumentSettings } from './settings'
-import { TimeMeasurer } from './timeMeasurer'
+import { TimeMeasurer } from './time-measurer'
 import {
   getWollokFileExtension,
   packageFromURI,
