@@ -1,11 +1,13 @@
 import winston, { format } from 'winston'
 
-const ignorePrivate = format((info) => {
+export const consoleFormat = format.printf(info => info.message + (info.timeElapsed ? ` | ${info.timeElapsed} ms` : ''))
+
+export const ignorePrivate = format(info => {
   if (info.private) return false
   return info
 })
 
-const removePrivate = format((info) => {
+export const removePrivate = format(info => {
   delete info.private
   return info
 })
@@ -13,7 +15,7 @@ const removePrivate = format((info) => {
 export const logger = winston.createLogger({
   transports: [
     new winston.transports.Console({
-      format: format.printf(info => info.message + (info.timeElapsed ? ` | ${info.timeElapsed} ms` : '')),
+      format: consoleFormat,
     }),
     new winston.transports.File(
       {

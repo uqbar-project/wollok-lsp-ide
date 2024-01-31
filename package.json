@@ -166,6 +166,7 @@
     "test-with-coverage:e2e": "npm run lint && npm run compile && env COVERAGE=true sh ./scripts/e2e.sh",
     "test:unit": "cd server && npm run test && cd ..",
     "test-with-coverage:unit": "cd server && npm run test-with-coverage && cd ..",
+    "test-local-coverage:unit": "cd server && npm run test-local-coverage && cd ..",
     "prepare": "husky install",
     "package": "vsce package",
     "lint-staged": "lint-staged"

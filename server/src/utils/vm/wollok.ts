@@ -61,7 +61,7 @@ export const rootFolder = (uri: string): string => {
   while (!fs.existsSync(folderPath + path.sep + 'package.json') && folderPath) {
     const lastIndex = folderPath.lastIndexOf(path.sep)
     if (!lastIndex) return ''
-    folderPath = folderPath?.slice(0, lastIndex)
+    folderPath = folderPath.slice(0, lastIndex)
   }
   return folderPath
 }

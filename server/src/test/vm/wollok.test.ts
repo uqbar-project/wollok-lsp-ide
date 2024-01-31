@@ -2,7 +2,7 @@ import { expect } from 'expect'
 import { join, resolve } from 'path'
 import { relativeFilePath, rootFolder } from '../../utils/vm/wollok'
 
-describe('file paths', () => {
+describe('root folder', () => {
   it('solves root folder for common project', () => {
     const defaultFolder = join('examples', 'example-project')
     expect(rootFolder(defaultFolder)).toEqual(join('examples', 'example-project'))
@@ -13,6 +13,13 @@ describe('file paths', () => {
     expect(rootFolder(defaultFolder)).toEqual('')
   })
 
+  it('solves root folder when package.json is in a parent folder', () => {
+    const defaultFolder = join('examples', 'another-project', 'inner-folder1', 'inner-folder2')
+    expect(rootFolder(defaultFolder)).toEqual(join('examples', 'another-project', 'inner-folder1'))
+  })
+})
+
+describe('relative file path', () => {
   it('solves relative file path for a file in root path - file prefix', () => {
     const exampleFile = join('examples', 'example-project', 'example.wlk')
     expect(relativeFilePath(resolve(exampleFile).toString())).toEqual('example.wlk')
@@ -21,6 +28,11 @@ describe('file paths', () => {
   it('solves relative file path for a file in root path - without file', () => {
     const exampleFile = join('examples', 'example-project', 'example.wlk')
     expect(relativeFilePath(exampleFile)).toEqual('example.wlk')
+  })
+
+  it('solves relative file path for a file in root path - missing root folder', () => {
+    const exampleFile = join('examples', 'missing-project', 'example2.wlk')
+    expect(relativeFilePath(exampleFile)).toEqual(join('examples', 'missing-project', 'example2.wlk'))
   })
 
   it('solves relative file path for a file in root path - missing file', () => {
