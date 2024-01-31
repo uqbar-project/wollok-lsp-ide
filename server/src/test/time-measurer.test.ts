@@ -6,11 +6,11 @@ import { logger } from '../utils/logger'
 describe('Time Measurer', () => {
 
   let clock: sinon.SinonFakeTimers
-  let consoleLogSpy: sinon.SinonStub
+  let consoleInfoSpy: sinon.SinonStub
 
   beforeEach(async () => {
     clock = sinon.useFakeTimers()
-    consoleLogSpy = sinon.stub(logger, 'info')
+    consoleInfoSpy = sinon.stub(logger, 'info')
   })
 
   afterEach(() => {
@@ -24,10 +24,12 @@ describe('Time Measurer', () => {
     clock.tick(50)
     timeMeasurer.addTime('process 2')
     timeMeasurer.finalReport()
-    const firstMessage = consoleLogSpy.getCall(0).args[0].message
-    expect(firstMessage).toEqual('⌛ process 1 | 200 ms')
-    const secondMessage = consoleLogSpy.getCall(1).args[0].message
-    expect(secondMessage).toEqual('🕒 process 2 | 50 ms')
+    const firstConsoleArg = consoleInfoSpy.getCall(0).args[0]
+    expect(firstConsoleArg.message).toEqual('⌛ process 1')
+    expect(firstConsoleArg.timeElapsed).toEqual(200)
+    const secondConsoleArg = consoleInfoSpy.getCall(1).args[0]
+    expect(secondConsoleArg.message).toEqual('🕒 process 2')
+    expect(secondConsoleArg.timeElapsed).toEqual(50)
   })
 
 })

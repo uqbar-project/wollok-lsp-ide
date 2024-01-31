@@ -13,11 +13,12 @@ const removePrivate = format((info) => {
 export const logger = winston.createLogger({
   transports: [
     new winston.transports.Console({
-      format: format.printf(info => info.message),
+      format: format.printf(info => info.message + (info.timeElapsed ? ` | ${info.timeElapsed} ms` : '')),
     }),
     new winston.transports.File(
       {
-        filename: 'wollok.log',
+        filename: 'log/wollok.log',
+        maxsize: 1000000,
         format: format.combine(
           ignorePrivate(),
           removePrivate(),

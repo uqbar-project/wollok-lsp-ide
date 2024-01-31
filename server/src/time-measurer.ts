@@ -17,7 +17,7 @@ export class TimeMeasurer {
       const thresholdReached = time > maxThreshold()
       const icon = thresholdReached ? '⌛' : '🕒'
       logger.info({
-        message: `${icon} ${timeRow.processName} | ${time} ms`,
+        message: `${icon} ${timeRow.processName}`,
         timeElapsed: time,
         private: !thresholdReached,
       })
