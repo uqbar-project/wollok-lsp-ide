@@ -39,12 +39,14 @@ jobs:
     - name: Unit Tests
       run: npm run test-with-coverage:unit
     - name: Update server coverage badge
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       if: matrix.os == 'ubuntu-latest'
       with:
         files: ./server/coverage/coverage-final.json
         verbose: true
         flags: lsp-ide-server
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     
     # - name: Update client coverage badge
     #   uses: codecov/codecov-action@v3
