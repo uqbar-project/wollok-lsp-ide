@@ -195,6 +195,7 @@ const validationMessagesEs: Message = {
   [FAILURE]: 'La siguiente regla fall\u00F3: ',
 }
 
+
 const MISSING_WOLLOK_TS_CLI = 'missing_wollok_ts_cli'
 
 const lspMessagesEn = {
