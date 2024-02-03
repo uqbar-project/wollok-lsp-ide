@@ -15,9 +15,9 @@ export class TimeMeasurer {
     this.times.forEach((timeRow, index) => {
       const timeElapsed = this.elapsedTime(index)
       const thresholdReached = timeElapsed > maxThreshold()
-      const icon = thresholdReached ? '⌛' : '🕒'
+      const icon = thresholdReached ? '⌛ ' : ''
       logger.info({
-        message: `${icon} ${timeRow.processName}`,
+        message: `${icon}${timeRow.processName}`,
         timeElapsed,
         private: !thresholdReached,
       })

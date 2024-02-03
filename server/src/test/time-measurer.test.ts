@@ -28,7 +28,7 @@ describe('Time Measurer', () => {
     expect(firstConsoleArg.message).toEqual('⌛ process 1')
     expect(firstConsoleArg.timeElapsed).toEqual(200)
     const secondConsoleArg = consoleInfoSpy.getCall(1).args[0]
-    expect(secondConsoleArg.message).toEqual('🕒 process 2')
+    expect(secondConsoleArg.message).toEqual('process 2')
     expect(secondConsoleArg.timeElapsed).toEqual(50)
   })
 
