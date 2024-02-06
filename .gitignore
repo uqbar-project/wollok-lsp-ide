@@ -9,3 +9,4 @@ yalc.lock
 .DS_Store
 coverage
 .nyc_output
+wollok.log

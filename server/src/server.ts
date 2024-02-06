@@ -26,6 +26,7 @@ import { initializeSettings, WollokLSPSettings } from './settings'
 import { ProgressReporter } from './utils/progress-reporter'
 import { EnvironmentProvider } from './utils/vm/environment'
 import { rename, requestIsRenamable as isRenamable } from './functionalities/rename'
+import { logger } from './utils/logger'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -35,7 +36,8 @@ export type ClientConfigurations = {
   trace: { server: "off" |  "messages" | "verbose" }
   openDynamicDiagramOnRepl: boolean
   openInternalDynamicDiagram: boolean
-  dynamicDiagramDarkMode: boolean
+  dynamicDiagramDarkMode: boolean,
+  maxThreshold: number,
 }
 
 
@@ -140,7 +142,13 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
       environmentProvider.$environment.getValue()!
     )
   } catch (e) {
-    connection.console.error(`✘ Failed to rebuild document: ${e}`)
+    const message = `✘ Failed to rebuild document: ${e}`
+    logger.error({
+      level: 'error',
+      file: change.document.uri,
+      message,
+    })
+    connection.console.error(message)
   }
 }
 // The content of a text document has changed. This event is emitted

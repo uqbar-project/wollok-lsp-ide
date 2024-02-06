@@ -6,6 +6,7 @@ export interface WollokLSPSettings {
   openDynamicDiagramOnRepl: boolean,
   openInternalDynamicDiagram: boolean,
   dynamicDiagramDarkMode: boolean,
+  maxThreshold: number,
 }
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -27,6 +28,7 @@ const defaultSettings: WollokLSPSettings = {
   openDynamicDiagramOnRepl: true,
   openInternalDynamicDiagram: true,
   dynamicDiagramDarkMode: true,
+  maxThreshold: 100,
 }
 
 let globalSettings: WollokLSPSettings = defaultSettings
@@ -56,3 +58,5 @@ export const initializeSettings = async (
 
 export const lang = (): string =>
   languageDescription[globalSettings.language] || envLang()
+
+export const maxThreshold = (): number => globalSettings.maxThreshold
