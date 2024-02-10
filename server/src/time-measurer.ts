@@ -1,3 +1,6 @@
+import { maxThreshold } from './settings'
+import { logger } from './utils/logger'
+
 export class TimeMeasurer {
   private times: Array<TimeElement> = []
   private initialTime: number = this.now()
@@ -10,10 +13,15 @@ export class TimeMeasurer {
   finalReport(): void {
     if (!this.times) return
     this.times.forEach((timeRow, index) => {
-      const time = this.elapsedTime(index)
-      console.info(`🕒 ${timeRow.processName} | ${time} ms ${time > 200 ? '⌛' : ''}`)
+      const timeElapsed = this.elapsedTime(index)
+      const thresholdReached = timeElapsed > maxThreshold()
+      const icon = thresholdReached ? '⌛ ' : ''
+      logger.info({
+        message: `${icon}${timeRow.processName}`,
+        timeElapsed,
+        private: !thresholdReached,
+      })
     })
-    console.info('')
     this.reset()
   }
 
