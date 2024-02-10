@@ -4,6 +4,7 @@ import { PrintingMalformedNodeError } from 'wollok-ts/dist/printer/exceptions'
 import { packageFromURI } from '../utils/text-documents'
 import { wollokURI } from '../utils/vm/wollok'
 import { ClientConfigurations } from '../server'
+import { logger } from '../utils/logger'
 
 export const formatRange = (environment: Environment) => (params: DocumentRangeFormattingParams): TextEdit[] => {
   const file = getPackage(params, environment)
@@ -30,7 +31,7 @@ export const formatDocument = (environment: Environment, { formatter: formatterC
     if(err instanceof PrintingMalformedNodeError){
       message += `: ${err.message} {${err.node.toString()}}`
     }
-    console.error(message)
+    logger.error(message)
     return null
   }
 }
