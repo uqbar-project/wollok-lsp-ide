@@ -14,7 +14,7 @@ suite('Should display on hover', () => {
       new Position(1, 8),
       new Hover(
         [
-          new MarkdownString('Field: Number'),
+          new MarkdownString('\n```text\nField: Number\n```\n'),
           new MarkdownString('\n```wollok\nconst x = 2\n```\n'),
         ],
         new Range(new Position(1, 2), new Position(2, 0))

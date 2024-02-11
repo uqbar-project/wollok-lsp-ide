@@ -1,4 +1,4 @@
-import { Hover, HoverParams, Range } from 'vscode-languageserver'
+import { Hover, HoverParams } from 'vscode-languageserver'
 import { Body, Environment, print } from 'wollok-ts'
 import { cursorNode, toVSCRange } from '../utils/text-documents'
 

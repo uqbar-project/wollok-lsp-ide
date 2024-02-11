@@ -18,13 +18,13 @@ import {
 } from './functionalities/code-lens'
 import { reportValidationMessage } from './functionalities/reporter'
 import { updateDocumentSettings } from './settings'
-import { TimeMeasurer } from './timeMeasurer'
+import { TimeMeasurer } from './time-measurer'
 import {
   getWollokFileExtension,
   packageFromURI,
   trimIn,
 } from './utils/text-documents'
-import { isNodeURI, wollokURI } from './utils/vm/wollok'
+import { isNodeURI, relativeFilePath, wollokURI } from './utils/vm/wollok'
 import { cursorNode } from './utils/text-documents'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -77,38 +77,16 @@ export const validateTextDocument =
     await updateDocumentSettings(connection)
 
     try {
+      const documentUri = relativeFilePath(textDocument.uri)
       const timeMeasurer = new TimeMeasurer()
       const problems = validate(environment)
-      timeMeasurer.addTime('validation time')
+      sendDiagnostics(connection, problems, allDocuments)
+      timeMeasurer.addTime(`Validating ${documentUri}`)
 
       sendDiagnostics(connection, problems, allDocuments)
       timeMeasurer.finalReport()
     } catch (e) {
-      // TODO: Generate a high-level function
-      const uri = wollokURI(textDocument.uri)
-      const content = textDocument.getText()
-
-      connection.sendDiagnostics({
-        uri: uri,
-        diagnostics: [
-          createDiagnostic(textDocument, {
-            level: 'error',
-            code: 'FileCouldNotBeValidated',
-            node: { sourceFileName: () => uri },
-            values: [],
-            sourceMap: {
-              start: {
-                line: 1,
-                offset: 0,
-              },
-              end: {
-                line: Number.MAX_VALUE,
-                offset: content.length - 1,
-              },
-            },
-          } as unknown as Problem),
-        ],
-      })
+      generateErrorForFile(connection, textDocument)
     }
   }
 
@@ -145,4 +123,31 @@ export const codeLenses = (environment: Environment) => (params: CodeLensParams)
     default:
       return null
   }
+}
+
+const generateErrorForFile = (connection: Connection, textDocument: TextDocument) => {
+  const documentUri = wollokURI(textDocument.uri)
+  const content = textDocument.getText()
+
+  connection.sendDiagnostics({
+    uri: documentUri,
+    diagnostics: [
+      createDiagnostic(textDocument, {
+        level: 'error',
+        code: 'FileCouldNotBeValidated',
+        node: { sourceFileName: () => documentUri },
+        values: [],
+        sourceMap: {
+          start: {
+            line: 1,
+            offset: 0,
+          },
+          end: {
+            line: Number.MAX_VALUE,
+            offset: content.length - 1,
+          },
+        },
+      } as unknown as Problem),
+    ],
+  })
 }

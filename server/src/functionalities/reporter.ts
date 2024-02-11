@@ -17,7 +17,7 @@ const validationMessagesEn: Message = {
   shouldNotBeEmpty: 'Should not make an empty definition.',
   shouldUseConditionalExpression:
     'Bad usage of if! You must return the condition itself without using if.',
-  shouldPassValuesToAllAttributes: 'Reference {0} not found in {1}',
+  shouldPassValuesToAllAttributes: '{0} cannot be instantiated, you must pass values to the following attributes: {1}',
   namedArgumentShouldExist: 'Reference {0} not found in {1}',
   linearizationShouldNotRepeatNamedArguments:
     'Reference {0} is initialized more than once during linearization',
@@ -106,7 +106,7 @@ const validationMessagesEs: Message = {
     'El elemento no puede estar vac\u00EDo: falta escribir c\u00F3digo.',
   shouldUseConditionalExpression:
     'Est\u00E1s usando incorrectamente el if. Devolv\u00E9 simplemente la expresi\u00F3n booleana.',
-  shouldPassValuesToAllAttributes: 'No se encuentra la referencia {0} en {1}',
+  shouldPassValuesToAllAttributes: 'No se puede instanciar {0}. Falta pasar valores a los siguientes atributos: {1}',
   namedArgumentShouldExist: 'No se encuentra la referencia {0} en {1}',
   linearizationShouldNotRepeatNamedArguments:
     'La referencia {0} est\u00E1 inicializada m\u00E1s de una vez',
@@ -194,6 +194,7 @@ const validationMessagesEs: Message = {
     "Solo un test puede marcarse como 'only' (los otros no se ejecutar\u00E1n)",
   [FAILURE]: 'La siguiente regla fall\u00F3: ',
 }
+
 
 const MISSING_WOLLOK_TS_CLI = 'missing_wollok_ts_cli'
 

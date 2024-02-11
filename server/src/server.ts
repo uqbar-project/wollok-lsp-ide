@@ -14,19 +14,20 @@ import {
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node'
 import { Environment } from 'wollok-ts'
+import { definition } from './functionalities/definition'
 import { formatDocument, formatRange } from './functionalities/formatter'
+import { typeDescriptionOnHover } from './functionalities/hover'
+import { requestIsRenamable as isRenamable, rename } from './functionalities/rename'
+import { documentSymbols, workspaceSymbols } from './functionalities/symbols'
 import {
   codeLenses,
   completions,
   validateTextDocument,
 } from './linter'
-import { documentSymbols, workspaceSymbols } from './functionalities/symbols'
-import { definition } from './functionalities/definition'
 import { initializeSettings, WollokLSPSettings } from './settings'
+import { logger } from './utils/logger'
 import { ProgressReporter } from './utils/progress-reporter'
 import { EnvironmentProvider } from './utils/vm/environment'
-import { rename, requestIsRenamable as isRenamable } from './functionalities/rename'
-import { typeDescriptionOnHover } from './functionalities/hover'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -36,7 +37,8 @@ export type ClientConfigurations = {
   trace: { server: "off" |  "messages" | "verbose" }
   openDynamicDiagramOnRepl: boolean
   openInternalDynamicDiagram: boolean
-  dynamicDiagramDarkMode: boolean
+  dynamicDiagramDarkMode: boolean,
+  maxThreshold: number,
 }
 
 
@@ -154,6 +156,7 @@ documents.onDidOpen(rebuildTextDocument)
 connection.onRequest((change) => {
   if (change === 'STRONG_FILES_CHANGED') {
     environmentProvider.resetEnvironment()
+    documents.all().forEach(doc => environmentProvider.updateEnvironmentWith(doc))
   }
 })
 

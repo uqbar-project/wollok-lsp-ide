@@ -131,6 +131,13 @@
           "default": true,
           "description": "If true, opens dynamic diagram in Dark Mode. Otherwise, it uses Light Mode.",
           "order": 6
+        },
+        "wollokLSP.maxThreshold": {
+          "scope": "resource",
+          "type": "number",
+          "default": 100,
+          "description": "Maximum threshold in milliseconds: if an operation takes longer, it will be saved in the log file.",
+          "order": 7
         }
       }
     },
@@ -160,12 +167,13 @@
     "test-with-coverage:e2e": "npm run lint && npm run compile && env COVERAGE=true sh ./scripts/e2e.sh",
     "test:unit": "cd server && npm run test && cd ..",
     "test-with-coverage:unit": "cd server && npm run test-with-coverage && cd ..",
+    "test-local-coverage:unit": "cd server && npm run test-local-coverage && cd ..",
     "prepare": "husky install",
     "package": "vsce package",
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "wollok-ts": "../wollok-ts"
+    "wollok-ts": "4.0.8"
   },
   "devDependencies": {
     "@types/expect": "^24.3.0",
