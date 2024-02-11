@@ -37,7 +37,7 @@ export class EnvironmentProvider {
       const environment = buildEnvironment(files, baseEnvironment)
       timeMeasurer.addTime('Building environment')
       inferTypes(environment)
-      timeMeasurer.addTime('Infering types')
+      timeMeasurer.addTime('Inferring types')
       this.buildProgressReporter.end()
       timeMeasurer.finalReport()
       return environment
