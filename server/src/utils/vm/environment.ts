@@ -30,7 +30,7 @@ export class EnvironmentProvider {
     return this.$environment.next(this.buildEnvironmentFrom([]))
   }
 
-  private buildEnvironmentFrom(files: Parameters<typeof buildEnvironment>[0], baseEnvironment?: Environment): Environment | null {
+  private buildEnvironmentFrom(files: Parameters<typeof buildEnvironment>[0], baseEnvironment?: Environment): Environment {
     try {
       this.buildProgressReporter.begin()
       const timeMeasurer = new TimeMeasurer()

@@ -25,7 +25,6 @@ import {
   validateTextDocument,
 } from './linter'
 import { initializeSettings, WollokLSPSettings } from './settings'
-import { logger } from './utils/logger'
 import { ProgressReporter } from './utils/progress-reporter'
 import { EnvironmentProvider } from './utils/vm/environment'
 
