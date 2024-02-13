@@ -1,9 +1,24 @@
-import { CodeLens, Position, Range } from 'vscode-languageserver'
-import { Describe, Node, Package, Test, Program } from 'wollok-ts'
+import { CodeLens, CodeLensParams, Position, Range } from 'vscode-languageserver'
+import { Describe, Node, Package, Test, Program, Environment } from 'wollok-ts'
 import { is } from 'wollok-ts/dist/extensions'
-import { toVSCRange } from '../utils/text-documents'
+import { getWollokFileExtension, packageFromURI, toVSCRange } from '../utils/text-documents'
 import { fqnRelativeToPackage } from '../utils/vm/wollok'
 
+
+export const codeLenses = (environment: Environment) => (params: CodeLensParams): CodeLens[] | null => {
+  const fileExtension = getWollokFileExtension(params.textDocument.uri)
+  const file = packageFromURI(params.textDocument.uri, environment)
+  if (!file) return null
+
+  switch (fileExtension) {
+    case 'wpgm':
+      return getProgramCodeLenses(file)
+    case 'wtest':
+      return getTestCodeLenses(file)
+    default:
+      return null
+  }
+}
 
 export const getProgramCodeLenses = (file: Package): CodeLens[] =>
   file.members.filter(is(Program)).map(program => ({

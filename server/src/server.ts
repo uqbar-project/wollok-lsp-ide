@@ -20,7 +20,6 @@ import { typeDescriptionOnHover } from './functionalities/hover'
 import { requestIsRenamable as isRenamable, rename } from './functionalities/rename'
 import { documentSymbols, workspaceSymbols } from './functionalities/symbols'
 import {
-  codeLenses,
   completions,
   validateTextDocument,
 } from './linter'
@@ -28,6 +27,7 @@ import { initializeSettings, WollokLSPSettings } from './settings'
 import { ProgressReporter } from './utils/progress-reporter'
 import { EnvironmentProvider } from './utils/vm/environment'
 import { logger } from './utils/logger'
+import { codeLenses } from './functionalities/code-lens'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
