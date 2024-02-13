@@ -125,7 +125,7 @@ export const codeLenses = (environment: Environment) => (params: CodeLensParams)
   }
 }
 
-const generateErrorForFile = (connection: Connection, textDocument: TextDocument) => {
+export const generateErrorForFile = (connection: Connection, textDocument: TextDocument): void => {
   const documentUri = wollokURI(textDocument.uri)
   const content = textDocument.getText()
 
