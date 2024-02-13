@@ -14,19 +14,19 @@ import {
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node'
 import { Environment } from 'wollok-ts'
+import { definition } from './functionalities/definition'
 import { formatDocument, formatRange } from './functionalities/formatter'
+import { typeDescriptionOnHover } from './functionalities/hover'
+import { requestIsRenamable as isRenamable, rename } from './functionalities/rename'
+import { documentSymbols, workspaceSymbols } from './functionalities/symbols'
 import {
   codeLenses,
   completions,
   validateTextDocument,
 } from './linter'
-import { documentSymbols, workspaceSymbols } from './functionalities/symbols'
-import { definition } from './functionalities/definition'
 import { initializeSettings, WollokLSPSettings } from './settings'
 import { ProgressReporter } from './utils/progress-reporter'
 import { EnvironmentProvider } from './utils/vm/environment'
-import { rename, requestIsRenamable as isRenamable } from './functionalities/rename'
-import { logger } from './utils/logger'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -98,6 +98,7 @@ connection.onInitialize((params: InitializeParams) => {
       definitionProvider: true,
       documentSymbolProvider: true,
       workspaceSymbolProvider: true,
+      hoverProvider: true,
       renameProvider: { prepareProvider: true },
       documentFormattingProvider: true,
       documentRangeFormattingProvider: true,
@@ -142,13 +143,7 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
       environmentProvider.$environment.getValue()!
     )
   } catch (e) {
-    const message = `✘ Failed to rebuild document: ${e}`
-    logger.error({
-      level: 'error',
-      file: change.document.uri,
-      message,
-    })
-    connection.console.error(message)
+    connection.console.error(`✘ Failed to rebuild document: ${e}`)
   }
 }
 // The content of a text document has changed. This event is emitted
@@ -186,6 +181,7 @@ const handlers: readonly [
   [connection.onCompletion, completions],
   [connection.onPrepareRename, isRenamable],
   [connection.onRenameRequest, rename(documents)],
+  [connection.onHover, typeDescriptionOnHover],
 ]
 
 for(const [handlerRegistration, requestHandler] of handlers){

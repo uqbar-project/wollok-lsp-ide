@@ -26,7 +26,6 @@ import {
 } from './utils/text-documents'
 import { isNodeURI, relativeFilePath, wollokURI } from './utils/vm/wollok'
 import { cursorNode } from './utils/text-documents'
-import { logger } from './utils/logger'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -81,16 +80,12 @@ export const validateTextDocument =
       const documentUri = relativeFilePath(textDocument.uri)
       const timeMeasurer = new TimeMeasurer()
       const problems = validate(environment)
-      timeMeasurer.addTime(`Building environment for ${documentUri}`)
-
       sendDiagnostics(connection, problems, allDocuments)
       timeMeasurer.addTime(`Validating ${documentUri}`)
 
+      sendDiagnostics(connection, problems, allDocuments)
       timeMeasurer.finalReport()
     } catch (e) {
-      logger.error({
-        message: `✘ Failed to build ${relativeFilePath(textDocument.uri)}: ${e}`,
-      })
       generateErrorForFile(connection, textDocument)
     }
   }

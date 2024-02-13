@@ -1,9 +1,12 @@
+import { BehaviorSubject } from 'rxjs'
 import { Connection } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, buildEnvironment } from 'wollok-ts'
+import { inferTypes } from 'wollok-ts/dist/typeSystem/constraintBasedTypeSystem'
 import { ProgressReporter } from '../progress-reporter'
 import { wollokURI } from './wollok'
-import { BehaviorSubject } from 'rxjs'
+import { TimeMeasurer } from '../../time-measurer'
+import { logger } from '../logger'
 
 export class EnvironmentProvider {
   readonly $environment = new BehaviorSubject<Environment | null>(null)
@@ -28,9 +31,24 @@ export class EnvironmentProvider {
   }
 
   private buildEnvironmentFrom(files: Parameters<typeof buildEnvironment>[0], baseEnvironment?: Environment): Environment {
-    this.buildProgressReporter.begin()
-    const environment = buildEnvironment(files, baseEnvironment)
-    this.buildProgressReporter.end()
-    return environment
+    try {
+      this.buildProgressReporter.begin()
+      const timeMeasurer = new TimeMeasurer()
+      const environment = buildEnvironment(files, baseEnvironment)
+      timeMeasurer.addTime('Building environment')
+      inferTypes(environment)
+      timeMeasurer.addTime('Inferring types')
+      this.buildProgressReporter.end()
+      timeMeasurer.finalReport()
+      return environment
+    } catch (error) {
+      const message = `✘ Failed to build environment: ${error}`
+      logger.error({
+        level: 'error',
+        files: files.map(file => file.name),
+        message,
+      })
+      throw error
+    }
   }
 }
