@@ -74,8 +74,6 @@ export const validateTextDocument =
       const problems = validate(environment)
       sendDiagnostics(connection, problems, allDocuments)
       timeMeasurer.addTime(`Validating ${documentUri}`)
-
-      sendDiagnostics(connection, problems, allDocuments)
       timeMeasurer.finalReport()
     } catch (e) {
       generateErrorForFile(connection, textDocument)
