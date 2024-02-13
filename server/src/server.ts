@@ -27,6 +27,7 @@ import {
 import { initializeSettings, WollokLSPSettings } from './settings'
 import { ProgressReporter } from './utils/progress-reporter'
 import { EnvironmentProvider } from './utils/vm/environment'
+import { logger } from './utils/logger'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -54,16 +55,23 @@ const requestContext = combineLatest([environmentProvider.$environment.pipe(filt
 
 const requestProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-request', title: 'Processing Request...' })
 
-function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return, PR, void>{
+function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void>{
   return (params, cancel, workDoneProgress, resultProgress) => {
     requestProgressReporter.begin()
-    const result = requestHandler(params, cancel, workDoneProgress, resultProgress)
-    requestProgressReporter.end()
-    return result
+    try {
+      const result = requestHandler(params, cancel, workDoneProgress, resultProgress)
+      return result
+    } catch(e) {
+      logger.error('✘ Failed to process request', e)
+      return null
+    } finally {
+      requestProgressReporter.end()
+    }
+
   }
 }
 
-function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: Environment, settings: ClientConfigurations) => ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return, PR, void>{
+function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: Environment, settings: ClientConfigurations) => ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void>{
   return (params, cancel, workDoneProgress, resultProgress) => {
     requestProgressReporter.begin()
     return new Promise(resolve => {
@@ -150,7 +158,13 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(rebuildTextDocument)
 
-documents.onDidOpen(rebuildTextDocument)
+documents.onDidOpen((change) => {
+  try {
+    rebuildTextDocument(change)
+  } catch(e) {
+    connection.console.error(`✘ Failed to rebuild document: ${e}`)
+  }
+})
 
 connection.onRequest((change) => {
   if (change === 'STRONG_FILES_CHANGED') {

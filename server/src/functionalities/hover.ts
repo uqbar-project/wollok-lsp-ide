@@ -1,17 +1,16 @@
 import { Hover, HoverParams } from 'vscode-languageserver'
 import { Body, Environment, print } from 'wollok-ts'
 import { cursorNode, toVSCRange } from '../utils/text-documents'
+import { logger } from '../utils/logger'
 
 type TypeDescriptionResponse = Hover | null
 
 export const typeDescriptionOnHover = (environment: Environment) => (params: HoverParams): TypeDescriptionResponse => {
-  let node = cursorNode(environment, params.position, params.textDocument)
-
-  if(node.is(Body)){
-    node = node.parent
-  }
-
-  try{
+  try {
+    let node = cursorNode(environment, params.position, params.textDocument)
+    if(node.is(Body)){
+      node = node.parent
+    }
 
     return {
       contents: [
@@ -26,7 +25,8 @@ export const typeDescriptionOnHover = (environment: Environment) => (params: Hov
       ],
       range: node.sourceMap ? toVSCRange(node.sourceMap) : undefined,
     }
-  } catch {
+  } catch(e) {
+    logger.error('Failed to get type description', e)
     return null
   }
 }
