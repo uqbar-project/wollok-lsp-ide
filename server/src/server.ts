@@ -157,13 +157,7 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(rebuildTextDocument)
 
-documents.onDidOpen((change) => {
-  try {
-    rebuildTextDocument(change)
-  } catch(e) {
-    connection.console.error(`✘ Failed to rebuild document: ${e}`)
-  }
-})
+documents.onDidOpen(rebuildTextDocument)
 
 connection.onRequest((change) => {
   if (change === 'STRONG_FILES_CHANGED') {
