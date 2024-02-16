@@ -4,7 +4,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, buildEnvironment } from 'wollok-ts'
 import { inferTypes } from 'wollok-ts/dist/typeSystem/constraintBasedTypeSystem'
 import { ProgressReporter } from '../progress-reporter'
-import { wollokURI } from './wollok'
+import { documentToFile, wollokURI } from './wollok'
 import { TimeMeasurer } from '../../time-measurer'
 import { logger } from '../logger'
 import { generateErrorForFile } from '../../linter'
@@ -26,10 +26,7 @@ export class EnvironmentProvider {
   }
 
   private buildEnvironmentFrom(documents: TextDocument[], baseEnvironment?: Environment): Environment {
-    const files: Parameters<typeof buildEnvironment>[0] = documents.map(document => ({
-        name: wollokURI(document.uri),
-        content: document.getText(),
-    }))
+    const files: Parameters<typeof buildEnvironment>[0] = documents.map(documentToFile)
     this.buildProgressReporter.begin()
     const timeMeasurer = new TimeMeasurer()
     try {
