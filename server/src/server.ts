@@ -59,8 +59,7 @@ function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Pa
   return (params, cancel, workDoneProgress, resultProgress) => {
     requestProgressReporter.begin()
     try {
-      const result = requestHandler(params, cancel, workDoneProgress, resultProgress)
-      return result
+      return requestHandler(params, cancel, workDoneProgress, resultProgress)
     } catch(e) {
       logger.error('✘ Failed to process request', e)
       return null
