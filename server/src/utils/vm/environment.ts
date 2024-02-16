@@ -34,7 +34,6 @@ export class EnvironmentProvider {
       timeMeasurer.addTime('Building environment')
       inferTypes(environment)
       timeMeasurer.addTime('Inferring types')
-      this.buildProgressReporter.end()
       return environment
     } catch (error) {
       const message = `✘ Failed to build environment: ${error}`
