@@ -20,13 +20,14 @@ import { typeDescriptionOnHover } from './functionalities/hover'
 import { requestIsRenamable as isRenamable, rename } from './functionalities/rename'
 import { documentSymbols, workspaceSymbols } from './functionalities/symbols'
 import {
-  codeLenses,
   completions,
   validateTextDocument,
 } from './linter'
 import { initializeSettings, WollokLSPSettings } from './settings'
 import { ProgressReporter } from './utils/progress-reporter'
 import { EnvironmentProvider } from './utils/vm/environment'
+import { logger } from './utils/logger'
+import { codeLenses } from './functionalities/code-lens'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -54,16 +55,22 @@ const requestContext = combineLatest([environmentProvider.$environment.pipe(filt
 
 const requestProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-request', title: 'Processing Request...' })
 
-function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return, PR, void>{
+function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void>{
   return (params, cancel, workDoneProgress, resultProgress) => {
     requestProgressReporter.begin()
-    const result = requestHandler(params, cancel, workDoneProgress, resultProgress)
-    requestProgressReporter.end()
-    return result
+    try {
+      return requestHandler(params, cancel, workDoneProgress, resultProgress)
+    } catch(e) {
+      logger.error('✘ Failed to process request', e)
+      return null
+    } finally {
+      requestProgressReporter.end()
+    }
+
   }
 }
 
-function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: Environment, settings: ClientConfigurations) => ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return, PR, void>{
+function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: Environment, settings: ClientConfigurations) => ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void>{
   return (params, cancel, workDoneProgress, resultProgress) => {
     requestProgressReporter.begin()
     return new Promise(resolve => {

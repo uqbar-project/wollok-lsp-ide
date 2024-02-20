@@ -2,6 +2,7 @@ import { DocumentSymbol, DocumentSymbolParams, SymbolKind, WorkspaceSymbol, Work
 import { Environment, Field, Method, Module, Node, Package, Program, Test, Variable } from 'wollok-ts'
 import { packageFromURI, toVSCRange } from '../utils/text-documents'
 import { workspacePackage } from '../utils/vm/wollok'
+import { logger } from '../utils/logger'
 
 type Symbolyzable = Program | Test | Module | Variable | Field | Method | Test
 
@@ -11,8 +12,10 @@ export const documentSymbols = (environment: Environment) => (params: DocumentSy
     return []
   }
   const document = packageFromURI(params.textDocument.uri, environment)
-  if (!document)
-    throw new Error('Could not produce symbols: document not found')
+  if (!document){
+    logger.error('Could not produce symbols: document not found')
+    return []
+  }
   return documentSymbolsFor(document)
 }
 

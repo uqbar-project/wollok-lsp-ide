@@ -1,6 +1,4 @@
 import {
-  CodeLens,
-  CodeLensParams,
   CompletionItem,
   CompletionParams,
   Connection,
@@ -12,20 +10,14 @@ import { Environment, Import, Problem, validate } from 'wollok-ts'
 import { List } from 'wollok-ts/dist/extensions'
 import { completionsForNode } from './functionalities/autocomplete/node-completion'
 import { completeMessages } from './functionalities/autocomplete/send-completion'
-import {
-  getProgramCodeLenses,
-  getTestCodeLenses,
-} from './functionalities/code-lens'
 import { reportValidationMessage } from './functionalities/reporter'
 import { updateDocumentSettings } from './settings'
 import { TimeMeasurer } from './time-measurer'
 import {
-  getWollokFileExtension,
-  packageFromURI,
+  cursorNode,
   trimIn,
 } from './utils/text-documents'
 import { isNodeURI, relativeFilePath, wollokURI } from './utils/vm/wollok'
-import { cursorNode } from './utils/text-documents'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -82,8 +74,6 @@ export const validateTextDocument =
       const problems = validate(environment)
       sendDiagnostics(connection, problems, allDocuments)
       timeMeasurer.addTime(`Validating ${documentUri}`)
-
-      sendDiagnostics(connection, problems, allDocuments)
       timeMeasurer.finalReport()
     } catch (e) {
       generateErrorForFile(connection, textDocument)
@@ -110,22 +100,7 @@ export const completions = (environment: Environment) => (
   return result
 }
 
-export const codeLenses = (environment: Environment) => (params: CodeLensParams): CodeLens[] | null => {
-  const fileExtension = getWollokFileExtension(params.textDocument.uri)
-  const file = packageFromURI(params.textDocument.uri, environment)
-  if (!file) return null
-
-  switch (fileExtension) {
-    case 'wpgm':
-      return getProgramCodeLenses(file)
-    case 'wtest':
-      return getTestCodeLenses(file)
-    default:
-      return null
-  }
-}
-
-const generateErrorForFile = (connection: Connection, textDocument: TextDocument) => {
+export const generateErrorForFile = (connection: Connection, textDocument: TextDocument): void => {
   const documentUri = wollokURI(textDocument.uri)
   const content = textDocument.getText()
 

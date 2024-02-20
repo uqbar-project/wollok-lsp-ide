@@ -4,51 +4,51 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, buildEnvironment } from 'wollok-ts'
 import { inferTypes } from 'wollok-ts/dist/typeSystem/constraintBasedTypeSystem'
 import { ProgressReporter } from '../progress-reporter'
-import { wollokURI } from './wollok'
+import { documentToFile, wollokURI } from './wollok'
 import { TimeMeasurer } from '../../time-measurer'
 import { logger } from '../logger'
+import { generateErrorForFile } from '../../linter'
 
 export class EnvironmentProvider {
   readonly $environment = new BehaviorSubject<Environment | null>(null)
   private buildProgressReporter: ProgressReporter
 
-  constructor(connection: Connection) {
+  constructor(private connection: Connection) {
     this.buildProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-build', title: 'Wollok Building...' })
   }
 
   updateEnvironmentWith(document: TextDocument): void {
-    const uri = wollokURI(document.uri)
-    const content = document.getText()
-    const file: { name: string, content: string } = {
-      name: uri,
-      content: content,
-    }
-    this.$environment.next(this.buildEnvironmentFrom([file], this.$environment.getValue() ?? undefined))
+    this.$environment.next(this.buildEnvironmentFrom([document], this.$environment.getValue() ?? undefined))
   }
 
   resetEnvironment(): void {
     return this.$environment.next(this.buildEnvironmentFrom([]))
   }
 
-  private buildEnvironmentFrom(files: Parameters<typeof buildEnvironment>[0], baseEnvironment?: Environment): Environment {
+  private buildEnvironmentFrom(documents: TextDocument[], baseEnvironment?: Environment): Environment {
+    const files: Parameters<typeof buildEnvironment>[0] = documents.map(documentToFile)
+    this.buildProgressReporter.begin()
+    const timeMeasurer = new TimeMeasurer()
     try {
-      this.buildProgressReporter.begin()
-      const timeMeasurer = new TimeMeasurer()
       const environment = buildEnvironment(files, baseEnvironment)
       timeMeasurer.addTime('Building environment')
       inferTypes(environment)
       timeMeasurer.addTime('Inferring types')
-      this.buildProgressReporter.end()
-      timeMeasurer.finalReport()
       return environment
     } catch (error) {
       const message = `✘ Failed to build environment: ${error}`
+      documents.forEach(document => {
+        generateErrorForFile(this.connection, document)
+      })
       logger.error({
         level: 'error',
         files: files.map(file => file.name),
         message,
       })
       throw error
+    } finally {
+      this.buildProgressReporter.end()
+      timeMeasurer.finalReport()
     }
   }
 }

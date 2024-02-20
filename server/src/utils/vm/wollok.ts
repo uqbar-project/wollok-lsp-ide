@@ -1,7 +1,8 @@
 import { is } from 'wollok-ts/dist/extensions'
-import { Class, Entity, Environment, Import, LiteralValue, Method, Module, Node, Package, Reference } from 'wollok-ts'
+import { Class, Entity, Environment, FileContent, Import, LiteralValue, Method, Module, Node, Package, Reference } from 'wollok-ts'
 import fs from 'fs'
 import path from 'path'
+import { TextDocument } from 'vscode-languageserver-textdocument'
 
 export const OBJECT_CLASS = 'wollok.lang.Object'
 
@@ -50,6 +51,11 @@ export const fqnRelativeToPackage =
     node.fullyQualifiedName.replace(pckg.fullyQualifiedName, pckg.name)
 
 export const wollokURI = (uri: string): string => uri.replace('file:///', '')
+
+export const documentToFile = (doc: TextDocument): FileContent => ({
+  name: wollokURI(doc.uri),
+  content: doc.getText(),
+})
 
 export const isNodeURI = (node: Node, uri: string): boolean => node.sourceFileName == wollokURI(uri)
 
