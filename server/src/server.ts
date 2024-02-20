@@ -28,6 +28,7 @@ import { ProgressReporter } from './utils/progress-reporter'
 import { EnvironmentProvider } from './utils/vm/environment'
 import { logger } from './utils/logger'
 import { codeLenses } from './functionalities/code-lens'
+import { references } from './functionalities/references'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -166,10 +167,6 @@ connection.onRequest((change) => {
   }
 })
 
-connection.onReferences((_params) => {
-  return []
-})
-
 config.subscribe(() => {
     // Revalidate all open text documents
     documents.all().forEach(validateTextDocument(connection, documents.all()))
@@ -189,6 +186,7 @@ const handlers: readonly [
   [connection.onPrepareRename, isRenamable],
   [connection.onRenameRequest, rename(documents)],
   [connection.onHover, typeDescriptionOnHover],
+  [connection.onReferences, references],
 ]
 
 for(const [handlerRegistration, requestHandler] of handlers){
