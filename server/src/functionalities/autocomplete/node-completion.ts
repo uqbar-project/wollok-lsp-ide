@@ -1,7 +1,7 @@
 import { CompletionItem } from 'vscode-languageserver'
 import { Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin, Describe, Program, Test, Reference, New, Import, Entity } from 'wollok-ts'
 import { is, match, when } from 'wollok-ts/dist/extensions'
-import { classCompletionItem, fieldCompletionItem, initializerCompletionItem, parameterCompletionItem, singletonCompletionItem, entityCompletionItem } from './autocomplete'
+import { classCompletionItem, fieldCompletionItem, initializerCompletionItem, parameterCompletionItem, singletonCompletionItem, entityCompletionItem, withImport } from './autocomplete'
 import { optionModules, optionImports, optionDescribes, optionTests, optionReferences, optionMethods, optionPrograms, optionAsserts, optionConstReferences, optionInitialize, optionPropertiesAndReferences } from './options-autocomplete'
 import { implicitImport, parentImport } from '../../utils/vm/wollok'
 
@@ -58,7 +58,7 @@ const completeMethod = (node: Method): CompletionItem[] => {
   return [
     ...node.parameters.map(parameterCompletionItem),
     ...fields.map(fieldCompletionItem),
-    ...(node.environment.descendants.filter(node => node.is(Singleton) && !!node.name) as Singleton[]).map(singletonCompletionItem),
+    ...(node.environment.descendants.filter(node => node.is(Singleton) && !!node.name) as Singleton[]).map(withImport(singletonCompletionItem)(node)),
   ]
 }
 
@@ -73,11 +73,11 @@ const completeReference = (node: Reference<Class>): CompletionItem[] => {
   const nodeImport = parentImport(node)
   if (nodeImport) return completeImports(nodeImport)
   const classes = node.environment.descendants.filter(child => child.is(Class) && !child.isAbstract) as Class[]
-  return classes.map(classCompletionItem).concat(completeForParent(node))
+  return classes.map(withImport(classCompletionItem)(node)).concat(completeForParent(node))
 }
 
 const completeNew = (node: New): CompletionItem[] =>
-  node.instantiated.target && node.instantiated.target.is(Class) ? [initializerCompletionItem(node.instantiated.target)] : []
+  node.instantiated.target && node.instantiated.target.is(Class) ? [withImport(initializerCompletionItem)(node)(node.instantiated.target)] : []
 
 const availableForImport = (node: Node) => (node.is(Class) || node.is(Singleton) || node.is(Reference) || node.is(Mixin)) && node.name && (node as Entity).fullyQualifiedName && !implicitImport(node)
 

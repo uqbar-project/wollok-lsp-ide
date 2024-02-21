@@ -91,3 +91,5 @@ export const projectFQN = (node: Entity): string => {
 export const targettingAt = <T extends Node>(aNode: T) => (anotherNode: Node): anotherNode is Reference<T>  => {
   return anotherNode.is(Reference) && anotherNode.target === aNode
 }
+
+export const parentPackage = (node: Node): Package | undefined => node.ancestors.find(is(Package))
