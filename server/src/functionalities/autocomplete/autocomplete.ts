@@ -1,8 +1,32 @@
-import { CompletionItem, CompletionItemKind, InsertTextFormat } from 'vscode-languageserver'
-import { Class, Entity, Field, Method, Mixin, Module, Name, Node, Parameter, Reference, Singleton } from 'wollok-ts'
+import { CompletionItem, CompletionItemKind, CompletionParams, InsertTextFormat } from 'vscode-languageserver'
+import { Class, Entity, Environment, Field, Import, Method, Mixin, Module, Name, Node, Parameter, Reference, Singleton } from 'wollok-ts'
 import { OBJECT_CLASS, parentModule, projectFQN } from '../../utils/vm/wollok'
 import { match, when } from 'wollok-ts/dist/extensions'
+import { TimeMeasurer } from '../../time-measurer'
+import { cursorNode } from '../../utils/text-documents'
+import { completionsForNode } from './node-completion'
+import { completeMessages } from './send-completion'
 
+
+export const completions = (environment: Environment) => (
+  params: CompletionParams,
+): CompletionItem[] => {
+  const timeMeasurer = new TimeMeasurer()
+
+  const { position, textDocument, context } = params
+  const selectionNode = cursorNode(environment, position, textDocument)
+
+  timeMeasurer.addTime(`Autocomplete - ${selectionNode?.kind}`)
+
+  const autocompleteMessages = context?.triggerCharacter === '.' && !selectionNode.parent.is(Import)
+  if (autocompleteMessages) {
+    // ignore dot
+    position.character -= 1
+  }
+  const result = autocompleteMessages ? completeMessages(environment, selectionNode) : completionsForNode(selectionNode)
+  timeMeasurer.finalReport()
+  return result
+}
 
 // -----------------
 // -----MAPPERS-----

@@ -14,21 +14,21 @@ import {
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node'
 import { Environment } from 'wollok-ts'
+import { codeLenses } from './functionalities/code-lens'
 import { definition } from './functionalities/definition'
 import { formatDocument, formatRange } from './functionalities/formatter'
 import { typeDescriptionOnHover } from './functionalities/hover'
+import { references } from './functionalities/references'
 import { requestIsRenamable as isRenamable, rename } from './functionalities/rename'
 import { documentSymbols, workspaceSymbols } from './functionalities/symbols'
 import {
-  completions,
   validateTextDocument,
 } from './linter'
 import { initializeSettings, WollokLSPSettings } from './settings'
+import { logger } from './utils/logger'
 import { ProgressReporter } from './utils/progress-reporter'
 import { EnvironmentProvider } from './utils/vm/environment'
-import { logger } from './utils/logger'
-import { codeLenses } from './functionalities/code-lens'
-import { references } from './functionalities/references'
+import { completions } from './functionalities/autocomplete/autocomplete'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
