@@ -26,7 +26,7 @@ const validationMessagesEn: Message = {
   shouldInitializeAllAttributes:
     'You must provide initial value to the following references: {0}',
   shouldImplementAllMethodsInHierarchy:
-    'Inconsistent hierarchy. Methods on mixins without super implementation on hierarchy',
+    'Methods in hierachy without super implementation: {0}',
   shouldUseSelfAndNotSingletonReference:
     "Don't use the name within the object. Use 'self' instead.",
   shouldNotReassignConst: 'Cannot modify constants',
@@ -115,7 +115,7 @@ const validationMessagesEs: Message = {
   shouldInitializeAllAttributes:
     'Debe proveer un valor inicial a las siguientes referencias: {0}',
   shouldImplementAllMethodsInHierarchy:
-    'Jerarqu\u00EDa inconsistente. Existen m\u00E9todos en mixins que requieren implementaci\u00F3n en super',
+    'Existen m\u00E9todos en la jerarqu\u00EDa que requieren implementaci\u00F3n en super: {0}',
   shouldUseSelfAndNotSingletonReference:
     "No debe usar el nombre del objeto dentro del mismo. Use 'self'.",
   shouldNotReassignConst: 'No se pueden modificar las referencias constantes',
