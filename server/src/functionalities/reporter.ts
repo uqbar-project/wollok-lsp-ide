@@ -67,6 +67,7 @@ const validationMessagesEn: Message = {
     'Method without body. You must implement it',
   shouldNotUseVoidMethodAsValue:
     'Message send "{0}" produces no value (missing return in method?)',
+  shouldNotAssignValueInLoop: 'Infinite loop in value assignment',
   shouldInitializeGlobalReference: 'Reference is never initialized',
   shouldNotDefineUnusedVariables: 'Unused variable',
   shouldNotDefineGlobalMutableVariables:
@@ -161,6 +162,7 @@ const validationMessagesEs: Message = {
     'El método debe tener una implementación',
   shouldNotUseVoidMethodAsValue:
     'El mensaje "{0}" no retorna ning\u00FAn valor (quiz\u00E1s te falte un return en el m\u00E9todo)',
+  shouldNotAssignValueInLoop: 'Se genera un loop infinito en la asignaci\u00F3n del valor',
   shouldInitializeGlobalReference: 'La referencia nunca se inicializa',
   shouldNotDefineUnusedVariables: 'Esta variable nunca se utiliza',
   shouldNotDefineGlobalMutableVariables:
