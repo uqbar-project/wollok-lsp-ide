@@ -8,6 +8,8 @@ type TypeDescriptionResponse = Hover | null
 export const typeDescriptionOnHover = (environment: Environment) => (params: HoverParams): TypeDescriptionResponse => {
   try {
     let node = cursorNode(environment, params.position, params.textDocument)
+    if (!node) return null
+
     if(node.is(Body)){
       node = node.parent
     }
