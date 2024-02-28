@@ -48,7 +48,8 @@ export const withImport = <T extends Node>(mapper: CompletionItemMapper<T>) => (
     importedPackage &&
     originalPackage &&
     importedPackage !== originalPackage &&
-    !originalPackage.imports.some(imported => imported.entity.target === importedPackage)
+    !originalPackage.imports.some(imported => imported.entity.target === importedPackage) &&
+    !importedPackage.isGlobalPackage
   ) {
     result.detail = `Add import ${importedPackage.fileName ? relativeFilePath(packageToURI(importedPackage)) : importedPackage.name}${result.detail ? ` - ${result.detail}` : ''}`
     result.additionalTextEdits = (result.additionalTextEdits ?? []).concat(
