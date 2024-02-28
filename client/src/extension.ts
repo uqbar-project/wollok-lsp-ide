@@ -91,10 +91,7 @@ export function activate(context: ExtensionContext): void {
 }
 
 export function deactivate(): Thenable<void> | undefined {
-  if (!client) {
-    return undefined
-  }
-  return client.stop()
+  return client?.stop()
 }
 
 async function validateWorkspace() {
