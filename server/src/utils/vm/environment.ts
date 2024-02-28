@@ -36,6 +36,8 @@ export class EnvironmentProvider {
       timeMeasurer.addTime('Inferring types')
       return environment
     } catch (error) {
+
+      // todo: remove this catch and move the logs to server.ts
       const message = `✘ Failed to build environment: ${error}`
       documents.forEach(document => {
         generateErrorForFile(this.connection, document)
