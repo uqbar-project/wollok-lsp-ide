@@ -1,7 +1,7 @@
 import { Location, ReferenceParams } from 'vscode-languageserver'
 import { Environment, Method, Node, Reference, Send, Singleton } from 'wollok-ts'
 import { cursorNode, nodeToLocation } from '../utils/text-documents'
-import { targettingAt } from '../utils/vm/wollok'
+import { targettingAt } from 'wollok-ts'
 
 export const references = (environment: Environment) => (params: ReferenceParams): Location[] | null => {
   const node = cursorNode(environment, params.position, params.textDocument)

@@ -1,7 +1,5 @@
 import { CompletionItem } from 'vscode-languageserver'
-import { Body, Describe, Environment, Literal, Method, New, Node, Reference, Singleton } from 'wollok-ts'
-import { List, is } from 'wollok-ts/dist/extensions'
-import { allAvailableMethods, allMethods, firstNodeWithProblems, literalValueToClass } from '../../utils/vm/wollok'
+import { Body, Describe, Environment, Literal, Method, New, Node, Reference, Singleton, List, is, CLOSURE_EVALUATE_METHOD, allAvailableMethods, allMethods, firstNodeWithProblems, literalValueToClass } from 'wollok-ts'
 import { methodCompletionItem } from './autocomplete'
 
 export function completeMessages(environment: Environment, node: Node): CompletionItem[] {
@@ -48,5 +46,5 @@ function fileValidForAutocomplete(sourceFileName: string | undefined) {
 }
 
 function methodNameValidForAutocomplete(method: Method) {
-  return !isSymbol(method.name) && method.name !== '<apply>'
+  return !isSymbol(method.name) && method.name !== CLOSURE_EVALUATE_METHOD
 }

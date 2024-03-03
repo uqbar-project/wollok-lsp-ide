@@ -1,16 +1,16 @@
 import { Location, TextDocumentPositionParams } from 'vscode-languageserver'
-import { Environment, Method, Module, New, Node, Reference, Self, Send, Singleton, Super } from 'wollok-ts'
-import { is, match, when } from 'wollok-ts/dist/extensions'
+import { Environment, Method, Module, New, Node, Reference, Self, Send, Singleton, Super, is, match, when } from 'wollok-ts'
 import { getNodesByPosition, nodeToLocation } from '../utils/text-documents'
 
 export const definition = (environment: Environment) => (
   textDocumentPosition: TextDocumentPositionParams
-): Location[] => {
-  const cursorNodes = getNodesByPosition(environment, textDocumentPosition)
-  const definitions = getNodeDefinition(environment)(cursorNodes.reverse()[0])
-  return definitions.map(nodeToLocation)
-}
+  ): Location[] => {
+    const cursorNodes = getNodesByPosition(environment, textDocumentPosition)
+    const definitions = getNodeDefinition(environment)(cursorNodes.reverse()[0])
+    return definitions.map(nodeToLocation)
+  }
 
+// WOLLOK-TS: hablar con Nahue/Ivo, para mí desde acá para abajo todo se podria migrar a wollok-ts
 export const getNodeDefinition = (environment: Environment) => (node: Node): Node[] => {
   try {
     return match(node)(
@@ -29,7 +29,7 @@ function referenceDefinition(ref: Reference<Node>): Node | undefined {
 }
 
 
-const sendDefinitions = (environment: Environment) => ( send: Send): Method[] => {
+const sendDefinitions = (environment: Environment) => (send: Send): Method[] => {
   try {
     return match(send.receiver)(
       when(Reference)(node => {
@@ -66,14 +66,9 @@ function allMethodDefinitions(environment: Environment, send: Send): Method[] {
 
 
 // UTILS
-
 const moduleFinderWithBackup = (environment: Environment, send: Send) => (methodFinder: (module: Module) => Method[]) => {
   const module = send.ancestors.find(is(Module))
-  if(module) {
-    return methodFinder(module)
-  } else {
-    return allMethodDefinitions(environment, send)
-  }
+  return module ? methodFinder(module) : allMethodDefinitions(environment, send)
 }
 
 function definedOrEmpty<T>(value: T | undefined): T[] {

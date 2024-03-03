@@ -20,6 +20,7 @@ import {
 } from 'vscode-languageclient/node'
 import { subscribeWollokCommands } from './commands'
 import { allWollokFiles } from './utils'
+import { wollokLSPExtensionId } from './constants'
 
 let client: LanguageClient
 
@@ -48,7 +49,7 @@ export function activate(context: ExtensionContext): void {
     // Register the server for Wollok documents
     documentSelector: [{ scheme: 'file', language: 'wollok' }],
     synchronize: {
-      configurationSection: 'wollok-lsp-ide',
+      configurationSection: wollokLSPExtensionId,
       // Notify the server about file changes to '.clientrc files contained in the workspace
       fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
     },
@@ -59,7 +60,7 @@ export function activate(context: ExtensionContext): void {
 
   // Create the language client and start the client.
   client = new LanguageClient(
-    'wollok-lsp-ide',
+    wollokLSPExtensionId,
     'Wollok',
     serverOptions,
     clientOptions,
