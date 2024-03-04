@@ -3,7 +3,7 @@ import { Body, Describe, Environment, Literal, Method, New, Node, Reference, Sin
 import { methodCompletionItem } from './autocomplete'
 
 export function completeMessages(environment: Environment, node: Node): CompletionItem[] {
-  return methodPool(environment, node).map(method => methodCompletionItem(node, method))
+  return methodPool(environment, node).map((method: Method) => methodCompletionItem(node, method))
 }
 
 function methodPool(environment: Environment, node: Node): List<Method> {
@@ -34,7 +34,7 @@ function isSymbol(message: string) {
 }
 
 function allPossibleMethods(environment: Environment, node: Node): Method[] {
-  return allAvailableMethods(environment).filter(method => availableForAutocomplete(method, node))
+  return allAvailableMethods(environment).filter((method: Method) => availableForAutocomplete(method, node))
 }
 
 function availableForAutocomplete(method: Method, node: Node) {
