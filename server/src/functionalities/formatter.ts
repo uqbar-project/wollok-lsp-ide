@@ -1,9 +1,8 @@
 import { DocumentFormattingParams, DocumentRangeFormattingParams, Position, Range, TextEdit } from 'vscode-languageserver'
-import { Environment, Package, print } from 'wollok-ts'
-import { PrintingMalformedNodeError } from 'wollok-ts/dist/printer/exceptions'
+import { Environment, Package, print, PrintingMalformedNodeError } from 'wollok-ts'
+import { packageFromURI } from '../utils/text-documents'
 import { ClientConfigurations } from '../server'
 import { logger } from '../utils/logger'
-import { packageFromURI } from '../utils/text-documents'
 
 export const formatRange = (environment: Environment) => (params: DocumentRangeFormattingParams): TextEdit[] => {
   const file = getPackage(params, environment)
