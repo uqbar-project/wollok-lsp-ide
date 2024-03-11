@@ -1,6 +1,7 @@
 import { Location, Position, Range, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, Node, Package, SourceIndex, SourceMap } from 'wollok-ts'
+import { relativeFilePath } from './vm/wollok'
 
 // TODO: Refactor
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
@@ -76,13 +77,10 @@ export function trimIn(range: Range, textDocument: TextDocument): Range {
 }
 
 export const packageFromURI = (uri: string, environment: Environment): Package | undefined => {
-  const sanitizedURI = uri.replace('file:///', '')
+  const sanitizedURI = relativeFilePath(uri)
+  // TODO: Use projectFQN ?
   return environment.descendants.find(node => node.is(Package) && node.fileName === sanitizedURI) as Package | undefined
 }
-
-export const packageToURI = (pkg: Package): string => fileNameToURI(pkg.fileName!)
-
-export const fileNameToURI = (fileName: string): string => `file:///${fileName}`
 
 export const getWollokFileExtension = (uri: string): 'wlk' | 'wpgm' | 'wtest' => {
   const extension = uri.split('.').pop()
