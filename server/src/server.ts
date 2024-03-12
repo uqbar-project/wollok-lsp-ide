@@ -40,6 +40,7 @@ export type ClientConfigurations = {
   openInternalDynamicDiagram: boolean
   dynamicDiagramDarkMode: boolean,
   maxThreshold: number,
+  typeSystem: { enabled: boolean }
 }
 
 
@@ -52,6 +53,7 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
 const environmentProvider = new EnvironmentProvider(connection)
 const config = new Subject<ClientConfigurations>()
+config.forEach(config => environmentProvider.inferTypes = config.typeSystem.enabled)
 const requestContext = combineLatest([environmentProvider.$environment.pipe(filter(environment => environment != null)), config])
 
 const requestProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-request', title: 'Processing Request...' })
@@ -170,7 +172,8 @@ connection.onRequest((change) => {
 
 config.subscribe(() => {
     // Revalidate all open text documents
-    documents.all().forEach(validateTextDocument(connection, documents.all()))
+    environmentProvider.updateEnvironmentWith(...documents.all())
+    documents.all().forEach(doc => validateTextDocument(connection, documents.all())(doc)(environmentProvider.$environment.getValue()!))
 })
 
 const handlers: readonly [

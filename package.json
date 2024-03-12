@@ -138,6 +138,12 @@
           "default": 100,
           "description": "Maximum threshold in milliseconds: if an operation takes longer, it will be saved in the log file.",
           "order": 7
+        },
+        "wollokLSP.typeSystem.enabled": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Enable Type System (experimental)",
+          "default": false
         }
       }
     },
