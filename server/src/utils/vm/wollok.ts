@@ -59,14 +59,17 @@ export const isNodeURI = (node: Node, uri: string): boolean => node.sourceFileNa
 export const workspacePackage = (environment: Environment): Package =>
   environment.members[1]
 
+let _rootFolder: string
 export const rootFolder = (uri: string): string => {
-  let folderPath = uri
-  while (!fs.existsSync(folderPath + path.sep + 'package.json') && folderPath) {
-    const lastIndex = folderPath.lastIndexOf(path.sep)
-    if (!lastIndex) return ''
-    folderPath = folderPath.slice(0, lastIndex)
+  if (_rootFolder) return _rootFolder
+
+  _rootFolder = uri
+  while (!fs.existsSync(_rootFolder + path.sep + 'package.json') && _rootFolder) {
+    const lastIndex = _rootFolder.lastIndexOf(path.sep)
+    if (!lastIndex) return _rootFolder = ''
+    _rootFolder = _rootFolder.slice(0, lastIndex)
   }
-  return folderPath
+  return _rootFolder
 }
 
 export const relativeFilePath = (uri: string): string => {
@@ -77,8 +80,8 @@ export const relativeFilePath = (uri: string): string => {
 }
 
 export const uriFromRelativeFilePath = (relativeURI: string): string => {
-  const rootPath = rootFolder(relativeURI) // This is safe?
-  return 'file://' + path.join(rootPath, relativeURI)
+  // It is important to have _rootFolder cached!
+  return 'file://' + path.join(_rootFolder, relativeURI)
 }
 
 export const projectFQN = (node: Entity): string => {
