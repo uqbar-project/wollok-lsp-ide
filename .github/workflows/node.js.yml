@@ -27,15 +27,11 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm install
     - run: npm run compile
-    
-    #   we need to test for windows > 1.85.1, current version breaks
-    #   node 18.18.2 & vscode 1.84.2 works
-    # - name: Run headless test
-    #   if: matrix.os == 'windows-latest'
-    #   uses: coactions/setup-xvfb@v1
-    #   with:
-    #     run: npm run test-with-coverage:e2e
-    
+    - name: Run headless test
+      if: matrix.os == 'windows-latest'
+      uses: coactions/setup-xvfb@v1
+      with:
+        run: npm run test-with-coverage:e2e
     - name: Unit Tests
       run: npm run test-with-coverage:unit
     - name: Update server coverage badge
