@@ -1,7 +1,7 @@
 import { Location, Position, Range, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, Node, Package, SourceIndex, SourceMap } from 'wollok-ts'
-import { relativeFilePath } from './vm/wollok'
+import { relativeFilePath, uriFromRelativeFilePath } from './vm/wollok'
 
 // TODO: Refactor
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
@@ -58,7 +58,7 @@ export const nodeToLocation = (node: Node): Location => {
   }
 
   return {
-    uri: node.sourceFileName!,
+    uri: uriFromRelativeFilePath(node.sourceFileName!),
     range: toVSCRange(node.sourceMap),
   }
 }
