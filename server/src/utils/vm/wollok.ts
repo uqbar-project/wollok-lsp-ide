@@ -62,14 +62,18 @@ export const workspacePackage = (environment: Environment): Package =>
 let _rootFolder: string
 export const rootFolder = (uri: string): string => {
   if (_rootFolder) return _rootFolder
-
-  _rootFolder = uri
-  while (!fs.existsSync(_rootFolder + path.sep + 'package.json') && _rootFolder) {
-    const lastIndex = _rootFolder.lastIndexOf(path.sep)
-    if (!lastIndex) return _rootFolder = ''
-    _rootFolder = _rootFolder.slice(0, lastIndex)
-  }
+  _rootFolder = findPackageJSON(uri)
   return _rootFolder
+}
+
+export const findPackageJSON = (uri: string) => {
+  let baseUri = uri
+  while (!fs.existsSync(baseUri + path.sep + 'package.json') && baseUri) {
+    const lastIndex = baseUri.lastIndexOf(path.sep)
+    if (!lastIndex) return ''
+    baseUri = baseUri.slice(0, lastIndex)
+  }
+  return baseUri
 }
 
 export const relativeFilePath = (uri: string): string => {
