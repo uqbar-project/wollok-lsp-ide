@@ -23,7 +23,10 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
   )
   context.subscriptions.push(registerCLICommand('wollok.run.tests', runTests))
   context.subscriptions.push(
-    registerCLICommand('wollok.run.program', runProgram),
+    registerCLICommand('wollok.run.program', runProgram()),
+  )
+  context.subscriptions.push(
+    registerCLICommand('wollok.run.game', runProgram(true)),
   )
 }
 
@@ -31,9 +34,10 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
  * CLI Commands
  */
 
-export const runProgram = (fqn: string): Task =>
-  wollokCLITask('run program', 'Wollok run program', [
+export const runProgram = (isGame = false) => (fqn: string): Task =>
+  wollokCLITask('run program', `Wollok run ${isGame ? 'game' : 'program'}`, [
     'run',
+    ...isGame ? ['-g'] : [],
     `'${fqn}'`,
     '--skipValidations',
   ])

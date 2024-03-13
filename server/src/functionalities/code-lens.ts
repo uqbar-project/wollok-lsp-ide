@@ -20,14 +20,24 @@ export const codeLenses = (environment: Environment) => (params: CodeLensParams)
 }
 
 export const getProgramCodeLenses = (file: Package): CodeLens[] =>
-  file.members.filter(is(Program)).map(program => ({
-    range: toVSCRange(program.sourceMap!),
-    command: {
-      command: 'wollok.run.program',
-      title: 'Run program',
-      arguments: [program.fullyQualifiedName],
+  file.members.filter(is(Program)).flatMap(program => [
+    {
+      range: toVSCRange(program.sourceMap!),
+      command: {
+        command: 'wollok.run.game',
+        title: 'Run game',
+        arguments: [program.fullyQualifiedName],
+      },
     },
-  }))
+    {
+      range: toVSCRange(program.sourceMap!),
+      command: {
+        command: 'wollok.run.program',
+        title: 'Run program',
+        arguments: [program.fullyQualifiedName],
+      },
+    },
+  ])
 
 
 export const getTestCodeLenses = (file: Package): CodeLens[] => {
@@ -53,7 +63,7 @@ export const getTestCodeLenses = (file: Package): CodeLens[] => {
   ]
 }
 
-function buildTestCodeLens(range: Range, filter: string, title: string): CodeLens{
+function buildTestCodeLens(range: Range, filter: string, title: string): CodeLens {
   return {
     range,
     command: {
