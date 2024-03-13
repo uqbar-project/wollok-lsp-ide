@@ -1,8 +1,8 @@
-import { is } from 'wollok-ts/dist/extensions'
-import { Class, Entity, Environment, FileContent, Import, LiteralValue, Method, Module, Node, Package, Reference } from 'wollok-ts'
 import fs from 'fs'
 import path from 'path'
 import { TextDocument } from 'vscode-languageserver-textdocument'
+import { Class, Entity, Environment, FileContent, Import, LiteralValue, Method, Module, Node, Package, Reference } from 'wollok-ts'
+import { is } from 'wollok-ts/dist/extensions'
 
 export const OBJECT_CLASS = 'wollok.lang.Object'
 
@@ -60,13 +60,17 @@ export const workspacePackage = (environment: Environment): Package =>
   environment.members[1]
 
 let _rootFolder: string
+/** THIS FUNCTION IS ONLY FOR TESTING */
+export const _setRootFolder = (uri: string): void => {
+  _rootFolder = uri
+}
 export const rootFolder = (uri: string): string => {
   if (_rootFolder) return _rootFolder
   _rootFolder = findPackageJSON(uri)
   return _rootFolder
 }
 
-export const findPackageJSON = (uri: string) => {
+export const findPackageJSON = (uri: string): string => {
   let baseUri = uri
   while (!fs.existsSync(baseUri + path.sep + 'package.json') && baseUri) {
     const lastIndex = baseUri.lastIndexOf(path.sep)
