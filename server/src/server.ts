@@ -35,7 +35,7 @@ export type ClientConfigurations = {
   'cli-path': string
   language: "Spanish" | "English" | "Based on Local Environment",
   maxNumberOfProblems: number
-  trace: { server: "off" |  "messages" | "verbose" }
+  trace: { server: "off" | "messages" | "verbose" }
   openDynamicDiagramOnRepl: boolean
   openInternalDynamicDiagram: boolean
   dynamicDiagramDarkMode: boolean,
@@ -58,12 +58,12 @@ const requestContext = combineLatest([environmentProvider.$environment.pipe(filt
 
 const requestProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-request', title: 'Processing Request...' })
 
-function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void>{
+function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void> {
   return (params, cancel, workDoneProgress, resultProgress) => {
     requestProgressReporter.begin()
     try {
       return requestHandler(params, cancel, workDoneProgress, resultProgress)
-    } catch(e) {
+    } catch (e) {
       logger.error('✘ Failed to process request', e)
       return null
     } finally {
@@ -73,7 +73,7 @@ function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Pa
   }
 }
 
-function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: Environment, settings: ClientConfigurations) => ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void>{
+function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: Environment, settings: ClientConfigurations) => ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void> {
   return (params, cancel, workDoneProgress, resultProgress) => {
     requestProgressReporter.begin()
     return new Promise(resolve => {
@@ -171,34 +171,36 @@ connection.onRequest((change) => {
 })
 
 config.subscribe(() => {
-    // Revalidate all open text documents
-    environmentProvider.updateEnvironmentWith(...documents.all())
-    documents.all().forEach(doc => validateTextDocument(connection, documents.all())(doc)(environmentProvider.$environment.getValue()!))
+  // Revalidate all open text documents
+  environmentProvider.updateEnvironmentWith(...documents.all())
+  documents.all().forEach(doc =>
+    validateTextDocument(connection, documents.all())(doc)(environmentProvider.$environment.getValue()!)
+  )
 })
 
 const handlers: readonly [
-  (handler: GenericRequestHandler<any, any>)  =>  Disposable,
+  (handler: GenericRequestHandler<any, any>) => Disposable,
   (environment: Environment, settings: ClientConfigurations) => GenericRequestHandler<any, any>
 ][] = [
-  [connection.onDocumentSymbol, documentSymbols],
-  [connection.onWorkspaceSymbol, workspaceSymbols],
-  [connection.onCodeLens, codeLenses],
-  [connection.onDefinition, definition],
-  [connection.onDocumentFormatting, formatDocument],
-  [connection.onDocumentRangeFormatting, formatRange],
-  [connection.onCompletion, completions],
-  [connection.onPrepareRename, isRenamable],
-  [connection.onRenameRequest, rename(documents)],
-  [connection.onHover, typeDescriptionOnHover],
-  [connection.onReferences, references],
-]
+    [connection.onDocumentSymbol, documentSymbols],
+    [connection.onWorkspaceSymbol, workspaceSymbols],
+    [connection.onCodeLens, codeLenses],
+    [connection.onDefinition, definition],
+    [connection.onDocumentFormatting, formatDocument],
+    [connection.onDocumentRangeFormatting, formatRange],
+    [connection.onCompletion, completions],
+    [connection.onPrepareRename, isRenamable],
+    [connection.onRenameRequest, rename(documents)],
+    [connection.onHover, typeDescriptionOnHover],
+    [connection.onReferences, references],
+  ]
 
-for(const [handlerRegistration, requestHandler] of handlers){
+for (const [handlerRegistration, requestHandler] of handlers) {
   handlerRegistration(waitForFirstHandler(requestHandler))
 }
 
 requestContext.subscribe(([newEnvironment, newSettings]) => {
-  for(const [handlerRegistration, requestHandler] of handlers){
+  for (const [handlerRegistration, requestHandler] of handlers) {
     handlerRegistration(syncHandler(requestHandler(newEnvironment!, newSettings)))
   }
 })

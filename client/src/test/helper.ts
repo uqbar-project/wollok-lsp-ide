@@ -57,3 +57,7 @@ export async function setTestContent(content: string): Promise<boolean> {
   )
   return editor.edit((editBuilder) => editBuilder.replace(all, content))
 }
+
+export async function setConfiguration(section: string, value: any): Promise<any> {
+  return await workspace.getConfiguration('wollokLSP').update(section, value)
+}

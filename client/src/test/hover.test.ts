@@ -1,6 +1,6 @@
 import * as assert from 'assert'
 import { commands, Hover, MarkdownString, Position, Range, Uri } from 'vscode'
-import { activate, getDocumentURI } from './helper'
+import { activate, getDocumentURI, setConfiguration } from './helper'
 
 /** ATTENTION
  * These tests are NOT ATOMIC, they depend on each other, order matters. (Resolve TODO)
@@ -9,6 +9,7 @@ suite('Should display on hover', () => {
   const hoverURI = getDocumentURI('hover.wlk')
 
   test('hover field', async () => {
+    await setConfiguration('typeSystem.enabled', true)
     await testHover(
       hoverURI,
       new Position(1, 8),
