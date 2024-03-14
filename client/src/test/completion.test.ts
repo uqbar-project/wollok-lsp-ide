@@ -3,8 +3,10 @@ import {
   commands,
   CompletionItemKind,
   CompletionList,
-  Position,
   Uri,
+  Position,
+  TextEdit,
+  Range,
 } from 'vscode'
 import { getDocumentURI, activate } from './helper'
 
@@ -73,12 +75,26 @@ suite('Should do completion', () => {
     })
   })
 
+  test('Completes and imports', async () => {
+    await testCompletion(getDocumentURI('manolo.wlk'), new Position(4, 6), { items: [
+        {
+          label: "Pepita",
+          kind: CompletionItemKind.Class,
+          additionalTextEdits: [
+            new TextEdit(new Range(new Position(0, 0), new Position(0, 0)), "import pepita.*\n"),
+          ],
+        },
+      ],
+    }, 'Pepita')
+  })
+
 })
 
 async function testCompletion(
   docUri: Uri,
   position: Position,
   expectedCompletionList: CompletionList,
+  filterByLabel?: string,
 ) {
   await activate(docUri)
 
@@ -86,8 +102,12 @@ async function testCompletion(
   const wollokCompletionList = (await commands.executeCommand(
     'vscode.executeCompletionItemProvider',
     docUri,
-    position,
+    position
   )) as CompletionList
+
+  if(filterByLabel) {
+    wollokCompletionList.items = wollokCompletionList.items.filter((item) => item.label === filterByLabel)
+  }
 
   assert.equal(
     expectedCompletionList.items.length,
@@ -96,6 +116,7 @@ async function testCompletion(
   )
   expectedCompletionList.items.forEach((expectedItem, i) => {
     const actualItem = wollokCompletionList.items[i]
+    assert.deepEqual(actualItem.additionalTextEdits?.map(edit => edit.newText), expectedItem.additionalTextEdits?.map(edit => edit.newText))
     assert.equal(actualItem.label, expectedItem.label)
     assert.equal(actualItem.kind, expectedItem.kind)
   })
