@@ -17,7 +17,7 @@ import {
   cursorNode,
   trimIn,
 } from './utils/text-documents'
-import { isNodeURI, relativeFilePath, wollokURI } from './utils/vm/wollok'
+import { isNodeURI, relativeFilePath } from './utils/vm/wollok'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -57,28 +57,28 @@ const sendDiagnostics = (
       .filter((problem) => isNodeURI(problem.node, document.uri))
       .map((problem) => createDiagnostic(document, problem))
 
-    const uri = wollokURI(document.uri)
+    const { uri } = document
     connection.sendDiagnostics({ uri, diagnostics })
   }
 }
 
 export const validateTextDocument =
   (connection: Connection, allDocuments: TextDocument[]) =>
-  (textDocument: TextDocument) =>
-  async (environment: Environment): Promise<void> => {
-    await updateDocumentSettings(connection)
+    (textDocument: TextDocument) =>
+      async (environment: Environment): Promise<void> => {
+        await updateDocumentSettings(connection)
 
-    try {
-      const documentUri = relativeFilePath(textDocument.uri)
-      const timeMeasurer = new TimeMeasurer()
-      const problems = validate(environment)
-      sendDiagnostics(connection, problems, allDocuments)
-      timeMeasurer.addTime(`Validating ${documentUri}`)
-      timeMeasurer.finalReport()
-    } catch (e) {
-      generateErrorForFile(connection, textDocument)
-    }
-  }
+        try {
+          const documentUri = relativeFilePath(textDocument.uri)
+          const timeMeasurer = new TimeMeasurer()
+          const problems = validate(environment)
+          sendDiagnostics(connection, problems, allDocuments)
+          timeMeasurer.addTime(`Validating ${documentUri}`)
+          timeMeasurer.finalReport()
+        } catch (e) {
+          generateErrorForFile(connection, textDocument)
+        }
+      }
 
 export const completions = (environment: Environment) => (
   params: CompletionParams,
@@ -101,16 +101,16 @@ export const completions = (environment: Environment) => (
 }
 
 export const generateErrorForFile = (connection: Connection, textDocument: TextDocument): void => {
-  const documentUri = wollokURI(textDocument.uri)
+  const { uri } = textDocument
   const content = textDocument.getText()
 
   connection.sendDiagnostics({
-    uri: documentUri,
+    uri,
     diagnostics: [
       createDiagnostic(textDocument, {
         level: 'error',
         code: 'FileCouldNotBeValidated',
-        node: { sourceFileName: () => documentUri },
+        node: { sourceFileName: () => uri },
         values: [],
         sourceMap: {
           start: {

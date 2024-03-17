@@ -1,8 +1,8 @@
 import { DocumentSymbol, DocumentSymbolParams, SymbolKind, WorkspaceSymbol, WorkspaceSymbolParams } from 'vscode-languageserver'
 import { Environment, Field, Method, Module, Node, Package, Program, Test, Variable } from 'wollok-ts'
-import { packageFromURI, toVSCRange } from '../utils/text-documents'
-import { workspacePackage } from '../utils/vm/wollok'
 import { logger } from '../utils/logger'
+import { packageFromURI, toVSCRange } from '../utils/text-documents'
+import { uriFromRelativeFilePath, workspacePackage } from '../utils/vm/wollok'
 
 type Symbolyzable = Program | Test | Module | Variable | Field | Method | Test
 
@@ -49,7 +49,7 @@ const documentSymbol = (node: Symbolyzable): DocumentSymbol => {
 const workspaceSymbol = (node: Symbolyzable): WorkspaceSymbol => WorkspaceSymbol.create(
   node.name!,
   symbolKind(node),
-  node.sourceFileName!,
+  uriFromRelativeFilePath(node.sourceFileName!),
   toVSCRange(node.sourceMap!)
 )
 

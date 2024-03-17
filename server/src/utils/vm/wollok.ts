@@ -46,8 +46,6 @@ export const parentImport = (node: Node): Import | undefined => node.ancestors.f
 
 export const implicitImport = (node: Node): boolean => ['wollok/lang.wlk', 'wollok/lib.wlk'].includes(node.sourceFileName ?? '')
 
-export const wollokURI = (uri: string): string => uri.replace('file:///', '')
-
 export const documentToFile = (doc: TextDocument): FileContent => ({
   // name: wollokURI(doc.uri),
   name: relativeFilePath(doc.uri),
