@@ -79,16 +79,16 @@ export const rootFolder = (uri: string): string => {
 }
 
 export const findPackageJSON = (uri: string): string => {
-  let baseUri = decodeURIComponent(uri).replaceAll('/', path.sep)
+  let baseUri = uri
   logger.log('info', `Looking for package.json for: ${baseUri}`)
-  while (!fs.existsSync(baseUri + path.sep + 'package.json') && baseUri) {
+  while (!fs.existsSync(decodeURIComponent(baseUri).replaceAll('/', path.sep) + path.sep + 'package.json') && baseUri) {
     const lastIndex = baseUri.lastIndexOf(path.sep)
     if (!lastIndex) logger.log('info', `Not found`)
     if (!lastIndex) return ''
     baseUri = baseUri.slice(0, lastIndex)
   }
   logger.log('info', `Found on: ${baseUri}`)
-  return encodeURIComponent(baseUri).replaceAll(path.sep, '/')
+  return baseUri
 }
 
 
