@@ -31,7 +31,7 @@ jobs:
       if: matrix.os == 'windows-latest'
       uses: coactions/setup-xvfb@v1
       with:
-        run: npm run test-with-coverage:e2e
+        run: npm run test-with-coverage:e2e ; cat ./client/testFixture/log/wollok.log
     - name: Run unit tests
       run: npm run test-with-coverage:unit
     - name: Update server coverage badge

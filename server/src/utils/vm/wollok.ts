@@ -3,6 +3,7 @@ import path from 'path'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Class, Entity, Environment, FileContent, Import, LiteralValue, Method, Module, Node, Package, Reference } from 'wollok-ts'
 import { is } from 'wollok-ts/dist/extensions'
+import { logger } from '../logger'
 
 export const OBJECT_CLASS = 'wollok.lang.Object'
 
@@ -79,11 +80,14 @@ export const rootFolder = (uri: string): string => {
 
 export const findPackageJSON = (uri: string): string => {
   let baseUri = uri
+  logger.log('info', `Looking for package.json for: ${baseUri}`)
   while (!fs.existsSync(baseUri + path.sep + 'package.json') && baseUri) {
     const lastIndex = baseUri.lastIndexOf(path.sep)
+    if (!lastIndex) logger.log('info', `Not found`)
     if (!lastIndex) return ''
     baseUri = baseUri.slice(0, lastIndex)
   }
+  logger.log('info', `Found on: ${baseUri}`)
   return baseUri
 }
 
