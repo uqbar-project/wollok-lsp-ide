@@ -14,22 +14,22 @@ import {
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node'
 import { Environment } from 'wollok-ts'
+import { codeLenses } from './functionalities/code-lens'
 import { definition } from './functionalities/definition'
 import { formatDocument, formatRange } from './functionalities/formatter'
 import { typeDescriptionOnHover } from './functionalities/hover'
-import { requestIsRenamable as isRenamable, rename } from './functionalities/rename'
+import { references } from './functionalities/references'
+import { rename, requestIsRenamable as isRenamable } from './functionalities/rename'
 import { documentSymbols, workspaceSymbols } from './functionalities/symbols'
 import {
   completions,
   validateTextDocument,
 } from './linter'
 import { initializeSettings, WollokLSPSettings } from './settings'
-import { ProgressReporter } from './utils/progress-reporter'
-import { EnvironmentProvider } from './utils/vm/environment'
 import { logger } from './utils/logger'
-import { codeLenses } from './functionalities/code-lens'
-import { references } from './functionalities/references'
-import { rootFolder, _setRootFolder } from './utils/vm/wollok'
+import { ProgressReporter } from './utils/progress-reporter'
+import { setWorkspaceUri, WORKSPACE_URI } from './utils/text-documents'
+import { EnvironmentProvider } from './utils/vm/environment'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -151,7 +151,7 @@ const deferredChanges: TextDocumentChangeEvent<TextDocument>[] = []
 
 const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
   try {
-    if (!rootFolder('')) { // Too fast! We cannot yet...
+    if (!WORKSPACE_URI) { // Too fast! We cannot yet...
       deferredChanges.push(change) // Will be executed when workspace folder arrive
       throw new Error('Missing workspace folder!')
     }
@@ -170,9 +170,10 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(rebuildTextDocument)
 
+// Custom requests from client
 connection.onRequest((change) => {
   if (change.startsWith('WORKSPACE_URI')) { // WORKSPACE_URI:[uri]
-    _setRootFolder('file:' + change.split(':').pop())
+    setWorkspaceUri('file:' + change.split(':').pop())
     deferredChanges.forEach(rebuildTextDocument)
     deferredChanges.length = 0
   }

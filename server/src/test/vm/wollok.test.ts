@@ -1,6 +1,6 @@
 import { expect } from 'expect'
 import { join, resolve } from 'path'
-import { findPackageJSON, relativeFilePath, _setRootFolder } from '../../utils/vm/wollok'
+import { findPackageJSON, relativeFilePath, setWorkspaceUri } from '../../utils/text-documents'
 
 describe('root folder', () => {
   it('solves root folder for common project', () => {
@@ -23,11 +23,11 @@ describe('relative file path', () => {
 
   beforeEach(() => {
     // Cache the base folder
-    _setRootFolder(join('examples', 'example-project'))
+    setWorkspaceUri(join('examples', 'example-project'))
   })
 
   it('solves relative file path for a file in root path - file prefix', () => {
-    _setRootFolder(resolve('examples', 'example-project').toString())
+    setWorkspaceUri(resolve('examples', 'example-project').toString())
     const exampleFile = join('examples', 'example-project', 'example.wlk')
     expect(relativeFilePath(resolve(exampleFile).toString())).toEqual('example.wlk')
   })

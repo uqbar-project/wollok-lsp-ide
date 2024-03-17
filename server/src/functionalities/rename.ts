@@ -2,8 +2,8 @@ import { RenameParams, TextDocuments, TextEdit, WorkspaceEdit } from 'vscode-lan
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment } from 'wollok-ts'
 import { Field, Node, Parameter, Reference, Variable } from 'wollok-ts/dist/model'
-import { cursorNode, toVSCRange } from '../utils/text-documents'
-import { targettingAt, uriFromRelativeFilePath } from '../utils/vm/wollok'
+import { cursorNode, toVSCRange, uriFromRelativeFilePath } from '../utils/text-documents'
+import { targettingAt } from '../utils/vm/wollok'
 
 export const rename = (documents: TextDocuments<TextDocument>) => (environment: Environment) => (params: RenameParams): WorkspaceEdit | null => {
   // cast cursor node as it's already validated in prepareRename request

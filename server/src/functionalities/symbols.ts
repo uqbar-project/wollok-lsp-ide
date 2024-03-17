@@ -1,8 +1,8 @@
 import { DocumentSymbol, DocumentSymbolParams, SymbolKind, WorkspaceSymbol, WorkspaceSymbolParams } from 'vscode-languageserver'
 import { Environment, Field, Method, Module, Node, Package, Program, Test, Variable } from 'wollok-ts'
 import { logger } from '../utils/logger'
-import { packageFromURI, toVSCRange } from '../utils/text-documents'
-import { uriFromRelativeFilePath, workspacePackage } from '../utils/vm/wollok'
+import { packageFromURI, toVSCRange, uriFromRelativeFilePath } from '../utils/text-documents'
+import { workspacePackage } from '../utils/vm/wollok'
 
 type Symbolyzable = Program | Test | Module | Variable | Field | Method | Test
 

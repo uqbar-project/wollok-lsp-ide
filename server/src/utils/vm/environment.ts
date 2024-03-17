@@ -4,10 +4,10 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, buildEnvironment } from 'wollok-ts'
 import { inferTypes } from 'wollok-ts/dist/typeSystem/constraintBasedTypeSystem'
 import { ProgressReporter } from '../progress-reporter'
-import { documentToFile } from './wollok'
 import { TimeMeasurer } from '../../time-measurer'
 import { logger } from '../logger'
 import { generateErrorForFile } from '../../linter'
+import { documentToFile } from '../text-documents'
 
 export class EnvironmentProvider {
   readonly $environment = new BehaviorSubject<Environment | null>(null)
