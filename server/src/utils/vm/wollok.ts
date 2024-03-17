@@ -67,6 +67,8 @@ export const _setRootFolder = (uri: string): void => {
 const FILE_BASE_URI = 'file://'
 
 export const rootFolder = (uri: string): string => {
+  return _rootFolder
+  
   // Cached, should not change!
   //   TODO: Check what happend on workspace change.
   if (_rootFolder) return _rootFolder
@@ -105,8 +107,7 @@ export const uriFromRelativeFilePath = (relativeURI: string): string => {
 
 export const projectFQN = (node: Entity): string => {
   if (node.fullyQualifiedName.startsWith('wollok')) return node.fullyQualifiedName
-  const fileName = node.sourceFileName ?? ''
-  const rootPath = rootFolder('/' + fileName).slice(1)
+  const rootPath = _rootFolder.slice(1)
   if (!rootPath) return node.fullyQualifiedName
   const rootFQN = rootPath.replaceAll('/', '.')
   return node.fullyQualifiedName?.replaceAll(rootFQN + '.', '') ?? ''

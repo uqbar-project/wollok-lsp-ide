@@ -99,6 +99,7 @@ export function deactivate(): Thenable<void> | undefined {
 
 async function validateWorkspace() {
   const uris = await allWollokFiles()
+  await client.sendRequest(`WORKSPACE_URI:${workspace.workspaceFolders[0].uri}`)
   for (const uri of uris) {
     // Force 'change' on document for server tracking
     const textDoc = await workspace.openTextDocument(uri)

@@ -29,6 +29,7 @@ import { EnvironmentProvider } from './utils/vm/environment'
 import { logger } from './utils/logger'
 import { codeLenses } from './functionalities/code-lens'
 import { references } from './functionalities/references'
+import { rootFolder, _setRootFolder } from './utils/vm/wollok'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -146,8 +147,15 @@ documents.onDidClose((change) => {
   documentSettings.delete(change.document.uri)
 })
 
+const deferredChanges: TextDocumentChangeEvent<TextDocument>[] = []
+
 const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
   try {
+    if (!rootFolder('')) { // Too fast! We cannot yet...
+      deferredChanges.push(change) // Will be executed when workspace folder arrive
+      throw new Error('Missing workspace folder!')
+    }
+
     environmentProvider.updateEnvironmentWith(change.document)
     validateTextDocument(connection, documents.all())(change.document)(
       environmentProvider.$environment.getValue()!
@@ -157,16 +165,21 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
     logger.error(`✘ Failed to rebuild document`, e)
   }
 }
+
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(rebuildTextDocument)
 
-documents.onDidOpen(rebuildTextDocument)
-
 connection.onRequest((change) => {
-  if (change === 'STRONG_FILES_CHANGED') {
+  if (change.startsWith('WORKSPACE_URI')) { // WORKSPACE_URI:[uri]
+    _setRootFolder('file:' + change.split(':').pop())
+    deferredChanges.forEach(rebuildTextDocument)
+    deferredChanges.length = 0
+  }
+
+  if (change === 'STRONG_FILES_CHANGED') { // A file was deleted, renamed, moved, etc.
     environmentProvider.resetEnvironment()
-    documents.all().forEach(doc => environmentProvider.updateEnvironmentWith(doc))
+    environmentProvider.updateEnvironmentWith(...documents.all())
   }
 })
 
