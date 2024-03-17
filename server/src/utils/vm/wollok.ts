@@ -78,8 +78,10 @@ export const findPackageJSON = (uri: string): string => {
   return baseUri
 }
 
+const FILE_BASE_URI = 'file:' + path.sep + path.sep
+
 export const relativeFilePath = (uri: string): string => {
-  const sanitizedUri = uri.replace('file:///', path.sep)
+  const sanitizedUri = uri.replace(FILE_BASE_URI, '')
   const rootPath = rootFolder(sanitizedUri)
   if (!rootPath) return sanitizedUri
   return sanitizedUri.replaceAll(rootPath + path.sep, '')
@@ -87,7 +89,7 @@ export const relativeFilePath = (uri: string): string => {
 
 export const uriFromRelativeFilePath = (relativeURI: string): string => {
   // It is important to have _rootFolder cached!
-  return 'file://' + path.join(_rootFolder, relativeURI)
+  return FILE_BASE_URI + path.join(_rootFolder, relativeURI)
 }
 
 export const projectFQN = (node: Entity): string => {
