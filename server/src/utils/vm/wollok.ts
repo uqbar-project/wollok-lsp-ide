@@ -78,7 +78,7 @@ export const findPackageJSON = (uri: string): string => {
   return baseUri
 }
 
-const FILE_BASE_URI = 'file:' + path.sep + path.sep
+const FILE_BASE_URI = process.platform === 'win32' ? '' : 'file:' + path.sep + path.sep
 
 export const relativeFilePath = (uri: string): string => {
   const sanitizedUri = uri.replace(FILE_BASE_URI, '')
