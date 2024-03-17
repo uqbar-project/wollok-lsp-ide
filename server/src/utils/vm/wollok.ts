@@ -74,7 +74,7 @@ export const rootFolder = (uri: string): string => {
   if (uri.startsWith(FILE_BASE_URI)) {
     _rootFolder += FILE_BASE_URI
   }
-  _rootFolder += findPackageJSON(uri.replace(FILE_BASE_URI, ''))
+  _rootFolder += findPackageJSON(decodeURIComponent(uri.replace(FILE_BASE_URI, '')))
   return _rootFolder
 }
 
