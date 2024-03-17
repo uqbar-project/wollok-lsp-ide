@@ -74,21 +74,21 @@ export const rootFolder = (uri: string): string => {
   if (uri.startsWith(FILE_BASE_URI)) {
     _rootFolder += FILE_BASE_URI
   }
-  _rootFolder += findPackageJSON(decodeURIComponent(uri.replace(FILE_BASE_URI, '')))
+  _rootFolder += findPackageJSON(uri.replace(FILE_BASE_URI, ''))
   return _rootFolder
 }
 
 export const findPackageJSON = (uri: string): string => {
-  let baseUri = uri
+  let baseUri = decodeURIComponent(uri).replaceAll('/', path.sep)
   logger.log('info', `Looking for package.json for: ${baseUri}`)
-  while (!fs.existsSync(baseUri + '/' + 'package.json') && baseUri) {
-    const lastIndex = baseUri.lastIndexOf('/')
+  while (!fs.existsSync(baseUri + path.sep + 'package.json') && baseUri) {
+    const lastIndex = baseUri.lastIndexOf(path.sep)
     if (!lastIndex) logger.log('info', `Not found`)
     if (!lastIndex) return ''
     baseUri = baseUri.slice(0, lastIndex)
   }
   logger.log('info', `Found on: ${baseUri}`)
-  return baseUri
+  return encodeURIComponent(baseUri).replaceAll(path.sep, '/')
 }
 
 
