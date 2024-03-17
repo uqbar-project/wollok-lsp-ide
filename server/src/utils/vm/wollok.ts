@@ -64,7 +64,7 @@ export const _setRootFolder = (uri: string): void => {
   _rootFolder = uri
 }
 
-const FILE_BASE_URI = 'file:' + path.sep + path.sep
+const FILE_BASE_URI = 'file://'
 
 export const rootFolder = (uri: string): string => {
   // Cached, should not change!
