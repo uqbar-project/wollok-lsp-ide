@@ -81,8 +81,8 @@ export const rootFolder = (uri: string): string => {
 export const findPackageJSON = (uri: string): string => {
   let baseUri = uri
   logger.log('info', `Looking for package.json for: ${baseUri}`)
-  while (!fs.existsSync(baseUri + path.sep + 'package.json') && baseUri) {
-    const lastIndex = baseUri.lastIndexOf(path.sep)
+  while (!fs.existsSync(baseUri + '/' + 'package.json') && baseUri) {
+    const lastIndex = baseUri.lastIndexOf('/')
     if (!lastIndex) logger.log('info', `Not found`)
     if (!lastIndex) return ''
     baseUri = baseUri.slice(0, lastIndex)
@@ -95,20 +95,20 @@ export const findPackageJSON = (uri: string): string => {
 export const relativeFilePath = (absoluteURI: string): string => {
   const rootPath = rootFolder(absoluteURI)
   if (!rootPath) return absoluteURI
-  return absoluteURI.replaceAll(rootPath + path.sep, '')
+  return absoluteURI.replaceAll(rootPath + '/', '')
 }
 
 export const uriFromRelativeFilePath = (relativeURI: string): string => {
   // It is important to have _rootFolder cached!
-  return _rootFolder + path.sep + relativeURI
+  return _rootFolder + '/' + relativeURI
 }
 
 export const projectFQN = (node: Entity): string => {
   if (node.fullyQualifiedName.startsWith('wollok')) return node.fullyQualifiedName
   const fileName = node.sourceFileName ?? ''
-  const rootPath = rootFolder(path.sep + fileName).slice(1)
+  const rootPath = rootFolder('/' + fileName).slice(1)
   if (!rootPath) return node.fullyQualifiedName
-  const rootFQN = rootPath.replaceAll(path.sep, '.')
+  const rootFQN = rootPath.replaceAll('/', '.')
   return node.fullyQualifiedName?.replaceAll(rootFQN + '.', '') ?? ''
 }
 
