@@ -41,7 +41,7 @@ async function sleep(milliseconds: number) {
 }
 
 export const getDocumentPath = (docPath: string): string => {
-  return path.resolve(__dirname, '../../testFixture', docPath)
+  return path.resolve(__dirname, path.join('..', '..', 'testFixture'), docPath)
 }
 export const getDocumentURI = (docPath: string): Uri => {
   return Uri.file(getDocumentPath(docPath))

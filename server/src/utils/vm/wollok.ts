@@ -57,14 +57,23 @@ export const isNodeURI = (node: Node, uri: string): boolean => node.sourceFileNa
 export const workspacePackage = (environment: Environment): Package =>
   environment.members[1]
 
-let _rootFolder: string
+let _rootFolder = ''
 /** THIS FUNCTION IS ONLY FOR TESTING */
 export const _setRootFolder = (uri: string): void => {
   _rootFolder = uri
 }
+
+const FILE_BASE_URI = 'file:' + path.sep + path.sep
+
 export const rootFolder = (uri: string): string => {
+  // Cached, should not change!
+  //   TODO: Check what happend on workspace change.
   if (_rootFolder) return _rootFolder
-  _rootFolder = findPackageJSON(uri)
+
+  if (uri.startsWith(FILE_BASE_URI)) {
+    _rootFolder += FILE_BASE_URI
+  }
+  _rootFolder += findPackageJSON(uri.replace(FILE_BASE_URI, ''))
   return _rootFolder
 }
 
@@ -78,18 +87,16 @@ export const findPackageJSON = (uri: string): string => {
   return baseUri
 }
 
-const FILE_BASE_URI = process.platform === 'win32' ? '' : 'file:' + path.sep + path.sep
 
-export const relativeFilePath = (uri: string): string => {
-  const sanitizedUri = uri.replace(FILE_BASE_URI, '')
-  const rootPath = rootFolder(sanitizedUri)
-  if (!rootPath) return sanitizedUri
-  return sanitizedUri.replaceAll(rootPath + path.sep, '')
+export const relativeFilePath = (absoluteURI: string): string => {
+  const rootPath = rootFolder(absoluteURI)
+  if (!rootPath) return absoluteURI
+  return absoluteURI.replaceAll(rootPath + path.sep, '')
 }
 
 export const uriFromRelativeFilePath = (relativeURI: string): string => {
   // It is important to have _rootFolder cached!
-  return FILE_BASE_URI + path.join(_rootFolder, relativeURI)
+  return _rootFolder + path.sep + relativeURI
 }
 
 export const projectFQN = (node: Entity): string => {
