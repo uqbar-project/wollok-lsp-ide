@@ -49,4 +49,3 @@ export const projectPackages = (environment: Environment): Package[] =>
 
 export const targettingAt = <T extends Node>(aNode: T) => (anotherNode: Node): anotherNode is Reference<T> =>
   anotherNode.is(Reference) && anotherNode.target === aNode
-
