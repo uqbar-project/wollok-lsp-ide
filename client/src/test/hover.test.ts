@@ -5,10 +5,10 @@ import { activate, getDocumentURI, setConfiguration } from './helper'
 /** ATTENTION
  * These tests are NOT ATOMIC, they depend on each other, order matters. (Resolve TODO)
  * */
-suite('Should display on hover', () => {
+suite.only('Should display on hover', () => {
   const hoverURI = getDocumentURI('hover.wlk')
 
-  test('hover field', async () => {
+  test('hover field with type info', async () => {
     await setConfiguration('typeSystem.enabled', true)
     await testHover(
       hoverURI,
@@ -16,6 +16,21 @@ suite('Should display on hover', () => {
       new Hover(
         [
           new MarkdownString('\n```text\nField: Number\n```\n'),
+          new MarkdownString('\n```wollok\nconst x = 2\n```\n'),
+        ],
+        new Range(new Position(1, 2), new Position(2, 0))
+      )
+    )
+  })
+
+  test('hover field without type info', async () => {
+    await setConfiguration('typeSystem.enabled', false)
+    await testHover(
+      hoverURI,
+      new Position(1, 8),
+      new Hover(
+        [
+          new MarkdownString('\n```text\nField\n```\n'),
           new MarkdownString('\n```wollok\nconst x = 2\n```\n'),
         ],
         new Range(new Position(1, 2), new Position(2, 0))
