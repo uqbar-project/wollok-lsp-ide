@@ -28,10 +28,9 @@ jobs:
     - run: npm install
     - run: npm run compile
     - name: Run e2e test
-      if: matrix.os == 'windows-latest'
       uses: coactions/setup-xvfb@v1
       with:
-        run: npm run test-with-coverage:e2e ; cat ./client/testFixture/log/wollok.log
+        run: npm run test-with-coverage:e2e
     - name: Run unit tests
       run: npm run test-with-coverage:unit
     - name: Update server coverage badge
@@ -43,15 +42,15 @@ jobs:
         flags: lsp-ide-server
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-    
-    # - name: Update client coverage badge
-    #   uses: codecov/codecov-action@v3
-    #   if: matrix.os == 'windows-latest'
-    #   with:
-    #     files: ./client/coverage/coverage-final.json
-    #     verbose: true
-    #     flags: lsp-ide-client
-    
+    - name: Update client coverage badge
+      uses: codecov/codecov-action@v3
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        files: ./client/coverage/coverage-final.json
+        verbose: true
+        flags: lsp-ide-client
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}  
     - name: Generate VSIX file
       if: matrix.os == 'ubuntu-latest' && github.ref == 'refs/heads/master'
       run: |
