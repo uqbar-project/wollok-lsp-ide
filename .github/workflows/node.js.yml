@@ -35,7 +35,7 @@ jobs:
       run: npm run test-with-coverage:unit
     - name: Update server coverage badge
       uses: codecov/codecov-action@v4
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'windows-latest'
       with:
         files: ./server/coverage/coverage-final.json
         verbose: true
@@ -44,7 +44,7 @@ jobs:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     - name: Update client coverage badge
       uses: codecov/codecov-action@v3
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'windows-latest'
       with:
         files: ./client/coverage/coverage-final.json
         verbose: true
