@@ -18,7 +18,7 @@ suite('Should display on hover', () => {
           new MarkdownString('\n```text\nField: Number\n```\n'),
           new MarkdownString('\n```wollok\nconst x = 2\n```\n'),
         ],
-        new Range(new Position(1, 2), new Position(2, 0))
+        new Range(new Position(1, 2), new Position(1, 13))
       )
     )
   })
@@ -33,7 +33,7 @@ suite('Should display on hover', () => {
           new MarkdownString('\n```text\nField\n```\n'),
           new MarkdownString('\n```wollok\nconst x = 2\n```\n'),
         ],
-        new Range(new Position(1, 2), new Position(2, 0))
+        new Range(new Position(1, 2), new Position(1, 13))
       )
     )
   })
