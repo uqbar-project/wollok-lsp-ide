@@ -5,7 +5,7 @@ import { activate, getDocumentURI, setConfiguration } from './helper'
 /** ATTENTION
  * These tests are NOT ATOMIC, they depend on each other, order matters. (Resolve TODO)
  * */
-suite.only('Should display on hover', () => {
+suite('Should display on hover', () => {
   const hoverURI = getDocumentURI('hover.wlk')
 
   test('hover field with type info', async () => {
