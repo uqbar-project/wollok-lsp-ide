@@ -15,7 +15,7 @@ suite('Should do symbols', () => {
     ])
   })
 
-  test.skip('Provides workspace symbols', async () => {
+  test('Provides workspace symbols', async () => {
     await testWorkspaceSymbols(
       docUri,
       [{ name: '"pepita is happy"', kind: SymbolKind.Event }],

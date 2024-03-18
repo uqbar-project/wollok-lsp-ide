@@ -43,11 +43,10 @@ export const parentImport = (node: Node): Import | undefined => node.ancestors.f
 
 export const implicitImport = (node: Node): boolean => ['wollok/lang.wlk', 'wollok/lib.wlk'].includes(node.sourceFileName ?? '')
 
-// TOFIX
-export const workspacePackage = (environment: Environment): Package =>
-  environment.members[1]
+export const projectPackages = (environment: Environment): Package[] =>
+  environment.members.slice(1)
 
 
-export const targettingAt = <T extends Node>(aNode: T) => (anotherNode: Node): anotherNode is Reference<T> => {
-  return anotherNode.is(Reference) && anotherNode.target === aNode
-}
+export const targettingAt = <T extends Node>(aNode: T) => (anotherNode: Node): anotherNode is Reference<T> =>
+  anotherNode.is(Reference) && anotherNode.target === aNode
+
