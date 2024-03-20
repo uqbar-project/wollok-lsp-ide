@@ -21,6 +21,45 @@ type CodeLensLSPAnswer = CodeLensJSON[] | null
 suite('Should do code lenses', () => {
   const docUri = getDocumentURI('test.wtest')
 
+  test('Shows program code lenses for wpgm file', async () => {
+    await testCodeLenses(getDocumentURI('pepitaGame.wpgm'), [
+      {
+        range: {
+          c: {
+            e: 0,
+            c: 0,
+          },
+          e: {
+            c: 2,
+            e: 1,
+          },
+        },
+        command: {
+          title: 'Run game',
+          command: 'wollok.run.game',
+          arguments: ['pepitaGame.juego'],
+        },
+      },
+      {
+        range: {
+          c: {
+            e: 0,
+            c: 0,
+          },
+          e: {
+            c: 2,
+            e: 1,
+          },
+        },
+        command: {
+          title: 'Run program',
+          command: 'wollok.run.program',
+          arguments: ['pepitaGame.juego'],
+        },
+      },
+    ])
+  })
+
   test('Shows test code lenses for Wollok Test file', async () => {
     await testCodeLenses(docUri, [
       {
@@ -76,6 +115,7 @@ suite('Should do code lenses', () => {
       },
     ])
   })
+
   test('Shows no code lenses for Wollok file', async () => {
     await testCodeLenses(getDocumentURI('pepita.wlk'), [])
   })

@@ -24,8 +24,21 @@ suite('Should run commands', () => {
     await onWindowsBash(() =>
       testCommand(
         pepitaURI,
-        () => runProgram('file.program'),
+        () => runProgram()('file.program'),
         ` run 'file.program' --skipValidations -p ${expectedPathByShell(
+          'bash',
+          folderURI.fsPath,
+        )}`,
+      ),
+    )
+  })
+
+  test('run game', async () => {
+    await onWindowsBash(() =>
+      testCommand(
+        pepitaURI,
+        () => runProgram(true)('file.program'),
+        ` run -g 'file.program' --skipValidations -p ${expectedPathByShell(
           'bash',
           folderURI.fsPath,
         )}`,

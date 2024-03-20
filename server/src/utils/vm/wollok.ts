@@ -1,26 +1,24 @@
+import { Class, Environment, Import, LiteralValue, Method, Module, Node, Package, Reference } from 'wollok-ts'
 import { is } from 'wollok-ts/dist/extensions'
-import { Class, Entity, Environment, FileContent, Import, LiteralValue, Method, Module, Node, Package, Reference } from 'wollok-ts'
-import fs from 'fs'
-import path from 'path'
-import { TextDocument } from 'vscode-languageserver-textdocument'
 
 export const OBJECT_CLASS = 'wollok.lang.Object'
 
 export const literalValueToClass = (environment: Environment, literal: LiteralValue): Class => {
-  const clazz = (() => { switch (typeof literal) {
-    case 'number':
-      return 'wollok.lang.Number'
-    case 'string':
-      return 'wollok.lang.String'
-    case 'boolean':
-      return 'wollok.lang.Boolean'
-    case 'object':
-      try {
-        const referenceClasses = literal as unknown as Reference<Class>[]
-        return referenceClasses[0].name
-      } catch (e) {
-        return OBJECT_CLASS
-      }
+  const clazz = (() => {
+    switch (typeof literal) {
+      case 'number':
+        return 'wollok.lang.Number'
+      case 'string':
+        return 'wollok.lang.String'
+      case 'boolean':
+        return 'wollok.lang.Boolean'
+      case 'object':
+        try {
+          const referenceClasses = literal as unknown as Reference<Class>[]
+          return referenceClasses[0].name
+        } catch (e) {
+          return OBJECT_CLASS
+        }
     }
   })()
   return environment.getNodeByFQN(clazz)
@@ -45,49 +43,9 @@ export const parentImport = (node: Node): Import | undefined => node.ancestors.f
 
 export const implicitImport = (node: Node): boolean => ['wollok/lang.wlk', 'wollok/lib.wlk'].includes(node.sourceFileName ?? '')
 
-// @ToDo Workaround because package fqn is absolute in the lsp.
-export const fqnRelativeToPackage =
-  (pckg: Package, node: Entity): string =>
-    node.fullyQualifiedName.replace(pckg.fullyQualifiedName, pckg.name)
+export const projectPackages = (environment: Environment): Package[] =>
+  environment.members.slice(1)
 
-export const wollokURI = (uri: string): string => uri.replace('file:///', '')
 
-export const documentToFile = (doc: TextDocument): FileContent => ({
-  name: wollokURI(doc.uri),
-  content: doc.getText(),
-})
-
-export const isNodeURI = (node: Node, uri: string): boolean => node.sourceFileName == wollokURI(uri)
-
-export const workspacePackage = (environment: Environment): Package =>
-  environment.members[1]
-
-export const rootFolder = (uri: string): string => {
-  let folderPath = uri
-  while (!fs.existsSync(folderPath + path.sep + 'package.json') && folderPath) {
-    const lastIndex = folderPath.lastIndexOf(path.sep)
-    if (!lastIndex) return ''
-    folderPath = folderPath.slice(0, lastIndex)
-  }
-  return folderPath
-}
-
-export const relativeFilePath = (uri: string): string => {
-  const sanitizedUri = uri.replace('file:///', path.sep)
-  const rootPath = rootFolder(sanitizedUri)
-  if (!rootPath) return sanitizedUri
-  return sanitizedUri.replaceAll(rootPath + path.sep, '')
-}
-
-export const projectFQN = (node: Entity): string => {
-  if (node.fullyQualifiedName.startsWith('wollok')) return node.fullyQualifiedName
-  const fileName = node.sourceFileName ?? ''
-  const rootPath = rootFolder(path.sep + fileName).slice(1)
-  if (!rootPath) return node.fullyQualifiedName
-  const rootFQN = rootPath.replaceAll(path.sep, '.')
-  return node.fullyQualifiedName?.replaceAll(rootFQN + '.', '') ?? ''
-}
-
-export const targettingAt = <T extends Node>(aNode: T) => (anotherNode: Node): anotherNode is Reference<T>  => {
-  return anotherNode.is(Reference) && anotherNode.target === aNode
-}
+export const targettingAt = <T extends Node>(aNode: T) => (anotherNode: Node): anotherNode is Reference<T> =>
+  anotherNode.is(Reference) && anotherNode.target === aNode

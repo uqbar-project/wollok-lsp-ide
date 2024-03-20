@@ -4,21 +4,22 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, buildEnvironment } from 'wollok-ts'
 import { inferTypes } from 'wollok-ts/dist/typeSystem/constraintBasedTypeSystem'
 import { ProgressReporter } from '../progress-reporter'
-import { documentToFile } from './wollok'
 import { TimeMeasurer } from '../../time-measurer'
 import { logger } from '../logger'
 import { generateErrorForFile } from '../../linter'
+import { documentToFile } from '../text-documents'
 
 export class EnvironmentProvider {
   readonly $environment = new BehaviorSubject<Environment | null>(null)
   private buildProgressReporter: ProgressReporter
+  inferTypes = false
 
   constructor(private connection: Connection) {
     this.buildProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-build', title: 'Wollok Building...' })
   }
 
-  updateEnvironmentWith(document: TextDocument): void {
-    this.$environment.next(this.buildEnvironmentFrom([document], this.$environment.getValue() ?? undefined))
+  updateEnvironmentWith(...documents: TextDocument[]): void {
+    this.$environment.next(this.buildEnvironmentFrom(documents, this.$environment.getValue() ?? undefined))
   }
 
   resetEnvironment(): void {
@@ -32,8 +33,10 @@ export class EnvironmentProvider {
     try {
       const environment = buildEnvironment(files, baseEnvironment)
       timeMeasurer.addTime('Building environment')
-      inferTypes(environment)
-      timeMeasurer.addTime('Inferring types')
+      if (this.inferTypes) {
+        inferTypes(environment)
+        timeMeasurer.addTime('Inferring types')
+      }
       return environment
     } catch (error) {
 

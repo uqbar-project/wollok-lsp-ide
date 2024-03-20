@@ -1,7 +1,7 @@
 import { CompletionItem, CompletionItemKind, InsertTextFormat } from 'vscode-languageserver'
 import { Class, Entity, Field, Method, Mixin, Module, Name, Node, Parameter, Reference, Singleton } from 'wollok-ts'
-import { OBJECT_CLASS, parentModule, projectFQN } from '../../utils/vm/wollok'
 import { match, when } from 'wollok-ts/dist/extensions'
+import { OBJECT_CLASS, parentModule } from '../../utils/vm/wollok'
 
 
 // -----------------
@@ -110,7 +110,7 @@ export const initializerCompletionItem = (clazz: Class): CompletionItem => {
 }
 
 export const entityCompletionItem = (entity: Entity): CompletionItem => {
-  const label = projectFQN(entity)
+  const label = entity.fullyQualifiedName
   return {
     label,
     filterText: label,

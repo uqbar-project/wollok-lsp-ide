@@ -1,8 +1,7 @@
 import { CodeLens, CodeLensParams, Position, Range } from 'vscode-languageserver'
-import { Describe, Node, Package, Test, Program, Environment } from 'wollok-ts'
+import { Describe, Environment, Node, Package, Program, Test } from 'wollok-ts'
 import { is } from 'wollok-ts/dist/extensions'
 import { getWollokFileExtension, packageFromURI, toVSCRange } from '../utils/text-documents'
-import { fqnRelativeToPackage } from '../utils/vm/wollok'
 
 
 export const codeLenses = (environment: Environment) => (params: CodeLensParams): CodeLens[] | null => {
@@ -21,20 +20,30 @@ export const codeLenses = (environment: Environment) => (params: CodeLensParams)
 }
 
 export const getProgramCodeLenses = (file: Package): CodeLens[] =>
-  file.members.filter(is(Program)).map(program => ({
-    range: toVSCRange(program.sourceMap!),
-    command: {
-      command: 'wollok.run.program',
-      title: 'Run program',
-      arguments: [fqnRelativeToPackage(file, program)],
+  file.members.filter(is(Program)).flatMap(program => [
+    {
+      range: toVSCRange(program.sourceMap!),
+      command: {
+        command: 'wollok.run.game',
+        title: 'Run game',
+        arguments: [program.fullyQualifiedName],
+      },
     },
-  }))
+    {
+      range: toVSCRange(program.sourceMap!),
+      command: {
+        command: 'wollok.run.program',
+        title: 'Run program',
+        arguments: [program.fullyQualifiedName],
+      },
+    },
+  ])
 
 
 export const getTestCodeLenses = (file: Package): CodeLens[] => {
   const runAllTests = buildTestCodeLens(
     Range.create(Position.create(0, 0), Position.create(0, 0)),
-    file.name,
+    file.fullyQualifiedName,
     'Run all tests'
   )
 
@@ -44,17 +53,17 @@ export const getTestCodeLenses = (file: Package): CodeLens[] => {
     ...file
       .descendants
       .filter(isTesteable)
-      .map(n =>
+      .map(node =>
         buildTestCodeLens(
-          toVSCRange(n.sourceMap!),
-          fqnRelativeToPackage(file, n as Test | Describe),
-          `Run ${n.is(Test) ? 'test' : 'describe'}`
+          toVSCRange(node.sourceMap!),
+          node.fullyQualifiedName,
+          `Run ${node.is(Test) ? 'test' : 'describe'}`
         )
       ),
   ]
 }
 
-function buildTestCodeLens(range: Range, filter: string, title: string): CodeLens{
+function buildTestCodeLens(range: Range, filter: string, title: string): CodeLens {
   return {
     range,
     command: {
