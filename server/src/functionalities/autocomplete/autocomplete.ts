@@ -3,7 +3,7 @@ import { Class, Entity, Environment, Field, Import, Method, Mixin, Module, Name,
 import { match, when } from 'wollok-ts/dist/extensions'
 import { TimeMeasurer } from '../../time-measurer'
 import { cursorNode, packageToURI } from '../../utils/text-documents'
-import { OBJECT_CLASS, parentModule, parentPackage, projectFQN, relativeFilePath } from '../../utils/vm/wollok'
+import { OBJECT_CLASS, isImportedIn, parentModule, parentPackage, projectFQN, relativeFilePath } from '../../utils/vm/wollok'
 import { completionsForNode } from './node-completion'
 import { completeMessages } from './send-completion'
 
@@ -47,9 +47,7 @@ export const withImport = <T extends Node>(mapper: CompletionItemMapper<T>) => (
   if(
     importedPackage &&
     originalPackage &&
-    importedPackage !== originalPackage &&
-    !originalPackage.imports.some(imported => imported.entity.target === importedPackage) &&
-    !importedPackage.isGlobalPackage
+    isImportedIn(importedPackage, originalPackage)
   ) {
     result.detail = `Add import ${importedPackage.fileName ? relativeFilePath(packageToURI(importedPackage)) : importedPackage.name}${result.detail ? ` - ${result.detail}` : ''}`
     result.additionalTextEdits = (result.additionalTextEdits ?? []).concat(
