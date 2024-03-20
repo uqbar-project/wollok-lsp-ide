@@ -3,7 +3,7 @@ import { Class, Entity, Environment, Field, Import, Method, Mixin, Module, Name,
 import { match, when } from 'wollok-ts/dist/extensions'
 import { TimeMeasurer } from '../../time-measurer'
 import { cursorNode, packageToURI } from '../../utils/text-documents'
-import { OBJECT_CLASS, isImportedIn, parentModule, parentPackage, projectFQN, relativeFilePath } from '../../utils/vm/wollok'
+import { OBJECT_CLASS, isImportedIn, parentModule, projectFQN, relativeFilePath } from '../../utils/vm/wollok'
 import { completionsForNode } from './node-completion'
 import { completeMessages } from './send-completion'
 
@@ -40,8 +40,8 @@ export const fieldCompletionItem: CompletionItemMapper<Field> = namedCompletionI
 export const singletonCompletionItem: CompletionItemMapper<Singleton> = moduleCompletionItem(CompletionItemKind.Class)
 
 export const withImport = <T extends Node>(mapper: CompletionItemMapper<T>) => (relativeTo: Node): CompletionItemMapper<T> => (node) => {
-  const importedPackage = parentPackage(node)
-  const originalPackage = parentPackage(relativeTo)
+  const importedPackage = node.parentPackage!
+  const originalPackage = relativeTo.parentPackage!
 
   const result = mapper(node)
   if(

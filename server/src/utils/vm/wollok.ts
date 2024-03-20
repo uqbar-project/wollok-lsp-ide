@@ -92,8 +92,6 @@ export const targettingAt = <T extends Node>(aNode: T) => (anotherNode: Node): a
   return anotherNode.is(Reference) && anotherNode.target === aNode
 }
 
-export const parentPackage = (node: Node): Package | undefined => node.ancestors.find(is(Package))
-
 export const isImportedIn = (importedPackage: Package, importingPackage: Package): boolean =>
   importedPackage !== importingPackage &&
   !importingPackage.imports.some(imported => imported.entity.target === importedPackage) &&
