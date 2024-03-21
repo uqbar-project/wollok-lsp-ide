@@ -27,7 +27,7 @@ const workspaceSymbolsFor = (environment: Environment, query: string): Workspace
   projectPackages(environment)
     .flatMap(_package => _package.descendants).filter(isSymbolyzable)
     .filter(node => node.sourceFileName && node.sourceMap)
-    .filter(node => node.name?.toLowerCase().includes(query.toLowerCase()))
+    .filter(node => node.name?.toLowerCase().includes(query.toLowerCase())) // TODO: can we simplify to a single filter? Maybe extract the function
     .map(workspaceSymbol)
 
 
@@ -52,7 +52,6 @@ const workspaceSymbol = (node: Symbolyzable): WorkspaceSymbol => WorkspaceSymbol
 
 const isSymbolyzable = (node: Node): node is Symbolyzable =>
   [Program, Test, Module, Variable, Field, Method].some(t => node.is(t))
-
 
 const symbolKind = (node: Node): SymbolKind => {
   switch (node.kind) {

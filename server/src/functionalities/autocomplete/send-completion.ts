@@ -1,11 +1,9 @@
 import { CompletionItem } from 'vscode-languageserver'
-import { Body, Describe, Environment, Literal, Method, New, Node, Reference, Singleton } from 'wollok-ts'
-import { List, is } from 'wollok-ts/dist/extensions'
-import { allAvailableMethods, allMethods, firstNodeWithProblems, literalValueToClass } from '../../utils/vm/wollok'
+import { Body, Describe, Environment, Literal, Method, New, Node, Reference, Singleton, List, is, CLOSURE_EVALUATE_METHOD, allAvailableMethods, allMethods, firstNodeWithProblems, literalValueToClass } from 'wollok-ts'
 import { methodCompletionItem } from './autocomplete'
 
 export function completeMessages(environment: Environment, node: Node): CompletionItem[] {
-  return methodPool(environment, node).map(method => methodCompletionItem(node, method))
+  return methodPool(environment, node).map((method: Method) => methodCompletionItem(node, method))
 }
 
 function methodPool(environment: Environment, node: Node): List<Method> {
@@ -36,7 +34,7 @@ function isSymbol(message: string) {
 }
 
 function allPossibleMethods(environment: Environment, node: Node): Method[] {
-  return allAvailableMethods(environment).filter(method => availableForAutocomplete(method, node))
+  return allAvailableMethods(environment).filter((method: Method) => availableForAutocomplete(method, node))
 }
 
 function availableForAutocomplete(method: Method, node: Node) {
@@ -48,5 +46,5 @@ function fileValidForAutocomplete(sourceFileName: string | undefined) {
 }
 
 function methodNameValidForAutocomplete(method: Method) {
-  return !isSymbol(method.name) && method.name !== '<apply>'
+  return !isSymbol(method.name) && method.name !== CLOSURE_EVALUATE_METHOD
 }

@@ -1,8 +1,5 @@
 import { CompletionItem, CompletionItemKind, InsertTextFormat } from 'vscode-languageserver'
-import { Class, Entity, Field, Method, Mixin, Module, Name, Node, Parameter, Reference, Singleton } from 'wollok-ts'
-import { match, when } from 'wollok-ts/dist/extensions'
-import { OBJECT_CLASS, parentModule } from '../../utils/vm/wollok'
-
+import { Class, Entity, Field, Method, Mixin, Module, Name, Node, OBJECT_MODULE, Parameter, Reference, Singleton, getAllUninitializedAttributes, match, when, parentModule } from 'wollok-ts'
 
 // -----------------
 // -----MAPPERS-----
@@ -47,7 +44,7 @@ const getLibraryIndex = (node: Node) => {
 const formatSortText = (index: number) => ('000' + index).slice(-3)
 
 const additionalIndex = (method: Method, methodContainer: Module): number => {
-  if (methodContainer.fullyQualifiedName === OBJECT_CLASS) return 50
+  if (methodContainer.fullyQualifiedName === OBJECT_MODULE) return 50
   if (methodContainer instanceof Class && methodContainer.isAbstract) return 5
   if (method.isAbstract()) return 3
   return 1
@@ -97,8 +94,7 @@ export const classCompletionItem = (clazz: Class): CompletionItem => {
 }
 
 export const initializerCompletionItem = (clazz: Class): CompletionItem => {
-  // TODO: export getAllUninitializedAttributes from wollok-ts and use it
-  const initializers = clazz.allFields.map((member, i) => `\${${2*i+1}:${member.name}} = \${${2*i+2}}`).join(', ')
+  const initializers = getAllUninitializedAttributes(clazz).map((attributeName, i) => `\${${2*i+1}:${attributeName}} = \${${2*i+2}}`).join(', ')
   return {
     label: 'initializers',
     filterText: 'initializers',

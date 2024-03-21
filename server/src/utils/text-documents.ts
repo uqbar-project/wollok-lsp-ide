@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { Location, Position, Range, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Environment, FileContent, Node, Package, SourceIndex, SourceMap } from 'wollok-ts'
+import { Environment, FileContent, Node, PROGRAM_FILE_EXTENSION, Package, SourceIndex, SourceMap, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
 
 // TODO: Refactor
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
@@ -41,14 +41,12 @@ export const getNodesByPosition = (environment: Environment, textDocumentPositio
   return environment.descendants.filter(node => !!node.sourceFileName && include(node, textDocumentPosition))
 }
 
-export const toVSCPosition = (position: SourceIndex): Position => {
-  const max0 = (n: number) => n < 0 ? 0 : n
-
-  return Position.create(
-    max0(position.line - 1),
-    max0(position.column - 1)
+export const toVSCPosition = (position: SourceIndex): Position =>
+  Position.create(
+    Math.max(0, position.line - 1),
+    Math.max(0, position.column - 1)
   )
-}
+
 
 export const toVSCRange = (sourceMap: SourceMap): Range =>
   Range.create(toVSCPosition(sourceMap.start), toVSCPosition(sourceMap.end))
@@ -83,19 +81,24 @@ export const packageFromURI = (uri: string, environment: Environment): Package |
   return environment.descendants.find(node => node.is(Package) && node.fileName === sanitizedURI) as Package | undefined
 }
 
-export const getWollokFileExtension = (uri: string): 'wlk' | 'wpgm' | 'wtest' => {
+export const packageToURI = (pkg: Package): string => fileNameToURI(pkg.fileName!)
+
+export const fileNameToURI = (fileName: string): string => `file:///${fileName}`
+
+export const getWollokFileExtension = (uri: string): typeof WOLLOK_FILE_EXTENSION | typeof PROGRAM_FILE_EXTENSION | typeof TEST_FILE_EXTENSION => {
   const extension = uri.split('.').pop()
   if (!extension) throw new Error('Could not determine file extension')
 
-  switch (extension) {
-    case 'wlk':
-    case 'wpgm':
-    case 'wtest':
+  switch(extension) {
+    case WOLLOK_FILE_EXTENSION:
+    case PROGRAM_FILE_EXTENSION:
+    case TEST_FILE_EXTENSION:
       return extension
     default:
-      throw new Error('Invalid file extension')
+      throw new Error(`Invalid file extension: ${extension}`)
   }
 }
+
 export function cursorNode(
   environment: Environment,
   position: Position,

@@ -1,8 +1,6 @@
 import { CodeLens, CodeLensParams, Position, Range } from 'vscode-languageserver'
-import { Describe, Environment, Node, Package, Program, Test } from 'wollok-ts'
-import { is } from 'wollok-ts/dist/extensions'
+import { Describe, fqnRelativeToPackage, Node, Package, Test, Program, Environment, is } from 'wollok-ts'
 import { getWollokFileExtension, packageFromURI, toVSCRange } from '../utils/text-documents'
-
 
 export const codeLenses = (environment: Environment) => (params: CodeLensParams): CodeLens[] | null => {
   const fileExtension = getWollokFileExtension(params.textDocument.uri)
@@ -56,7 +54,7 @@ export const getTestCodeLenses = (file: Package): CodeLens[] => {
       .map(node =>
         buildTestCodeLens(
           toVSCRange(node.sourceMap!),
-          node.fullyQualifiedName,
+          fqnRelativeToPackage(file, node as Test | Describe),
           `Run ${node.is(Test) ? 'test' : 'describe'}`
         )
       ),

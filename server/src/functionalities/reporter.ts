@@ -201,7 +201,7 @@ const validationMessagesEs: Message = {
 const MISSING_WOLLOK_TS_CLI = 'missing_wollok_ts_cli'
 
 const lspMessagesEn = {
-  [MISSING_WOLLOK_TS_CLI]: 'Missing configuration WollokLSP/cli-pat in order to run Wollok tasks',
+  [MISSING_WOLLOK_TS_CLI]: 'Missing configuration WollokLSP/cli-path in order to run Wollok tasks',
 }
 
 const lspMessagesEs = {

@@ -1,9 +1,7 @@
 import { RenameParams, TextDocuments, TextEdit, WorkspaceEdit } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Environment } from 'wollok-ts'
-import { Field, Node, Parameter, Reference, Variable } from 'wollok-ts/dist/model'
-import { cursorNode, toVSCRange, uriFromRelativeFilePath } from '../utils/text-documents'
-import { targettingAt } from '../utils/vm/wollok'
+import { Environment, Field, Node, Parameter, Reference, targettingAt, Variable } from 'wollok-ts'
+import { cursorNode, uriFromRelativeFilePath, toVSCRange } from '../utils/text-documents'
 
 export const rename = (documents: TextDocuments<TextDocument>) => (environment: Environment) => (params: RenameParams): WorkspaceEdit | null => {
   // cast cursor node as it's already validated in prepareRename request
@@ -38,9 +36,9 @@ function isRenamable(aNode: Node): aNode is Renamable {
 
 function renameNode(node: Renamable, newName: string, environment: Environment, documents: TextDocuments<TextDocument>): {uri: string, edit: TextEdit}[]{
   const hits: (Renamable | Reference<Renamable>)[] = [node]
-  const referencesRanamedNode = targettingAt(node)
+  const referencesRenamedNode = targettingAt(node)
   environment.forEach(aNode => {
-    if(!aNode.isSynthetic && referencesRanamedNode(aNode)) {
+    if(!aNode.isSynthetic && referencesRenamedNode(aNode)) {
       hits.push(aNode as Reference<Field>)
     }
   })

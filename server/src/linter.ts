@@ -6,8 +6,7 @@ import {
   DiagnosticSeverity,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Environment, Import, Problem, validate } from 'wollok-ts'
-import { List } from 'wollok-ts/dist/extensions'
+import { Environment, Import, List, Problem, validate } from 'wollok-ts'
 import { completionsForNode } from './functionalities/autocomplete/node-completion'
 import { completeMessages } from './functionalities/autocomplete/send-completion'
 import { reportValidationMessage } from './functionalities/reporter'
