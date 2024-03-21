@@ -1,5 +1,5 @@
 import * as assert from 'assert'
-import { commands, Location, LocationLink, Position, Range, Uri } from 'vscode'
+import { commands, Location, Position, Range, Uri } from 'vscode'
 import { activate, getDocumentURI } from './helper'
 import { beforeEach } from 'mocha'
 
