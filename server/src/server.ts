@@ -19,7 +19,7 @@ import { definition } from './functionalities/definition'
 import { formatDocument, formatRange } from './functionalities/formatter'
 import { typeDescriptionOnHover } from './functionalities/hover'
 import { references } from './functionalities/references'
-import { requestIsRenamable as isRenamable, rename } from './functionalities/rename'
+import { rename, requestIsRenamable as isRenamable } from './functionalities/rename'
 import { documentSymbols, workspaceSymbols } from './functionalities/symbols'
 import {
   validateTextDocument,
@@ -27,6 +27,7 @@ import {
 import { initializeSettings, WollokLSPSettings } from './settings'
 import { logger } from './utils/logger'
 import { ProgressReporter } from './utils/progress-reporter'
+import { setWorkspaceUri, WORKSPACE_URI } from './utils/text-documents'
 import { EnvironmentProvider } from './utils/vm/environment'
 import { completions } from './functionalities/autocomplete/autocomplete'
 
@@ -35,11 +36,12 @@ export type ClientConfigurations = {
   'cli-path': string
   language: "Spanish" | "English" | "Based on Local Environment",
   maxNumberOfProblems: number
-  trace: { server: "off" |  "messages" | "verbose" }
+  trace: { server: "off" | "messages" | "verbose" }
   openDynamicDiagramOnRepl: boolean
   openInternalDynamicDiagram: boolean
   dynamicDiagramDarkMode: boolean,
   maxThreshold: number,
+  typeSystem: { enabled: boolean }
 }
 
 
@@ -52,16 +54,17 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument)
 
 const environmentProvider = new EnvironmentProvider(connection)
 const config = new Subject<ClientConfigurations>()
+config.forEach(config => environmentProvider.inferTypes = config.typeSystem.enabled)
 const requestContext = combineLatest([environmentProvider.$environment.pipe(filter(environment => environment != null)), config])
 
 const requestProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-request', title: 'Processing Request...' })
 
-function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void>{
+function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void> {
   return (params, cancel, workDoneProgress, resultProgress) => {
     requestProgressReporter.begin()
     try {
       return requestHandler(params, cancel, workDoneProgress, resultProgress)
-    } catch(e) {
+    } catch (e) {
       logger.error('✘ Failed to process request', e)
       return null
     } finally {
@@ -71,7 +74,7 @@ function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Pa
   }
 }
 
-function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: Environment, settings: ClientConfigurations) => ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void>{
+function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: Environment, settings: ClientConfigurations) => ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void> {
   return (params, cancel, workDoneProgress, resultProgress) => {
     requestProgressReporter.begin()
     return new Promise(resolve => {
@@ -144,57 +147,74 @@ documents.onDidClose((change) => {
   documentSettings.delete(change.document.uri)
 })
 
+const deferredChanges: TextDocumentChangeEvent<TextDocument>[] = []
+
 const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
   try {
+    if (!WORKSPACE_URI) { // Too fast! We cannot yet...
+      deferredChanges.push(change) // Will be executed when workspace folder arrive
+      throw new Error('Missing workspace folder!')
+    }
+
     environmentProvider.updateEnvironmentWith(change.document)
     validateTextDocument(connection, documents.all())(change.document)(
       environmentProvider.$environment.getValue()!
     )
   } catch (e) {
     connection.console.error(`✘ Failed to rebuild document: ${e}`)
+    logger.error(`✘ Failed to rebuild document`, e)
   }
 }
+
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(rebuildTextDocument)
 
-documents.onDidOpen(rebuildTextDocument)
-
+// Custom requests from client
 connection.onRequest((change) => {
-  if (change === 'STRONG_FILES_CHANGED') {
+  if (change.startsWith('WORKSPACE_URI')) { // WORKSPACE_URI:[uri]
+    setWorkspaceUri('file:' + change.split(':').pop())
+    deferredChanges.forEach(rebuildTextDocument)
+    deferredChanges.length = 0
+  }
+
+  if (change === 'STRONG_FILES_CHANGED') { // A file was deleted, renamed, moved, etc.
     environmentProvider.resetEnvironment()
-    documents.all().forEach(doc => environmentProvider.updateEnvironmentWith(doc))
+    environmentProvider.updateEnvironmentWith(...documents.all())
   }
 })
 
 config.subscribe(() => {
-    // Revalidate all open text documents
-    documents.all().forEach(validateTextDocument(connection, documents.all()))
+  // Revalidate all open text documents
+  environmentProvider.updateEnvironmentWith(...documents.all())
+  documents.all().forEach(doc =>
+    validateTextDocument(connection, documents.all())(doc)(environmentProvider.$environment.getValue()!)
+  )
 })
 
 const handlers: readonly [
-  (handler: GenericRequestHandler<any, any>)  =>  Disposable,
+  (handler: GenericRequestHandler<any, any>) => Disposable,
   (environment: Environment, settings: ClientConfigurations) => GenericRequestHandler<any, any>
 ][] = [
-  [connection.onDocumentSymbol, documentSymbols],
-  [connection.onWorkspaceSymbol, workspaceSymbols],
-  [connection.onCodeLens, codeLenses],
-  [connection.onDefinition, definition],
-  [connection.onDocumentFormatting, formatDocument],
-  [connection.onDocumentRangeFormatting, formatRange],
-  [connection.onCompletion, completions],
-  [connection.onPrepareRename, isRenamable],
-  [connection.onRenameRequest, rename(documents)],
-  [connection.onHover, typeDescriptionOnHover],
-  [connection.onReferences, references],
-]
+    [connection.onDocumentSymbol, documentSymbols],
+    [connection.onWorkspaceSymbol, workspaceSymbols],
+    [connection.onCodeLens, codeLenses],
+    [connection.onDefinition, definition],
+    [connection.onDocumentFormatting, formatDocument],
+    [connection.onDocumentRangeFormatting, formatRange],
+    [connection.onCompletion, completions],
+    [connection.onPrepareRename, isRenamable],
+    [connection.onRenameRequest, rename(documents)],
+    [connection.onHover, typeDescriptionOnHover],
+    [connection.onReferences, references],
+  ]
 
-for(const [handlerRegistration, requestHandler] of handlers){
+for (const [handlerRegistration, requestHandler] of handlers) {
   handlerRegistration(waitForFirstHandler(requestHandler))
 }
 
 requestContext.subscribe(([newEnvironment, newSettings]) => {
-  for(const [handlerRegistration, requestHandler] of handlers){
+  for (const [handlerRegistration, requestHandler] of handlers) {
     handlerRegistration(syncHandler(requestHandler(newEnvironment!, newSettings)))
   }
 })

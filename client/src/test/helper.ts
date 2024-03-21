@@ -41,7 +41,7 @@ async function sleep(milliseconds: number) {
 }
 
 export const getDocumentPath = (docPath: string): string => {
-  return path.resolve(__dirname, '../../testFixture', docPath)
+  return path.resolve(__dirname, path.join('..', '..', 'testFixture'), docPath)
 }
 export const getDocumentURI = (docPath: string): Uri => {
   return Uri.file(getDocumentPath(docPath))
@@ -56,4 +56,8 @@ export async function setTestContent(content: string): Promise<boolean> {
     document.positionAt(document.getText().length),
   )
   return editor.edit((editBuilder) => editBuilder.replace(all, content))
+}
+
+export async function setConfiguration(section: string, value: any): Promise<any> {
+  return await workspace.getConfiguration('wollokLSP').update(section, value)
 }

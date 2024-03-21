@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.2.1
+- New logger! 📝
+- New refactor! Rename variables 🏷️
+- New Type system support on Hover 🔠
+- New feature released: Navigation by References ⬅️
+- Fixing Validator errors and messages 🧐
+- Upgrade Wollok-TS 4.0.9 ⬆️
+
 ## v0.2.0
 
 - New feature released: Formatter! 💅🏼

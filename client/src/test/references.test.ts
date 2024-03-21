@@ -1,7 +1,7 @@
 import * as assert from 'assert'
+import { beforeEach } from 'mocha'
 import { commands, Location, Position, Range, Uri } from 'vscode'
 import { activate, getDocumentURI } from './helper'
-import { beforeEach } from 'mocha'
 
 /** ATTENTION
  * These tests are NOT ATOMIC, they depend on each other, order matters. (Resolve TODO)

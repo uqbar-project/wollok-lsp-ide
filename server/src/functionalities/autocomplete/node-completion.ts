@@ -1,9 +1,7 @@
 import { CompletionItem } from 'vscode-languageserver'
-import { Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin, Describe, Program, Test, Reference, New, Import, Entity } from 'wollok-ts'
-import { is, match, when } from 'wollok-ts/dist/extensions'
+import { Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin, Describe, Program, Test, Reference, New, Import, Entity, implicitImport, is, parentImport, match, when } from 'wollok-ts'
 import { classCompletionItem, fieldCompletionItem, initializerCompletionItem, parameterCompletionItem, singletonCompletionItem, entityCompletionItem, withImport } from './autocomplete'
 import { optionModules, optionImports, optionDescribes, optionTests, optionReferences, optionMethods, optionPrograms, optionAsserts, optionConstReferences, optionInitialize, optionPropertiesAndReferences } from './options-autocomplete'
-import { implicitImport, parentImport } from '../../utils/vm/wollok'
 
 export const completionsForNode = (node: Node): CompletionItem[] => {
   try {

@@ -26,7 +26,7 @@ const validationMessagesEn: Message = {
   shouldInitializeAllAttributes:
     'You must provide initial value to the following references: {0}',
   shouldImplementAllMethodsInHierarchy:
-    'Inconsistent hierarchy. Methods on mixins without super implementation on hierarchy',
+    'Methods in hierachy without super implementation: {0}',
   shouldUseSelfAndNotSingletonReference:
     "Don't use the name within the object. Use 'self' instead.",
   shouldNotReassignConst: 'Cannot modify constants',
@@ -67,6 +67,7 @@ const validationMessagesEn: Message = {
     'Method without body. You must implement it',
   shouldNotUseVoidMethodAsValue:
     'Message send "{0}" produces no value (missing return in method?)',
+  shouldNotAssignValueInLoop: 'Infinite loop in value assignment',
   shouldInitializeGlobalReference: 'Reference is never initialized',
   shouldNotDefineUnusedVariables: 'Unused variable',
   shouldNotDefineGlobalMutableVariables:
@@ -115,7 +116,7 @@ const validationMessagesEs: Message = {
   shouldInitializeAllAttributes:
     'Debe proveer un valor inicial a las siguientes referencias: {0}',
   shouldImplementAllMethodsInHierarchy:
-    'Jerarqu\u00EDa inconsistente. Existen m\u00E9todos en mixins que requieren implementaci\u00F3n en super',
+    'Existen m\u00E9todos en la jerarqu\u00EDa que requieren implementaci\u00F3n en super: {0}',
   shouldUseSelfAndNotSingletonReference:
     "No debe usar el nombre del objeto dentro del mismo. Use 'self'.",
   shouldNotReassignConst: 'No se pueden modificar las referencias constantes',
@@ -161,6 +162,7 @@ const validationMessagesEs: Message = {
     'El método debe tener una implementación',
   shouldNotUseVoidMethodAsValue:
     'El mensaje "{0}" no retorna ning\u00FAn valor (quiz\u00E1s te falte un return en el m\u00E9todo)',
+  shouldNotAssignValueInLoop: 'Se genera un loop infinito en la asignaci\u00F3n del valor',
   shouldInitializeGlobalReference: 'La referencia nunca se inicializa',
   shouldNotDefineUnusedVariables: 'Esta variable nunca se utiliza',
   shouldNotDefineGlobalMutableVariables:
@@ -199,7 +201,7 @@ const validationMessagesEs: Message = {
 const MISSING_WOLLOK_TS_CLI = 'missing_wollok_ts_cli'
 
 const lspMessagesEn = {
-  [MISSING_WOLLOK_TS_CLI]: 'Missing configuration WollokLSP/cli-pat in order to run Wollok tasks',
+  [MISSING_WOLLOK_TS_CLI]: 'Missing configuration WollokLSP/cli-path in order to run Wollok tasks',
 }
 
 const lspMessagesEs = {

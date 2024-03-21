@@ -1,12 +1,11 @@
 import { CompletionItem, CompletionItemKind, CompletionParams, InsertTextFormat, Position, TextEdit } from 'vscode-languageserver'
-import { Class, Entity, Environment, Field, Import, Method, Mixin, Module, Name, Node, Parameter, Reference, Singleton } from 'wollok-ts'
-import { match, when } from 'wollok-ts/dist/extensions'
+import { Class, Entity, Field, Method, Mixin, Module, Name, Node, OBJECT_MODULE, Parameter, Reference, Singleton, Environment, Import, parentModule, getAllUninitializedAttributes } from 'wollok-ts'
 import { TimeMeasurer } from '../../time-measurer'
-import { cursorNode, packageToURI } from '../../utils/text-documents'
-import { OBJECT_CLASS, isImportedIn, parentModule, projectFQN, relativeFilePath } from '../../utils/vm/wollok'
+import { cursorNode, relativeFilePath, packageToURI } from '../../utils/text-documents'
+import { isImportedIn } from '../../utils/vm/wollok'
 import { completionsForNode } from './node-completion'
 import { completeMessages } from './send-completion'
-
+import { match, when } from 'wollok-ts/dist/extensions'
 
 export const completions = (environment: Environment) => (
   params: CompletionParams,
@@ -89,7 +88,7 @@ const getLibraryIndex = (node: Node) => {
 const formatSortText = (index: number) => ('000' + index).slice(-3)
 
 const additionalIndex = (method: Method, methodContainer: Module): number => {
-  if (methodContainer.fullyQualifiedName === OBJECT_CLASS) return 50
+  if (methodContainer.fullyQualifiedName === OBJECT_MODULE) return 50
   if (methodContainer instanceof Class && methodContainer.isAbstract) return 5
   if (method.isAbstract()) return 3
   return 1
@@ -139,8 +138,7 @@ export const classCompletionItem = (clazz: Class): CompletionItem => {
 }
 
 export const initializerCompletionItem = (clazz: Class): CompletionItem => {
-  // TODO: export getAllUninitializedAttributes from wollok-ts and use it
-  const initializers = clazz.allFields.map((member, i) => `\${${2*i+1}:${member.name}} = \${${2*i+2}}`).join(', ')
+  const initializers = getAllUninitializedAttributes(clazz).map((attributeName, i) => `\${${2*i+1}:${attributeName}} = \${${2*i+2}}`).join(', ')
   return {
     label: 'initializers',
     filterText: 'initializers',
@@ -152,7 +150,7 @@ export const initializerCompletionItem = (clazz: Class): CompletionItem => {
 }
 
 export const entityCompletionItem = (entity: Entity): CompletionItem => {
-  const label = projectFQN(entity)
+  const label = entity.fullyQualifiedName
   return {
     label,
     filterText: label,

@@ -1,14 +1,11 @@
 import { DocumentFormattingParams, DocumentRangeFormattingParams, Position, Range, TextEdit } from 'vscode-languageserver'
-import { Environment, Package, print } from 'wollok-ts'
-import { PrintingMalformedNodeError } from 'wollok-ts/dist/printer/exceptions'
+import { Environment, Package, print, PrintingMalformedNodeError } from 'wollok-ts'
 import { packageFromURI } from '../utils/text-documents'
-import { wollokURI } from '../utils/vm/wollok'
 import { ClientConfigurations } from '../server'
 import { logger } from '../utils/logger'
 
 export const formatRange = (environment: Environment) => (params: DocumentRangeFormattingParams): TextEdit[] => {
   const file = getPackage(params, environment)
-
 
   return [TextEdit.insert(Position.create(0, 0), `// ${file.fileName}\n`)]
 }
@@ -38,9 +35,9 @@ export const formatDocument = (environment: Environment, { formatter: formatterC
 
 
 function getPackage(params: DocumentFormattingParams, environment: Environment): Package {
-  const file = packageFromURI(wollokURI(params.textDocument.uri), environment)
+  const file = packageFromURI(params.textDocument.uri, environment)
   if(!file){
-    throw new Error('Could not find file to format')
+    throw new Error('Could not find file to format') // TODO: shouldn´t we log params.textDocument.uri?
   }
   return file
 }
