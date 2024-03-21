@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.3.0
+- Improve UX 🧑‍💻
+- wollok-TS 4.1.0 API revamp ⬆️
+- Import on autocomplete 📝
+
 ## v0.2.1
 - New logger! 📝
 - New refactor! Rename variables 🏷️
