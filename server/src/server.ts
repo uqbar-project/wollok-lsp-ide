@@ -22,7 +22,6 @@ import { references } from './functionalities/references'
 import { rename, requestIsRenamable as isRenamable } from './functionalities/rename'
 import { documentSymbols, workspaceSymbols } from './functionalities/symbols'
 import {
-  completions,
   validateTextDocument,
 } from './linter'
 import { initializeSettings, WollokLSPSettings } from './settings'
@@ -30,6 +29,7 @@ import { logger } from './utils/logger'
 import { ProgressReporter } from './utils/progress-reporter'
 import { setWorkspaceUri, WORKSPACE_URI } from './utils/text-documents'
 import { EnvironmentProvider } from './utils/vm/environment'
+import { completions } from './functionalities/autocomplete/autocomplete'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }

@@ -1,19 +1,17 @@
 import {
-  CompletionItem,
-  CompletionParams,
   Connection,
   Diagnostic,
   DiagnosticSeverity,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Environment, Import, List, Problem, validate } from 'wollok-ts'
-import { completionsForNode } from './functionalities/autocomplete/node-completion'
-import { completeMessages } from './functionalities/autocomplete/send-completion'
+import { Environment, Problem, validate } from 'wollok-ts'
+import { List } from 'wollok-ts/dist/extensions'
 import { reportValidationMessage } from './functionalities/reporter'
 import { updateDocumentSettings } from './settings'
 import { TimeMeasurer } from './time-measurer'
 import {
-  cursorNode, isNodeURI, relativeFilePath, trimIn,
+  isNodeURI, relativeFilePath,
+  trimIn,
 } from './utils/text-documents'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -77,25 +75,6 @@ export const validateTextDocument =
         }
       }
 
-export const completions = (environment: Environment) => (
-  params: CompletionParams,
-): CompletionItem[] => {
-  const timeMeasurer = new TimeMeasurer()
-
-  const { position, textDocument, context } = params
-  const selectionNode = cursorNode(environment, position, textDocument)
-
-  timeMeasurer.addTime(`Autocomplete - ${selectionNode?.kind}`)
-
-  const autocompleteMessages = context?.triggerCharacter === '.' && !selectionNode.parent.is(Import)
-  if (autocompleteMessages) {
-    // ignore dot
-    position.character -= 1
-  }
-  const result = autocompleteMessages ? completeMessages(environment, selectionNode) : completionsForNode(selectionNode)
-  timeMeasurer.finalReport()
-  return result
-}
 
 export const generateErrorForFile = (connection: Connection, textDocument: TextDocument): void => {
   const { uri } = textDocument

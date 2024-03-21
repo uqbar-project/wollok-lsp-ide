@@ -1,5 +1,31 @@
-import { CompletionItem, CompletionItemKind, InsertTextFormat } from 'vscode-languageserver'
-import { Class, Entity, Field, Method, Mixin, Module, Name, Node, OBJECT_MODULE, Parameter, Reference, Singleton, getAllUninitializedAttributes, match, when, parentModule } from 'wollok-ts'
+import { CompletionItem, CompletionItemKind, CompletionParams, InsertTextFormat, Position, TextEdit } from 'vscode-languageserver'
+import { Class, Entity, Field, Method, Mixin, Module, Name, Node, OBJECT_MODULE, Parameter, Reference, Singleton, Environment, Import, parentModule, getAllUninitializedAttributes } from 'wollok-ts'
+import { TimeMeasurer } from '../../time-measurer'
+import { cursorNode, relativeFilePath, packageToURI } from '../../utils/text-documents'
+import { isImportedIn } from '../../utils/vm/wollok'
+import { completionsForNode } from './node-completion'
+import { completeMessages } from './send-completion'
+import { match, when } from 'wollok-ts/dist/extensions'
+
+export const completions = (environment: Environment) => (
+  params: CompletionParams,
+): CompletionItem[] => {
+  const timeMeasurer = new TimeMeasurer()
+
+  const { position, textDocument, context } = params
+  const selectionNode = cursorNode(environment, position, textDocument)
+
+  timeMeasurer.addTime(`Autocomplete - ${selectionNode?.kind}`)
+
+  const autocompleteMessages = context?.triggerCharacter === '.' && !selectionNode.parent.is(Import)
+  if (autocompleteMessages) {
+    // ignore dot
+    position.character -= 1
+  }
+  const result = autocompleteMessages ? completeMessages(environment, selectionNode) : completionsForNode(selectionNode)
+  timeMeasurer.finalReport()
+  return result
+}
 
 // -----------------
 // -----MAPPERS-----
@@ -12,6 +38,24 @@ export const fieldCompletionItem: CompletionItemMapper<Field> = namedCompletionI
 
 export const singletonCompletionItem: CompletionItemMapper<Singleton> = moduleCompletionItem(CompletionItemKind.Class)
 
+export const withImport = <T extends Node>(mapper: CompletionItemMapper<T>) => (relativeTo: Node): CompletionItemMapper<T> => (node) => {
+  const importedPackage = node.parentPackage!
+  const originalPackage = relativeTo.parentPackage!
+
+  const result = mapper(node)
+  if(
+    importedPackage &&
+    originalPackage &&
+    isImportedIn(importedPackage, originalPackage)
+  ) {
+    result.detail = `Add import ${importedPackage.fileName ? relativeFilePath(packageToURI(importedPackage)) : importedPackage.name}${result.detail ? ` - ${result.detail}` : ''}`
+    result.additionalTextEdits = (result.additionalTextEdits ?? []).concat(
+      TextEdit.insert(Position.create(0, 0), `import ${importedPackage.name}.*\n`)
+    )
+  }
+
+  return result
+}
 /**
  * We want
  * - first: methods belonging to the same file we are using
