@@ -1,7 +1,8 @@
 import { CodeLens, CodeLensParams, Position, Range } from 'vscode-languageserver'
-import { Describe, Node, Package, Test, Program, Environment, is } from 'wollok-ts'
+import { Describe, Node, Package, Test, Program, Environment, is, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Class, Singleton } from 'wollok-ts'
 import { getWollokFileExtension, packageFromURI, toVSCRange } from '../utils/text-documents'
 import { removeQuotes } from '../utils/strings'
+import { COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../constants'
 
 export const codeLenses = (environment: Environment) => (params: CodeLensParams): CodeLens[] | null => {
   const fileExtension = getWollokFileExtension(params.textDocument.uri)
@@ -9,10 +10,12 @@ export const codeLenses = (environment: Environment) => (params: CodeLensParams)
   if (!file) return null
 
   switch (fileExtension) {
-    case 'wpgm':
+    case PROGRAM_FILE_EXTENSION:
       return getProgramCodeLenses(file)
-    case 'wtest':
+    case TEST_FILE_EXTENSION:
       return getTestCodeLenses(file)
+    case WOLLOK_FILE_EXTENSION:
+      return getWollokFileCodeLenses(file)
     default:
       return null
   }
@@ -23,7 +26,7 @@ export const getProgramCodeLenses = (file: Package): CodeLens[] =>
     {
       range: toVSCRange(program.sourceMap!),
       command: {
-        command: 'wollok.run.game',
+        command: COMMAND_RUN_GAME,
         title: 'Run game',
         arguments: [program.fullyQualifiedName],
       },
@@ -31,7 +34,7 @@ export const getProgramCodeLenses = (file: Package): CodeLens[] =>
     {
       range: toVSCRange(program.sourceMap!),
       command: {
-        command: 'wollok.run.program',
+        command: COMMAND_RUN_PROGRAM,
         title: 'Run program',
         arguments: [program.fullyQualifiedName],
       },
@@ -67,7 +70,7 @@ const buildTestCodeLens = (file: Package, node: Test | Describe): CodeLens => {
 
   return buildTestsCodeLens(
     toVSCRange(node.sourceMap!),
-    'wollok.run.test',
+    COMMAND_RUN_TEST,
     `Run ${node.is(Test) ? 'test' : 'describe'}`,
     [
       null,
@@ -87,6 +90,21 @@ const buildTestsCodeLens = (range: Range, command: string, title: string, args: 
   },
 })
 
-function isTesteable(node: Node): node is Test | Describe {
-  return node.is(Test) || node.is(Describe)
-}
+export const getWollokFileCodeLenses = (file: Package): CodeLens[] =>
+  file.members.filter(isWollokDefinition).flatMap(definition => [
+    // TODO: armar una función para crear un command, pasarle command y title
+    {
+      range: toVSCRange(definition.sourceMap!),
+      command: {
+        command: COMMAND_START_REPL,
+        title: 'Run in REPL',
+        arguments: [definition.fullyQualifiedName],
+      },
+    },
+  ])
+
+const isTesteable = (node: Node): node is Test | Describe =>
+  node.is(Test) || node.is(Describe)
+
+const isWollokDefinition = (node: Node): node is Class | Singleton =>
+  node.is(Class) || node.is(Singleton)
