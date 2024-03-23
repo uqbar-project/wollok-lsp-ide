@@ -1,5 +1,5 @@
 import { CodeLens, CodeLensParams, Position, Range } from 'vscode-languageserver'
-import { Describe, Node, Package, Test, Program, Environment, is, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Class, Singleton } from 'wollok-ts'
+import { Describe, Node, Package, Test, Program, Environment, is, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Class, Singleton, Entity } from 'wollok-ts'
 import { getWollokFileExtension, packageFromURI, toVSCRange } from '../utils/text-documents'
 import { removeQuotes } from '../utils/strings'
 import { COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../constants'
@@ -23,22 +23,8 @@ export const codeLenses = (environment: Environment) => (params: CodeLensParams)
 
 export const getProgramCodeLenses = (file: Package): CodeLens[] =>
   file.members.filter(is(Program)).flatMap(program => [
-    {
-      range: toVSCRange(program.sourceMap!),
-      command: {
-        command: COMMAND_RUN_GAME,
-        title: 'Run game',
-        arguments: [program.fullyQualifiedName],
-      },
-    },
-    {
-      range: toVSCRange(program.sourceMap!),
-      command: {
-        command: COMMAND_RUN_PROGRAM,
-        title: 'Run program',
-        arguments: [program.fullyQualifiedName],
-      },
-    },
+    buildLens(program, COMMAND_RUN_GAME, 'Run game'),
+    buildLens(program, COMMAND_RUN_PROGRAM, 'Run program'),
   ])
 
 
@@ -92,19 +78,27 @@ const buildTestsCodeLens = (range: Range, command: string, title: string, args: 
 
 export const getWollokFileCodeLenses = (file: Package): CodeLens[] =>
   file.members.filter(isWollokDefinition).flatMap(definition => [
-    // TODO: armar una función para crear un command, pasarle command y title
-    {
-      range: toVSCRange(definition.sourceMap!),
-      command: {
-        command: COMMAND_START_REPL,
-        title: 'Run in REPL',
-        arguments: [definition.fullyQualifiedName],
-      },
-    },
+    buildLens(definition, COMMAND_START_REPL, 'Run in REPL'),
   ])
+
+/************************************************************************************************/
+/* HELPER FUNCTIONS
+/************************************************************************************************/
 
 const isTesteable = (node: Node): node is Test | Describe =>
   node.is(Test) || node.is(Describe)
 
 const isWollokDefinition = (node: Node): node is Class | Singleton =>
   node.is(Class) || node.is(Singleton)
+
+
+const buildLens = (node: Entity, command: string, title: string) => (
+  {
+    range: toVSCRange(node.sourceMap!),
+    command: {
+      command,
+      title,
+      arguments: [node.fullyQualifiedName],
+    },
+  }
+)
