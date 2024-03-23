@@ -5,7 +5,7 @@ import { getDocumentURI, activate } from './helper'
 suite('Should do code lenses', () => {
   const docUri = getDocumentURI('test.wtest')
 
-  test('Shows program code lenses for wpgm file', async () => {
+  test('Shows program code lenses for Wollok Program file', async () => {
     await testCodeLenses(getDocumentURI('pepitaGame.wpgm'), [
       new CodeLens(
         new Range(new Position(0, 0), new Position(2, 1)),
@@ -55,8 +55,47 @@ suite('Should do code lenses', () => {
     ])
   })
 
-  test('Shows no code lenses for Wollok file', async () => {
-    await testCodeLenses(getDocumentURI('pepita.wlk'), [])
+  test('Shows test code lenses for Wollok Definition file', async () => {
+    await testCodeLenses(getDocumentURI('pepita.wlk'), [
+        {
+          range : {
+            c : {
+              c : 0,
+              e : 0,
+            },
+            e : {
+              c : 4,
+              e : 0,
+            },
+          },
+          command : {
+            arguments : [
+              'pepita.Pepita',
+            ],
+            command : 'wollok.start.repl',
+            title : 'Run in REPL',
+          },
+        },
+        {
+          range: {
+            c : {
+              c : 4,
+              e : 0,
+            },
+            e : {
+              c : 6,
+              e : 0,
+            },
+          },
+          command: {
+            arguments: [
+              'pepita.a',
+            ],
+            command: 'wollok.start.repl',
+            title: 'Run in REPL',
+          },
+        },
+    ])
   })
 })
 
