@@ -1,118 +1,57 @@
 import * as assert from 'assert'
-import { commands, Range, Uri } from 'vscode'
-import { CodeLens } from 'vscode-languageclient'
+import { commands, Range, Uri, CodeLens, Position } from 'vscode'
 import { getDocumentURI, activate } from './helper'
-
-type PositionJSON = {
-  /**
-   * Line
-   */
-  c: number
-  /**
-   * Character
-   */
-  e: number
-}
-type CodeLensJSON = Omit<CodeLens, 'range'> & {
-  range: { c: PositionJSON; e: PositionJSON }
-}
-type CodeLensLSPAnswer = CodeLensJSON[] | null
 
 suite('Should do code lenses', () => {
   const docUri = getDocumentURI('test.wtest')
 
   test('Shows program code lenses for wpgm file', async () => {
     await testCodeLenses(getDocumentURI('pepitaGame.wpgm'), [
-      {
-        range: {
-          c: {
-            e: 0,
-            c: 0,
-          },
-          e: {
-            c: 2,
-            e: 1,
-          },
-        },
-        command: {
+      new CodeLens(
+        new Range(new Position(0, 0), new Position(2, 1)),
+        {
           title: 'Run game',
           command: 'wollok.run.game',
           arguments: ['pepitaGame.juego'],
         },
-      },
-      {
-        range: {
-          c: {
-            e: 0,
-            c: 0,
-          },
-          e: {
-            c: 2,
-            e: 1,
-          },
-        },
-        command: {
+      ),
+      new CodeLens(
+        new Range(new Position(0, 0), new Position(2, 1)),
+        {
           title: 'Run program',
           command: 'wollok.run.program',
           arguments: ['pepitaGame.juego'],
         },
-      },
+      ),
     ])
   })
 
   test('Shows test code lenses for Wollok Test file', async () => {
     await testCodeLenses(docUri, [
-      {
-        range: {
-          c: {
-            e: 0,
-            c: 0,
-          },
-          e: {
-            e: 0,
-            c: 0,
-          },
-        },
-        command: {
+      new CodeLens(
+        new Range(new Position(0, 0), new Position(0, 0)),
+        {
           title: 'Run all tests',
-          command: 'wollok.run.tests',
-          arguments: ['test'],
+          command: 'wollok.run.test',
+          arguments: [null, 'test', null, null],
         },
-      },
-      {
-        range: {
-          c: {
-            c: 0,
-            e: 0,
-          },
-          e: {
-            c: 4,
-            e: 1,
-          },
-        },
-        command: {
+      ),
+      new CodeLens(
+        new Range(new Position(0, 0), new Position(4, 1)),
+        {
           title: 'Run describe',
-          command: 'wollok.run.tests',
-          arguments: ['test."pepita test"'],
+          command: 'wollok.run.test',
+          arguments: [null, 'test', 'pepita test', null],
         },
-      },
-      {
-        range: {
-          c: {
-            c: 1,
-            e: 4,
-          },
-          e: {
-            c: 4,
-            e: 0,
-          },
-        },
-        command: {
+      ),
+      new CodeLens(
+        new Range(new Position(1, 4), new Position(4, 0)),
+        {
           title: 'Run test',
-          command: 'wollok.run.tests',
-          arguments: ['test."pepita test"."pepita is happy"'],
+          command: 'wollok.run.test',
+          arguments: [null, 'test', 'pepita test', 'pepita is happy'],
         },
-      },
+      ),
     ])
   })
 
@@ -123,7 +62,7 @@ suite('Should do code lenses', () => {
 
 async function testCodeLenses(
   docUri: Uri,
-  expectedCodeLensesList: CodeLensLSPAnswer,
+  expectedCodeLensesList: CodeLens[],
 ) {
   await activate(docUri)
 
@@ -131,7 +70,7 @@ async function testCodeLenses(
   const actualCodeLensesList = (await commands.executeCommand(
     'vscode.executeCodeLensProvider',
     docUri,
-  )) as (CodeLens & { range: Range })[] | null
+  )) as CodeLens[] | null
 
   assert.deepEqual(
     actualCodeLensesList,
