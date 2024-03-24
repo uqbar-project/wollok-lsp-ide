@@ -10,4 +10,3 @@ yalc.lock
 coverage
 .nyc_output
 wollok.log
-./client/src/shared-definitions.ts

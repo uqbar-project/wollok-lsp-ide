@@ -176,7 +176,6 @@
     ]
   },
   "scripts": {
-    "preinstall": "ln ./server/src/shared-definitions.ts ./client/src",
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
