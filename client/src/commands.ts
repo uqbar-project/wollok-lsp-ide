@@ -34,13 +34,16 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
  * CLI Commands
  */
 
-export const runProgram = (isGame = false) => (fqn: string): Task =>
-  wollokCLITask('run program', `Wollok run ${isGame ? 'game' : 'program'}`, [
+export const runProgram = (isGame = false) => (fqn: string): Task => {
+  // Terminate previous terminal session
+  vscode.commands.executeCommand('workbench.action.terminal.killAll')
+  return wollokCLITask('run program', `Wollok run ${isGame ? 'game' : 'program'}`, [
     'run',
     ...isGame ? ['-g'] : [],
     `'${fqn}'`,
     '--skipValidations',
   ])
+}
 
 export const runTest = ([filter, file, describe, test]: [string|null, string|null, string|null, string|null]): Task =>
   wollokCLITask('run tests', 'Wollok run test', [
