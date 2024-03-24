@@ -2,7 +2,7 @@ import { CodeLens, CodeLensParams, Position, Range } from 'vscode-languageserver
 import { Describe, Node, Package, Test, Program, Environment, is, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Class, Singleton, Entity } from 'wollok-ts'
 import { getWollokFileExtension, packageFromURI, toVSCRange } from '../utils/text-documents'
 import { removeQuotes } from '../utils/strings'
-import { COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../constants'
+import { COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../shared-definitions'
 
 export const codeLenses = (environment: Environment) => (params: CodeLensParams): CodeLens[] | null => {
   const fileExtension = getWollokFileExtension(params.textDocument.uri)
@@ -41,7 +41,22 @@ export const getTestCodeLenses = (file: Package): CodeLens[] => {
   ]
 }
 
-const buildRunAllTestsCodeLens = (file: Package): CodeLens =>
+export const getWollokFileCodeLenses = (file: Package): CodeLens[] =>
+  file.members.filter(isWollokDefinition).flatMap(definition => [
+    buildLens(definition, COMMAND_START_REPL, 'Run in REPL'),
+  ])
+
+/************************************************************************************************/
+/* HELPER FUNCTIONS
+/************************************************************************************************/
+
+const isTesteable = (node: Node): node is Test | Describe =>
+  node.is(Test) || node.is(Describe)
+
+const isWollokDefinition = (node: Node): node is Class | Singleton =>
+  node.is(Class) || node.is(Singleton)
+
+  const buildRunAllTestsCodeLens = (file: Package): CodeLens =>
   buildTestsCodeLens(
     Range.create(Position.create(0, 0), Position.create(0, 0)),
     'wollok.run.test',
@@ -75,22 +90,6 @@ const buildTestsCodeLens = (range: Range, command: string, title: string, args: 
     arguments: args,
   },
 })
-
-export const getWollokFileCodeLenses = (file: Package): CodeLens[] =>
-  file.members.filter(isWollokDefinition).flatMap(definition => [
-    buildLens(definition, COMMAND_START_REPL, 'Run in REPL'),
-  ])
-
-/************************************************************************************************/
-/* HELPER FUNCTIONS
-/************************************************************************************************/
-
-const isTesteable = (node: Node): node is Test | Describe =>
-  node.is(Test) || node.is(Describe)
-
-const isWollokDefinition = (node: Node): node is Class | Singleton =>
-  node.is(Class) || node.is(Singleton)
-
 
 const buildLens = (node: Entity, command: string, title: string) => (
   {
