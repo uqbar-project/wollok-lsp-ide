@@ -42,9 +42,9 @@ export const getTestCodeLenses = (file: Package): CodeLens[] => {
 }
 
 export const getWollokFileCodeLenses = (file: Package): CodeLens[] =>
-  file.members.filter(isWollokDefinition).flatMap(definition => [
+  file.members.filter(isWollokDefinition).map(definition =>
     buildLens(definition, COMMAND_START_REPL, 'Run in REPL'),
-  ])
+  )
 
 /************************************************************************************************/
 /* HELPER FUNCTIONS
