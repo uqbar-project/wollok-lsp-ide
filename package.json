@@ -159,6 +159,20 @@
         "when": "resourceExtname == .wtest",
         "category": "Wollok"
       }
+    ],
+    "keybindings": [
+      {
+        "command": "wollok.start.repl",
+        "key": "ctrl+r",
+        "mac": "cmd+r",
+        "when": "editorTextFocus && resourceExtname == .wlk"
+      },
+      {
+        "command": "wollok.run.allTests",
+        "key": "ctrl+r",
+        "mac": "cmd+r",
+        "when": "editorTextFocus && resourceExtname == .wtest"
+      }
     ]
   },
   "scripts": {

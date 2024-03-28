@@ -1,7 +1,8 @@
 import { CodeLens, CodeLensParams, Position, Range } from 'vscode-languageserver'
-import { Describe, Node, Package, Test, Program, Environment, is } from 'wollok-ts'
+import { Describe, Node, Package, Test, Program, Environment, is, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Class, Singleton, Entity } from 'wollok-ts'
 import { getWollokFileExtension, packageFromURI, toVSCRange } from '../utils/text-documents'
 import { removeQuotes } from '../utils/strings'
+import { COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../shared-definitions'
 
 export const codeLenses = (environment: Environment) => (params: CodeLensParams): CodeLens[] | null => {
   const fileExtension = getWollokFileExtension(params.textDocument.uri)
@@ -9,10 +10,12 @@ export const codeLenses = (environment: Environment) => (params: CodeLensParams)
   if (!file) return null
 
   switch (fileExtension) {
-    case 'wpgm':
+    case PROGRAM_FILE_EXTENSION:
       return getProgramCodeLenses(file)
-    case 'wtest':
+    case TEST_FILE_EXTENSION:
       return getTestCodeLenses(file)
+    case WOLLOK_FILE_EXTENSION:
+      return getWollokFileCodeLenses(file)
     default:
       return null
   }
@@ -20,22 +23,8 @@ export const codeLenses = (environment: Environment) => (params: CodeLensParams)
 
 export const getProgramCodeLenses = (file: Package): CodeLens[] =>
   file.members.filter(is(Program)).flatMap(program => [
-    {
-      range: toVSCRange(program.sourceMap!),
-      command: {
-        command: 'wollok.run.game',
-        title: 'Run game',
-        arguments: [program.fullyQualifiedName],
-      },
-    },
-    {
-      range: toVSCRange(program.sourceMap!),
-      command: {
-        command: 'wollok.run.program',
-        title: 'Run program',
-        arguments: [program.fullyQualifiedName],
-      },
-    },
+    buildLens(program, COMMAND_RUN_GAME, 'Run game'),
+    buildLens(program, COMMAND_RUN_PROGRAM, 'Run program'),
   ])
 
 
@@ -52,7 +41,22 @@ export const getTestCodeLenses = (file: Package): CodeLens[] => {
   ]
 }
 
-const buildRunAllTestsCodeLens = (file: Package): CodeLens =>
+export const getWollokFileCodeLenses = (file: Package): CodeLens[] =>
+  file.members.filter(isWollokDefinition).map(definition =>
+    buildLens(definition, COMMAND_START_REPL, 'Run in REPL'),
+  )
+
+/************************************************************************************************/
+/* HELPER FUNCTIONS
+/************************************************************************************************/
+
+const isTesteable = (node: Node): node is Test | Describe =>
+  node.is(Test) || node.is(Describe)
+
+const isWollokDefinition = (node: Node): node is Class | Singleton =>
+  node.is(Class) || node.is(Singleton)
+
+  const buildRunAllTestsCodeLens = (file: Package): CodeLens =>
   buildTestsCodeLens(
     Range.create(Position.create(0, 0), Position.create(0, 0)),
     'wollok.run.test',
@@ -67,7 +71,7 @@ const buildTestCodeLens = (file: Package, node: Test | Describe): CodeLens => {
 
   return buildTestsCodeLens(
     toVSCRange(node.sourceMap!),
-    'wollok.run.test',
+    COMMAND_RUN_TEST,
     `Run ${node.is(Test) ? 'test' : 'describe'}`,
     [
       null,
@@ -87,6 +91,13 @@ const buildTestsCodeLens = (range: Range, command: string, title: string, args: 
   },
 })
 
-function isTesteable(node: Node): node is Test | Describe {
-  return node.is(Test) || node.is(Describe)
-}
+const buildLens = (node: Entity, command: string, title: string) => (
+  {
+    range: toVSCRange(node.sourceMap!),
+    command: {
+      command,
+      title,
+      arguments: [node.fullyQualifiedName],
+    },
+  }
+)

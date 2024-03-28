@@ -20,7 +20,7 @@ import {
 } from 'vscode-languageclient/node'
 import { subscribeWollokCommands } from './commands'
 import { allWollokFiles } from './utils'
-import { wollokLSPExtensionId } from './constants'
+import { wollokLSPExtensionId } from './shared-definitions'
 
 let client: LanguageClient
 
