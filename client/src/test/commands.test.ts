@@ -1,7 +1,7 @@
 import * as assert from 'assert'
 import * as sinon from 'sinon'
 import { ShellExecution, Task, Uri, env, workspace } from 'vscode'
-import { runAllTests, runProgram, runTests, startRepl } from '../commands'
+import { runAllTests, runProgram, runTest, startRepl } from '../commands'
 import { activate, getDocumentURI, getFolderURI } from './helper'
 import { toPosix, toWin, Shell } from '../platform-string-utils'
 import { afterEach, beforeEach } from 'mocha'
@@ -47,7 +47,10 @@ suite('Should run commands', () => {
   })
 
   suite('run tests', () => {
-    const testFQN = 'tests."tests de pepita"."something"'
+    const SEP = '<SEP>'
+    const testCommandOptions = `-f tests -d ${SEP}tests de pepita${SEP} -t ${SEP}something${SEP}`
+
+    const testArgs: [string, string, string, string] = [null, 'tests', 'tests de pepita', 'something']
 
     async function runCommandOnPlatform(
       platform: string,
@@ -59,8 +62,8 @@ suite('Should run commands', () => {
       const separator = shell == 'cmd' ? '"' : '\''
       await testCommand(
         pepitaURI,
-        () => runTests(testFQN),
-        ` test ${separator}${expectedCommand}${separator} --skipValidations -p ${expectedPathByShell(
+        () => runTest(testArgs),
+        ` test ${expectedCommand.replace(new RegExp(SEP, 'g'), separator)} --skipValidations -p ${expectedPathByShell(
           shell,
           folderURI.fsPath,
         )}`,
@@ -68,12 +71,12 @@ suite('Should run commands', () => {
       sinon.restore()
     }
 
-    test('on Linux', () => runCommandOnPlatform('linux', 'bash', testFQN))
-    test('on Mac', () => runCommandOnPlatform('darwin', 'bash', testFQN))
-    test('on Windows with Command', () => runCommandOnPlatform('win32', 'cmd', 'tests.tests de pepita.something'))
-    test('on Windows with Powershell', () => runCommandOnPlatform('win32', 'pwsh', testFQN))
+    test('on Linux', () => runCommandOnPlatform('linux', 'bash', testCommandOptions))
+    test('on Mac', () => runCommandOnPlatform('darwin', 'bash', testCommandOptions))
+    test('on Windows with Command', () => runCommandOnPlatform('win32', 'cmd', testCommandOptions))
+    test('on Windows with Powershell', () => runCommandOnPlatform('win32', 'pwsh', testCommandOptions))
     test('on Windows with Bash', () =>
-      runCommandOnPlatform('win32', 'bash', testFQN))
+      runCommandOnPlatform('win32', 'bash', testCommandOptions))
   })
 
   test('run all tests', async () => {

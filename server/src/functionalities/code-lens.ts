@@ -1,6 +1,7 @@
 import { CodeLens, CodeLensParams, Position, Range } from 'vscode-languageserver'
-import { Describe, fqnRelativeToPackage, Node, Package, Test, Program, Environment, is } from 'wollok-ts'
+import { Describe, Node, Package, Test, Program, Environment, is } from 'wollok-ts'
 import { getWollokFileExtension, packageFromURI, toVSCRange } from '../utils/text-documents'
+import { removeQuotes } from '../utils/strings'
 
 export const codeLenses = (environment: Environment) => (params: CodeLensParams): CodeLens[] | null => {
   const fileExtension = getWollokFileExtension(params.textDocument.uri)
@@ -39,11 +40,7 @@ export const getProgramCodeLenses = (file: Package): CodeLens[] =>
 
 
 export const getTestCodeLenses = (file: Package): CodeLens[] => {
-  const runAllTests = buildTestCodeLens(
-    Range.create(Position.create(0, 0), Position.create(0, 0)),
-    file.fullyQualifiedName,
-    'Run all tests'
-  )
+  const runAllTests = buildRunAllTestsCodeLens(file)
 
   return [
     runAllTests
@@ -51,26 +48,44 @@ export const getTestCodeLenses = (file: Package): CodeLens[] => {
     ...file
       .descendants
       .filter(isTesteable)
-      .map(node =>
-        buildTestCodeLens(
-          toVSCRange(node.sourceMap!),
-          fqnRelativeToPackage(file, node as Test | Describe),
-          `Run ${node.is(Test) ? 'test' : 'describe'}`
-        )
-      ),
+      .map(node => buildTestCodeLens(file, node)),
   ]
 }
 
-function buildTestCodeLens(range: Range, filter: string, title: string): CodeLens {
-  return {
-    range,
-    command: {
-      command: 'wollok.run.tests',
-      title: title,
-      arguments: [filter],
-    },
-  }
+const buildRunAllTestsCodeLens = (file: Package): CodeLens =>
+  buildTestsCodeLens(
+    Range.create(Position.create(0, 0), Position.create(0, 0)),
+    'wollok.run.test',
+    'Run all tests',
+    [null, file.name, null, null]
+  )
+
+
+const buildTestCodeLens = (file: Package, node: Test | Describe): CodeLens => {
+  const describe = node.is(Describe) ? node.name : node.parent?.is(Describe) ? node.parent.name : null
+  const test = node.is(Test) ? node.name : null
+
+  return buildTestsCodeLens(
+    toVSCRange(node.sourceMap!),
+    'wollok.run.test',
+    `Run ${node.is(Test) ? 'test' : 'describe'}`,
+    [
+      null,
+      file.name,
+      describe ? removeQuotes(describe) : null,
+      test ? removeQuotes(test) : null,
+    ]
+  )
 }
+
+const buildTestsCodeLens = (range: Range, command: string, title: string, args: [string|null, string|null, string|null, string|null]):  CodeLens => ({
+  range,
+  command: {
+    command,
+    title,
+    arguments: args,
+  },
+})
 
 function isTesteable(node: Node): node is Test | Describe {
   return node.is(Test) || node.is(Describe)
