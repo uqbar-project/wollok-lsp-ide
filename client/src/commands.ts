@@ -14,19 +14,19 @@ import {
   fsToShell,
   unknownToShell,
 } from './platform-string-utils'
-import { wollokLSPExtensionCode } from './constants'
+import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode } from './shared-definitions'
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
-  context.subscriptions.push(registerCLICommand('wollok.start.repl', startRepl))
+  context.subscriptions.push(registerCLICommand(COMMAND_START_REPL, startRepl))
   context.subscriptions.push(
-    registerCLICommand('wollok.run.allTests', runAllTests),
+    registerCLICommand(COMMAND_RUN_ALL_TESTS, runAllTests),
   )
-  context.subscriptions.push(registerCLICommand('wollok.run.test', runTest))
+  context.subscriptions.push(registerCLICommand(COMMAND_RUN_TEST, runTest))
   context.subscriptions.push(
-    registerCLICommand('wollok.run.program', runProgram()),
+    registerCLICommand(COMMAND_RUN_PROGRAM, runProgram()),
   )
   context.subscriptions.push(
-    registerCLICommand('wollok.run.game', runProgram(true)),
+    registerCLICommand(COMMAND_RUN_GAME, runProgram(true)),
   )
 }
 
@@ -34,13 +34,16 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
  * CLI Commands
  */
 
-export const runProgram = (isGame = false) => (fqn: string): Task =>
-  wollokCLITask('run program', `Wollok run ${isGame ? 'game' : 'program'}`, [
+export const runProgram = (isGame = false) => (fqn: string): Task => {
+  // Terminate previous terminal session
+  vscode.commands.executeCommand('workbench.action.terminal.killAll')
+  return wollokCLITask('run program', `Wollok run ${isGame ? 'game' : 'program'}`, [
     'run',
     ...isGame ? ['-g'] : [],
     `'${fqn}'`,
     '--skipValidations',
   ])
+}
 
 export const runTest = ([filter, file, describe, test]: [string|null, string|null, string|null, string|null]): Task =>
   wollokCLITask('run tests', 'Wollok run test', [
