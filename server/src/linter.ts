@@ -4,12 +4,12 @@ import {
   DiagnosticSeverity,
 } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
-import { Environment, Problem, validate } from 'wollok-ts'
-import { List } from 'wollok-ts/dist/extensions'
+import { Environment, List, Problem, validate } from 'wollok-ts'
 import { reportValidationMessage } from './functionalities/reporter'
 import { updateDocumentSettings } from './settings'
 import { TimeMeasurer } from './time-measurer'
 import { isNodeURI, relativeFilePath, trimIn } from './utils/text-documents'
+import { logger } from './utils/logger'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
@@ -60,15 +60,17 @@ export const validateTextDocument =
       async (environment: Environment): Promise<void> => {
         await updateDocumentSettings(connection)
 
+        const timeMeasurer = new TimeMeasurer()
         try {
-          const documentUri = relativeFilePath(textDocument.uri)
-          const timeMeasurer = new TimeMeasurer()
           const problems = validate(environment)
           sendDiagnostics(connection, problems, allDocuments)
+        } catch (error) {
+          logger.error(`✘ Validate text document error: ${error}`, error)
+          generateErrorForFile(connection, textDocument)
+        } finally {
+          const documentUri = relativeFilePath(textDocument.uri)
           timeMeasurer.addTime(`Validating ${documentUri}`)
           timeMeasurer.finalReport()
-        } catch (e) {
-          generateErrorForFile(connection, textDocument)
         }
       }
 

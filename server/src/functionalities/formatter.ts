@@ -23,12 +23,12 @@ export const formatDocument = (environment: Environment, { formatter: formatterC
         })
       ),
     ]
-  } catch(err) {
-    let message = `Could not format file '${file.fileName}'`
-    if(err instanceof PrintingMalformedNodeError){
-      message += `: ${err.message} {${err.node.toString()}}`
+  } catch(error) {
+    let message = `✘ Could not format file '${file.fileName}'`
+    if (error instanceof PrintingMalformedNodeError) {
+      message += `: ${error.message} {${error.node.toString()}}`
     }
-    logger.error(message)
+    logger.error(message, error)
     return null
   }
 }

@@ -59,34 +59,6 @@ const requestContext = combineLatest([environmentProvider.$environment.pipe(filt
 
 const requestProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-request', title: 'Processing Request...' })
 
-function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void> {
-  return (params, cancel, workDoneProgress, resultProgress) => {
-    requestProgressReporter.begin()
-    try {
-      return requestHandler(params, cancel, workDoneProgress, resultProgress)
-    } catch (e) {
-      logger.error('✘ Failed to process request', e)
-      return null
-    } finally {
-      requestProgressReporter.end()
-    }
-
-  }
-}
-
-function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: Environment, settings: ClientConfigurations) => ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void> {
-  return (params, cancel, workDoneProgress, resultProgress) => {
-    requestProgressReporter.begin()
-    return new Promise(resolve => {
-      firstValueFrom(requestContext).then(([newEnvironment, newSettings]) => {
-        const result = syncHandler(requestHandler(newEnvironment!, newSettings))(params, cancel, workDoneProgress, resultProgress)
-        requestProgressReporter.end()
-        resolve(result)
-      })
-    })
-  }
-}
-
 let hasWorkspaceFolderCapability = false
 
 connection.onInitialize((params: InitializeParams) => {
@@ -122,29 +94,41 @@ connection.onInitialize((params: InitializeParams) => {
 })
 
 connection.onInitialized(() => {
-  connection.client.register(DidChangeConfigurationNotification.type, null)
+  try {
+    connection.client.register(DidChangeConfigurationNotification.type, null)
 
-  if (hasWorkspaceFolderCapability) {
-    connection.workspace.onDidChangeWorkspaceFolders((_event) => {
-      connection.console.log('Workspace folder change event received.')
-    })
+    if (hasWorkspaceFolderCapability) {
+      connection.workspace.onDidChangeWorkspaceFolders((_event) => {
+        connection.console.log('Workspace folder change event received.')
+      })
+    }
+    initializeSettings(connection)
+    environmentProvider.resetEnvironment()
+  } catch (error) {
+    handleError('onInitialized failed', error)
   }
-  initializeSettings(connection)
-  environmentProvider.resetEnvironment()
 })
 
 // Cache the settings of all open documents
 const documentSettings: Map<string, Thenable<WollokLSPSettings>> = new Map()
 
 connection.onDidChangeConfiguration(() => {
-  connection.workspace.getConfiguration('wollokLSP').then(settings => {
-    config.next(settings as ClientConfigurations)
-  })
+  try {
+    connection.workspace.getConfiguration('wollokLSP').then(settings => {
+      config.next(settings as ClientConfigurations)
+    })
+  } catch (error) {
+    handleError('onDidChangeConfiguration failed', error)
+  }
 })
 
 // Only keep settings for open documents
 documents.onDidClose((change) => {
-  documentSettings.delete(change.document.uri)
+  try {
+    documentSettings.delete(change.document.uri)
+  } catch (error) {
+    handleError('onDidClose event failed', error)
+  }
 })
 
 const deferredChanges: TextDocumentChangeEvent<TextDocument>[] = []
@@ -161,8 +145,7 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
       environmentProvider.$environment.getValue()!
     )
   } catch (e) {
-    connection.console.error(`✘ Failed to rebuild document: ${e}`)
-    logger.error(`✘ Failed to rebuild document`, e)
+    handleError('Failed to rebuild document', e)
   }
 }
 
@@ -172,24 +155,32 @@ documents.onDidChangeContent(rebuildTextDocument)
 
 // Custom requests from client
 connection.onRequest((change) => {
-  if (change.startsWith('WORKSPACE_URI')) { // WORKSPACE_URI:[uri]
-    setWorkspaceUri('file:' + change.split(':').pop())
-    deferredChanges.forEach(rebuildTextDocument)
-    deferredChanges.length = 0
-  }
+  try {
+    if (change.startsWith('WORKSPACE_URI')) { // WORKSPACE_URI:[uri]
+      setWorkspaceUri('file:' + change.split(':').pop())
+      deferredChanges.forEach(rebuildTextDocument)
+      deferredChanges.length = 0
+    }
 
-  if (change === 'STRONG_FILES_CHANGED') { // A file was deleted, renamed, moved, etc.
-    environmentProvider.resetEnvironment()
-    environmentProvider.updateEnvironmentWith(...documents.all())
+    if (change === 'STRONG_FILES_CHANGED') { // A file was deleted, renamed, moved, etc.
+      environmentProvider.resetEnvironment()
+      environmentProvider.updateEnvironmentWith(...documents.all())
+    }
+  } catch (error) {
+    handleError('onRequest change failed', error)
   }
 })
 
 config.subscribe(() => {
-  // Revalidate all open text documents
-  environmentProvider.updateEnvironmentWith(...documents.all())
-  documents.all().forEach(doc =>
-    validateTextDocument(connection, documents.all())(doc)(environmentProvider.$environment.getValue()!)
-  )
+  try {
+    // Revalidate all open text documents
+    environmentProvider.updateEnvironmentWith(...documents.all())
+    documents.all().forEach(doc =>
+      validateTextDocument(connection, documents.all())(doc)(environmentProvider.$environment.getValue()!)
+    )
+  } catch (error) {
+    handleError('Updating environment failed', error)
+  }
 })
 
 const handlers: readonly [
@@ -209,13 +200,21 @@ const handlers: readonly [
     [connection.onReferences, references],
   ]
 
-for (const [handlerRegistration, requestHandler] of handlers) {
-  handlerRegistration(waitForFirstHandler(requestHandler))
+try {
+  for (const [handlerRegistration, requestHandler] of handlers) {
+    handlerRegistration(waitForFirstHandler(requestHandler))
+  }
+} catch (error) {
+  handleError('Handling registration for first time failed', error)
 }
 
 requestContext.subscribe(([newEnvironment, newSettings]) => {
-  for (const [handlerRegistration, requestHandler] of handlers) {
-    handlerRegistration(syncHandler(requestHandler(newEnvironment!, newSettings)))
+  try {
+    for (const [handlerRegistration, requestHandler] of handlers) {
+      handlerRegistration(syncHandler(requestHandler(newEnvironment!, newSettings)))
+    }
+  } catch (error) {
+    handleError('There was an error while processing a request during a change of environment', error)
   }
 })
 
@@ -225,3 +224,40 @@ documents.listen(connection)
 
 // Listen on the connection
 connection.listen()
+
+/*************************************************************************************************************/
+/* Internal functions                                                                                        */
+/*************************************************************************************************************/
+
+function handleError(message: string, e: unknown): void {
+  connection.console.error(`✘ ${message}: ${e}`)
+  logger.error(`✘ ${message}`, e)
+}
+
+function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void> {
+  return (params, cancel, workDoneProgress, resultProgress) => {
+    requestProgressReporter.begin()
+    try {
+      return requestHandler(params, cancel, workDoneProgress, resultProgress)
+    } finally {
+      requestProgressReporter.end()
+    }
+  }
+}
+
+function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: Environment, settings: ClientConfigurations) => ServerRequestHandler<Params, Return, PR, void>): ServerRequestHandler<Params, Return | null, PR, void> {
+  return (params, cancel, workDoneProgress, resultProgress) => {
+    requestProgressReporter.begin()
+    return new Promise(resolve => {
+      firstValueFrom(requestContext).then(([newEnvironment, newSettings]) => {
+        const result = syncHandler(requestHandler(newEnvironment!, newSettings))(params, cancel, workDoneProgress, resultProgress)
+        requestProgressReporter.end()
+        resolve(result)
+      },
+      error => {
+        requestProgressReporter.end()
+        throw error
+      })
+    })
+  }
+}

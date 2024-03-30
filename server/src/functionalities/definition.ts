@@ -1,6 +1,7 @@
 import { Location, TextDocumentPositionParams } from 'vscode-languageserver'
 import { Environment, Method, Module, New, Node, Reference, Self, Send, Singleton, Super, is, match, when } from 'wollok-ts'
 import { getNodesByPosition, nodeToLocation } from '../utils/text-documents'
+import { logger } from '../utils/logger'
 
 export const definition = (environment: Environment) => (
   textDocumentPosition: TextDocumentPositionParams
@@ -19,7 +20,8 @@ export const getNodeDefinition = (environment: Environment) => (node: Node): Nod
       when(Super)(node => definedOrEmpty(superMethodDefinition(node))),
       when(Self)(node => definedOrEmpty(node.ancestors.find(is(Module))))
     )
-  } catch {
+  } catch (error) {
+    logger.error(`✘ Error in getNodeDefinition: ${error}`, error)
     return [node]
   }
 }
@@ -43,7 +45,8 @@ const sendDefinitions = (environment: Environment) => (send: Send): Method[] => 
         (module) => definedOrEmpty(module.lookupMethod(send.message, send.args.length))
       )),
     )
-  } catch {
+  } catch (error) {
+    logger.error(`✘ Send definitions error: ${error}`, error)
     return allMethodDefinitions(environment, send)
   }
 }

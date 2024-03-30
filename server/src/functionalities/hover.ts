@@ -30,8 +30,8 @@ export const typeDescriptionOnHover = (environment: Environment, { typeSystem }:
       ],
       range: node.sourceMap ? toVSCRange(node.sourceMap) : undefined,
     }
-  } catch (e) {
-    logger.error('Failed to get type description', e)
+  } catch (error) {
+    logger.error(`✘ Failed to get type description: ${error}`, error)
     return null
   }
 }

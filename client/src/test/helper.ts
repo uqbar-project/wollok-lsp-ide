@@ -30,9 +30,9 @@ export async function activate(docUri: Uri, timeToWait = 2000): Promise<void> {
     document = await workspace.openTextDocument(docUri)
     editor = await window.showTextDocument(document)
     await sleep(timeToWait) // Wait for server activation
-  } catch (e) {
-    console.error(e)
-    throw e
+  } catch (error) {
+    console.error(error)
+    throw error
   }
 }
 
@@ -43,9 +43,11 @@ async function sleep(milliseconds: number) {
 export const getDocumentPath = (docPath: string): string => {
   return path.resolve(__dirname, path.join('..', '..', 'testFixture'), docPath)
 }
+
 export const getDocumentURI = (docPath: string): Uri => {
   return Uri.file(getDocumentPath(docPath))
 }
+
 export const getFolderURI = (): Uri => {
   return Uri.file(getDocumentPath(''))
 }
