@@ -1,4 +1,5 @@
 import { Connection } from 'vscode-languageserver/node'
+import { wollokLSPExtensionCode } from './shared-definitions'
 
 export interface WollokLSPSettings {
   maxNumberOfProblems: number
@@ -46,7 +47,7 @@ export const updateDocumentSettings = async (
 ): Promise<void> => {
   globalSettings =
     ((await connection.workspace.getConfiguration({
-      section: 'wollokLSP',
+      section: wollokLSPExtensionCode,
     })) as WollokLSPSettings) || defaultSettings
 }
 

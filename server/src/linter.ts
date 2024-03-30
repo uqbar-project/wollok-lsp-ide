@@ -9,10 +9,7 @@ import { List } from 'wollok-ts/dist/extensions'
 import { reportValidationMessage } from './functionalities/reporter'
 import { updateDocumentSettings } from './settings'
 import { TimeMeasurer } from './time-measurer'
-import {
-  isNodeURI, relativeFilePath,
-  trimIn,
-} from './utils/text-documents'
+import { isNodeURI, relativeFilePath, trimIn } from './utils/text-documents'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // INTERNAL FUNCTIONS
