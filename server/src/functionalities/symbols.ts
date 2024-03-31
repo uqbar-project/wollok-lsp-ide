@@ -8,7 +8,7 @@ type Symbolyzable = Program | Test | Module | Variable | Field | Method | Test
 export const documentSymbols = (environment: Environment) => (params: DocumentSymbolParams): DocumentSymbol[] => {
   const document = packageFromURI(params.textDocument.uri, environment)
   if (!document){
-    logger.error('Could not produce symbols: document not found')
+    logger.error(`✘ Could not produce symbols: document ${params.textDocument.uri} not found`)
     return []
   }
   return documentSymbolsFor(document)
