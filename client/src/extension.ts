@@ -81,8 +81,10 @@ export function activate(context: ExtensionContext): void {
   })
 
   // Force environment to restart
-  const revalidateWorskpace = (_event) =>
-    client.sendRequest('STRONG_FILES_CHANGED').then(validateWorkspace)
+  const revalidateWorskpace = (_event) => {
+    const pathForChange = (file) => file.oldUri?.fsPath ?? file.fsPath
+    return client.sendRequest(`STRONG_FILES_CHANGED:${_event.files.map(pathForChange).join(',')}`).then(validateWorkspace)
+  }
 
   workspace.onDidDeleteFiles(revalidateWorskpace)
   workspace.onDidRenameFiles(revalidateWorskpace)

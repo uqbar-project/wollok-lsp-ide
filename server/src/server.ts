@@ -155,6 +155,7 @@ documents.onDidChangeContent(rebuildTextDocument)
 
 // Custom requests from client
 connection.onRequest((change) => {
+  logger.info(`onRequest - ${change}`)
   try {
     if (change.startsWith('WORKSPACE_URI')) { // WORKSPACE_URI:[uri]
       setWorkspaceUri('file:' + change.split(':').pop())
@@ -162,9 +163,21 @@ connection.onRequest((change) => {
       deferredChanges.length = 0
     }
 
-    if (change === 'STRONG_FILES_CHANGED') { // A file was deleted, renamed, moved, etc.
+    if (change.startsWith('STRONG_FILES_CHANGED')) { // A file was deleted, renamed, moved, etc.
       environmentProvider.resetEnvironment()
       environmentProvider.updateEnvironmentWith(...documents.all())
+
+      // Remove zombies problems
+      const files = change.split(':').pop()
+      if (files) {
+        const uris = files.split(',')
+        setTimeout(() => {
+          uris.forEach(uri => {
+            logger.info(`Removing diagnostics from ${uri}`)
+            connection.sendDiagnostics({ uri, diagnostics: [] })
+          })
+        }, 100)
+      }
     }
   } catch (error) {
     handleError('onRequest change failed', error)
