@@ -8,6 +8,7 @@ export interface WollokLSPSettings {
   openInternalDynamicDiagram: boolean,
   dynamicDiagramDarkMode: boolean,
   maxThreshold: number,
+  millisecondsToOpenDynamicDiagram: number,
 }
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -30,6 +31,7 @@ const defaultSettings: WollokLSPSettings = {
   openInternalDynamicDiagram: true,
   dynamicDiagramDarkMode: true,
   maxThreshold: 100,
+  millisecondsToOpenDynamicDiagram: 1000,
 }
 
 let globalSettings: WollokLSPSettings = defaultSettings

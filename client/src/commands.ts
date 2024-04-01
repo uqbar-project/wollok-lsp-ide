@@ -79,6 +79,7 @@ export const startRepl = (): Task => {
   const replTask = wollokCLITask('repl', `Wollok Repl: ${getCurrentFileName(currentDocument)}`, cliCommands)
 
   const openDynamicDiagram = wollokLSPConfiguration.get('openDynamicDiagramOnRepl') as boolean
+  const millisecondsToOpenDynamicDiagram = wollokLSPConfiguration.get('millisecondsToOpenDynamicDiagram') as number
   if (openDynamicDiagram) {
     setTimeout(() => {
       const openInternalDynamicDiagram = wollokLSPConfiguration.get('openInternalDynamicDiagram') as boolean
@@ -87,7 +88,7 @@ export const startRepl = (): Task => {
       } else {
         vscode.env.openExternal(vscode.Uri.parse(DYNAMIC_DIAGRAM_URI))
       }
-    }, 1000)
+    }, millisecondsToOpenDynamicDiagram)
   }
   return replTask
 }
