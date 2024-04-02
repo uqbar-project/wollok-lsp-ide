@@ -41,8 +41,8 @@
       {
         "id": "wollok",
         "icon": {
-          "dark": "./images/wlk.png",
-          "light": "./images/wlk.png"
+          "dark": "./images/wollokFile.png",
+          "light": "./images/wollokFile.png"
         },
         "aliases": [
           "Wollok",
