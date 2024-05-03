@@ -1,5 +1,5 @@
 import { Location, TextDocumentPositionParams } from 'vscode-languageserver'
-import { Environment, Method, Module, New, Node, Reference, Self, Send, Singleton, Super, is, match, when } from 'wollok-ts'
+import { Environment, Method, Module, Node, Reference, Self, Send, Super, is, match, sendDefinitions, when } from 'wollok-ts'
 import { getNodesByPosition, nodeToLocation } from '../utils/text-documents'
 import { logger } from '../utils/logger'
 
@@ -11,12 +11,35 @@ export const definition = (environment: Environment) => (
     return definitions.map(nodeToLocation)
   }
 
-// WOLLOK-TS: hablar con Nahue/Ivo, para mí desde acá para abajo todo se podria migrar a wollok-ts
 export const getDefinition = (environment: Environment) => (node: Node): Node[] => {
   try {
-    getNodeDefinition(environment)(node)
+    return getNodeDefinition(environment)(node)
   } catch (error) {
     logger.error(`✘ Error in getDefinition: ${error}`, error)
     return [node]
   }
 }
+
+// TODO: terminar de migrar a wollok-ts estas 4 definiciones
+export const getNodeDefinition = (environment: Environment) => (node: Node): Node[] => {
+  try {
+    return match(node)(
+      when(Reference)(node => definedOrEmpty(node.target)),
+      when(Send)(sendDefinitions(environment)),
+      when(Super)(node => definedOrEmpty(superMethodDefinition(node))),
+      when(Self)(node => definedOrEmpty(getParentModule(node)))
+    )
+  } catch {
+    return [node]
+  }
+}
+
+const superMethodDefinition = (superNode: Super): Method | undefined => {
+  const currentMethod = superNode.ancestors.find(is(Method))!
+  const module = getParentModule(superNode)
+  return module ? module.lookupMethod(currentMethod.name, superNode.args.length, { lookupStartFQN: module.fullyQualifiedName }) : undefined
+}
+
+const getParentModule = (node: Node) => node.ancestors.find(is(Module))
+
+const definedOrEmpty = <T>(value: T | undefined): T[] => value ? [value] : []

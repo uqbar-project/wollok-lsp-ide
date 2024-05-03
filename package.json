@@ -203,7 +203,7 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "wollok-ts": "4.1.0"
+    "wollok-ts": "4.1.1"
   },
   "devDependencies": {
     "@types/expect": "^24.3.0",
