@@ -17,8 +17,8 @@ export const rename = (documents: TextDocuments<TextDocument>) => (environment: 
 
 export const requestIsRenamable = (environment: Environment) => (params: RenameParams): any => {
   const renamedNode = cursorNode(environment, params.position, params.textDocument)
-  if(!renamedNode) return null
-  if( renamedNode.is(Reference)  && renamedNode.target && isRenamable(renamedNode.target) ||  isRenamable(renamedNode)) {
+  if (!renamedNode) return null
+  if (renamedNode.is(Reference) && renamedNode.target && isRenamable(renamedNode.target) || isRenamable(renamedNode)) {
     // ToDo: switch back to defaultBehavior when https://github.com/microsoft/vscode/issues/198423 is released
     return {
       range: toVSCRange(renamedNode.sourceMap!),
@@ -38,7 +38,7 @@ function renameNode(node: Renamable, newName: string, environment: Environment, 
   const hits: (Renamable | Reference<Renamable>)[] = [node]
   const referencesRenamedNode = targettingAt(node)
   environment.forEach(aNode => {
-    if(!aNode.isSynthetic && referencesRenamedNode(aNode)) {
+    if (!aNode.isSynthetic && referencesRenamedNode(aNode)) {
       hits.push(aNode as Reference<Field>)
     }
   })

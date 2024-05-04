@@ -41,8 +41,8 @@
       {
         "id": "wollok",
         "icon": {
-          "dark": "./images/wollok.png",
-          "light": "./images/wollok.png"
+          "dark": "./images/wollokFile.png",
+          "light": "./images/wollokFile.png"
         },
         "aliases": [
           "Wollok",
@@ -66,19 +66,21 @@
           "scope": "resource",
           "type": "boolean",
           "description": "Abbreviate assignments",
-          "default": true
+          "default": true,
+          "order": 0
         },
         "wollokLSP.formatter.maxWidth": {
           "scope": "resource",
           "type": "number",
           "description": "Maximum width allowed in a line",
-          "default": 80
+          "default": 80,
+          "order": 1
         },
         "wollokLSP.cli-path": {
           "scope": "resource",
           "type": "string",
           "description": "Path to Wollok-CLI.",
-          "order": 0
+          "order": 10
         },
         "wollokLSP.language": {
           "scope": "resource",
@@ -90,14 +92,14 @@
           ],
           "default": "Based on Local Environment",
           "description": "Language used while reporting linter errors and warnings.",
-          "order": 1
+          "order": 11
         },
         "wollokLSP.maxNumberOfProblems": {
           "scope": "resource",
           "type": "number",
           "default": 100,
           "description": "Controls the maximum number of problems produced by the server.",
-          "order": 2
+          "order": 12
         },
         "wollokLSP.trace.server": {
           "scope": "window",
@@ -109,41 +111,49 @@
           ],
           "default": "off",
           "description": "Traces the communication between VS Code and the language server.",
-          "order": 3
+          "order": 20
         },
-        "wollokLSP.openDynamicDiagramOnRepl": {
+        "wollokLSP.dynamicDiagram.openDynamicDiagramOnRepl": {
           "scope": "resource",
           "type": "boolean",
           "default": true,
           "description": "Opens the dynamic diagram when running the REPL.",
-          "order": 4
+          "order": 30
         },
-        "wollokLSP.openInternalDynamicDiagram": {
+        "wollokLSP.dynamicDiagram.openInternalDynamicDiagram": {
           "scope": "resource",
           "type": "boolean",
           "default": true,
           "description": "If true, opens an internal dynamic diagram inside Wollok IDE. If false, it will open a new external browser.",
-          "order": 5
+          "order": 31
         },
-        "wollokLSP.dynamicDiagramDarkMode": {
+        "wollokLSP.dynamicDiagram.millisecondsToOpenDynamicDiagram": {
+          "scope": "resource",
+          "type": "number",
+          "default": 1000,
+          "description": "Milliseconds we wait until we open Dynamic Diagram in Browser.",
+          "order": 32
+        },
+        "wollokLSP.dynamicDiagram.dynamicDiagramDarkMode": {
           "scope": "resource",
           "type": "boolean",
           "default": true,
           "description": "If true, opens dynamic diagram in Dark Mode. Otherwise, it uses Light Mode.",
-          "order": 6
+          "order": 33
         },
         "wollokLSP.maxThreshold": {
           "scope": "resource",
           "type": "number",
           "default": 100,
           "description": "Maximum threshold in milliseconds: if an operation takes longer, it will be saved in the log file.",
-          "order": 7
+          "order": 40
         },
         "wollokLSP.typeSystem.enabled": {
           "scope": "resource",
           "type": "boolean",
           "description": "Enable Type System (experimental)",
-          "default": false
+          "default": false,
+          "order": 50
         }
       }
     },
@@ -193,7 +203,7 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "wollok-ts": "4.1.0"
+    "wollok-ts": "4.1.1"
   },
   "devDependencies": {
     "@types/expect": "^24.3.0",

@@ -1,15 +1,14 @@
 import { DocumentSymbol, DocumentSymbolParams, SymbolKind, WorkspaceSymbol, WorkspaceSymbolParams } from 'vscode-languageserver'
-import { Environment, Field, Method, Module, Node, Package, Program, Test, Variable } from 'wollok-ts'
+import { Environment, Field, Method, Module, Node, Package, projectPackages, Program, Test, Variable } from 'wollok-ts'
 import { logger } from '../utils/logger'
 import { packageFromURI, toVSCRange, uriFromRelativeFilePath } from '../utils/text-documents'
-import { projectPackages } from '../utils/vm/wollok'
 
 type Symbolyzable = Program | Test | Module | Variable | Field | Method | Test
 
 export const documentSymbols = (environment: Environment) => (params: DocumentSymbolParams): DocumentSymbol[] => {
   const document = packageFromURI(params.textDocument.uri, environment)
   if (!document){
-    logger.error('Could not produce symbols: document not found')
+    logger.error(`✘ Could not produce symbols: document ${params.textDocument.uri} not found`)
     return []
   }
   return documentSymbolsFor(document)

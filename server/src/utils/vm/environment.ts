@@ -4,7 +4,6 @@ import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, buildEnvironment, inferTypes } from 'wollok-ts'
 import { ProgressReporter } from '../progress-reporter'
 import { TimeMeasurer } from '../../time-measurer'
-import { logger } from '../logger'
 import { generateErrorForFile } from '../../linter'
 import { documentToFile } from '../text-documents'
 
@@ -38,16 +37,8 @@ export class EnvironmentProvider {
       }
       return environment
     } catch (error) {
-
-      // todo: remove this catch and move the logs to server.ts
-      const message = `✘ Failed to build environment: ${error}`
       documents.forEach(document => {
         generateErrorForFile(this.connection, document)
-      })
-      logger.error({
-        level: 'error',
-        files: files.map(file => file.name),
-        message,
       })
       throw error
     } finally {

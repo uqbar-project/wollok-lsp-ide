@@ -72,22 +72,24 @@ const DYNAMIC_DIAGRAM_URI = 'http://localhost:3000/'
 export const startRepl = (): Task => {
   const currentDocument = window.activeTextEditor?.document
   const wollokLSPConfiguration = workspace.getConfiguration(wollokLSPExtensionCode)
-  const dynamicDiagramDarkMode = wollokLSPConfiguration.get('dynamicDiagramDarkMode') ?? false
-  const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations', dynamicDiagramDarkMode ? '--darkMode' : '']
+  const dynamicDiagramDarkMode = wollokLSPConfiguration.get('dynamicDiagram.dynamicDiagramDarkMode') as boolean
+  const openDynamicDiagram = wollokLSPConfiguration.get('dynamicDiagram.openDynamicDiagramOnRepl') as boolean
+  const millisecondsToOpenDynamicDiagram = wollokLSPConfiguration.get('dynamicDiagram.millisecondsToOpenDynamicDiagram') as number
+
+  const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations', dynamicDiagramDarkMode ? '--darkMode' : '', openDynamicDiagram ? '': '--skipDiagram']
   // Terminate previous tasks
   vscode.commands.executeCommand('workbench.action.terminal.killAll')
   const replTask = wollokCLITask('repl', `Wollok Repl: ${getCurrentFileName(currentDocument)}`, cliCommands)
 
-  const openDynamicDiagram = wollokLSPConfiguration.get('openDynamicDiagramOnRepl') as boolean
   if (openDynamicDiagram) {
     setTimeout(() => {
-      const openInternalDynamicDiagram = wollokLSPConfiguration.get('openInternalDynamicDiagram') as boolean
+      const openInternalDynamicDiagram = wollokLSPConfiguration.get('dynamicDiagram.openInternalDynamicDiagram') as boolean
       if (openInternalDynamicDiagram) {
         vscode.commands.executeCommand('simpleBrowser.show', DYNAMIC_DIAGRAM_URI)
       } else {
         vscode.env.openExternal(vscode.Uri.parse(DYNAMIC_DIAGRAM_URI))
       }
-    }, 1000)
+    }, millisecondsToOpenDynamicDiagram)
   }
   return replTask
 }

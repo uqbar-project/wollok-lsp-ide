@@ -2,7 +2,7 @@ import { CompletionItem, CompletionItemKind, CompletionParams, InsertTextFormat,
 import { Class, Entity, Field, Method, Mixin, Module, Name, Node, OBJECT_MODULE, Parameter, Reference, Singleton, Environment, Import, parentModule, getAllUninitializedAttributes } from 'wollok-ts'
 import { TimeMeasurer } from '../../time-measurer'
 import { cursorNode, relativeFilePath, packageToURI } from '../../utils/text-documents'
-import { isImportedIn } from '../../utils/vm/wollok'
+import { isNotImportedIn } from 'wollok-ts'
 import { completionsForNode } from './node-completion'
 import { completeMessages } from './send-completion'
 import { match, when } from 'wollok-ts/dist/extensions'
@@ -46,7 +46,7 @@ export const withImport = <T extends Node>(mapper: CompletionItemMapper<T>) => (
   if(
     importedPackage &&
     originalPackage &&
-    isImportedIn(importedPackage, originalPackage)
+    isNotImportedIn(importedPackage, originalPackage)
   ) {
     result.detail = `Add import ${importedPackage.fileName ? relativeFilePath(packageToURI(importedPackage)) : importedPackage.name}${result.detail ? ` - ${result.detail}` : ''}`
     result.additionalTextEdits = (result.additionalTextEdits ?? []).concat(

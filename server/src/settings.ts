@@ -1,4 +1,5 @@
 import { Connection } from 'vscode-languageserver/node'
+import { wollokLSPExtensionCode } from './shared-definitions'
 
 export interface WollokLSPSettings {
   maxNumberOfProblems: number
@@ -7,6 +8,7 @@ export interface WollokLSPSettings {
   openInternalDynamicDiagram: boolean,
   dynamicDiagramDarkMode: boolean,
   maxThreshold: number,
+  millisecondsToOpenDynamicDiagram: number,
 }
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -29,6 +31,7 @@ const defaultSettings: WollokLSPSettings = {
   openInternalDynamicDiagram: true,
   dynamicDiagramDarkMode: true,
   maxThreshold: 100,
+  millisecondsToOpenDynamicDiagram: 1000,
 }
 
 let globalSettings: WollokLSPSettings = defaultSettings
@@ -46,7 +49,7 @@ export const updateDocumentSettings = async (
 ): Promise<void> => {
   globalSettings =
     ((await connection.workspace.getConfiguration({
-      section: 'wollokLSP',
+      section: wollokLSPExtensionCode,
     })) as WollokLSPSettings) || defaultSettings
 }
 
