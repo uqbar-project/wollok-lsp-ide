@@ -1,8 +1,14 @@
 # Changelog
 
+## v0.3.1
+- Improve interface with CLI on running tests 🚦
+- Add lens for REPL 😎
+- Improve UX 🧑‍💻
+- Update Wollok-TS 4.1.1 ⬆️
+
 ## v0.3.0
 - Improve UX 🧑‍💻
-- wollok-TS 4.1.0 API revamp ⬆️
+- Wollok-TS 4.1.0 API revamp ⬆️
 - Import on autocomplete 📝
 
 ## v0.2.1
