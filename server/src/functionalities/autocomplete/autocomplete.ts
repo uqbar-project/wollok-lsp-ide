@@ -1,5 +1,5 @@
 import { CompletionItem, CompletionItemKind, CompletionParams, InsertTextFormat, Position, TextEdit } from 'vscode-languageserver'
-import { Class, Entity, Field, Method, Mixin, Module, Name, Node, OBJECT_MODULE, Parameter, Reference, Singleton, Environment, Import, parentModule, getAllUninitializedAttributes } from 'wollok-ts'
+import { Class, Entity, Field, Method, Mixin, Module, Name, Node, OBJECT_MODULE, Parameter, Reference, Singleton, Environment, Import, parentModule, getAllUninitializedAttributes, Variable } from 'wollok-ts'
 import { TimeMeasurer } from '../../time-measurer'
 import { cursorNode, relativeFilePath, packageToURI } from '../../utils/text-documents'
 import { isNotImportedIn } from 'wollok-ts'
@@ -14,7 +14,10 @@ export const completions = (environment: Environment) => (
 
   const { position, textDocument, context } = params
   const selectionNode = cursorNode(environment, position, textDocument)
-
+  if(!selectionNode) {
+    timeMeasurer.finalReport()
+    throw new Error('Could not find selection node')
+  }
   timeMeasurer.addTime(`Autocomplete - ${selectionNode?.kind}`)
 
   const autocompleteMessages = context?.triggerCharacter === '.' && !selectionNode.parent.is(Import)
@@ -32,9 +35,11 @@ export const completions = (environment: Environment) => (
 // -----------------
 type CompletionItemMapper<T extends Node> = (node: T) => CompletionItem
 
-export const parameterCompletionItem: CompletionItemMapper<Parameter> = namedCompletionItem(CompletionItemKind.Variable)
+export const parameterCompletionItem: CompletionItemMapper<Parameter> = namedCompletionItem(CompletionItemKind.Variable, '002')
 
-export const fieldCompletionItem: CompletionItemMapper<Field> = namedCompletionItem(CompletionItemKind.Field)
+export const variableCompletionItem: CompletionItemMapper<Variable> = namedCompletionItem(CompletionItemKind.Variable, '001')
+
+export const fieldCompletionItem: CompletionItemMapper<Field> = namedCompletionItem(CompletionItemKind.Field, '003')
 
 export const singletonCompletionItem: CompletionItemMapper<Singleton> = moduleCompletionItem(CompletionItemKind.Class)
 
@@ -110,17 +115,17 @@ export const methodCompletionItem = (node: Node, method: Method): CompletionItem
 
 
 function moduleCompletionItem<T extends Module>(kind: CompletionItemKind){
-  return (module: T) => namedCompletionItem(kind)(module.name ? module as {name: Name} : { name: 'unnamed' })
+  return (module: T) => namedCompletionItem(kind, '004')(module.name ? module as {name: Name} : { name: 'unnamed' })
 }
 
-function namedCompletionItem<T extends {name: string}>(kind: CompletionItemKind) {
+function namedCompletionItem<T extends {name: string}>(kind: CompletionItemKind, sortText = '999') {
   return (namedNode: T): CompletionItem => {
     return {
       label: namedNode.name,
       insertText: namedNode.name,
       insertTextFormat: InsertTextFormat.PlainText,
       kind,
-      sortText: '001',
+      sortText,
     }
   }
 }
