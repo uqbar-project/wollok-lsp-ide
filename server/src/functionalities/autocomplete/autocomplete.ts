@@ -35,11 +35,11 @@ export const completions = (environment: Environment) => (
 // -----------------
 type CompletionItemMapper<T extends Node> = (node: T) => CompletionItem
 
-export const parameterCompletionItem: CompletionItemMapper<Parameter> = namedCompletionItem(CompletionItemKind.Variable, '002')
+export const parameterCompletionItem: CompletionItemMapper<Parameter> = namedCompletionItem(CompletionItemKind.Variable, '006')
 
-export const variableCompletionItem: CompletionItemMapper<Variable> = namedCompletionItem(CompletionItemKind.Variable, '001')
+export const variableCompletionItem: CompletionItemMapper<Variable> = namedCompletionItem(CompletionItemKind.Variable, '003')
 
-export const fieldCompletionItem: CompletionItemMapper<Field> = namedCompletionItem(CompletionItemKind.Field, '003')
+export const fieldCompletionItem: CompletionItemMapper<Field> = namedCompletionItem(CompletionItemKind.Field, '009')
 
 export const singletonCompletionItem: CompletionItemMapper<Singleton> = moduleCompletionItem(CompletionItemKind.Class)
 
@@ -115,7 +115,7 @@ export const methodCompletionItem = (node: Node, method: Method): CompletionItem
 
 
 function moduleCompletionItem<T extends Module>(kind: CompletionItemKind){
-  return (module: T) => namedCompletionItem(kind, '004')(module.name ? module as {name: Name} : { name: 'unnamed' })
+  return (module: T) => namedCompletionItem(kind, '012')(module.name ? module as {name: Name} : { name: 'unnamed' })
 }
 
 function namedCompletionItem<T extends {name: string}>(kind: CompletionItemKind, sortText = '999') {
