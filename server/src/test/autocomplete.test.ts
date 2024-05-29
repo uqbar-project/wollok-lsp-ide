@@ -1,11 +1,21 @@
 import { expect } from 'expect'
 import { CompletionItem } from 'vscode-languageserver'
-import { Body, Class, Describe, Environment, Field, Import, Literal, Method, Mixin, New, Node, Package, Program, Reference, Sentence, Singleton, buildEnvironment, link } from 'wollok-ts'
+import { Body, Describe, Environment, Field, Import, Literal, Method, New, Node, Package, Program, Reference, Sentence, Singleton, buildEnvironment, link } from 'wollok-ts'
 import { completeForParent, completionsForNode } from '../functionalities/autocomplete/node-completion'
 import { completeMessages } from '../functionalities/autocomplete/send-completion'
 import { buildPepitaEnvironment } from './utils/wollok-test-utils'
 
 describe('autocomplete', () => {
+  it('completions for body should be local variables plus the parents completions', () => {
+    const environment = buildPepitaEnvironment()
+    const body = (environment.getNodeByFQN('pepita.pepita') as Singleton).allMethods[0].body as Body
+    const completions = completionsForNodeSorted(body)
+    expect(
+      completions.map(completion => completion.label))
+      .toEqual(['gramos', ...completeForParent(body).map(completion => completion.label)]
+    )
+  })
+
   describe('completions for singleton node', () => {
     let pepitaEnvironment: Environment
     let pepita: Singleton
@@ -23,9 +33,9 @@ describe('autocomplete', () => {
       testCompletionLabelsForNode(pepita, ['var attribute', 'var property', 'const attribute', 'const property', 'method (effect)', 'method (return)'])
     })
 
-    it('method should complete with module fields, parameters and WKOs', () => {
-      const comerMethod = pepita.lookupMethod('comer', 1)
-      testCompletionLabelsForNodeIncludes(comerMethod!, ['comida', 'peso', 'game', 'pepita', 'keyboard', 'assert', 'console'])
+    it('method should complete with variables, module fields, parameters and WKOs', () => {
+      const comerMethod = pepita.lookupMethod('comer', 1)!.body as Body
+      testCompletionLabelsForNodeIncludes(comerMethod!, ['gramos', 'comida', 'peso', 'game', 'pepita', 'keyboard', 'assert', 'console'])
     })
 
     it('unhandled node should complete with parent completions', () => {
@@ -45,17 +55,10 @@ describe('autocomplete', () => {
       const unhandledNodeMock: Node = { kind: 'UnhandledNode' } as unknown as Node
       expect(() => completeForParent(unhandledNodeMock)).toThrow('Node has no parent')
     })
-
-    it('body should complete with parent completions', () => {
-      const comer = pepita.lookupMethod('comer', 1)!
-      const body = comer.body! as Body
-      expect(completionsForNodeSorted(body)).toEqual(completeForParent(body))
-    })
   })
 
   describe('completions for class node', () => {
     let environment: Environment
-    let birdClass: Class
     const fileName = 'completeUnitClass.wlk'
     const className = 'completeUnitClass.Bird'
 
@@ -69,23 +72,15 @@ describe('autocomplete', () => {
         
       }
       ` }])
-      birdClass = environment.getNodeByFQN<Class>(className)
     })
 
     it('class should complete with snippets', () => {
       testCompletionLabelsForNode(environment.getNodeByFQN(className), ['var attribute', 'var property', 'const attribute', 'const property', 'method (effect)', 'method (return)'])
     })
-
-    it('body should complete with parent completions', () => {
-      const fly = birdClass.lookupMethod('fly', 1)!
-      const body = fly.body! as Body
-      expect(completionsForNodeSorted(body)).toEqual(completeForParent(body))
-    })
   })
 
   describe('completions for mixin node', () => {
     let environment: Environment
-    let aMixin: Mixin
     const fileName = 'completeUnitMixin.wlk'
     const mixinName = 'completeUnitMixin.Flier'
 
@@ -100,17 +95,10 @@ describe('autocomplete', () => {
       }
       
       ` }])
-      aMixin = environment.getNodeByFQN<Mixin>(mixinName)
     })
 
     it('mixin should complete with snippets', () => {
       testCompletionLabelsForNode(environment.getNodeByFQN(mixinName), ['var attribute', 'var property', 'const attribute', 'const property', 'method (effect)', 'method (return)'])
-    })
-
-    it('body should complete with parent completions', () => {
-      const fly = aMixin.lookupMethod('fly', 1)!
-      const body = fly.body! as Body
-      expect(completionsForNodeSorted(body)).toEqual(completeForParent(body))
     })
   })
 
@@ -123,9 +111,9 @@ describe('autocomplete', () => {
     beforeEach(() => {
       environment = buildEnvironment([{ name: fileName, content: `
       describe "group" {
-
+        var aField = "bar"
         test "basic" {
-          
+          var aVar = "baz"
         }
         
       }
@@ -139,8 +127,30 @@ describe('autocomplete', () => {
     })
 
     it('test should complete with snippets', () => {
-      const firstTest = aDescribe.tests[0]
-      testCompletionLabelsForNode(firstTest, ['var attribute', 'const attribute', 'assert equality', 'assert boolean', 'assert throws', 'assert throws message'])
+      const firstTest = aDescribe.tests[0].body
+      testCompletionLabelsForNode(firstTest, [
+        // local variables
+        'aVar',
+        // parent fields
+        'aField',
+        // WKOs
+        'game',
+        'keyboard',
+        'void',
+        'collection',
+        'calendar',
+        'io',
+        'console',
+        'assert',
+        'runtime',
+        // snippets
+        'var attribute',
+        'const attribute',
+        'assert equality',
+        'assert boolean',
+        'assert throws',
+        'assert throws message',
+      ])
     })
   })
 

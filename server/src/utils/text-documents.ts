@@ -103,7 +103,7 @@ export function cursorNode(
   environment: Environment,
   position: Position,
   textDocument: TextDocumentIdentifier
-): Node {
+): Node | undefined {
   return getNodesByPosition(environment, {
     position,
     textDocument,

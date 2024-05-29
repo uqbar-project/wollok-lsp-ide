@@ -1,8 +1,8 @@
 import { CompletionItem } from 'vscode-languageserver'
-import { Node, Body, Method, Singleton, Module, Environment, Package, Class, Mixin, Describe, Program, Test, Reference, New, Import, Entity, implicitImport, is, parentImport, match, when } from 'wollok-ts'
-import { classCompletionItem, fieldCompletionItem, initializerCompletionItem, parameterCompletionItem, singletonCompletionItem, entityCompletionItem, withImport } from './autocomplete'
-import { optionModules, optionImports, optionDescribes, optionTests, optionReferences, optionMethods, optionPrograms, optionAsserts, optionConstReferences, optionInitialize, optionPropertiesAndReferences } from './options-autocomplete'
+import { Body, Class, Describe, Entity, Environment, Import, Method, Mixin, New, Node, Package, Program, Reference, Singleton, Test, Variable, implicitImport, match, parentImport, when } from 'wollok-ts'
 import { logger } from '../../utils/logger'
+import { classCompletionItem, entityCompletionItem, fieldCompletionItem, initializerCompletionItem, parameterCompletionItem, singletonCompletionItem, variableCompletionItem, withImport } from './autocomplete'
+import { optionAsserts, optionConstReferences, optionDescribes, optionImports, optionInitialize, optionMethods, optionModules, optionPrograms, optionPropertiesAndReferences, optionReferences, optionTests } from './options-autocomplete'
 
 export const completionsForNode = (node: Node): CompletionItem[] => {
   try {
@@ -40,9 +40,11 @@ const completeProgram = (): CompletionItem[] => [
   ...optionReferences,
 ]
 
-const completeTest = (): CompletionItem[] => [
+const completeTest = (node: Test): CompletionItem[] => [
   ...optionReferences,
   ...optionAsserts,
+  ...node.parent.is(Describe) ? node.parent.allFields.map(fieldCompletionItem) : [],
+  ...completeAllSigletons(node),
 ]
 
 const completeModule = (): CompletionItem[] => [
@@ -50,15 +52,19 @@ const completeModule = (): CompletionItem[] => [
   ...optionMethods,
 ]
 
-const completeBody = (node: Body): CompletionItem[] => completeForParent(node)
+const completeBody = (node: Body): CompletionItem[] => [
+  ...completeForParent(node),
+  ...node.scope.localContributions()
+    .filter((value) => value[1].is(Variable))
+    .map((value) => variableCompletionItem(value[1] as Variable)),
+]
 
 const completeMethod = (node: Method): CompletionItem[] => {
   const parent = node.parent
-  const fields = is(Module) ? parent.fields : []
   return [
     ...node.parameters.map(parameterCompletionItem),
-    ...fields.map(fieldCompletionItem),
-    ...(node.environment.descendants.filter(node => node.is(Singleton) && !!node.name) as Singleton[]).map(withImport(singletonCompletionItem)(node)),
+    ...parent.fields.map(fieldCompletionItem),
+    ...completeAllSigletons(node),
   ]
 }
 
@@ -82,3 +88,5 @@ const completeNew = (node: New): CompletionItem[] =>
 const availableForImport = (node: Node) => (node.is(Class) || node.is(Singleton) || node.is(Reference) || node.is(Mixin)) && node.name && (node as Entity).fullyQualifiedName && !implicitImport(node)
 
 const completeImports = (node: Import) => (node.environment.descendants.filter(availableForImport) as Entity[]).map(entityCompletionItem)
+
+const completeAllSigletons = (originNode: Node) => (originNode.environment.descendants.filter(node => node.is(Singleton) && !node.isClosure()) as Singleton[]).map(withImport(singletonCompletionItem)(originNode))
