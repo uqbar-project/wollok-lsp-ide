@@ -48,9 +48,9 @@ suite('Should run commands', () => {
 
   suite('run tests', () => {
     const SEP = '<SEP>'
-    const testCommandOptions = `-f tests -d ${SEP}tests de pepita${SEP} -t ${SEP}something${SEP}`
+    const testCommandOptions = `-f ${SEP}tests.wtest${SEP} -d ${SEP}tests de pepita${SEP} -t ${SEP}something${SEP}`
 
-    const testArgs: [string, string, string, string] = [null, 'tests', 'tests de pepita', 'something']
+    const testArgs: [string, string, string, string] = [null, 'tests.wtest', 'tests de pepita', 'something']
 
     async function runCommandOnPlatform(
       platform: string,

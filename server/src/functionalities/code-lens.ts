@@ -56,12 +56,12 @@ const isTesteable = (node: Node): node is Test | Describe =>
 const isWollokDefinition = (node: Node): node is Class | Singleton =>
   node.is(Class) || node.is(Singleton)
 
-  const buildRunAllTestsCodeLens = (file: Package): CodeLens =>
+const buildRunAllTestsCodeLens = (file: Package): CodeLens =>
   buildTestsCodeLens(
     Range.create(Position.create(0, 0), Position.create(0, 0)),
     'wollok.run.test',
     'Run all tests',
-    [null, file.name, null, null]
+    [null, file.fileName!, null, null]
   )
 
 
@@ -75,7 +75,7 @@ const buildTestCodeLens = (file: Package, node: Test | Describe): CodeLens => {
     `Run ${node.is(Test) ? 'test' : 'describe'}`,
     [
       null,
-      file.name,
+      file.fileName!,
       describe ? removeQuotes(describe) : null,
       test ? removeQuotes(test) : null,
     ]
