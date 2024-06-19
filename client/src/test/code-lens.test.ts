@@ -45,7 +45,7 @@ suite('Should do code lenses', () => {
         },
       ),
       new CodeLens(
-        new Range(new Position(1, 4), new Position(4, 0)),
+        new Range(new Position(1, 4), new Position(3, 5)),
         {
           title: 'Run test',
           command: 'wollok.run.test',
@@ -58,7 +58,7 @@ suite('Should do code lenses', () => {
   test('Shows test code lenses for Wollok Definition file', async () => {
     await testCodeLenses(getDocumentURI('pepita.wlk'), [
       new CodeLens(
-        new Range(new Position(0, 0), new Position(4, 0)),
+        new Range(new Position(0, 0), new Position(2, 1)),
         {
           title : 'Run in REPL',
           command : 'wollok.start.repl',
@@ -66,7 +66,7 @@ suite('Should do code lenses', () => {
         },
       ),
       new CodeLens(
-        new Range(new Position(4, 0), new Position(6, 0)),
+        new Range(new Position(4, 0), new Position(4, 10)),
         {
           title: 'Run in REPL',
           command: 'wollok.start.repl',
