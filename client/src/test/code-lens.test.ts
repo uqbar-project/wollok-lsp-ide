@@ -33,7 +33,7 @@ suite('Should do code lenses', () => {
         {
           title: 'Run all tests',
           command: 'wollok.run.test',
-          arguments: [null, 'test', null, null],
+          arguments: [null, 'test.wtest', null, null],
         },
       ),
       new CodeLens(
@@ -41,7 +41,7 @@ suite('Should do code lenses', () => {
         {
           title: 'Run describe',
           command: 'wollok.run.test',
-          arguments: [null, 'test', 'pepita test', null],
+          arguments: [null, 'test.wtest', 'pepita test', null],
         },
       ),
       new CodeLens(
@@ -49,7 +49,7 @@ suite('Should do code lenses', () => {
         {
           title: 'Run test',
           command: 'wollok.run.test',
-          arguments: [null, 'test', 'pepita test', 'pepita is happy'],
+          arguments: [null, 'test.wtest', 'pepita test', 'pepita is happy'],
         },
       ),
     ])

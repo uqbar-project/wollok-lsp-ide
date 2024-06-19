@@ -49,7 +49,7 @@ export const runTest = ([filter, file, describe, test]: [string|null, string|nul
   wollokCLITask('run tests', 'Wollok run test', [
     'test',
     ...filter ? [`${asShellString(filter)}`] : [],
-    ...file ? ['-f', file] : [],
+    ...file ? ['-f', asShellString(file)] : [],
     ...describe ? ['-d', `${asShellString(describe)}`] : [],
     ...test ? ['-t', `${asShellString(test)}`] : [],
     '--skipValidations',
