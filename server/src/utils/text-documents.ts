@@ -52,14 +52,21 @@ export const toVSCRange = (sourceMap: SourceMap): Range =>
   Range.create(toVSCPosition(sourceMap.start), toVSCPosition(sourceMap.end))
 
 export const nodeToLocation = (node: Node): Location => {
-  if (!node.sourceMap || !node.sourceFileName) {
-    throw new Error('No source map found for node')
-  }
+  if(!node.sourceFileName) throw new Error('No source file found for node')
 
-  return {
-    uri: uriFromRelativeFilePath(node.sourceFileName!),
-    range: toVSCRange(node.sourceMap),
+  if(node.is(Package)){
+    return Location.create(
+      uriFromRelativeFilePath(node.sourceFileName!),
+      Range.create(Position.create(0, 0), Position.create(0, 0)),
+    )
   }
+  
+  if (!node.sourceMap) throw new Error('No source map found for node')
+
+  return Location.create(
+    uriFromRelativeFilePath(node.sourceFileName!),
+    toVSCRange(node.sourceMap),
+  )
 }
 
 export function trimIn(range: Range, textDocument: TextDocument): Range {
