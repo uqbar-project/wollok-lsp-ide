@@ -60,7 +60,7 @@ export const nodeToLocation = (node: Node): Location => {
       Range.create(Position.create(0, 0), Position.create(0, 0)),
     )
   }
-  
+
   if (!node.sourceMap) throw new Error('No source map found for node')
 
   return Location.create(
