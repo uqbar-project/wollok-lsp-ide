@@ -1,8 +1,12 @@
 # Changelog
 
+## v0.3.3
+- Update Wollok-TS 4.1.3 (hotfix) ⬆️
+
 ## v0.3.2
 - Autocomplete on method/test bodies improvements 📝
 - Test command: filename as string instead of package name ✍🏼
+- Update Wollok-TS 4.1.2 ⬆️
 
 ## v0.3.1
 - Improve interface with CLI on running tests 🚦
