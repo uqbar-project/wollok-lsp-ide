@@ -1,6 +1,8 @@
 import { expect } from 'expect'
 import path from 'path'
-import { between, findPackageJSON, relativeFilePath, setWorkspaceUri } from '../utils/text-documents'
+import { Position, Range } from 'vscode-languageserver'
+import { Literal, Node, Package, SourceMap } from 'wollok-ts'
+import { between, findPackageJSON, nodeToLocation, relativeFilePath, setWorkspaceUri } from '../utils/text-documents'
 
 const { join, resolve }  = path.posix
 
@@ -34,6 +36,60 @@ describe('text document utilities', () => {
       expect(between({ line: 4, character: 32 }, { line: 4, character: 8 }, { line: 4, character: 18 })).toBe(false)
     })
 
+  })
+
+  describe('node to location', () => {
+
+    const pepitaPackage: Package = new Package({ name: 'pepita', fileName: 'src/pepita.wlk' })
+    const testNodeLocation = (node: Node, expectedFile: string, expectedRange: Range) => {
+      const location = nodeToLocation(node)
+      expect(location.uri).toEqual('examples/example-project/' + expectedFile)
+      expect(location.range).toEqual(expectedRange)
+    }
+
+    beforeEach(() => {
+      setWorkspaceUri(join('examples', 'example-project'))
+    })
+
+    it('package location', () => {
+      testNodeLocation(
+        pepitaPackage,
+        'src/pepita.wlk',
+        Range.create(Position.create(0, 0), Position.create(0, 0))
+      )
+    })
+
+    it('node location', () => {
+      const literal = new Literal({
+        value: 42,
+        sourceMap: new SourceMap({
+          start: { line: 1, column: 2, offset: 2 },
+          end: { line: 1, column: 4, offset: 4 },
+        }),
+        parent: pepitaPackage,
+      })
+
+      testNodeLocation(
+        literal,
+        'src/pepita.wlk',
+        Range.create(Position.create(0, 1), Position.create(0, 3))
+      )
+    })
+
+    it('missing file location', () => {
+      const brokenPackage = new Package({ name: 'broken' })
+
+      expect(() => nodeToLocation(brokenPackage)).toThrowError('No source file found for node')
+    })
+
+    it('missing source map location', () => {
+      const literal = new Literal({
+        value: 42,
+        parent: pepitaPackage,
+      })
+
+      expect(() => nodeToLocation(literal)).toThrowError('No source map found for node')
+    })
   })
 })
 
