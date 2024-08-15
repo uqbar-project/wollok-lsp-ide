@@ -10,3 +10,4 @@ yalc.lock
 coverage
 .nyc_output
 wollok.log
+tsconfig.tsbuildinfo

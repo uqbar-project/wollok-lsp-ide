@@ -12,7 +12,9 @@
     "vscode": "^1.80"
   },
   "dependencies": {
-    "@types/vscode": "^1.80.0"
+    "@types/vscode": "^1.80.0",
+    "@vscode/debugadapter": "^1.66.0",
+    "@vscode/debugprotocol": "^1.66.0"
   },
   "devDependencies": {
     "@vscode/test-electron": "^2.3.9",

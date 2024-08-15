@@ -13,8 +13,17 @@
   "categories": [
     "Programming Languages"
   ],
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "keywords": [
-    "ide wollok oop educative objects learning"
+    "ide",
+    "wollok",
+    "oop",
+    "educative",
+    "objects",
+    "learning"
   ],
   "icon": "images/wollokIdeLogo.png",
   "engines": {
@@ -37,6 +46,21 @@
   },
   "main": "./client/out/extension",
   "contributes": {
+    "menus": {
+      "editor/title/run": [
+        {
+          "command": "wollok.start.repl",
+          "when": "resourceLangId == wollok",
+          "group": "navigation@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "wollok.start.repl",
+          "when": "resourceLangId == wollok"
+        }
+      ]
+    },
     "languages": [
       {
         "id": "wollok",
@@ -55,6 +79,48 @@
           ".wlk.xt",
           ".wtest.xt",
           ".wpgm.xt"
+        ]
+      }
+    ],
+    "breakpoints": [
+      {
+        "language": "wollok"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "wollok",
+        "label": "Wollok Debug",
+        "languages": [
+          "wollok"
+        ],
+        "program": "./client/out/debug-adapter/debug.js",
+        "runtime": "node",
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "Absolute path to a text file.",
+                "default": "${workspaceFolder}"
+              }
+            }
+          }
+        },
+        "configurationSnippets": [
+          {
+            "label": "Wollok Debug: Launch",
+            "description": "A new configuration for launching a Wollok debug session",
+            "body": {
+              "type": "wollok",
+              "request": "launch",
+              "name": "${2:Launch Program}",
+              "program": "^\"\\${workspaceFolder}\""
+            }
+          }
         ]
       }
     ],
@@ -161,6 +227,7 @@
       {
         "command": "wollok.start.repl",
         "title": "Start a new REPL session",
+        "icon": "$(play)",
         "category": "Wollok"
       },
       {
@@ -173,6 +240,8 @@
     "keybindings": [
       {
         "command": "wollok.start.repl",
+        "icon": "$(play)",
+        "title": "Start a new REPL session for this file",
         "key": "ctrl+r",
         "mac": "cmd+r",
         "when": "editorTextFocus && resourceExtname == .wlk"
@@ -189,7 +258,6 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
-    "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
     "lint": "cd client && eslint . --ignore-path ../.eslintignore && cd ../server && eslint . --ignore-path ../.eslintignore && cd ..",
     "lint:fix": "cd client && eslint . --fix && cd ../server && eslint . --fix && cd ..",
     "test": "npm run test:e2e && npm run test:unit",
