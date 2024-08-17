@@ -1,0 +1,24 @@
+{
+  "name": "wollok-lsp-ide-client",
+  "description": "VSCode part of a language server",
+  "author": "Microsoft Corporation",
+  "license": "LGPL-3.0",
+  "publisher": "vscode",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uqbar-project/wollok-lsp-ide"
+  },
+  "engines": {
+    "vscode": "^1.80"
+  },
+  "dependencies": {
+    "@types/vscode": "^1.80.0",
+    "@vscode/debugadapter": "^1.66.0",
+    "@vscode/debugprotocol": "^1.66.0",
+    "wollok-debug-adapter": "workspace:^"
+  },
+  "devDependencies": {
+    "@vscode/test-electron": "^2.3.9",
+    "vscode-languageclient": "^9.0.1"
+  }
+}

@@ -1,5 +1,4 @@
-import path = require('path')
-import { WollokDebugSession } from './debug-adapter/debug-session'
+import { WollokDebugSession } from 'wollok-debug-adapter'
 import { DebugAdapterDescriptor, DebugAdapterDescriptorFactory, DebugAdapterInlineImplementation, DebugSession, ProviderResult } from 'vscode'
 
 /**
@@ -7,8 +6,6 @@ import { DebugAdapterDescriptor, DebugAdapterDescriptorFactory, DebugAdapterInli
  */
 export class WollokDebugAdapterFactory implements DebugAdapterDescriptorFactory {
   createDebugAdapterDescriptor(_session: DebugSession): ProviderResult<DebugAdapterDescriptor> {
-    console.log('factoryyy')
-    const debugExecPath = path.join(__dirname, '..', '..', 'debug-adapter', 'out', 'debug.js')
     return new DebugAdapterInlineImplementation(new WollokDebugSession())
     // return new DebugAdapterExecutable('node', [
     //   debugExecPath,

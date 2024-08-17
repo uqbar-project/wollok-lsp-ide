@@ -17,9 +17,9 @@ export class WollokDebugSession extends LoggingDebugSession {
   protected launchRequest(response: DebugProtocol.LaunchResponse, args: DebugProtocol.LaunchRequestArguments, request?: DebugProtocol.Request): void {
     console.log(`[LAUNCH REQUEST]`, request, args)
     // ToDo: get files from args
-    // const environment = buildEnvironment([{ name: 'pepita', content: fs.readFileSync((args as any).program, 'utf8') + '/pepita.wlk' }])
-    // const evaluation = Evaluation.build(environment, WRE)
-    // this.interpreter = new Interpreter(evaluation)
+    const environment = buildEnvironment([{ name: 'pepita', content: fs.readFileSync((args as any).program, 'utf8') + '/pepita.wlk' }])
+    const evaluation = Evaluation.build(environment, WRE)
+    this.interpreter = new Interpreter(evaluation)
     response.success = true
     this.sendResponse(response)
   }

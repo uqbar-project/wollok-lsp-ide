@@ -14,8 +14,7 @@
     "Programming Languages"
   ],
   "workspaces": [
-    "client",
-    "server"
+    "packages/*"
   ],
   "keywords": [
     "ide",
@@ -44,7 +43,7 @@
     },
     "hoverProvider": true
   },
-  "main": "./client/out/extension",
+  "main": "./packages/client/out/extension",
   "contributes": {
     "menus": {
       "editor/title/run": [
@@ -289,6 +288,8 @@
     "sinon": "^15.0.3",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
-  }
+    "typescript": "^4.9.5",
+    "yarn": "^1.22.22"
+  },
+  "packageManager": "yarn@4.4.0"
 }

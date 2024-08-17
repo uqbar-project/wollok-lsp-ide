@@ -1,5 +1,6 @@
 {
-  "name": "wollok-lsp-ide-client",
+  "name": "wollok-debug-adapter",
+  "version": "0.0.1",
   "description": "VSCode part of a language server",
   "author": "Microsoft Corporation",
   "license": "LGPL-3.0",
@@ -12,12 +13,8 @@
     "vscode": "^1.80"
   },
   "dependencies": {
-    "@types/vscode": "^1.80.0",
     "@vscode/debugadapter": "^1.66.0",
     "@vscode/debugprotocol": "^1.66.0"
   },
-  "devDependencies": {
-    "@vscode/test-electron": "^2.3.9",
-    "vscode-languageclient": "^9.0.1"
-  }
+  "main": "./out/index.js"
 }

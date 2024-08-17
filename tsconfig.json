@@ -19,10 +19,13 @@
   "exclude": ["node_modules", ".vscode-test"],
   "references": [
     {
-      "path": "./client"
+      "path": "./packages/client"
     },
     {
-      "path": "./server"
+      "path": "./packages/server"
+    },
+    {
+      "path": "./packages/debug-adapter"
     }
   ]
 }
