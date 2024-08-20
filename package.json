@@ -11,7 +11,10 @@
     "url": "https://github.com/uqbar-project/wollok-lsp-ide"
   },
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Debuggers",
+    "Linters",
+    "Testing"
   ],
   "workspaces": [
     "packages/*"
@@ -93,7 +96,7 @@
         "languages": [
           "wollok"
         ],
-        "program": "./client/out/debug-adapter/debug.js",
+        "program": "./client/out/debug-adapter/index.js",
         "runtime": "node",
         "configurationAttributes": {
           "launch": {
@@ -266,7 +269,7 @@
     "test-with-coverage:unit": "cd server && npm run test-with-coverage && cd ..",
     "test-local-coverage:unit": "cd server && npm run test-local-coverage && cd ..",
     "prepare": "husky install",
-    "package": "vsce package",
+    "package": "vsce package --no-dependencies",
     "lint-staged": "lint-staged"
   },
   "dependencies": {
@@ -279,7 +282,7 @@
     "@types/sinon": "^10.0.13",
     "@typescript-eslint/eslint-plugin": "^5.53.0",
     "@typescript-eslint/parser": "^5.53.0",
-    "@vscode/vsce": "^2.19.0",
+    "@vscode/vsce": "^3.0.0",
     "eslint": "^8.35.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.1.2",
