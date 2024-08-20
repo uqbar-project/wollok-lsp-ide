@@ -1,12 +1,13 @@
-import { DebugSession, InitializedEvent, StoppedEvent, Thread } from '@vscode/debugadapter'
+import { DebugSession, InitializedEvent, StoppedEvent, TerminatedEvent, Thread } from '@vscode/debugadapter'
 import { DebugProtocol } from '@vscode/debugprotocol'
 import * as vscode from 'vscode'
 import { ExtensionContext } from 'vscode'
-import { buildEnvironment, DirectedInterpreter, Environment, ExecutionDirector, executionFor, FileContent, is, Program, PROGRAM_FILE_EXTENSION, RuntimeObject, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
+import { buildEnvironment, DirectedInterpreter, Environment, ExecutionDirector, executionFor, ExecutionState, FileContent, is, Node, Program, PROGRAM_FILE_EXTENSION, RuntimeObject, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
 export class WollokDebugSession extends DebugSession {
   private interpreter: DirectedInterpreter
   private environment: Environment
   private executionDirector: ExecutionDirector<unknown>
+  private stoppedNode: Node
   constructor(private context: ExtensionContext, private workspace: typeof vscode.workspace){
     super()
   }
@@ -111,15 +112,38 @@ export class WollokDebugSession extends DebugSession {
     this.sendResponse(response)
   }
 
+  protected moveExecution(action: () => ExecutionState<unknown>): void{
+    const state = action()
+    const stoppedReason = state.done ? state.error ? 'exception' : 'done' : 'breakpoint'
+    if(!state.done && 'next' in state) {
+      this.stoppedNode = state.next
+      this.sendEvent(new StoppedEvent(stoppedReason, 1))
+    } else {
+      this.sendEvent(new TerminatedEvent())
+    }
+  }
 
   protected continue(): void {
-    const state = this.executionDirector.resume()
-    const stoppedReason = state.done ? (state.error ? 'exception' : 'done') : 'breakpoint'
-    this.sendEvent(new StoppedEvent(stoppedReason, 1))
+    this.moveExecution(() => this.executionDirector.resume())
   }
 
   protected continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments, request?: DebugProtocol.Request): void {
     this.continue()
+    this.sendResponse(response)
+  }
+
+  protected nextRequest(response: DebugProtocol.NextResponse, args: DebugProtocol.NextArguments, request?: DebugProtocol.Request): void {
+    this.moveExecution(() => this.executionDirector.stepThrough())
+    this.sendResponse(response)
+  }
+
+  protected stepInRequest(response: DebugProtocol.StepInResponse, args: DebugProtocol.StepInArguments, request?: DebugProtocol.Request): void {
+    this.moveExecution(() => this.executionDirector.stepIn())
+    this.sendResponse(response)
+  }
+
+  protected stepOutRequest(response: DebugProtocol.StepOutResponse, args: DebugProtocol.StepOutArguments, request?: DebugProtocol.Request): void {
+    this.moveExecution(() => this.executionDirector.stepOut())
     this.sendResponse(response)
   }
 
@@ -128,9 +152,15 @@ export class WollokDebugSession extends DebugSession {
     response.body = { stackFrames: [
       {
         id: 1,
-        name:     this.interpreter.evaluation.currentNode.kind,
-        line:     this.interpreter.evaluation.currentNode.sourceMap.start.line,
-        column:   this.interpreter.evaluation.currentNode.sourceMap.start.column,
+        name:     this.stoppedNode.label,
+        line:     this.stoppedNode.sourceMap?.start.line,
+        column:   this.stoppedNode.sourceMap?.start.column,
+        endColumn: this.stoppedNode.sourceMap?.end.column,
+        endLine:   this.stoppedNode.sourceMap?.end.line,
+        source: {
+          name: this.interpreter.evaluation.frameStack[1].node.sourceFileName,
+          path: this.interpreter.evaluation.frameStack[1].node.sourceFileName,
+        },
       },
     ] }
     this.sendResponse(response)
@@ -140,7 +170,7 @@ export class WollokDebugSession extends DebugSession {
     response.body = {
       scopes: [
         {
-          name: 'program',
+          name: this.interpreter.evaluation.currentNode.label,
           variablesReference: 1,
           expensive: false,
         },
@@ -150,19 +180,20 @@ export class WollokDebugSession extends DebugSession {
   }
 
   protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments, request?: DebugProtocol.Request): void {
+    const variables: DebugProtocol.VariablesResponse['body']['variables'] = []
+
+    this.interpreter.evaluation.currentFrame.locals.forEach((_, name) => {
+      const value = this.interpreter.evaluation.currentFrame.get(name)
+
+      variables.push({
+        name,
+        value: value.innerNumber.toString(),
+        variablesReference: 0,
+      })
+    })
+
     response.body = {
-      variables: [
-        {
-          name: 'pepita',
-          value: 'Pepita',
-          variablesReference: 1,
-        },
-        {
-          name: 'manolo',
-          value: 'manolo',
-          variablesReference: 1,
-        },
-      ],
+      variables,
     }
     this.sendResponse(response)
   }

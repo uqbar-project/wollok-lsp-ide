@@ -9,11 +9,12 @@ async function main() {
   try {
     // The folder containing the Extension Manifest package.json
     // Passed to `--extensionDevelopmentPath`
-    const extensionDevelopmentPath = path.resolve(__dirname, '../../../')
-
+    const extensionDevelopmentPath = path.resolve(__dirname, '../../../../')
+    console.log(extensionDevelopmentPath)
     // The path to test runner
     // Passed to --extensionTestsPath
     const extensionTestsPath = path.resolve(__dirname, './index')
+    console.log(extensionTestsPath)
 
     const coverage = !!process.env.COVERAGE
     console.info(`Running e2e tests ${coverage ? 'with coverage' : ''}...`)
@@ -23,7 +24,7 @@ async function main() {
       extensionDevelopmentPath,
       extensionTestsPath,
       launchArgs: [
-        path.resolve(extensionDevelopmentPath, './client/testFixture'),
+        path.resolve(extensionDevelopmentPath, './packages/client/testFixture'),
       ],
     })
   } catch (err) {
