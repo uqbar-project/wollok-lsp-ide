@@ -1,15 +1,23 @@
-import { DebugSession, InitializedEvent, Source, StoppedEvent, TerminatedEvent, Thread } from '@vscode/debugadapter'
+import { DebugSession, InitializedEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread } from '@vscode/debugadapter'
 import { DebugProtocol } from '@vscode/debugprotocol'
 import * as vscode from 'vscode'
 import { ExtensionContext } from 'vscode'
-import { buildEnvironment, DirectedInterpreter, Environment, ExecutionDirector, executionFor, ExecutionState, FileContent, is, Node, Package, Program, PROGRAM_FILE_EXTENSION, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
+import { buildEnvironment, DirectedInterpreter, Environment, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, is, Node, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeValue, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
 export class WollokDebugSession extends DebugSession {
-  private interpreter: DirectedInterpreter
-  private environment: Environment
-  private executionDirector: ExecutionDirector<unknown>
-  private stoppedNode: Node
-  constructor(private context: ExtensionContext, private workspace: typeof vscode.workspace){
+  protected interpreter: DirectedInterpreter
+  protected environment: Environment
+  protected executionDirector: ExecutionDirector<unknown>
+  protected frames: Map<number, Frame> = new Map()
+  protected static THREAD_ID = 1
+  protected configurationDone: Promise<void>
+  protected notifyConfigurationDone: () => void
+
+
+  constructor(protected context: ExtensionContext, protected workspace: typeof vscode.workspace){
     super()
+    this.configurationDone = new Promise<void>(resolve => {
+      this.notifyConfigurationDone = resolve
+    })
   }
 
   handleMessage(msg: DebugProtocol.ProtocolMessage): void {
@@ -24,6 +32,7 @@ export class WollokDebugSession extends DebugSession {
 
   protected configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, _args: DebugProtocol.ConfigurationDoneArguments, _request?: DebugProtocol.Request): void {
     this.sendResponse(response)
+    this.notifyConfigurationDone()
   }
 
   protected initializeRequest(response: DebugProtocol.InitializeResponse, _args: DebugProtocol.InitializeRequestArguments): void {
@@ -31,9 +40,9 @@ export class WollokDebugSession extends DebugSession {
     // build and return the capabilities of this debug adapter:
 		response.body = response.body || {}
 
-    // response.body.supportsBreakpointLocationsRequest = true
+    // response.body.supportsBreakpointLocationsRequest = true ToDo
     response.body.supportsDelayedStackTraceLoading = true
-    // response.body.supportsConfigurationDoneRequest = true
+    response.body.supportsConfigurationDoneRequest = true
     response.body.supportsSingleThreadExecutionRequests = false
 
     const debuggableFileExtensions = [WOLLOK_FILE_EXTENSION, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION]
@@ -55,13 +64,26 @@ export class WollokDebugSession extends DebugSession {
     this.launchRequest(response, args, request)
   }
 
-  protected launchRequest(response: DebugProtocol.LaunchResponse, _args: DebugProtocol.LaunchRequestArguments, _request?: DebugProtocol.Request): void {
+  protected launchRequest(response: DebugProtocol.LaunchResponse, args: WollokLaunchArguments, _request?: DebugProtocol.Request): void {
     // ToDo get test/program from args[program]
     const container: Test | Program = this.environment.descendants.find<Program>(is(Program))!
     this.executionDirector = this.interpreter.exec(
       container
     )
-    this.sendResponse(response)
+
+    /**
+     * Launch response must be sent
+     * after configuration is done
+     * see: https://github.com/Microsoft/vscode/issues/4902#issuecomment-368583522
+     */
+    this.configurationDone.then(() => {
+      this.sendResponse(response)
+      this.moveExecution(() => {
+        return this.executionDirector.resume(
+          args.stopOnEntry ? node => container.body.id === node.id : undefined
+        )
+      })
+    })
   }
 
   protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
@@ -69,7 +91,7 @@ export class WollokDebugSession extends DebugSession {
     // runtime supports no threads so just return a default thread.
     response.body = {
       threads: [
-        new Thread(1, "Wollok Main Thread"),
+        new Thread(WollokDebugSession.THREAD_ID, "Wollok Main Thread"),
       ],
     }
     this.sendResponse(response)
@@ -91,12 +113,6 @@ export class WollokDebugSession extends DebugSession {
       ],
     }
     this.sendResponse(response)
-
-    // ToDo: this should be here because if there are no set breakpoints
-    // the execution will never start
-    this.moveExecution(() => {
-      return this.executionDirector.resume()
-    })
   }
 
   protected setExceptionBreakPointsRequest(response: DebugProtocol.SetExceptionBreakpointsResponse, _args: DebugProtocol.SetExceptionBreakpointsArguments, _request?: DebugProtocol.Request): void {
@@ -119,8 +135,7 @@ export class WollokDebugSession extends DebugSession {
     const state = action()
     const stoppedReason = state.done ? state.error ? 'exception' : 'done' : 'breakpoint'
     if(!state.done && 'next' in state) {
-      this.stoppedNode = state.next
-      this.sendEvent(new StoppedEvent(stoppedReason, 1))
+      this.sendEvent(new StoppedEvent(stoppedReason, WollokDebugSession.THREAD_ID))
     } else {
       this.sendEvent(new TerminatedEvent())
     }
@@ -136,7 +151,7 @@ export class WollokDebugSession extends DebugSession {
   }
 
   protected nextRequest(response: DebugProtocol.NextResponse, _args: DebugProtocol.NextArguments, _request?: DebugProtocol.Request): void {
-    this.moveExecution(() => this.executionDirector.stepThrough())
+    this.moveExecution(() => this.executionDirector.stepOver())
     this.sendResponse(response)
   }
 
@@ -150,49 +165,43 @@ export class WollokDebugSession extends DebugSession {
     this.sendResponse(response)
   }
 
+  protected getFrameId(frame: Frame): number {
+    const id: number | undefined = Array.from(this.frames.keys()).find(key => this.frames.get(key).id === frame.id)
+    if(id !== undefined) return id
+    const newId = this.frames.size
+    this.frames.set(newId, frame)
+    return newId
+  }
 
   protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments, _request?: DebugProtocol.Request): void {
-    const startFrame = args.startFrame || 0
     response.body = {
       stackFrames:
         this.interpreter.evaluation.frameStack
-          .slice(startFrame)
-          .map((frame, index) => {
-            const frameNode = frame === this.interpreter.evaluation.currentFrame ? this.stoppedNode : frame.node
+          .slice(args.startFrame || 0)
+          .map((frame) => {
+            const isCurrentFrame = frame.id === this.interpreter.evaluation.currentFrame.id
+            const frameNode = frame.currentNode
             return {
-              id: startFrame + index, // ToDo: find a better id
-              name: frameNode.label,
+              id: this.getFrameId(frame),
+              name: frame.description,
               line: frameNode.sourceMap?.start.line,
               column: frameNode.sourceMap?.start.column,
               endColumn: frameNode.sourceMap?.end.column,
               endLine: frameNode.sourceMap?.end.line,
-              source: !frameNode.isSynthetic && new Source(
+              source: !!frameNode.sourceFileName && new Source(
                   frameNode.sourceFileName.split('/').pop()!,
                   frameNode.sourceFileName,
               ),
-          }
-        }),
-
-    //   [
-    //   {
-    //     id: 1,
-    //     name:     this.stoppedNode.label,
-    //     line:     this.stoppedNode.sourceMap?.start.line,
-    //     column:   this.stoppedNode.sourceMap?.start.column,
-    //     endColumn: this.stoppedNode.sourceMap?.end.column,
-    //     endLine:   this.stoppedNode.sourceMap?.end.line,
-    //     source: new Source(
-    //         this.interpreter.evaluation.frameStack[1].node.sourceFileName,
-    //         this.interpreter.evaluation.frameStack[1].node.sourceFileName,
-    //     ),
-    //   },
-    // ]
-   }
+              presentationHint: isCurrentFrame ? 'subtle' : 'normal',
+          } as StackFrame
+        }).reverse(),
+        totalFrames: this.interpreter.evaluation.frameStack.length,
+      }
     this.sendResponse(response)
   }
 
   protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments, _request?: DebugProtocol.Request): void {
-    const frame = this.interpreter.evaluation.frameStack[args.frameId]
+    const frame = this.frames.get(args.frameId)
     response.body = {
       scopes: [
         {
@@ -207,13 +216,23 @@ export class WollokDebugSession extends DebugSession {
 
   protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments, _request?: DebugProtocol.Request): void {
     const variables: DebugProtocol.VariablesResponse['body']['variables'] = []
-    const frame = this.interpreter.evaluation.frameStack[args.variablesReference]
+    const frame = this.frames.get(args.variablesReference)
+
+
     frame.locals.forEach((_, name) => {
       // ToDo handle strings, booleans, objects, etc.
-      const value = frame.get(name)
+      const value: RuntimeValue = frame.get(name)
+      let valueText: string
+
+      try {
+        value.assertIsNumber()
+        valueText = value.innerNumber.toString()
+      } catch(e) {
+        valueText = 'Not a number'
+      }
       variables.push({
         name,
-        value: value.innerNumber.toString(),
+        value: valueText,
         variablesReference: 0,
         type: 'number',
       })
@@ -224,4 +243,8 @@ export class WollokDebugSession extends DebugSession {
     }
     this.sendResponse(response)
   }
+}
+
+interface WollokLaunchArguments extends DebugProtocol.LaunchRequestArguments {
+  stopOnEntry?: boolean
 }

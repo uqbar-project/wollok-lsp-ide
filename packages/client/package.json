@@ -12,8 +12,6 @@
     "vscode": "^1.80"
   },
   "dependencies": {
-    "@vscode/debugadapter": "^1.66.0",
-    "@vscode/debugprotocol": "^1.66.0",
     "wollok-debug-adapter": "workspace:^"
   },
   "devDependencies": {
