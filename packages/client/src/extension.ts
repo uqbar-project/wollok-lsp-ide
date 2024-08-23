@@ -24,7 +24,7 @@ import {
 import { subscribeWollokCommands } from './commands'
 import { wollokLSPExtensionId } from './shared-definitions'
 import { allWollokFiles } from './utils'
-import { WollokDebugAdapterFactory } from 'wollok-debug-adapter'
+import { WollokDebugAdapterFactory, WollokDebugConfigurationProvider } from 'wollok-debug-adapter'
 
 let client: LanguageClient
 
@@ -63,10 +63,11 @@ export function activate(context: ExtensionContext): void {
   subscribeWollokCommands(context)
 
 
-  //todo: move to debug-adapter.ts
   // Subscribe Wollok Debug Adapter
   const debuggerFactory = new WollokDebugAdapterFactory(context, vscode.workspace)
+  context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('wollok', new WollokDebugConfigurationProvider()))
 	context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('wollok', debuggerFactory))
+
   // Create the language client and start the client.
   client = new LanguageClient(
     wollokLSPExtensionId,

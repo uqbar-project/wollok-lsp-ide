@@ -18,18 +18,18 @@ contributing.md
 **/*.map
 
 # no tests needed
-client/out/test/**
-client/out/testFixture/**
-server/out/test/**
+packages/client/out/test/**
+packages/client/out/testFixture/**
+packages/server/out/test/**
 
 # node_modules, except by vscode and needed dependencies
-client/node_modules/**
-!client/node_modules/vscode-jsonrpc/**
-!client/node_modules/vscode-languageclient/**
-!client/node_modules/vscode-languageserver-protocol/**
-!client/node_modules/vscode-languageserver-types/**
-!client/node_modules/{minimatch,brace-expansion,concat-map,balanced-match}/**
-!client/node_modules/{semver,lru-cache,yallist}/**
+packages/client/node_modules/**
+!packages/client/node_modules/vscode-jsonrpc/**
+!packages/client/node_modules/vscode-languageclient/**
+!packages/client/node_modules/vscode-languageserver-protocol/**
+!packages/client/node_modules/vscode-languageserver-types/**
+!packages/client/node_modules/{minimatch,brace-expansion,concat-map,balanced-match}/**
+!packages/client/node_modules/{semver,lru-cache,yallist}/**
 
 # wollok logging
 wollok.log

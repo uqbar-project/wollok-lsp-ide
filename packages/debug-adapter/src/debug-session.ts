@@ -2,7 +2,7 @@ import { DebugSession, InitializedEvent, Source, StackFrame, StoppedEvent, Termi
 import { DebugProtocol } from '@vscode/debugprotocol'
 import * as vscode from 'vscode'
 import { ExtensionContext } from 'vscode'
-import { buildEnvironment, DirectedInterpreter, Environment, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, is, Node, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeValue, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
+import { Body, buildEnvironment, DirectedInterpreter, Environment, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, is, Node, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeValue, Sentence, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
 export class WollokDebugSession extends DebugSession {
   protected interpreter: DirectedInterpreter
   protected environment: Environment
@@ -36,15 +36,14 @@ export class WollokDebugSession extends DebugSession {
   }
 
   protected initializeRequest(response: DebugProtocol.InitializeResponse, _args: DebugProtocol.InitializeRequestArguments): void {
-
-    // build and return the capabilities of this debug adapter:
-		response.body = response.body || {}
-
+    // capabilities
+    response.body = response.body || {}
     // response.body.supportsBreakpointLocationsRequest = true ToDo
     response.body.supportsDelayedStackTraceLoading = true
     response.body.supportsConfigurationDoneRequest = true
     response.body.supportsSingleThreadExecutionRequests = false
 
+    // initialize wollok interpreter
     const debuggableFileExtensions = [WOLLOK_FILE_EXTENSION, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION]
     this.workspace.findFiles(`**/*.{${debuggableFileExtensions.join(',')}}`).then(async files => {
       this.environment = buildEnvironment(
@@ -60,13 +59,34 @@ export class WollokDebugSession extends DebugSession {
     })
   }
 
-  protected attachRequest(response: DebugProtocol.AttachResponse, args: DebugProtocol.AttachRequestArguments, request?: DebugProtocol.Request): void {
-    this.launchRequest(response, args, request)
-  }
-
   protected launchRequest(response: DebugProtocol.LaunchResponse, args: WollokLaunchArguments, _request?: DebugProtocol.Request): void {
     // ToDo get test/program from args[program]
-    const container: Test | Program = this.environment.descendants.find<Program>(is(Program))!
+    const containerPackage = this.environment.descendants.filter<Package>(is(Package)).find(pkg => pkg.sourceFileName === args.file)
+
+    if(!containerPackage){
+      this.sendErrorResponse(response, 404, 'Could not find target file')
+      return
+    }
+
+    const container: Test | Program | undefined = containerPackage.descendants.find<Test|Program>(function (node: Node): node is Test | Program {
+      if('test' in args.target) {
+        const isPossibleTargetTest = node.is(Test) && node.name === `"${args.target.test}"`
+        if(args.target.describe) {
+          // recursive describes?
+          return isPossibleTargetTest && node.parent.name === `"${args.target.describe}"`
+        } else {
+          return isPossibleTargetTest
+        }
+      } else {
+        return node.is(Program) && node.name === args.target.program
+      }
+    })
+
+    if(!container){
+      this.sendErrorResponse(response, 404, 'Could not find target test or program')
+      return
+    }
+
     this.executionDirector = this.interpreter.exec(
       container
     )
@@ -98,36 +118,35 @@ export class WollokDebugSession extends DebugSession {
   }
 
 
-  protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, _args: DebugProtocol.SetBreakpointsArguments, _request?: DebugProtocol.Request): void {
+  protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments, _request?: DebugProtocol.Request): void {
+    const breakpointsPackage = this.environment.descendants.find<Package>(function (node): node is Package {
+      return node.is(Package) && node.sourceFileName === args.source.path
+    })
+    if(breakpointsPackage){
+      const sentences = breakpointsPackage.descendants.filter<Sentence>(function (node): node is Sentence {
+        return node.is(Sentence) && node.parent.is(Body) && args.breakpoints.map(breakpoint => breakpoint.line).includes(node.sourceMap?.start.line)
+      })
+      sentences.forEach(sentence => {
+        this.executionDirector.addBreakpoint(sentence)
+      })
 
-    const sentence = this.environment.descendants.find<Program>(is(Program))!.sentences()[1]
-    this.executionDirector.addBreakpoint(sentence)
+      response.body = {
+        breakpoints: sentences.map(sentence => ({
+            verified: true,
+            line: sentence.sourceMap.start.line,
+            column: sentence.sourceMap.start.column,
+            endColumn: sentence.sourceMap.end.column,
+            endLine: sentence.sourceMap.end.line,
+            source: new Source(sentence.sourceFileName.split('/').pop()!, sentence.sourceFileName),
+          })
+        ),
 
-    response.body = {
-      breakpoints: [
-        { verified: true,
-          line: sentence.sourceMap.start.line,
-          column: sentence.sourceMap.start.column,
-          instructionReference: 'holaaa',
-        },
-      ],
+      }
     }
     this.sendResponse(response)
   }
 
   protected setExceptionBreakPointsRequest(response: DebugProtocol.SetExceptionBreakpointsResponse, _args: DebugProtocol.SetExceptionBreakpointsArguments, _request?: DebugProtocol.Request): void {
-
-    this.sendResponse(response)
-  }
-
-  protected breakpointLocationsRequest(response: DebugProtocol.BreakpointLocationsResponse, _args: DebugProtocol.BreakpointLocationsArguments, _request?: DebugProtocol.Request): void {
-
-    response.body = {
-      breakpoints: [
-        { line: 1, column: 1 },
-      ],
-    }
-
     this.sendResponse(response)
   }
 
@@ -247,4 +266,9 @@ export class WollokDebugSession extends DebugSession {
 
 interface WollokLaunchArguments extends DebugProtocol.LaunchRequestArguments {
   stopOnEntry?: boolean
+  file: string,
+  target: {
+    test: string,
+    describe?: string
+  } | { program: string }
 }
