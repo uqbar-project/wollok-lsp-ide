@@ -29,7 +29,8 @@ export function resolvePathParser(): path.PlatformPath {
 }
 
 export function fsToShell(fsPath: string): string {
-  return transformSeparators(fsPath, path.sep, resolvePathParser().sep)
+  const quotes = fsPath.includes('"') ? '\'' : '"'
+  return quotes + transformSeparators(fsPath, path.sep, resolvePathParser().sep) + quotes
 }
 
 export function unknownToShell(aPath: string): string {
