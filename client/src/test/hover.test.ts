@@ -43,8 +43,10 @@ suite('Should display on hover', () => {
 async function testHover(uri: Uri, position: Position, expected: any): Promise<void> {
   await activate(uri)
   const actual = await commands.executeCommand('vscode.executeHoverProvider', uri, position)
-  delete actual[0]['canDecreaseHover']
-  delete actual[0]['canIncreaseHover']
+  // delete actual[0]['canDecreaseHover']
+  // delete actual[0]['canIncreaseHover']
+  delete actual[0]['canDecreaseVerbosity']
+  delete actual[0]['canIncreaseVerbosity']
   assert.deepEqual(actual, [expected])
   assert.deepEqual(
     actual[0].contents.map(content => content.value),

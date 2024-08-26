@@ -3,7 +3,7 @@ import * as sinon from 'sinon'
 import { ShellExecution, Task, Uri, env, workspace } from 'vscode'
 import { runAllTests, runProgram, runTest, startRepl } from '../commands'
 import { activate, getDocumentURI, getFolderURI } from './helper'
-import { toPosix, toWin, Shell } from '../platform-string-utils'
+import { toPosix, toWin, Shell, getQuotesFor } from '../platform-string-utils'
 import { afterEach, beforeEach } from 'mocha'
 
 suite('Should run commands', () => {
@@ -97,7 +97,7 @@ suite('Should run commands', () => {
       testCommand(
         pepitaURI,
         startRepl,
-        ` repl ${toPosix(
+        ` repl ${expectedPathByShell(env.shell as Shell,
           pepitaURI.fsPath,
         )} --skipValidations --darkMode  -p ${expectedPathByShell(
           'bash',
@@ -120,11 +120,9 @@ async function testCommand(
 }
 
 function expectedPathByShell(cmd: Shell, originalPath: string) {
-  if (['bash', 'zsh'].includes(cmd)) {
-    return toPosix(originalPath)
-  } else {
-    return toWin(originalPath)
-  }
+  const quotes = getQuotesFor(originalPath)
+  const newPath = ['bash', 'zsh'].includes(cmd) ? toPosix(originalPath) : toWin(originalPath)
+  return quotes + newPath + quotes
 }
 
 async function onWindowsBash(test: () => Promise<any>) {

@@ -28,8 +28,10 @@ export function resolvePathParser(): path.PlatformPath {
   return shellPathEncoding() === 'win32' ? path.win32 : path.posix
 }
 
+export const getQuotesFor = (path: string): string => path.includes('"') ? '\'' : '"'
+
 export function fsToShell(fsPath: string): string {
-  const quotes = fsPath.includes('"') ? '\'' : '"'
+  const quotes = getQuotesFor(fsPath)
   return quotes + transformSeparators(fsPath, path.sep, resolvePathParser().sep) + quotes
 }
 
