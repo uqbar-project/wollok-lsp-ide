@@ -9,7 +9,6 @@ export class WollokDebugSession extends DebugSession {
   protected environment: Environment
   protected executionDirector: ExecutionDirector<unknown>
   protected frames: WollokIdMap<Frame> = new WollokIdMap()
-  protected referencedObjects: WollokIdMap<RuntimeObject> = new WollokIdMap()
   protected contexts: WollokIdMap<Context> = new WollokIdMap()
   protected stoppedNode: Node
 
@@ -42,7 +41,7 @@ export class WollokDebugSession extends DebugSession {
   protected initializeRequest(response: DebugProtocol.InitializeResponse, _args: DebugProtocol.InitializeRequestArguments): void {
     // capabilities
     response.body = response.body || {}
-    // response.body.supportsBreakpointLocationsRequest = true ToDo
+    // ToDo: response.body.supportsBreakpointLocationsRequest = true
     response.body.supportsDelayedStackTraceLoading = true
     response.body.supportsConfigurationDoneRequest = true
     response.body.supportsSingleThreadExecutionRequests = false
@@ -75,7 +74,7 @@ export class WollokDebugSession extends DebugSession {
       if('test' in args.target) {
         const isPossibleTargetTest = node.is(Test) && node.name === `"${args.target.test}"`
         if(args.target.describe) {
-          // recursive describes?
+          // possible bug: recursive describes?
           return isPossibleTargetTest && node.parent.name === `"${args.target.describe}"`
         } else {
           return isPossibleTargetTest
@@ -157,7 +156,6 @@ export class WollokDebugSession extends DebugSession {
     const state = action()
     // reset stack state when moving execution
     this.frames.clear()
-    this.referencedObjects.clear()
     this.contexts.clear()
     const stoppedReason = state.done ? state.error ? 'exception' : 'done' : undefined
     if(!state.done && 'next' in state) {
@@ -251,13 +249,21 @@ export class WollokDebugSession extends DebugSession {
         valueText = 'Not a number'
       }
 
-      variables.push({
-        name,
-        value: valueText,
-        variablesReference: 0,
-        type: 'number',
-        evaluateName: name,
-      })
+      if(name === 'self') {
+        variables.push({
+          name,
+          value: value.module.name ?? '',
+          variablesReference: 0,
+          evaluateName: name,
+        })
+      } else {
+        variables.push({
+          name,
+          value: valueText,
+          variablesReference: value.locals.size > 0 ? this.contexts.getIdFor(value) : 0,
+          evaluateName: name,
+        })
+      }
     })
 
     response.body = {
