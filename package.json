@@ -52,14 +52,14 @@
       "editor/title/run": [
         {
           "command": "wollok.start.repl",
-          "when": "resourceLangId == wollok",
+          "when": "resourceLangId == wollok && resourceExtname == .wlk",
           "group": "navigation@1"
         }
       ],
       "commandPalette": [
         {
           "command": "wollok.start.repl",
-          "when": "resourceLangId == wollok"
+          "when": "resourceLangId == wollok && resourceExtname == .wlk"
         }
       ]
     },
@@ -115,7 +115,8 @@
                   },
                   "describe": {
                     "type": "string",
-                    "description": "The describe's name."
+                    "description": "(optional) The describe's name.",
+                    "optional": true
                   },
                   "test": {
                     "type": "string",
@@ -137,13 +138,30 @@
         },
         "configurationSnippets": [
           {
-            "label": "Wollok Debug: Launch",
-            "description": "A new configuration for launching a Wollok debug session",
+            "label": "Wollok Debug: Launch Program",
+            "description": "A new configuration for launching a Wollok debug session on a program",
             "body": {
               "type": "wollok",
               "request": "launch",
               "name": "${2:Launch Program}",
-              "program": "^\"\\${workspaceFolder}\""
+              "target": {
+                "program": "\"<insert your program name here>\""
+              },
+              "file": "^\"\\${file}\""
+            }
+          },
+          {
+            "label": "Wollok Debug: Launch Test",
+            "description": "A new configuration for launching a Wollok debug session on a test",
+            "body": {
+              "type": "wollok",
+              "request": "launch",
+              "name": "${2:Launch Test}",
+              "target": {
+                "test": "a test name",
+                "describe": "a describe name"
+              },
+              "file": "^\"\\${file}\""
             }
           }
         ]
@@ -253,7 +271,8 @@
         "command": "wollok.start.repl",
         "title": "Start a new REPL session",
         "icon": "$(play)",
-        "category": "Wollok"
+        "category": "Wollok",
+        "enablement": "resourceExtname == .wlk"
       },
       {
         "command": "wollok.run.allTests",
@@ -314,8 +333,7 @@
     "sinon": "^15.0.3",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5",
-    "yarn": "^1.22.22"
+    "typescript": "^4.9.5"
   },
   "packageManager": "yarn@4.4.0"
 }

@@ -6017,8 +6017,6 @@ __metadata:
   resolution: "wollok-lsp-ide-client@workspace:packages/client"
   dependencies:
     "@types/vscode": "npm:^1.80.0"
-    "@vscode/debugadapter": "npm:^1.66.0"
-    "@vscode/debugprotocol": "npm:^1.66.0"
     "@vscode/test-electron": "npm:^2.3.9"
     vscode-languageclient: "npm:^9.0.1"
     wollok-debug-adapter: "workspace:^"
@@ -6058,20 +6056,19 @@ __metadata:
     ts-node: "npm:^10.9.1"
     typescript: "npm:^4.9.5"
     wollok-ts: ../wollok-ts
-    yarn: "npm:^1.22.22"
   languageName: unknown
   linkType: soft
 
 "wollok-ts@file:../wollok-ts::locator=wollok-lsp-ide%40workspace%3A.":
   version: 4.1.4
-  resolution: "wollok-ts@file:../wollok-ts#../wollok-ts::hash=c138d2&locator=wollok-lsp-ide%40workspace%3A."
+  resolution: "wollok-ts@file:../wollok-ts#../wollok-ts::hash=afb628&locator=wollok-lsp-ide%40workspace%3A."
   dependencies:
     "@types/parsimmon": "npm:^1.10.8"
     parsimmon: "npm:^1.18.1"
     prettier-printer: "npm:^1.1.4"
     unraw: "npm:^3.0.0"
     uuid: "npm:^9.0.1"
-  checksum: 10c0/c414ebad9ec907a40c4e2f55c2f3b6b6cbda7bc50702759a7e235029a29a3e905092c95147269dc21db559912e923d7762b41d37b96786fd16f9f43743f96ad0
+  checksum: 10c0/b27f55998674fe63db7a78fec513f521c0fa12f8ff381833b66771030943b9af30e6f1f84ecbaec83043361706b859a9dd43abca96bdbc21f5dfc6f89cdb7a3f
   languageName: node
   linkType: hard
 
@@ -6253,16 +6250,6 @@ __metadata:
     y18n: "npm:^5.0.5"
     yargs-parser: "npm:^20.2.2"
   checksum: 10c0/b1dbfefa679848442454b60053a6c95d62f2d2e21dd28def92b647587f415969173c6e99a0f3bab4f1b67ee8283bf735ebe3544013f09491186ba9e8a9a2b651
-  languageName: node
-  linkType: hard
-
-"yarn@npm:^1.22.22":
-  version: 1.22.22
-  resolution: "yarn@npm:1.22.22"
-  bin:
-    yarn: bin/yarn.js
-    yarnpkg: bin/yarn.js
-  checksum: 10c0/8c77198c93d7542e7f4e131c63b66de357b7076ecfbcfe709ec0d674115c2dd9edaa45196e5510e6e9366d368707a802579e3402071002e1c9d9a99d491478de
   languageName: node
   linkType: hard
 
