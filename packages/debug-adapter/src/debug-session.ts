@@ -2,13 +2,17 @@ import { DebugSession, InitializedEvent, Source, StackFrame, StoppedEvent, Termi
 import { DebugProtocol } from '@vscode/debugprotocol'
 import * as vscode from 'vscode'
 import { ExtensionContext } from 'vscode'
-import { Body, buildEnvironment, DirectedInterpreter, Environment, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, is, Node, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeValue, Sentence, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
+import { Body, buildEnvironment, Context, DirectedInterpreter, Environment, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, is, Node, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
 export class WollokDebugSession extends DebugSession {
+  protected static readonly THREAD_ID = 1
   protected interpreter: DirectedInterpreter
   protected environment: Environment
   protected executionDirector: ExecutionDirector<unknown>
-  protected frames: Map<number, Frame> = new Map()
-  protected static THREAD_ID = 1
+  protected frames: WollokIdMap<Frame> = new WollokIdMap()
+  protected referencedObjects: WollokIdMap<RuntimeObject> = new WollokIdMap()
+  protected contexts: WollokIdMap<Context> = new WollokIdMap()
+  protected stoppedNode: Node
+
   protected configurationDone: Promise<void>
   protected notifyConfigurationDone: () => void
 
@@ -60,7 +64,6 @@ export class WollokDebugSession extends DebugSession {
   }
 
   protected launchRequest(response: DebugProtocol.LaunchResponse, args: WollokLaunchArguments, _request?: DebugProtocol.Request): void {
-    // ToDo get test/program from args[program]
     const containerPackage = this.environment.descendants.filter<Package>(is(Package)).find(pkg => pkg.sourceFileName === args.file)
 
     if(!containerPackage){
@@ -152,8 +155,13 @@ export class WollokDebugSession extends DebugSession {
 
   protected moveExecution(action: () => ExecutionState<unknown>): void{
     const state = action()
-    const stoppedReason = state.done ? state.error ? 'exception' : 'done' : 'breakpoint'
+    // reset stack state when moving execution
+    this.frames.clear()
+    this.referencedObjects.clear()
+    this.contexts.clear()
+    const stoppedReason = state.done ? state.error ? 'exception' : 'done' : undefined
     if(!state.done && 'next' in state) {
+      this.stoppedNode = state.next
       this.sendEvent(new StoppedEvent(stoppedReason, WollokDebugSession.THREAD_ID))
     } else {
       this.sendEvent(new TerminatedEvent())
@@ -184,14 +192,6 @@ export class WollokDebugSession extends DebugSession {
     this.sendResponse(response)
   }
 
-  protected getFrameId(frame: Frame): number {
-    const id: number | undefined = Array.from(this.frames.keys()).find(key => this.frames.get(key).id === frame.id)
-    if(id !== undefined) return id
-    const newId = this.frames.size
-    this.frames.set(newId, frame)
-    return newId
-  }
-
   protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments, _request?: DebugProtocol.Request): void {
     response.body = {
       stackFrames:
@@ -199,48 +199,49 @@ export class WollokDebugSession extends DebugSession {
           .slice(args.startFrame || 0)
           .map((frame) => {
             const isCurrentFrame = frame.id === this.interpreter.evaluation.currentFrame.id
-            const frameNode = frame.currentNode
-            return {
-              id: this.getFrameId(frame),
-              name: frame.description,
-              line: frameNode.sourceMap?.start.line,
-              column: frameNode.sourceMap?.start.column,
-              endColumn: frameNode.sourceMap?.end.column,
-              endLine: frameNode.sourceMap?.end.line,
-              source: !!frameNode.sourceFileName && new Source(
-                  frameNode.sourceFileName.split('/').pop()!,
-                  frameNode.sourceFileName,
-              ),
-              presentationHint: isCurrentFrame ? 'subtle' : 'normal',
-          } as StackFrame
+            return this.buildStackFrame(frame, isCurrentFrame ? this.stoppedNode : frame.currentNode)
         }).reverse(),
         totalFrames: this.interpreter.evaluation.frameStack.length,
       }
     this.sendResponse(response)
   }
 
+  protected buildStackFrame(frame: Frame, currentNode: Node): StackFrame {
+    return {
+      id: this.frames.getIdFor(frame),
+      name: frame.description,
+      line: currentNode.sourceMap?.start.line,
+      column: currentNode.sourceMap?.start.column,
+      endColumn: currentNode.sourceMap?.end.column,
+      endLine: currentNode.sourceMap?.end.line,
+      source: !!currentNode.sourceFileName && new Source(
+          currentNode.sourceFileName.split('/').pop()!,
+          currentNode.sourceFileName,
+      ),
+    }
+  }
+
   protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments, _request?: DebugProtocol.Request): void {
     const frame = this.frames.get(args.frameId)
     response.body = {
-      scopes: [
-        {
-          name: frame.node.label,
-          variablesReference: args.frameId,
+      scopes: frame.contextHierarchy().map(context => ({
+          name: context.description,
+          variablesReference: this.contexts.getIdFor(context),
           expensive: false,
-        },
-      ],
+          namedVariables: context.locals.size,
+      })),
     }
     this.sendResponse(response)
   }
 
   protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments, _request?: DebugProtocol.Request): void {
     const variables: DebugProtocol.VariablesResponse['body']['variables'] = []
-    const frame = this.frames.get(args.variablesReference)
+    const context = this.contexts.get(args.variablesReference)
 
 
-    frame.locals.forEach((_, name) => {
+    context.locals.forEach((_, name) => {
       // ToDo handle strings, booleans, objects, etc.
-      const value: RuntimeValue = frame.get(name)
+      const value: RuntimeValue = context.get(name)
       let valueText: string
 
       try {
@@ -249,11 +250,13 @@ export class WollokDebugSession extends DebugSession {
       } catch(e) {
         valueText = 'Not a number'
       }
+
       variables.push({
         name,
         value: valueText,
         variablesReference: 0,
         type: 'number',
+        evaluateName: name,
       })
     })
 
@@ -271,4 +274,14 @@ interface WollokLaunchArguments extends DebugProtocol.LaunchRequestArguments {
     test: string,
     describe?: string
   } | { program: string }
+}
+
+class WollokIdMap<T extends { id: string }> extends Map<number, T> {
+  getIdFor(elem: T): number {
+    const id: number | undefined = Array.from(this.keys()).find(key => this.get(key).id === elem.id)
+    if(id !== undefined) return id
+    const newId = this.size + 1
+    this.set(newId, elem)
+    return newId
+  }
 }
