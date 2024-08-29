@@ -1,8 +1,8 @@
-import { DebugSession, InitializedEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread } from '@vscode/debugadapter'
+import { DebugSession, InitializedEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread, Variable } from '@vscode/debugadapter'
 import { DebugProtocol } from '@vscode/debugprotocol'
 import * as vscode from 'vscode'
 import { ExtensionContext } from 'vscode'
-import { Body, buildEnvironment, Context, DirectedInterpreter, Environment, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, is, Node, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
+import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, Environment, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, is, LIST_MODULE, Node, NUMBER_MODULE, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
 export class WollokDebugSession extends DebugSession {
   protected static readonly THREAD_ID = 1
   protected interpreter: DirectedInterpreter
@@ -21,16 +21,6 @@ export class WollokDebugSession extends DebugSession {
     this.configurationDone = new Promise<void>(resolve => {
       this.notifyConfigurationDone = resolve
     })
-  }
-
-  handleMessage(msg: DebugProtocol.ProtocolMessage): void {
-    console.log(`[${(msg as any).command || msg.type}]`, msg) //ToDo: logger
-    super.handleMessage(msg)
-  }
-
-  sendResponse(response: DebugProtocol.Response): void {
-    console.log(`[response]`, response) //ToDo: logger
-    super.sendResponse(response)
   }
 
   protected configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, _args: DebugProtocol.ConfigurationDoneArguments, _request?: DebugProtocol.Request): void {
@@ -236,40 +226,43 @@ export class WollokDebugSession extends DebugSession {
     const variables: DebugProtocol.VariablesResponse['body']['variables'] = []
     const context = this.contexts.get(args.variablesReference)
 
-
     context.locals.forEach((_, name) => {
-      // ToDo handle strings, booleans, objects, etc.
       const value: RuntimeValue = context.get(name)
-      let valueText: string
-
-      try {
-        value.assertIsNumber()
-        valueText = value.innerNumber.toString()
-      } catch(e) {
-        valueText = 'Not a number'
-      }
 
       if(name === 'self') {
+        // should we show self?
         variables.push({
-          name,
+          name: '<self>',
           value: value.module.name ?? '',
           variablesReference: 0,
           evaluateName: name,
         })
       } else {
-        variables.push({
-          name,
-          value: valueText,
-          variablesReference: value.locals.size > 0 ? this.contexts.getIdFor(value) : 0,
-          evaluateName: name,
-        })
+        variables.push(this.buildVariableFromRuntimeObject(name, value))
       }
     })
+
+    // shoud 'innerCollection' be part of the Context interface?
+    if(context instanceof RuntimeObject) {
+      (context.innerCollection || []).forEach((value, i) => {
+        variables.push(this.buildVariableFromRuntimeObject(
+          i.toString(),
+          value
+        ))
+      })
+    }
 
     response.body = {
       variables,
     }
     this.sendResponse(response)
+  }
+  private buildVariableFromRuntimeObject(reference: string, object: RuntimeObject): Variable {
+    return {
+      name: reference,
+      value: getValueText(object),
+      variablesReference: object.locals.size > 0 || object.innerCollection?.length > 0 ? this.contexts.getIdFor(object) : 0,
+    }
   }
 }
 
@@ -289,5 +282,25 @@ class WollokIdMap<T extends { id: string }> extends Map<number, T> {
     const newId = this.size + 1
     this.set(newId, elem)
     return newId
+  }
+}
+
+
+// ToDo usar las nuevas funciones de dodain o mover esto a ts?
+function getValueText(value: RuntimeObject): string {
+  if(value.innerValue === null){
+    return 'null'
+  }
+  switch(value.module.fullyQualifiedName){
+    case STRING_MODULE:
+      return `"${value.innerString}"`
+    case NUMBER_MODULE:
+      return value.innerNumber.toString()
+    case BOOLEAN_MODULE:
+      return value.innerBoolean ? 'true' : 'false'
+    case LIST_MODULE:
+      return `[${value.innerCollection.map(elem => getValueText(elem)).join(', ')}]`
+    default:
+      return value.description
   }
 }
