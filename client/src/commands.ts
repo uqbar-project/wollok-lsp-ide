@@ -107,7 +107,7 @@ const registerCLICommand = (
   )
 
 const wollokCLITask = (task: string, name: string, cliCommands: string[]) => {
-  const wollokCliPath: string = fsToShell(workspace.getConfiguration(wollokLSPExtensionCode).get('cli-path'))
+  const wollokCliPath: string = workspace.getConfiguration(wollokLSPExtensionCode).get('cli-path')
   // TODO: i18n - but it's in the server
   if (!wollokCliPath) {
     vscode.commands.executeCommand('workbench.action.openSettings', wollokLSPExtensionCode)
