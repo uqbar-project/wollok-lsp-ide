@@ -1,7 +1,6 @@
 import { DebugSession, InitializedEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread, Variable } from '@vscode/debugadapter'
 import { DebugProtocol } from '@vscode/debugprotocol'
 import * as vscode from 'vscode'
-import { ExtensionContext } from 'vscode'
 import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, Environment, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, is, LIST_MODULE, Node, NUMBER_MODULE, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
 export class WollokDebugSession extends DebugSession {
   protected static readonly THREAD_ID = 1
@@ -16,7 +15,7 @@ export class WollokDebugSession extends DebugSession {
   protected notifyConfigurationDone: () => void
 
 
-  constructor(protected context: ExtensionContext, protected workspace: typeof vscode.workspace){
+  constructor(protected workspace: typeof vscode.workspace){
     super()
     this.configurationDone = new Promise<void>(resolve => {
       this.notifyConfigurationDone = resolve

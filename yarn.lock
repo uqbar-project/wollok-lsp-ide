@@ -169,7 +169,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/core@npm:^7.7.5":
+"@babel/core@npm:^7.23.9, @babel/core@npm:^7.7.5":
   version: 7.25.2
   resolution: "@babel/core@npm:7.25.2"
   dependencies:
@@ -294,6 +294,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/parser@npm:^7.23.9":
+  version: 7.25.6
+  resolution: "@babel/parser@npm:7.25.6"
+  dependencies:
+    "@babel/types": "npm:^7.25.6"
+  bin:
+    parser: ./bin/babel-parser.js
+  checksum: 10c0/f88a0e895dbb096fd37c4527ea97d12b5fc013720602580a941ac3a339698872f0c911e318c292b184c36b5fbe23b612f05aff9d24071bc847c7b1c21552c41d
+  languageName: node
+  linkType: hard
+
 "@babel/parser@npm:^7.25.0, @babel/parser@npm:^7.25.3":
   version: 7.25.3
   resolution: "@babel/parser@npm:7.25.3"
@@ -339,6 +350,17 @@ __metadata:
     "@babel/helper-validator-identifier": "npm:^7.24.7"
     to-fast-properties: "npm:^2.0.0"
   checksum: 10c0/e489435856be239f8cc1120c90a197e4c2865385121908e5edb7223cfdff3768cba18f489adfe0c26955d9e7bbb1fb10625bc2517505908ceb0af848989bd864
+  languageName: node
+  linkType: hard
+
+"@babel/types@npm:^7.25.6":
+  version: 7.25.6
+  resolution: "@babel/types@npm:7.25.6"
+  dependencies:
+    "@babel/helper-string-parser": "npm:^7.24.8"
+    "@babel/helper-validator-identifier": "npm:^7.24.7"
+    to-fast-properties: "npm:^2.0.0"
+  checksum: 10c0/89d45fbee24e27a05dca2d08300a26b905bd384a480448823f6723c72d3a30327c517476389b7280ce8cb9a2c48ef8f47da7f9f6d326faf6f53fd6b68237bdc4
   languageName: node
   linkType: hard
 
@@ -463,7 +485,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@istanbuljs/schema@npm:^0.1.2":
+"@istanbuljs/schema@npm:^0.1.2, @istanbuljs/schema@npm:^0.1.3":
   version: 0.1.3
   resolution: "@istanbuljs/schema@npm:0.1.3"
   checksum: 10c0/61c5286771676c9ca3eb2bd8a7310a9c063fb6e0e9712225c8471c582d157392c88f5353581c8c9adbe0dff98892317d2fdfc56c3499aa42e0194405206a963a
@@ -747,7 +769,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mocha@npm:^10.0.1":
+"@types/mocha@npm:^10, @types/mocha@npm:^10.0.1":
   version: 10.0.7
   resolution: "@types/mocha@npm:10.0.7"
   checksum: 10c0/48a2df4dd02b6e66a11129dca6a23cf0cc3995faf8525286eb851043685bd8b7444780f4bb29a1c42df7559ed63294e5308bfce3a6b862ad2e0359cb21c21329
@@ -816,7 +838,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/vscode@npm:^1.80.0":
+"@types/vscode@npm:^1.80.0, @types/vscode@npm:^1.92.0":
   version: 1.92.0
   resolution: "@types/vscode@npm:1.92.0"
   checksum: 10c0/4c3fc2fbc663568a300eb9ddb8de0179e8e8bf27fcabc240915ac1194ab9e9fd7f0034816c036824cf171b4d4e7e40fa40a3d838e3dd239a9d79fc1f06b85896
@@ -967,6 +989,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@vscode/debugadapter-testsupport@npm:^1.67.0":
+  version: 1.67.0
+  resolution: "@vscode/debugadapter-testsupport@npm:1.67.0"
+  dependencies:
+    "@vscode/debugprotocol": "npm:1.67.0"
+  checksum: 10c0/d1b433862d4e3821582133a3f4108b12be1361b393111581a744f04b10cb8e24b757137cf198064a88c3112b14ca8d15536b0bc3da7f22b8065e19bf8e28f0d8
+  languageName: node
+  linkType: hard
+
 "@vscode/debugadapter@npm:^1.66.0":
   version: 1.66.0
   resolution: "@vscode/debugadapter@npm:1.66.0"
@@ -980,6 +1011,13 @@ __metadata:
   version: 1.66.0
   resolution: "@vscode/debugprotocol@npm:1.66.0"
   checksum: 10c0/80b4186505b09c154d6bb8bd493a6a78b0846414043a15a93e53df0e4e7ff147e21357467fdaeb8a80292345bc221d58a11b282b57ae0c8dca94f060077f73af
+  languageName: node
+  linkType: hard
+
+"@vscode/debugprotocol@npm:1.67.0":
+  version: 1.67.0
+  resolution: "@vscode/debugprotocol@npm:1.67.0"
+  checksum: 10c0/1bad1969c34dce6aa9c547c9579273a53430c9762894aa22a02341aadef1c24c1b7311ac1d7d4684c6c5a27bbde264a9c54192a94d5f2da0a53060e489af4197
   languageName: node
   linkType: hard
 
@@ -3262,6 +3300,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"istanbul-lib-instrument@npm:^6.0.2":
+  version: 6.0.3
+  resolution: "istanbul-lib-instrument@npm:6.0.3"
+  dependencies:
+    "@babel/core": "npm:^7.23.9"
+    "@babel/parser": "npm:^7.23.9"
+    "@istanbuljs/schema": "npm:^0.1.3"
+    istanbul-lib-coverage: "npm:^3.2.0"
+    semver: "npm:^7.5.4"
+  checksum: 10c0/a1894e060dd2a3b9f046ffdc87b44c00a35516f5e6b7baf4910369acca79e506fc5323a816f811ae23d82334b38e3ddeb8b3b331bd2c860540793b59a8689128
+  languageName: node
+  linkType: hard
+
 "istanbul-lib-processinfo@npm:^2.0.2":
   version: 2.0.3
   resolution: "istanbul-lib-processinfo@npm:2.0.3"
@@ -4145,7 +4196,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mocha@npm:^10.2.0":
+"mocha@npm:^10.2.0, mocha@npm:^10.7.3":
   version: 10.7.3
   resolution: "mocha@npm:10.7.3"
   dependencies:
@@ -4362,6 +4413,43 @@ __metadata:
   bin:
     nyc: bin/nyc.js
   checksum: 10c0/ad0da0627b465f9e88f45105416774a04a033096115bcce8de8952fae25b6e3f3b6441ce81a484b7cd1b79c792aee271f68f57cefe9bb6d062720e61f2feed2c
+  languageName: node
+  linkType: hard
+
+"nyc@npm:^17.0.0":
+  version: 17.0.0
+  resolution: "nyc@npm:17.0.0"
+  dependencies:
+    "@istanbuljs/load-nyc-config": "npm:^1.0.0"
+    "@istanbuljs/schema": "npm:^0.1.2"
+    caching-transform: "npm:^4.0.0"
+    convert-source-map: "npm:^1.7.0"
+    decamelize: "npm:^1.2.0"
+    find-cache-dir: "npm:^3.2.0"
+    find-up: "npm:^4.1.0"
+    foreground-child: "npm:^2.0.0"
+    get-package-type: "npm:^0.1.0"
+    glob: "npm:^7.1.6"
+    istanbul-lib-coverage: "npm:^3.0.0"
+    istanbul-lib-hook: "npm:^3.0.0"
+    istanbul-lib-instrument: "npm:^6.0.2"
+    istanbul-lib-processinfo: "npm:^2.0.2"
+    istanbul-lib-report: "npm:^3.0.0"
+    istanbul-lib-source-maps: "npm:^4.0.0"
+    istanbul-reports: "npm:^3.0.2"
+    make-dir: "npm:^3.0.0"
+    node-preload: "npm:^0.2.1"
+    p-map: "npm:^3.0.0"
+    process-on-spawn: "npm:^1.0.0"
+    resolve-from: "npm:^5.0.0"
+    rimraf: "npm:^3.0.0"
+    signal-exit: "npm:^3.0.2"
+    spawn-wrap: "npm:^2.0.0"
+    test-exclude: "npm:^6.0.0"
+    yargs: "npm:^15.0.2"
+  bin:
+    nyc: bin/nyc.js
+  checksum: 10c0/d77033c42ce3fa8159ab1fa547332ce374aafcb46f48d1c15fd515f3c1b9b6d29335147229abd3d8251e78fad7961f2c8cfae3530cda32845f652ab0c81f53ad
   languageName: node
   linkType: hard
 
@@ -6006,9 +6094,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "wollok-debug-adapter@workspace:packages/debug-adapter"
   dependencies:
-    "@types/vscode": "npm:^1.80.0"
+    "@types/mocha": "npm:^10"
+    "@types/vscode": "npm:^1.92.0"
     "@vscode/debugadapter": "npm:^1.66.0"
+    "@vscode/debugadapter-testsupport": "npm:^1.67.0"
     "@vscode/debugprotocol": "npm:^1.66.0"
+    mocha: "npm:^10.7.3"
+    nyc: "npm:^17.0.0"
+    ts-mocha: "npm:^10.0.0"
   languageName: unknown
   linkType: soft
 
@@ -6027,8 +6120,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "wollok-lsp-ide-server@workspace:packages/server"
   dependencies:
+    "@types/mocha": "npm:^10"
+    mocha: "npm:^10.7.3"
     nyc: "npm:^15.1.0"
     rxjs: "npm:^7.8.1"
+    ts-mocha: "npm:^10.0.0"
     vscode-languageserver: "npm:^9.0.1"
     vscode-languageserver-textdocument: "npm:^1.0.11"
     winston: "npm:^3.11.0"
@@ -6052,7 +6148,6 @@ __metadata:
     mocha: "npm:^10.2.0"
     nyc: "npm:^15.1.0"
     sinon: "npm:^15.0.3"
-    ts-mocha: "npm:^10.0.0"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^4.9.5"
     wollok-ts: ../wollok-ts

@@ -17,11 +17,14 @@
     "winston": "^3.11.0"
   },
   "scripts": {
-    "test": "ts-mocha -p tsconfig.json --config ./.mocharc.js",
+    "test": "yarn ts-mocha -p tsconfig.json --config ./.mocharc.js",
     "test-with-coverage": "nyc --reporter=json --lines 70 ts-mocha",
     "test-local-coverage": "nyc --reporter=html --reporter=json --lines 70 ts-mocha"
   },
   "devDependencies": {
-    "nyc": "^15.1.0"
+    "@types/mocha": "^10",
+    "mocha": "^10.7.3",
+    "nyc": "^15.1.0",
+    "ts-mocha": "^10.0.0"
   }
 }

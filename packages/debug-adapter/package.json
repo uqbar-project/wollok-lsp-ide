@@ -9,15 +9,22 @@
     "type": "git",
     "url": "https://github.com/uqbar-project/wollok-lsp-ide"
   },
-  "engines": {
-    "vscode": "^1.80"
+  "scripts": {
+    "test": "yarn ts-mocha --config .mocharc.js",
+    "test-with-coverage": "nyc --reporter=json --lines 70 ts-mocha",
+    "test-local-coverage": "nyc --reporter=html --reporter=json --lines 70 ts-mocha"
   },
   "dependencies": {
     "@vscode/debugadapter": "^1.66.0",
     "@vscode/debugprotocol": "^1.66.0"
   },
   "devDependencies": {
-    "@types/vscode": "^1.80.0"
+    "@types/mocha": "^10",
+    "@types/vscode": "^1.92.0",
+    "@vscode/debugadapter-testsupport": "^1.67.0",
+    "mocha": "^10.7.3",
+    "nyc": "^17.0.0",
+    "ts-mocha": "^10.0.0"
   },
   "main": "./out/index.js"
 }

@@ -1,0 +1,5 @@
+program aWollokProgram {
+  var alpha = "beta"
+  alpha = "gamma"
+  var epsilon = [10, "beta", false]
+}
