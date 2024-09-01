@@ -91,9 +91,9 @@ export class WollokDebugSession extends DebugSession {
       this.sendResponse(response)
       this.moveExecution(() => {
         return this.executionDirector.resume(
-          args.stopOnEntry ? node => container.body.id === node.id : undefined
+          args.stopOnEntry ? node => container.body.sentences[0]?.id === node.id : undefined
         )
-      })
+      }, args.stopOnEntry ? 'entry' : undefined)
     })
   }
 
@@ -108,11 +108,13 @@ export class WollokDebugSession extends DebugSession {
     this.sendResponse(response)
   }
 
-
   protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments, _request?: DebugProtocol.Request): void {
     const breakpointsPackage = this.environment.descendants.find<Package>(function (node): node is Package {
       return node.is(Package) && node.sourceFileName === args.source.path
     })
+
+    this.executionDirector.breakpoints.forEach(this.executionDirector.removeBreakpoint)
+
     if(breakpointsPackage){
       const sentences = breakpointsPackage.descendants.filter<Sentence>(function (node): node is Sentence {
         return node.is(Sentence) && node.parent.is(Body) && args.breakpoints.map(breakpoint => breakpoint.line).includes(node.sourceMap?.start.line)
@@ -141,12 +143,12 @@ export class WollokDebugSession extends DebugSession {
     this.sendResponse(response)
   }
 
-  protected moveExecution(action: () => ExecutionState<unknown>): void{
+  protected moveExecution(action: () => ExecutionState<unknown>, overrideStoppedReason?: string): void{
     const state = action()
     // reset stack state when moving execution
     this.frames.clear()
     this.contexts.clear()
-    const stoppedReason = state.done ? state.error ? 'exception' : 'done' : undefined
+    const stoppedReason = overrideStoppedReason || (state.done ? state.error ? 'exception' : 'done' : 'breakpoint')
     if(!state.done && 'next' in state) {
       this.stoppedNode = state.next
       this.sendEvent(new StoppedEvent(stoppedReason, WollokDebugSession.THREAD_ID))

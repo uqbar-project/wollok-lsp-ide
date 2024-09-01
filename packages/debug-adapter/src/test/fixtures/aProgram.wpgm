@@ -1,5 +1,8 @@
+import pepita.*
+
 program aWollokProgram {
   var alpha = "beta"
+  pepita.fly(10)
   alpha = "gamma"
   var epsilon = [10, "beta", false]
 }

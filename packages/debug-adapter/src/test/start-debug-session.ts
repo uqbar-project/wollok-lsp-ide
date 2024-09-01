@@ -2,6 +2,12 @@ import * as path from 'path'
 import { WollokDebugSession } from '../debug-session'
 import * as fs from 'fs'
 
+/**
+ * In this file the debug session is being launched as an executable
+ * instead of inline (the way it normally launches), which means we
+ * dont have access to the vscode API so we must mock the workspace
+ */
+
 const FIXTURES_ROOT = path.resolve(__dirname, '..', '..', 'src', 'test', 'fixtures')
 
 const wollokFiles = fs
