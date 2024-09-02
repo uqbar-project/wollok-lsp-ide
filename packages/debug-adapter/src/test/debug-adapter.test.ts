@@ -76,37 +76,70 @@ describe('debug adapter', function () {
     })
   })
 
-  describe('stopped display', function () {
+  describe('stopped at breakpoint', function () {
     this.beforeEach(function () {
-      return Promise.all([
-        dc.launch({
-          "stopOnEntry": true,
+      return dc.hitBreakpoint(
+        {
+          "stopOnEntry": false,
           "file": PROGRAM,
           "target": {
             "program": "aWollokProgram",
           },
-        }),
-        dc.configurationDoneRequest(),
-        dc.waitForEvent('stopped', 1000),
-      ])
+        },
+        { line: 5, path: WLK },
+        { column: 5, line: 5, path: WLK },
+        { column: 5, line: 5, path: WLK, verified: true },
+      )
     })
 
-    it('stack trace', async function () {
+    it('should respond stack trace for all frames', async function () {
       const { body } = await dc.stackTraceRequest({ threadId: 1 })
       testStackTrace([
-        { line: 4, column: 3, sourceFile: PROGRAM },
+        { line: 5, column: 5, sourceFile: WLK },
+        { line: 5, column: 14, sourceFile: PROGRAM },
         { line: 3, column: 1, sourceFile: PROGRAM },
       ], body)
+    })
+
+    it('should respond with the scopes for a context', async function () {
+      await dc.stackTraceRequest({ threadId: 1 })
+      const { body: { scopes } } = await dc.scopesRequest({ frameId: 3 }) // first frame
+
+      assert.equal(scopes.length, 3)
+
+      assert.match(scopes[0].name, /.*pepita\.fly\(minutes\)/)
+      assert.match(scopes[1].name, /.*anObject\.pepita/)
+      assert.equal(scopes[2].name, 'root')
+    })
+
+    it('should respond the variables for a scope', async function () {
+      await dc.stackTraceRequest({ threadId: 1 })
+      const { body: { scopes } } = await dc.scopesRequest({ frameId: 3 }) // first frame
+      const expectedVariables = [
+        { scopeId: scopes[0].variablesReference, variables: ['minutes'] },
+        { scopeId: scopes[1].variablesReference, variables: ['energy'] },
+        { scopeId: scopes[2].variablesReference, variables: ['wollok.game.game'] },
+      ]
+
+      await Promise.all(expectedVariables.map(async ({ scopeId: variablesReference, variables: expectedVariables }) => {
+        const { body: { variables: actualVariables } } = await dc.variablesRequest({
+          variablesReference,
+        })
+
+        for(const expectedVariable of expectedVariables){
+          assert(actualVariables.map(variable => variable.name).includes(expectedVariable))
+        }
+      }))
     })
   })
 })
 
 
 function testStackTrace(expected: { line: number, column: number, sourceFile: string }[], actual: DebugProtocol.StackTraceResponse['body'] ){
-  assert.equal(expected.length, actual.totalFrames, `expected ${expected.length} frames but got ${actual.totalFrames}`)
+  assert.equal(actual.totalFrames, expected.length, `expected ${expected.length} frames but got ${actual.totalFrames}`)
   for(let i = 0; i < expected.length; i++){
-    assert.equal(expected[i].column, actual.stackFrames[i].column)
-    assert.equal(expected[i].line, actual.stackFrames[i].line)
-    assert.equal(expected[i].sourceFile, actual.stackFrames[i].source?.path)
+    assert.equal(actual.stackFrames[i].column, expected[i].column)
+    assert.equal(actual.stackFrames[i].line, expected[i].line)
+    assert.equal(actual.stackFrames[i].source?.path, expected[i].sourceFile)
   }
 }

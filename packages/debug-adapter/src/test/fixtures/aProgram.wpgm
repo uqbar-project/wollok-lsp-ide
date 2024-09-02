@@ -1,4 +1,4 @@
-import pepita.*
+import anObject.*
 
 program aWollokProgram {
   var alpha = "beta"
