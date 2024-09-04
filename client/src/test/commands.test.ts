@@ -26,10 +26,10 @@ suite('Should run commands', () => {
       () => runProgram()(['file.program']),
       [
         'run',
-        { quoting: ShellQuoting.Strong, value: 'file.program' },
+        quoted('file.program'),
         '--skipValidations',
         '-p',
-        { quoting: ShellQuoting.Strong, value: folderURI.fsPath }
+        quoted(folderURI.fsPath),
       ],
     )
   })
@@ -41,10 +41,10 @@ suite('Should run commands', () => {
       [ 
         'run', 
         '-g', 
-        { quoting: ShellQuoting.Strong, value: 'file.program' },
+        quoted('file.program'),
         '--skipValidations',
         '-p',
-        { quoting: ShellQuoting.Strong, value: folderURI.fsPath }
+        quoted(folderURI.fsPath),
       ],
     )
   })
@@ -59,14 +59,14 @@ suite('Should run commands', () => {
       [
         'test', 
         '-f',
-        { quoting: ShellQuoting.Strong, value: 'tests.wtest' },
+        quoted('tests.wtest'),
         '-d',
-        { quoting: ShellQuoting.Strong, value: 'tests de pepita' },
+        quoted('tests de pepita'),
         '-t',
-        { quoting: ShellQuoting.Strong, value: 'something' },
+        quoted('something'),
         '--skipValidations',
         '-p',
-        { quoting: ShellQuoting.Strong, value:folderURI.fsPath }
+        { quoting: ShellQuoting.Strong, value:folderURI.fsPath },
       ],
     )
   })
@@ -79,7 +79,7 @@ suite('Should run commands', () => {
         'test', 
         '--skipValidations',
         '-p',
-        { quoting: ShellQuoting.Strong,value:folderURI.fsPath }
+        quoted(folderURI.fsPath)
       ],
     )
   })
@@ -90,12 +90,12 @@ suite('Should run commands', () => {
         startRepl,
         [
           'repl',
-          { quoting: ShellQuoting.Strong,value:pepitaURI.fsPath },
+          quoted(pepitaURI.fsPath),
           '--skipValidations',
           '--darkMode',
           '', // do not open dynamic diagram
           '-p',
-          { quoting: ShellQuoting.Strong,value:folderURI.fsPath },
+          quoted(folderURI.fsPath),
         ],
       )
   })
@@ -124,4 +124,8 @@ function assertCommandSegmentMatches(actual: string | ShellQuotedString, expecte
     assert.equal(actual.value, (expected as ShellQuotedString).value)
     assert.equal(actual.quoting, (expected as ShellQuotedString).quoting)
   }
+}
+
+function quoted(aString: string): ShellQuotedString {
+  return { quoting: ShellQuoting.Strong, value: aString }
 }
