@@ -113,6 +113,7 @@ export class WollokDebugSession extends DebugSession {
       return node.is(Package) && node.sourceFileName === args.source.path
     })
 
+    // ToDo filtrar por package
     this.executionDirector.breakpoints.forEach(this.executionDirector.removeBreakpoint)
 
     if(breakpointsPackage){
@@ -292,7 +293,7 @@ function getValueText(value: RuntimeObject): string {
   if(value.innerValue === null){
     return 'null'
   }
-  switch(value.module.fullyQualifiedName){
+  switch(value.module.fullyQualifiedName) {
     case STRING_MODULE:
       return `"${value.innerString}"`
     case NUMBER_MODULE:
