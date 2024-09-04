@@ -1,10 +1,9 @@
 import * as assert from 'assert'
+import { afterEach, beforeEach } from 'mocha'
 import * as sinon from 'sinon'
-import { ShellExecution,ShellQuotedString, ShellQuoting, Task, Uri, env, workspace } from 'vscode'
+import { ShellExecution, ShellQuotedString, ShellQuoting, Task, Uri, workspace } from 'vscode'
 import { runAllTests, runProgram, runTest, startRepl } from '../commands'
 import { activate, getDocumentURI, getFolderURI } from './helper'
-import { afterEach, beforeEach } from 'mocha'
-import path = require('path')
 
 suite('Should run commands', () => {
   const folderURI = getFolderURI()
@@ -29,7 +28,7 @@ suite('Should run commands', () => {
         { quoting: ShellQuoting.Strong, value: 'file.program' },
         '--skipValidations',
         '-p',
-        { quoting: ShellQuoting.Strong, value: folderURI.fsPath }
+        { quoting: ShellQuoting.Strong, value: folderURI.fsPath },
       ],
     )
   })
@@ -38,13 +37,13 @@ suite('Should run commands', () => {
     return testCommand(
       pepitaURI,
       () => runProgram(true)(['file.program']),
-      [ 
-        'run', 
-        '-g', 
+      [
+        'run',
+        '-g',
         { quoting: ShellQuoting.Strong, value: 'file.program' },
         '--skipValidations',
         '-p',
-        { quoting: ShellQuoting.Strong, value: folderURI.fsPath }
+        { quoting: ShellQuoting.Strong, value: folderURI.fsPath },
       ],
     )
   })
@@ -57,7 +56,7 @@ suite('Should run commands', () => {
       pepitaURI,
       () => runTest(testArgs),
       [
-        'test', 
+        'test',
         '-f',
         { quoting: ShellQuoting.Strong, value: 'tests.wtest' },
         '-d',
@@ -66,7 +65,7 @@ suite('Should run commands', () => {
         { quoting: ShellQuoting.Strong, value: 'something' },
         '--skipValidations',
         '-p',
-        { quoting: ShellQuoting.Strong, value:folderURI.fsPath }
+        { quoting: ShellQuoting.Strong, value:folderURI.fsPath },
       ],
     )
   })
@@ -76,10 +75,10 @@ suite('Should run commands', () => {
       pepitaURI,
       runAllTests,
       [
-        'test', 
+        'test',
         '--skipValidations',
         '-p',
-        { quoting: ShellQuoting.Strong,value:folderURI.fsPath }
+        { quoting: ShellQuoting.Strong, value:folderURI.fsPath },
       ],
     )
   })
@@ -90,12 +89,12 @@ suite('Should run commands', () => {
         startRepl,
         [
           'repl',
-          { quoting: ShellQuoting.Strong,value:pepitaURI.fsPath },
+          { quoting: ShellQuoting.Strong, value:pepitaURI.fsPath },
           '--skipValidations',
           '--darkMode',
           '', // do not open dynamic diagram
           '-p',
-          { quoting: ShellQuoting.Strong,value:folderURI.fsPath },
+          { quoting: ShellQuoting.Strong, value:folderURI.fsPath },
         ],
       )
   })
