@@ -14,6 +14,8 @@ export const codeLenses = (environment: Environment) => (params: CodeLensParams)
       return getProgramCodeLenses(file)
     case TEST_FILE_EXTENSION:
       return getTestCodeLenses(file)
+    case WOLLOK_FILE_EXTENSION:
+      return getWollokFileCodeLenses(file)
     default:
       return null
   }
@@ -38,6 +40,11 @@ export const getTestCodeLenses = (file: Package): CodeLens[] => {
       .map(node => buildTestCodeLens(file, node)),
   ]
 }
+
+export const getWollokFileCodeLenses = (file: Package): CodeLens[] =>
+  file.members.filter(isWollokDefinition).map(definition =>
+    buildLens(definition, COMMAND_START_REPL, 'Run in REPL'),
+  )
 
 /************************************************************************************************/
 /* HELPER FUNCTIONS
