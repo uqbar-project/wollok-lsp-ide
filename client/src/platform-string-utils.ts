@@ -1,5 +1,4 @@
-import path = require('path')
-import { ShellQuotedString, ShellQuoting, env } from 'vscode'
+import { ShellQuotedString, ShellQuoting } from 'vscode'
 
 export function asShellString(string: string): ShellQuotedString {
   return { quoting: ShellQuoting.Strong, value: string }

@@ -1,10 +1,9 @@
 import * as assert from 'assert'
+import { afterEach, beforeEach } from 'mocha'
 import * as sinon from 'sinon'
-import { ShellExecution,ShellQuotedString, ShellQuoting, Task, Uri, env, workspace } from 'vscode'
+import { ShellExecution, ShellQuotedString, ShellQuoting, Task, Uri, workspace } from 'vscode'
 import { runAllTests, runProgram, runTest, startRepl } from '../commands'
 import { activate, getDocumentURI, getFolderURI } from './helper'
-import { afterEach, beforeEach } from 'mocha'
-import path = require('path')
 
 suite('Should run commands', () => {
   const folderURI = getFolderURI()
@@ -38,9 +37,9 @@ suite('Should run commands', () => {
     return testCommand(
       pepitaURI,
       () => runProgram(true)(['file.program']),
-      [ 
-        'run', 
-        '-g', 
+      [
+        'run',
+        '-g',
         quoted('file.program'),
         '--skipValidations',
         '-p',
@@ -57,7 +56,7 @@ suite('Should run commands', () => {
       pepitaURI,
       () => runTest(testArgs),
       [
-        'test', 
+        'test',
         '-f',
         quoted('tests.wtest'),
         '-d',
@@ -76,10 +75,10 @@ suite('Should run commands', () => {
       pepitaURI,
       runAllTests,
       [
-        'test', 
+        'test',
         '--skipValidations',
         '-p',
-        quoted(folderURI.fsPath)
+        quoted(folderURI.fsPath),
       ],
     )
   })
