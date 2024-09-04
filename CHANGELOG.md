@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.3.4
+- Fixes quoting for shell tasks (run, repl, tests, etc.) 🙌
+
 ## v0.3.3
 - Update Wollok-TS 4.1.3 (hotfix) ⬆️
 
