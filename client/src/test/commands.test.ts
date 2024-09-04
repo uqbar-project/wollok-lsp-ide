@@ -1,10 +1,9 @@
 import * as assert from 'assert'
+import { afterEach, beforeEach } from 'mocha'
 import * as sinon from 'sinon'
-import { ShellExecution, Task, Uri, env, workspace } from 'vscode'
+import { ShellExecution, ShellQuotedString, ShellQuoting, Task, Uri, workspace } from 'vscode'
 import { runAllTests, runProgram, runTest, startRepl } from '../commands'
 import { activate, getDocumentURI, getFolderURI } from './helper'
-import { toPosix, toWin, Shell } from '../platform-string-utils'
-import { afterEach, beforeEach } from 'mocha'
 
 suite('Should run commands', () => {
   const folderURI = getFolderURI()
@@ -20,116 +19,112 @@ suite('Should run commands', () => {
     sinon.restore()
   })
 
-  test('run program', async () => {
-    await onWindowsBash(() =>
-      testCommand(
-        pepitaURI,
-        () => runProgram()('file.program'),
-        ` run 'file.program' --skipValidations -p ${expectedPathByShell(
-          'bash',
-          folderURI.fsPath,
-        )}`,
-      ),
+  test('run program', () => {
+    return testCommand(
+      pepitaURI,
+      () => runProgram()(['file.program']),
+      [
+        'run',
+        quoted('file.program'),
+        '--skipValidations',
+        '-p',
+        quoted(folderURI.fsPath),
+      ],
     )
   })
 
-  test('run game', async () => {
-    await onWindowsBash(() =>
-      testCommand(
-        pepitaURI,
-        () => runProgram(true)('file.program'),
-        ` run -g 'file.program' --skipValidations -p ${expectedPathByShell(
-          'bash',
-          folderURI.fsPath,
-        )}`,
-      ),
+  test('run game', () => {
+    return testCommand(
+      pepitaURI,
+      () => runProgram(true)(['file.program']),
+      [
+        'run',
+        '-g',
+        quoted('file.program'),
+        '--skipValidations',
+        '-p',
+        quoted(folderURI.fsPath),
+      ],
     )
   })
 
-  suite('run tests', () => {
-    const SEP = '<SEP>'
-    const testCommandOptions = `-f ${SEP}tests.wtest${SEP} -d ${SEP}tests de pepita${SEP} -t ${SEP}something${SEP}`
+  test('runs tests', () => {
 
     const testArgs: [string, string, string, string] = [null, 'tests.wtest', 'tests de pepita', 'something']
 
-    async function runCommandOnPlatform(
-      platform: string,
-      shell: Shell,
-      expectedCommand: string,
-    ) {
-      sinon.stub(process, 'platform').value(platform)
-      sinon.stub(env, 'shell').value(shell)
-      const separator = shell == 'cmd' ? '"' : '\''
-      await testCommand(
-        pepitaURI,
-        () => runTest(testArgs),
-        ` test ${expectedCommand.replace(new RegExp(SEP, 'g'), separator)} --skipValidations -p ${expectedPathByShell(
-          shell,
-          folderURI.fsPath,
-        )}`,
-      )
-      sinon.restore()
-    }
-
-    test('on Linux', () => runCommandOnPlatform('linux', 'bash', testCommandOptions))
-    test('on Mac', () => runCommandOnPlatform('darwin', 'bash', testCommandOptions))
-    test('on Windows with Command', () => runCommandOnPlatform('win32', 'cmd', testCommandOptions))
-    test('on Windows with Powershell', () => runCommandOnPlatform('win32', 'pwsh', testCommandOptions))
-    test('on Windows with Bash', () =>
-      runCommandOnPlatform('win32', 'bash', testCommandOptions))
-  })
-
-  test('run all tests', async () => {
-    await onWindowsBash(() =>
-      testCommand(
-        pepitaURI,
-        runAllTests,
-        ` test --skipValidations -p ${expectedPathByShell(
-          'bash',
-          folderURI.fsPath,
-        )}`,
-      ),
+    return testCommand(
+      pepitaURI,
+      () => runTest(testArgs),
+      [
+        'test',
+        '-f',
+        quoted('tests.wtest'),
+        '-d',
+        quoted('tests de pepita'),
+        '-t',
+        quoted('something'),
+        '--skipValidations',
+        '-p',
+        { quoting: ShellQuoting.Strong, value:folderURI.fsPath },
+      ],
     )
   })
 
-  test('repl on current file', async () => {
-    await onWindowsBash(() =>
-      testCommand(
+  test('run all tests', () => {
+    return testCommand(
+      pepitaURI,
+      runAllTests,
+      [
+        'test',
+        '--skipValidations',
+        '-p',
+        quoted(folderURI.fsPath),
+      ],
+    )
+  })
+
+  test('repl on current file', () => {
+      return testCommand(
         pepitaURI,
         startRepl,
-        ` repl ${toPosix(
-          pepitaURI.fsPath,
-        )} --skipValidations --darkMode  -p ${expectedPathByShell(
-          'bash',
-          folderURI.fsPath,
-        )}`,
-      ),
-    )
+        [
+          'repl',
+          quoted(pepitaURI.fsPath),
+          '--skipValidations',
+          '--darkMode',
+          '', // do not open dynamic diagram
+          '-p',
+          quoted(folderURI.fsPath),
+        ],
+      )
   })
 })
 
 async function testCommand(
   docUri: Uri,
   command: () => Task,
-  expectedCommand: string,
+  expectedArgs: Array<string | ShellQuotedString>
 ) {
   await activate(docUri)
   const task = command()
   const execution = task.execution as ShellExecution
-  assert.ok(execution.commandLine.endsWith(expectedCommand), `[NOT MATCH]: [${execution.commandLine}] vs. [${expectedCommand}]`)
-}
-
-function expectedPathByShell(cmd: Shell, originalPath: string) {
-  if (['bash', 'zsh'].includes(cmd)) {
-    return toPosix(originalPath)
-  } else {
-    return toWin(originalPath)
+  assert.equal(execution.args.length, expectedArgs.length, `Execution should have ${expectedArgs.length} arguments, but has ${execution.args.length}`)
+  for(let i = 0; i < execution.args.length; i++){
+    assertCommandSegmentMatches(execution.args[i], expectedArgs[i])
   }
 }
 
-async function onWindowsBash(test: () => Promise<any>) {
-  sinon.stub(process, 'platform').value('win32')
-  sinon.stub(env, 'shell').value('bash')
-  await test()
-  sinon.restore()
+
+function assertCommandSegmentMatches(actual: string | ShellQuotedString, expected: string | ShellQuotedString) {
+  assert.equal(typeof actual, typeof expected)
+  if(typeof actual === 'string'){
+    assert.equal(actual, expected)
+  } else {
+    assert.equal(actual.value, (expected as ShellQuotedString).value)
+    assert.equal(actual.quoting, (expected as ShellQuotedString).quoting)
+  }
+}
+
+function quoted(aString: string): ShellQuotedString {
+  return { quoting: ShellQuoting.Strong, value: aString }
 }
