@@ -30,10 +30,10 @@
       "args": [
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceRoot}",
-        "--extensionTestsPath=${workspaceRoot}/client/out/test",
-        "${workspaceRoot}/client/testFixture"
+        "--extensionTestsPath=${workspaceRoot}/packages/client/out/test",
+        "${workspaceRoot}/packages/client/testFixture"
       ],
-      "outFiles": ["${workspaceRoot}/out/client/test/**/*.js"],
+      "outFiles": ["${workspaceRoot}/packages/client/out/test/**/*.js"],
       "preLaunchTask": {
         "type": "npm",
         "script": "watch"

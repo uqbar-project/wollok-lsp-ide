@@ -21,6 +21,7 @@ contributing.md
 packages/client/out/test/**
 packages/client/out/testFixture/**
 packages/server/out/test/**
+packages/debug-adapter/out/test/**
 
 # node_modules, except by vscode and needed dependencies
 packages/client/node_modules/**
