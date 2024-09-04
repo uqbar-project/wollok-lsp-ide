@@ -113,8 +113,11 @@ export class WollokDebugSession extends DebugSession {
       return node.is(Package) && node.sourceFileName === args.source.path
     })
 
-    // ToDo filtrar por package
-    this.executionDirector.breakpoints.forEach(this.executionDirector.removeBreakpoint)
+    this.executionDirector.breakpoints.forEach(breakpointedNode => {
+      if(breakpointedNode.sourceFileName === breakpointsPackage.sourceFileName) {
+        this.executionDirector.removeBreakpoint(breakpointedNode)
+      }
+    })
 
     if(breakpointsPackage){
       const sentences = breakpointsPackage.descendants.filter<Sentence>(function (node): node is Sentence {
@@ -146,9 +149,11 @@ export class WollokDebugSession extends DebugSession {
 
   protected moveExecution(action: () => ExecutionState<unknown>, overrideStoppedReason?: string): void{
     const state = action()
+
     // reset stack state when moving execution
     this.frames.clear()
     this.contexts.clear()
+
     const stoppedReason = overrideStoppedReason || (state.done ? state.error ? 'exception' : 'done' : 'breakpoint')
     if(!state.done && 'next' in state) {
       this.stoppedNode = state.next
