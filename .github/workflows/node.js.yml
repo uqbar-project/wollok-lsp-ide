@@ -55,8 +55,7 @@ jobs:
     - name: Generate VSIX file
       if: matrix.os == 'ubuntu-latest' && github.ref == 'refs/heads/master'
       run: |
-        npm i -g vsce
-        vsce package
+        yarn package
     - name: Add VSIX to the latest release
       if: matrix.os == 'ubuntu-latest' && github.ref == 'refs/heads/master'
       uses: "marvinpinto/action-automatic-releases@latest"

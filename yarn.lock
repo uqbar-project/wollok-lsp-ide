@@ -6150,20 +6150,20 @@ __metadata:
     sinon: "npm:^15.0.3"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^4.9.5"
-    wollok-ts: ../wollok-ts
+    wollok-ts: "npm:4.1.6"
   languageName: unknown
   linkType: soft
 
-"wollok-ts@file:../wollok-ts::locator=wollok-lsp-ide%40workspace%3A.":
-  version: 4.1.4
-  resolution: "wollok-ts@file:../wollok-ts#../wollok-ts::hash=afb628&locator=wollok-lsp-ide%40workspace%3A."
+"wollok-ts@npm:4.1.6":
+  version: 4.1.6
+  resolution: "wollok-ts@npm:4.1.6"
   dependencies:
     "@types/parsimmon": "npm:^1.10.8"
     parsimmon: "npm:^1.18.1"
     prettier-printer: "npm:^1.1.4"
     unraw: "npm:^3.0.0"
     uuid: "npm:^9.0.1"
-  checksum: 10c0/b27f55998674fe63db7a78fec513f521c0fa12f8ff381833b66771030943b9af30e6f1f84ecbaec83043361706b859a9dd43abca96bdbc21f5dfc6f89cdb7a3f
+  checksum: 10c0/2248c12858540699ce9c58b6e22255d2dd685ef0ae1c32ca023cc0a7c9d8489057a5b0600c0291e4f45cb831dc4c7ccd43de73b4c041b8569300d66c0c7bbbcf
   languageName: node
   linkType: hard
 

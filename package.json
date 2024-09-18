@@ -315,7 +315,7 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "wollok-ts": "../wollok-ts"
+    "wollok-ts": "4.1.6"
   },
   "devDependencies": {
     "@types/expect": "^24.3.0",

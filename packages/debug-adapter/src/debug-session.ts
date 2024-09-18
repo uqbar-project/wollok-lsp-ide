@@ -267,9 +267,27 @@ export class WollokDebugSession extends DebugSession {
   private buildVariableFromRuntimeObject(reference: string, object: RuntimeObject): Variable {
     return {
       name: reference,
-      value: getValueText(object),
+      value: getLabel(object) ?? 'undefined',
       variablesReference: object.locals.size > 0 || object.innerCollection?.length > 0 ? this.contexts.getIdFor(object) : 0,
     }
+  }
+}
+
+function getLabel(value: RuntimeObject): string {
+  if(value.innerValue === null){
+    return 'null'
+  }
+  switch(value.module.fullyQualifiedName) {
+    case STRING_MODULE:
+      return `"${value.innerString}"`
+    case NUMBER_MODULE:
+      return value.innerNumber.toString()
+    case BOOLEAN_MODULE:
+      return value.innerBoolean ? 'true' : 'false'
+    case LIST_MODULE:
+      return `[${value.innerCollection.map(elem => getLabel(elem)).join(', ')}]`
+    default:
+      return value.description
   }
 }
 
@@ -289,25 +307,5 @@ class WollokIdMap<T extends { id: string }> extends Map<number, T> {
     const newId = this.size + 1
     this.set(newId, elem)
     return newId
-  }
-}
-
-
-// ToDo usar las nuevas funciones de dodain o mover esto a ts?
-function getValueText(value: RuntimeObject): string {
-  if(value.innerValue === null){
-    return 'null'
-  }
-  switch(value.module.fullyQualifiedName) {
-    case STRING_MODULE:
-      return `"${value.innerString}"`
-    case NUMBER_MODULE:
-      return value.innerNumber.toString()
-    case BOOLEAN_MODULE:
-      return value.innerBoolean ? 'true' : 'false'
-    case LIST_MODULE:
-      return `[${value.innerCollection.map(elem => getValueText(elem)).join(', ')}]`
-    default:
-      return value.description
   }
 }
