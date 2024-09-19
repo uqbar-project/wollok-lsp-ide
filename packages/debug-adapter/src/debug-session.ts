@@ -1,9 +1,12 @@
 import { DebugSession, InitializedEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread, Variable } from '@vscode/debugadapter'
 import { DebugProtocol } from '@vscode/debugprotocol'
+import path = require('path')
 import * as vscode from 'vscode'
 import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, Environment, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, is, LIST_MODULE, Node, NUMBER_MODULE, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
 export class WollokDebugSession extends DebugSession {
   protected static readonly THREAD_ID = 1
+  protected static WOLLOK_PATH_SEPARATOR = '/'
+
   protected interpreter: DirectedInterpreter
   protected environment: Environment
   protected executionDirector: ExecutionDirector<unknown>
@@ -38,13 +41,14 @@ export class WollokDebugSession extends DebugSession {
     // initialize wollok interpreter
     const debuggableFileExtensions = [WOLLOK_FILE_EXTENSION, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION]
     this.workspace.findFiles(`**/*.{${debuggableFileExtensions.join(',')}}`).then(async files => {
-      this.environment = buildEnvironment(
-        await Promise.all(files.map(file =>
-          new Promise<FileContent>(resolve => this.workspace.openTextDocument(file).then(textDocument => {
-            resolve({ name: file.fsPath, content: textDocument.getText() })
-          }))
-        ))
-      )
+      const wollokPackages = await Promise.all(files.map(file =>
+
+        new Promise<FileContent>(resolve => this.workspace.openTextDocument(file).then(textDocument => {
+          resolve({ name: this.toWollokPath(textDocument.uri.fsPath), content: textDocument.getText() })
+        }))
+      ))
+
+      this.environment = buildEnvironment(wollokPackages, undefined)
       this.interpreter = executionFor(this.environment)
       this.sendResponse(response)
       this.sendEvent(new InitializedEvent())
@@ -52,7 +56,7 @@ export class WollokDebugSession extends DebugSession {
   }
 
   protected launchRequest(response: DebugProtocol.LaunchResponse, args: WollokLaunchArguments, _request?: DebugProtocol.Request): void {
-    const containerPackage = this.environment.descendants.filter<Package>(is(Package)).find(pkg => pkg.sourceFileName === args.file)
+    const containerPackage = this.environment.descendants.filter<Package>(is(Package)).find(pkg => pkg.sourceFileName === this.toWollokPath(args.file))
 
     if(!containerPackage){
       this.sendErrorResponse(response, 404, 'Could not find target file')
@@ -109,8 +113,9 @@ export class WollokDebugSession extends DebugSession {
   }
 
   protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments, _request?: DebugProtocol.Request): void {
+    const sourcePath = this.toWollokPath(args.source.path)
     const breakpointsPackage = this.environment.descendants.find<Package>(function (node): node is Package {
-      return node.is(Package) && node.sourceFileName === args.source.path
+      return node.is(Package) && node.sourceFileName === sourcePath
     })
 
     this.executionDirector.breakpoints.forEach(breakpointedNode => {
@@ -134,7 +139,7 @@ export class WollokDebugSession extends DebugSession {
             column: sentence.sourceMap.start.column,
             endColumn: sentence.sourceMap.end.column,
             endLine: sentence.sourceMap.end.line,
-            source: new Source(sentence.sourceFileName.split('/').pop()!, sentence.sourceFileName),
+            source: new Source(sentence.sourceFileName.split('/').pop()!, this.toClientPath(sentence.sourceFileName)),
           })
         ),
 
@@ -211,7 +216,7 @@ export class WollokDebugSession extends DebugSession {
       endLine: currentNode.sourceMap?.end.line,
       source: !!currentNode.sourceFileName && new Source(
           currentNode.sourceFileName.split('/').pop()!,
-          currentNode.sourceFileName,
+          this.toClientPath(currentNode.sourceFileName),
       ),
     }
   }
@@ -227,6 +232,14 @@ export class WollokDebugSession extends DebugSession {
       })),
     }
     this.sendResponse(response)
+  }
+
+  protected toWollokPath(aPath: string): string {
+    return aPath.replace(new RegExp( '\\' + path.sep, 'g'), WollokDebugSession.WOLLOK_PATH_SEPARATOR)
+  }
+
+  protected toClientPath(aWollokPath: string): string {
+    return aWollokPath.replace(new RegExp( '\\' + WollokDebugSession.WOLLOK_PATH_SEPARATOR, 'g'), path.sep)
   }
 
   protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments, _request?: DebugProtocol.Request): void {
