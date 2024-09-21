@@ -3,7 +3,8 @@
 
 # Wollok IDE
 
-[![Node.js CI](https://github.com/uqbar-project/wollok-lsp-ide/actions/workflows/node.js.yml/badge.svg)](https://github.com/uqbar-project/wollok-lsp-ide/actions/workflows/node.js.yml)&nbsp;&nbsp;![server label](https://img.shields.io/badge/server-red) [![server coverage](https://codecov.io/gh/uqbar-project/wollok-lsp-ide/branch/master/graph/badge.svg?token=OT11UZ38OM&flag=lsp-ide-server)](https://codecov.io/gh/uqbar-project/wollok-lsp-ide)&nbsp;&nbsp;![server label](https://img.shields.io/badge/client-blue) [![client coverage](https://codecov.io/gh/uqbar-project/wollok-lsp-ide/branch/master/graph/badge.svg?token=OT11UZ38OM&flag=lsp-ide-client)](https://codecov.io/gh/uqbar-project/wollok-lsp-ide) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Version](https://vsmarketplacebadges.dev/version/uqbar.wollok-lsp-ide.svg)](https://vsmarketplacebadges.dev/version/uqbar.wollok-lsp-ide.svg) [![Node.js CI](https://github.com/uqbar-project/wollok-lsp-ide/actions/workflows/node.js.yml/badge.svg)](https://github.com/uqbar-project/wollok-lsp-ide/actions/workflows/node.js.yml)&nbsp;&nbsp;![server label](https://img.shields.io/badge/server-red) [![server coverage](https://codecov.io/gh/uqbar-project/wollok-lsp-ide/branch/master/graph/badge.svg?token=OT11UZ38OM&flag=lsp-ide-server)](https://codecov.io/gh/uqbar-project/wollok-lsp-ide)&nbsp;&nbsp;![server label](https://img.shields.io/badge/client-blue) [![client coverage](https://codecov.io/gh/uqbar-project/wollok-lsp-ide/branch/master/graph/badge.svg?token=OT11UZ38OM&flag=lsp-ide-client)](https://codecov.io/gh/uqbar-project/wollok-lsp-ide) [![Installs](https://vsmarketplacebadges.dev/installs-short/uqbar.wollok-lsp-ide.svg)](https://vsmarketplacebadges.dev/installs-short/uqbar.wollok-lsp-ide.svg) ![GitHub License](https://img.shields.io/github/license/uqbar-project/wollok-lsp-ide)
+
 
 Starting from [LSP sample code](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide) for Visual Studio Code, we developed a couple of tools for Wollok using Language Server Protocol (for Visual Studio Code, IntelliJ, Eclipse, Atom, etc.)
 
@@ -29,7 +30,7 @@ Here you can see how to develop a Wollok example using autocompletion tools. Onc
 Do you want to contribute? Great, you are always welcome!
 
 - See [installation instructions for developers](https://github.com/uqbar-project/wollok-lsp-ide/wiki/Development-Environment)
-- You can also [join the Discord channel!](https://discord.gg/MWK9fafk)
+- You can also [join the Discord channel!](https://discord.gg/ZstgCPKEaa)
 - There's a list of [good first issues](https://github.com/uqbar-project/wollok-lsp-ide/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) to tackle, but in case of any hesitation you can always ping @PalumboN or @fdodino
 - Additional info is available at the [wiki](https://github.com/uqbar-project/wollok-lsp-ide/wiki)
 
