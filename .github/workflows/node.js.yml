@@ -26,7 +26,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: yarn
-    - run: yarn compile
+    - run: yarn compile-tests
     - name: Run e2e test
       if: matrix.os != 'ubuntu-latest'
       uses: coactions/setup-xvfb@v1

@@ -1,5 +1,5 @@
 import { expect } from 'expect'
-import sinon from 'sinon'
+import * as sinon from 'sinon'
 import { TimeMeasurer } from '../time-measurer'
 import { logger } from '../utils/logger'
 

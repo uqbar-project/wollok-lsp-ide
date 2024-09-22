@@ -4,7 +4,7 @@
 //  * ------------------------------------------------------------------------------------------ */
 import * as path from 'path'
 import * as Mocha from 'mocha'
-import * as glob from 'glob'
+import { glob } from 'glob'
 import * as NYC from 'nyc'
 import 'ts-node/register'
 import 'source-map-support/register'
@@ -29,7 +29,6 @@ export async function run(): Promise<void> {
 
 export async function initCoverage(): Promise<NYC> {
   const nyc = new NYC({
-    cwd: path.join(__dirname, '..', '..', '..'),
     reporter: ['json'],
     all: true,
     silent: false,
@@ -37,9 +36,9 @@ export async function initCoverage(): Promise<NYC> {
     hookRequire: true,
     hookRunInContext: true,
     hookRunInThisContext: true,
-    reportDir: 'client/coverage',
-    include: ['client/out/**/*.js', 'client/out/**/*.ts'],
-    exclude: ['client/out/test/**'],
+    reportDir: 'packages/client/coverage',
+    include: ['out/client/**/*.js', 'out/client/**/*.ts'],
+    exclude: ['out/client/test/**'],
   })
   await nyc.reset()
   await nyc.wrap()
@@ -66,11 +65,7 @@ async function runTests(): Promise<void> {
   const testsRoot = __dirname
 
   return new Promise((resolve, reject) => {
-    glob('**.test.js', { cwd: testsRoot }, (err, files) => {
-      if (err) {
-        return reject(err)
-      }
-
+    glob('**.test.js', { cwd: testsRoot }).then(files => {
       // Add files to the test suite
       files.forEach((file) => mocha.addFile(path.resolve(testsRoot, file)))
 
@@ -87,7 +82,7 @@ async function runTests(): Promise<void> {
         console.error(err)
         reject(err)
       }
-    })
+    }).catch(reject)
   })
 }
 

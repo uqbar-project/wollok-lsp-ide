@@ -8,7 +8,7 @@ import * as fs from 'fs'
  * dont have access to the vscode API so we must mock the workspace
  */
 
-const FIXTURES_ROOT = path.resolve(__dirname, '..', '..', 'src', 'test', 'fixtures')
+const FIXTURES_ROOT = path.resolve(__dirname, '../../../../packages/debug-adapter/src/test/fixtures')
 
 const wollokFiles = fs
   .readdirSync(FIXTURES_ROOT)

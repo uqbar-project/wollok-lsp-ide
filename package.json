@@ -27,7 +27,7 @@
     "objects",
     "learning"
   ],
-  "icon": "images/wollokIdeLogo.png",
+  "icon": "images/extension/wollokIdeLogo.png",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -46,7 +46,7 @@
     },
     "hoverProvider": true
   },
-  "main": "./packages/client/out/extension",
+  "main": "./dist/client/src/extension",
   "contributes": {
     "menus": {
       "editor/title/run": [
@@ -67,8 +67,8 @@
       {
         "id": "wollok",
         "icon": {
-          "dark": "./images/wollokFile.png",
-          "light": "./images/wollokFile.png"
+          "dark": "./images/extension/wollokFile.png",
+          "light": "./images/extension/wollokFile.png"
         },
         "aliases": [
           "Wollok",
@@ -300,39 +300,36 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn compile",
-    "compile": "tsc -b",
-    "watch": "tsc -b -w",
+    "check-types": "tsc --noEmit",
+    "compile": "yarn check-types && node esbuild.js",
+    "compile-tests": "tsc --outDir out",
+    "watch": "npm-run-all --parallel watch:*",
+    "watch:esbuild": "yarn node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "lint": "yarn workspaces foreach -A run eslint . --fix",
     "lint:fix": "cd client && eslint . --fix && cd ../server && eslint . --fix && cd ..",
-    "test": "yarn test:e2e && yarn test:unit",
-    "test:e2e": "yarn lint && yarn compile && sh ./scripts/e2e.sh",
-    "test-with-coverage:e2e": "yarn lint && yarn compile && env COVERAGE=true sh ./scripts/e2e.sh",
+    "test": "yarn compile-tests && yarn test:e2e && yarn test:unit",
+    "test:e2e": "yarn lint && yarn compile-tests && sh ./scripts/e2e.sh",
+    "test-with-coverage:e2e": "yarn lint && yarn compile-tests && env COVERAGE=true sh ./scripts/e2e.sh",
     "test:unit": "yarn workspaces foreach -Rpt --from '{wollok-lsp-ide-server,wollok-debug-adapter}' run test",
     "test-with-coverage:unit": "yarn workspaces foreach -Rpt --from '{wollok-lsp-ide-server,wollok-debug-adapter}' run test-with-coverage",
     "test-local-coverage:unit": "yarn workspaces foreach -Rpt --from '{wollok-lsp-ide-server,wollok-debug-adapter}' run test-local-coverage",
     "prepare": "husky install",
-    "package": "vsce package --no-dependencies",
+    "bundle": "yarn check-types && yarn node esbuild.js --production",
+    "package": "yarn bundle && vsce package --no-dependencies",
     "lint-staged": "lint-staged"
   },
-  "dependencies": {
-    "wollok-ts": "4.1.6"
-  },
   "devDependencies": {
-    "@types/expect": "^24.3.0",
-    "@types/mocha": "^10.0.1",
-    "@types/node": "^18.14.1",
-    "@types/sinon": "^10.0.13",
     "@typescript-eslint/eslint-plugin": "^5.53.0",
     "@typescript-eslint/parser": "^5.53.0",
     "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.23.1",
     "eslint": "^8.35.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.1.2",
-    "mocha": "^10.2.0",
-    "nyc": "^15.1.0",
-    "sinon": "^15.0.3",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.5"
+    "typescript": "^4.9.5",
+    "yarn-run-all": "^3.1.1"
   },
   "packageManager": "yarn@4.4.0"
 }

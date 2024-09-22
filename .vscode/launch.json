@@ -1,6 +1,12 @@
 // A launch configuration that compiles the extension and then opens it inside a new window
 {
   "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "Client + Server",
+      "configurations": ["Launch Client", "Attach to Server"]
+    }
+  ],
   "configurations": [
     {
       "type": "extensionHost",
@@ -8,7 +14,7 @@
       "name": "Launch Client",
       "runtimeExecutable": "${execPath}",
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
-      "outFiles": ["${workspaceFolder}/**/out/**/*.js"],
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "preLaunchTask": {
         "type": "npm",
         "script": "compile"
@@ -20,7 +26,7 @@
       "name": "Attach to Server",
       "port": 6009,
       "restart": true,
-      "outFiles": ["${workspaceFolder}/**/out/*.js"]
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
       "name": "Language Server E2E Test",
@@ -30,20 +36,14 @@
       "args": [
         "--disable-extensions",
         "--extensionDevelopmentPath=${workspaceRoot}",
-        "--extensionTestsPath=${workspaceRoot}/packages/client/out/test",
+        "--extensionTestsPath=${workspaceRoot}/out/client/src/test/index",
         "${workspaceRoot}/packages/client/testFixture"
       ],
-      "outFiles": ["${workspaceRoot}/packages/client/out/test/**/*.js"],
+      "outFiles": ["${workspaceRoot}/out/**/*.js"],
       "preLaunchTask": {
         "type": "npm",
-        "script": "watch"
+        "script": "compile-tests"
       }
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Client + Server",
-      "configurations": ["Launch Client", "Attach to Server"]
     }
   ]
 }

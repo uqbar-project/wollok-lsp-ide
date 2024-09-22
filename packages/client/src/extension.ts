@@ -24,15 +24,13 @@ import {
 import { subscribeWollokCommands } from './commands'
 import { wollokLSPExtensionId } from './shared-definitions'
 import { allWollokFiles } from './utils'
-import { WollokDebugAdapterFactory, WollokDebugConfigurationProvider } from 'wollok-debug-adapter'
+import { WollokDebugAdapterFactory, WollokDebugConfigurationProvider } from '../../debug-adapter/src/index'
 
 let client: LanguageClient
 
 export function activate(context: ExtensionContext): void {
   // The server is implemented in node
-  const serverModule = context.asAbsolutePath(
-    path.join('packages', 'server', 'out', 'server.js'),
-  )
+  const serverModule = path.join(__dirname, '../..', 'server', 'src', 'server.js')
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
   const debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] }

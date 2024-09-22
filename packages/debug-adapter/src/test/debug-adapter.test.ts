@@ -3,7 +3,7 @@ import { DebugClient } from '@vscode/debugadapter-testsupport'
 import * as assert from 'node:assert'
 import { DebugProtocol } from '@vscode/debugprotocol'
 
-const DEBUG_ADAPTER = path.resolve('out/test/start-debug-session.js')
+const DEBUG_ADAPTER = path.resolve(__dirname, '../../../../out/debug-adapter/src/test/start-debug-session.js')
 const FIXTURES_ROOT = path.resolve(__dirname, 'fixtures')
 const PROGRAM = path.resolve(FIXTURES_ROOT, 'aProgram.wpgm')
 const WLK = path.resolve(FIXTURES_ROOT, 'anObject.wlk')

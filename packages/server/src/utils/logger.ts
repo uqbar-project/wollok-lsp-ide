@@ -1,13 +1,13 @@
-import winston, { format } from 'winston'
+import * as winston from 'winston'
 
-export const consoleFormat = format.printf(info => info.message + (info.timeElapsed ? ` | ${info.timeElapsed} ms` : ''))
+export const consoleFormat = winston.format.printf(info => info.message + (info.timeElapsed ? ` | ${info.timeElapsed} ms` : ''))
 
-export const ignorePrivate = format(info => {
+export const ignorePrivate = winston.format(info => {
   if (info.private) return false
   return info
 })
 
-export const removePrivate = format(info => {
+export const removePrivate = winston.format(info => {
   delete info.private
   return info
 })
@@ -21,11 +21,11 @@ export const logger = winston.createLogger({
       {
         filename: 'log/wollok.log',
         maxsize: 1000000,
-        format: format.combine(
+        format: winston.format.combine(
           ignorePrivate(),
           removePrivate(),
-          format.timestamp(),
-          format.json(),
+          winston.format.timestamp(),
+          winston.format.json(),
         ),
       },
     ),
