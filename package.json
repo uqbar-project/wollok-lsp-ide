@@ -46,7 +46,7 @@
     },
     "hoverProvider": true
   },
-  "main": "./dist/client/src/extension",
+  "main": "./out/client/src/extension",
   "contributes": {
     "menus": {
       "editor/title/run": [
@@ -96,7 +96,7 @@
         "languages": [
           "wollok"
         ],
-        "program": "./client/out/debug-adapter/index.js",
+        "program": "./out/debug-adapter/src/index.js",
         "runtime": "node",
         "configurationAttributes": {
           "launch": {
@@ -299,24 +299,24 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "yarn compile",
     "check-types": "tsc --noEmit",
-    "compile": "yarn check-types && node esbuild.js",
-    "compile-tests": "tsc --outDir out",
+    "compile": "rimraf ./out && yarn check-types && yarn node esbuild.js",
+    "compile-tests": "rimraf ./out && tsc --outDir out",
     "watch": "npm-run-all --parallel watch:*",
     "watch:esbuild": "yarn node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "lint": "yarn workspaces foreach -A run eslint . --fix",
     "lint:fix": "cd client && eslint . --fix && cd ../server && eslint . --fix && cd ..",
     "test": "yarn compile-tests && yarn test:e2e && yarn test:unit",
-    "test:e2e": "yarn lint && yarn compile-tests && sh ./scripts/e2e.sh",
+    "test:e2e": "yarn lint && sh ./scripts/e2e.sh",
     "test-with-coverage:e2e": "yarn lint && yarn compile-tests && env COVERAGE=true sh ./scripts/e2e.sh",
     "test:unit": "yarn workspaces foreach -Rpt --from '{wollok-lsp-ide-server,wollok-debug-adapter}' run test",
     "test-with-coverage:unit": "yarn workspaces foreach -Rpt --from '{wollok-lsp-ide-server,wollok-debug-adapter}' run test-with-coverage",
     "test-local-coverage:unit": "yarn workspaces foreach -Rpt --from '{wollok-lsp-ide-server,wollok-debug-adapter}' run test-local-coverage",
-    "prepare": "husky install",
-    "bundle": "yarn check-types && yarn node esbuild.js --production",
+    "bundle": "yarn compile -- --production",
     "package": "yarn bundle && vsce package --no-dependencies",
+    "vscode:prepublish": "yarn bundle",
+    "prepare": "husky install",
     "lint-staged": "lint-staged"
   },
   "devDependencies": {
@@ -327,6 +327,7 @@
     "eslint": "^8.35.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.1.2",
+    "rimraf": "^6.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.5",
     "yarn-run-all": "^3.1.1"

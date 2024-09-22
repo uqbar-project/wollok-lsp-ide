@@ -15,7 +15,7 @@ async function main() {
     sourcemap: !production,
     sourcesContent: false,
     platform: 'node',
-    outdir: 'dist',
+    outdir: 'out',
     outbase: 'packages',
     external: ['vscode'],
     logLevel: 'silent',

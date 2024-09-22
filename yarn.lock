@@ -7179,6 +7179,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rimraf@npm:^6.0.1":
+  version: 6.0.1
+  resolution: "rimraf@npm:6.0.1"
+  dependencies:
+    glob: "npm:^11.0.0"
+    package-json-from-dist: "npm:^1.0.0"
+  bin:
+    rimraf: dist/esm/bin.mjs
+  checksum: 10c0/b30b6b072771f0d1e73b4ca5f37bb2944ee09375be9db5f558fcd3310000d29dfcfa93cf7734d75295ad5a7486dc8e40f63089ced1722a664539ffc0c3ece8c6
+  languageName: node
+  linkType: hard
+
 "run-parallel@npm:^1.1.9":
   version: 1.2.0
   resolution: "run-parallel@npm:1.2.0"
@@ -8629,6 +8641,7 @@ __metadata:
     eslint: "npm:^8.35.0"
     husky: "npm:^8.0.3"
     lint-staged: "npm:^13.1.2"
+    rimraf: "npm:^6.0.1"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^4.9.5"
     yarn-run-all: "npm:^3.1.1"
