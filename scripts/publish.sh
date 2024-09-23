@@ -26,5 +26,5 @@ fi
 
 echo "Everything ok. Publishing $TAG in Marketplace..."
 npm i -g vsce
-vsce publish
+vsce publish --no-dependencies
 echo "Check new version in https://marketplace.visualstudio.com/manage/publishers/uqbar"

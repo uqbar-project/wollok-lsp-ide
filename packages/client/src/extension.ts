@@ -4,12 +4,15 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path'
+import * as vscode from 'vscode'
 import {
   ExtensionContext,
-  workspace,
+  FileDeleteEvent,
+  FileRenameEvent,
+  StatusBarAlignment,
   languages,
   window,
-  StatusBarAlignment,
+  workspace,
 } from 'vscode'
 import {
   LanguageClient,
@@ -19,16 +22,15 @@ import {
   WorkDoneProgress,
 } from 'vscode-languageclient/node'
 import { subscribeWollokCommands } from './commands'
-import { allWollokFiles } from './utils'
 import { wollokLSPExtensionId } from './shared-definitions'
+import { allWollokFiles } from './utils'
+import { WollokDebugAdapterFactory, WollokDebugConfigurationProvider } from '../../debug-adapter/src/index'
 
 let client: LanguageClient
 
 export function activate(context: ExtensionContext): void {
   // The server is implemented in node
-  const serverModule = context.asAbsolutePath(
-    path.join('server', 'out', 'server.js'),
-  )
+  const serverModule = path.join(__dirname, '../..', 'server', 'src', 'server.js')
   // The debug options for the server
   // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
   const debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] }
@@ -58,6 +60,12 @@ export function activate(context: ExtensionContext): void {
   // Subscribe Wollok Commands
   subscribeWollokCommands(context)
 
+
+  // Subscribe Wollok Debug Adapter
+  const debuggerFactory = new WollokDebugAdapterFactory(context, vscode.workspace)
+  context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('wollok', new WollokDebugConfigurationProvider()))
+	context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('wollok', debuggerFactory))
+
   // Create the language client and start the client.
   client = new LanguageClient(
     wollokLSPExtensionId,
@@ -81,8 +89,10 @@ export function activate(context: ExtensionContext): void {
   })
 
   // Force environment to restart
-  const revalidateWorskpace = (_event) => {
-    const pathForChange = (file) => file.oldUri?.fsPath ?? file.fsPath
+
+  type CriticalFileChangeEvent = FileDeleteEvent | FileRenameEvent
+  const revalidateWorskpace = (_event: CriticalFileChangeEvent) => {
+    const pathForChange = (file: CriticalFileChangeEvent['files'][number]) => 'oldUri' in file ? file.oldUri.fsPath : file.fsPath
     return client.sendRequest(`STRONG_FILES_CHANGED:${_event.files.map(pathForChange).join(',')}`).then(validateWorkspace)
   }
 
@@ -99,7 +109,8 @@ export function deactivate(): Thenable<void> | undefined {
 
 async function validateWorkspace() {
   const uris = await allWollokFiles()
-  await client.sendRequest(`WORKSPACE_URI:${workspace.workspaceFolders[0].uri}`)
+  // ToDo check workspaceFolders for undefined and length
+  await client.sendRequest(`WORKSPACE_URI:${workspace.workspaceFolders![0].uri}`)
   for (const uri of uris) {
     // Force 'change' on document for server tracking
     const textDoc = await workspace.openTextDocument(uri)

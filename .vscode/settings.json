@@ -1,9 +1,14 @@
 {
-	"typescript.tsc.autoDetect": "off",
-	"typescript.preferences.quoteStyle": "single",
-	"typescript.tsdk": "node_modules/typescript/lib",
-	"editor.tabSize": 2,
-	"editor.insertSpaces": true,
-	"editor.detectIndentation": false,
-  "debug.javascript.usePreview": true
+  "typescript.tsc.autoDetect": "off",
+  "typescript.preferences.quoteStyle": "single",
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "debug.javascript.usePreview": true,
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  },
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

@@ -12,25 +12,32 @@
 **/.gitignore
 **/scripts
 contributing.md
+.nyc_output
+.nvmrc
+.eslintignore
+.lintstagedrc.json
+
+# images
+images/other
 
 # ts files are deployed as compiled js
 **/*.ts
 **/*.map
 
-# no tests needed
-client/out/test/**
-client/out/testFixture/**
-server/out/test/**
+# packages are bundled, therefore we don't need them
+packages
 
-# node_modules, except by vscode and needed dependencies
-client/node_modules/**
-!client/node_modules/vscode-jsonrpc/**
-!client/node_modules/vscode-languageclient/**
-!client/node_modules/vscode-languageserver-protocol/**
-!client/node_modules/vscode-languageserver-types/**
-!client/node_modules/{minimatch,brace-expansion,concat-map,balanced-match}/**
-!client/node_modules/{semver,lru-cache,yallist}/**
+# ignore tsc compiled code (tests)
+out
+
+# package manager (yarn)
+.yarn
+.pnp.*
+.yarnrc.yml
+node_modules
 
 # wollok logging
-wollok.log
+**/wollok.log
 
+# esbuild
+esbuild.js

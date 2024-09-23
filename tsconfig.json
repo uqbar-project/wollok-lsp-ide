@@ -3,26 +3,17 @@
     "module": "commonjs",
     "target": "es2017",
     "outDir": "out",
-    "rootDir": "src",
+    "rootDir": "packages",
     "sourceMap": true,
     "lib": ["esNext"],
     "declaration": true,
-    "strict": true,
+    "strict": false,
     "removeComments": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "esModuleInterop": true,
+    "esModuleInterop": false,
     "experimentalDecorators": true,
     "skipLibCheck": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", ".vscode-test"],
-  "references": [
-    {
-      "path": "./client"
-    },
-    {
-      "path": "./server"
-    }
-  ]
+  "exclude": ["node_modules", ".vscode-test", "out"]
 }

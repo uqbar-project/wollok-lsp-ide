@@ -1,0 +1,32 @@
+{
+  "name": "wollok-debug-adapter",
+  "version": "0.0.1",
+  "description": "VSCode part of a language server",
+  "author": "Microsoft Corporation",
+  "license": "LGPL-3.0",
+  "publisher": "uqbar",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uqbar-project/wollok-lsp-ide"
+  },
+  "main": "./out/index.js",
+  "scripts": {
+    "test": "yarn ts-mocha -p ../../tsconfig.json --config .mocharc.js",
+    "test-with-coverage": "nyc --reporter=json --lines 70 ts-mocha -p ../../tsconfig.json",
+    "test-local-coverage": "nyc --reporter=html --reporter=json --lines 70 ts-mocha -p ../../tsconfig.json"
+  },
+  "dependencies": {
+    "@vscode/debugadapter": "^1.66.0",
+    "@vscode/debugprotocol": "^1.66.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10",
+    "@types/node": "^18.14.1",
+    "@types/vscode": "^1.92.0",
+    "@vscode/debugadapter-testsupport": "^1.67.0",
+    "mocha": "^10.7.3",
+    "nyc": "^17.0.0",
+    "ts-mocha": "^10.0.0",
+    "wollok-ts": "4.1.6"
+  }
+}

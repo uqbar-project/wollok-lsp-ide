@@ -25,15 +25,15 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm install
-    - run: npm run compile
+    - run: yarn
+    - run: yarn compile-tests
     - name: Run e2e test
       if: matrix.os != 'ubuntu-latest'
       uses: coactions/setup-xvfb@v1
       with:
-        run: npm run test-with-coverage:e2e
+        run: yarn test-with-coverage:e2e
     - name: Run unit tests
-      run: npm run test-with-coverage:unit
+      run: yarn test-with-coverage:unit
     - name: Update server coverage badge
       uses: codecov/codecov-action@v4
       if: matrix.os == 'ubuntu-latest'
@@ -55,8 +55,7 @@ jobs:
     - name: Generate VSIX file
       if: matrix.os == 'ubuntu-latest' && github.ref == 'refs/heads/master'
       run: |
-        npm i -g vsce
-        vsce package
+        yarn package
     - name: Add VSIX to the latest release
       if: matrix.os == 'ubuntu-latest' && github.ref == 'refs/heads/master'
       uses: "marvinpinto/action-automatic-releases@latest"

@@ -1,6 +1,6 @@
 {
   "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
-  "ignorePatterns": ["**/*.js", "dist/**"],
+  "ignorePatterns": ["**/*.js", "out/**"],
   "plugins": ["@typescript-eslint"],
   "root": true,
   "rules": {

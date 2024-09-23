@@ -1,5 +1,5 @@
 import { expect } from 'expect'
-import path from 'path'
+import * as path from 'path'
 import { Position, Range } from 'vscode-languageserver'
 import { Literal, Node, Package, SourceMap } from 'wollok-ts'
 import { between, findPackageJSON, nodeToLocation, relativeFilePath, setWorkspaceUri } from '../utils/text-documents'

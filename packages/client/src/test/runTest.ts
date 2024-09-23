@@ -9,7 +9,7 @@ async function main() {
   try {
     // The folder containing the Extension Manifest package.json
     // Passed to `--extensionDevelopmentPath`
-    const extensionDevelopmentPath = path.resolve(__dirname, '../../../')
+    const extensionDevelopmentPath = path.resolve(__dirname, '../../../../')
 
     // The path to test runner
     // Passed to --extensionTestsPath
@@ -23,7 +23,7 @@ async function main() {
       extensionDevelopmentPath,
       extensionTestsPath,
       launchArgs: [
-        path.resolve(extensionDevelopmentPath, './client/testFixture'),
+        path.resolve(extensionDevelopmentPath, path.resolve(__dirname, '../../../../packages/client/testFixture')),
       ],
     })
   } catch (err) {
