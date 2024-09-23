@@ -27,9 +27,6 @@ images/other
 # packages are bundled, therefore we don't need them
 packages
 
-# ignore tsc compiled code (tests)
-out
-
 # package manager (yarn)
 .yarn
 .pnp.*
