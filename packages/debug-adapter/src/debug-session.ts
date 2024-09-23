@@ -32,11 +32,13 @@ export class WollokDebugSession extends DebugSession {
 
   protected initializeRequest(response: DebugProtocol.InitializeResponse, _args: DebugProtocol.InitializeRequestArguments): void {
     // capabilities
-    response.body = response.body || {}
-    // ToDo: response.body.supportsBreakpointLocationsRequest = true
-    response.body.supportsDelayedStackTraceLoading = true
-    response.body.supportsConfigurationDoneRequest = true
-    response.body.supportsSingleThreadExecutionRequests = false
+    response.body = {
+      ...response.body,
+      // ToDo: supportsBreakpointLocationsRequest: true
+      supportsDelayedStackTraceLoading: true,
+      supportsConfigurationDoneRequest: true,
+      supportsSingleThreadExecutionRequests: false,
+    }
 
     // initialize wollok interpreter
     const debuggableFileExtensions = [WOLLOK_FILE_EXTENSION, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION]
