@@ -139,7 +139,7 @@ export class WollokDebugSession extends DebugSession {
             column: sentence.sourceMap.start.column,
             endColumn: sentence.sourceMap.end.column,
             endLine: sentence.sourceMap.end.line,
-            source: new Source(sentence.sourceFileName.split('/').pop()!, this.toClientPath(sentence.sourceFileName)),
+            source: sourceFromNode(sentence),
           })
         ),
 
@@ -214,10 +214,7 @@ export class WollokDebugSession extends DebugSession {
       column: currentNode.sourceMap?.start.column,
       endColumn: currentNode.sourceMap?.end.column,
       endLine: currentNode.sourceMap?.end.line,
-      source: !!currentNode.sourceFileName && new Source(
-          currentNode.sourceFileName.split('/').pop()!,
-          this.toClientPath(currentNode.sourceFileName),
-      ),
+      source: !!currentNode.sourceFileName && sourceFromNode(currentNode),
     }
   }
 
@@ -284,6 +281,10 @@ export class WollokDebugSession extends DebugSession {
       variablesReference: object.locals.size > 0 || object.innerCollection?.length > 0 ? this.contexts.getIdFor(object) : 0,
     }
   }
+}
+
+function sourceFromNode<T extends Node>(node: T): Source {
+  return new Source(node.sourceFileName.split('/').pop()!, this.toClientPath(node.sourceFileName))
 }
 
 function getLabel(value: RuntimeObject): string {
