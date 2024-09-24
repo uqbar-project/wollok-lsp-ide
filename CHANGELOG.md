@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.5
+- Habemus **Debugger**! 🐞
+- Update Wollok-TS 4.1.6 ⬆️
+
 ## v0.3.4
 - Fixes quoting for shell tasks (run, repl, tests, etc.) 🙌
 
