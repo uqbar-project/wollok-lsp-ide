@@ -14,8 +14,7 @@
     "rxjs": "^7.8.1",
     "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-textdocument": "^1.0.11",
-    "winston": "^3.11.0",
-    "wollok-ts": "4.1.6"
+    "winston": "^3.11.0"
   },
   "scripts": {
     "test": "yarn ts-mocha -p ../../tsconfig.json --config ./.mocharc.js",
