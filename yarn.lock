@@ -8604,7 +8604,6 @@ __metadata:
     sinon: "npm:^15.0.3"
     vscode-languageclient: "npm:^9.0.1"
     wollok-debug-adapter: "workspace:^"
-    wollok-ts: "npm:4.1.6"
   languageName: unknown
   linkType: soft
 
@@ -8626,7 +8625,6 @@ __metadata:
     vscode-languageserver: "npm:^9.0.1"
     vscode-languageserver-textdocument: "npm:^1.0.11"
     winston: "npm:^3.11.0"
-    wollok-ts: "npm:4.1.6"
   languageName: unknown
   linkType: soft
 
@@ -8644,6 +8642,7 @@ __metadata:
     rimraf: "npm:^6.0.1"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^4.9.5"
+    wollok-ts: "npm:4.1.6"
     yarn-run-all: "npm:^3.1.1"
   languageName: unknown
   linkType: soft
