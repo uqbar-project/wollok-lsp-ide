@@ -18,8 +18,8 @@
   },
   "scripts": {
     "test": "yarn ts-mocha -p ../../tsconfig.json --config ./.mocharc.js",
-    "test-with-coverage": "nyc --reporter=json --lines 70 ts-mocha -p ../../tsconfig.json",
-    "test-local-coverage": "nyc --reporter=html --reporter=json --lines 70 ts-mocha -p ../../tsconfig.json"
+    "test-with-coverage": "nyc --reporter=json ts-mocha -p ../../tsconfig.json --config .mocharc.js",
+    "test-local-coverage": "nyc --reporter=html --reporter=json ts-mocha -p ../../tsconfig.json --config .mocharc.js"
   },
   "devDependencies": {
     "@types/expect": "^24.3.0",
@@ -29,7 +29,6 @@
     "expect": "^29.7.0",
     "jest": "^29.7.0",
     "mocha": "^10.7.3",
-    "nyc": "^15.1.0",
     "sinon": "^15.0.3",
     "ts-mocha": "^10.0.0"
   }

@@ -38,7 +38,7 @@ export async function initCoverage(): Promise<NYC> {
     hookRunInThisContext: true,
     reportDir: 'packages/client/coverage',
     include: ['out/client/**/*.js', 'out/client/**/*.ts'],
-    exclude: ['out/client/test/**'],
+    exclude: ['out/client/src/test/**'],
   })
   await nyc.reset()
   await nyc.wrap()
