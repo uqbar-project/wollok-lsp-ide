@@ -17,9 +17,7 @@
     "winston": "^3.11.0"
   },
   "scripts": {
-    "test": "yarn ts-mocha -p ../../tsconfig.json --config ./.mocharc.js",
-    "test-with-coverage": "nyc --reporter=json ts-mocha -p ../../tsconfig.json --config .mocharc.js",
-    "test-local-coverage": "nyc --reporter=html --reporter=json ts-mocha -p ../../tsconfig.json --config .mocharc.js"
+    "test": "yarn ts-mocha -p ../../tsconfig.json --config ./.mocharc.js"
   },
   "devDependencies": {
     "@types/expect": "^24.3.0",

@@ -1,3 +1,5 @@
+var path = require('path')
+
 module.exports = {
-  spec: 'src/test/**/*.test.ts',
+  spec: path.resolve(__dirname, '../../out/debug-adapter/src/test/*.test.js'),
 }

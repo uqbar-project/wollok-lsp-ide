@@ -25,39 +25,21 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn
-      - run: yarn compile-tests
-      - name: Run e2e test
-        if: matrix.os != 'ubuntu-latest'
+      - name: Run tests
         uses: coactions/setup-xvfb@v1
         with:
-          run: yarn test-with-coverage:e2e
-      - name: Run unit tests
-        run: yarn test-with-coverage:unit
-      - name: Update server coverage badge
-        uses: codecov/codecov-action@v4
-        if: matrix.os == 'ubuntu-latest'
+          run: yarn coverage
+      - name: Build coverage
+        uses: coactions/setup-xvfb@v1
         with:
-          files: ./packages/server/coverage/coverage-final.json
-          verbose: true
-          flags: lsp-ide-server
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      - name: Update client coverage badge
-        uses: codecov/codecov-action@v3
+          run: yarn build-coverage-report
+      - name: Update coverage
+        uses: codecov/codecov-action@v4
         if: matrix.os == 'windows-latest'
         with:
-          files: ./packages/client/coverage/coverage-final.json
+          files: ./coverage-total/coverage-final.json
           verbose: true
-          flags: lsp-ide-client
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      - name: Update debugger coverage badge
-        uses: codecov/codecov-action@v4
-        if: matrix.os == 'ubuntu-latest'
-        with:
-          files: ./packages/debug-adapter/coverage/coverage-final.json
-          verbose: true
-          flags: debug-adapter
+          codecov_yml_path: ./codecov.yml
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       - name: Generate VSIX file

@@ -33,12 +33,7 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": [
-        "--disable-extensions",
-        "--extensionDevelopmentPath=${workspaceRoot}",
-        "--extensionTestsPath=${workspaceRoot}/out/client/src/test/index",
-        "${workspaceRoot}/packages/client/testFixture"
-      ],
+      "testConfiguration": "${workspaceFolder}/.vscode-test.js",
       "outFiles": ["${workspaceRoot}/out/**/*.js"],
       "preLaunchTask": {
         "type": "npm",

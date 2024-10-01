@@ -2,10 +2,9 @@ import * as path from 'path'
 import { DebugClient } from '@vscode/debugadapter-testsupport'
 import * as assert from 'node:assert'
 import { DebugProtocol } from '@vscode/debugprotocol'
-import { shouldUseSelfAndNotSingletonReference } from 'wollok-ts/dist/validator'
 
-const DEBUG_ADAPTER = path.resolve(__dirname, '../../../../out/debug-adapter/src/test/start-debug-session.js')
-const FIXTURES_ROOT = path.resolve(__dirname, 'fixtures')
+const DEBUG_ADAPTER = path.resolve(__dirname, 'start-debug-session.js')
+const FIXTURES_ROOT = path.resolve(__dirname, '../../../../packages/debug-adapter/src/test/fixtures')
 const PROGRAM = path.resolve(FIXTURES_ROOT, 'aProgram.wpgm')
 const WLK = path.resolve(FIXTURES_ROOT, 'anObject.wlk')
 
@@ -13,7 +12,7 @@ describe('debug adapter', function () {
   let dc: DebugClient
 
   this.beforeEach( function () {
-    dc = new DebugClient('node', DEBUG_ADAPTER, 'wollok', {stdio: 'pipe'}, true)
+    dc = new DebugClient('node', DEBUG_ADAPTER, 'wollok', { stdio: 'pipe' }, true)
     return dc.start()
   })
 
