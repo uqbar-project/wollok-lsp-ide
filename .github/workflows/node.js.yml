@@ -49,7 +49,7 @@ jobs:
         with:
           files: ./coverage-total/coverage.json
           verbose: true
-          codecov_yml_path: ./codecov.yml
+          codecov_yml_path: codecov.yml
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       - name: Generate VSIX file
