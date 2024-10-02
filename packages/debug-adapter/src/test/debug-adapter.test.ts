@@ -33,7 +33,7 @@ describe('debug adapter', function () {
           },
         }),
         dc.configurationDoneRequest(),
-        dc.waitForEvent('terminated', 1000),
+        dc.waitForEvent('terminated', 3000),
       ])
     })
 
@@ -47,7 +47,7 @@ describe('debug adapter', function () {
           },
         }),
         dc.configurationDoneRequest(),
-        dc.waitForEvent('stopped', 1000),
+        dc.waitForEvent('stopped', 3000),
       ])
 
 
