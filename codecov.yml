@@ -17,10 +17,13 @@ component_management:
   individual_components:
     - component_id: debug-adapter
       name: Debugger
-      path: packages/debug-adapter/
+      paths:
+        - packages/debug-adapter/
     - component_id: client
       name: Extension Client
-      path: packages/client/
+      paths:
+        - packages/client/
     - component_id: lsp-server
       name: LSP Server
-      path: packages/server/
+      paths:
+        - packages/server/
