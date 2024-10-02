@@ -313,7 +313,7 @@
     "test:unit": "yarn workspaces foreach -Rpt --from '{wollok-lsp-ide-server,wollok-debug-adapter}' run test",
     "nyc": "nyc",
     "build-coverage-report": "rimraf coverage-total && cpy --flat ./coverage-e2e/coverage-final.json ./coverage-total --rename=coverage-e2e.json && cpy --flat ./coverage-unit/coverage-final.json ./coverage-total --rename=coverage-unit.json && nyc merge ./coverage-total ./coverage-total/coverage.json",
-    "coverage": "yarn compile-tests && run-s cover:e2e cover:unit",
+    "coverage": "run-s cover:e2e cover:unit",
     "cover:e2e": "vscode-test --coverage --coverage-repoter=text --coverage-reporter=json --coverage-output=coverage-e2e",
     "cover:unit": "nyc --reporter=json --report-dir=coverage-unit -p ./tsconfig.json yarn workspaces foreach -Rpt --from '{wollok-lsp-ide-server,wollok-debug-adapter}' run test",
     "bundle": "yarn compile -- --production",
