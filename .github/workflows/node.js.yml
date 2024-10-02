@@ -38,18 +38,11 @@ jobs:
         uses: coactions/setup-xvfb@v1
         with:
           run: yarn test:unit
-      - name: Build coverage
-        if: matrix.os == 'windows-latest'
-        uses: coactions/setup-xvfb@v1
-        with:
-          run: yarn build-coverage-report
       - name: Update coverage
         uses: codecov/codecov-action@v4
         if: matrix.os == 'windows-latest'
         with:
-          files: ./coverage-total/coverage.json
           verbose: true
-          codecov_yml_path: codecov.yml
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       - name: Generate VSIX file
