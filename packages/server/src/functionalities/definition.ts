@@ -25,13 +25,22 @@ export const getNodeDefinition = (environment: Environment) => (node: Node): Nod
   try {
     return match(node)(
       when(Reference)(node => definedOrEmpty(node.target)),
-      when(Send)(sendDefinitions(environment)),
+      when(Send)(node => mapSyntheticMethods(environment, node)),
       when(Super)(node => definedOrEmpty(superMethodDefinition(node))),
       when(Self)(node => definedOrEmpty(getParentModule(node)))
     )
   } catch {
     return [node]
   }
+}
+
+const mapSyntheticMethods = (environment: Environment, node: Send) => {
+  const definitions = sendDefinitions(environment)(node)
+  return definitions.map((method: Method) => method.isSynthetic ? getDefinitionFromSyntheticMethod(method) : method)
+}
+
+const getDefinitionFromSyntheticMethod = (method: Method) => {
+  return method.parent.allFields.find((field) => field.name === method.name && field.isProperty)
 }
 
 const superMethodDefinition = (superNode: Super): Method | undefined => {

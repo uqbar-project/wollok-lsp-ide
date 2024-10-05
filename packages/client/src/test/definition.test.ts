@@ -13,6 +13,13 @@ suite('Should go to definitions', () => {
         new Location(definitionURI, new Range(new Position(0, 0), new Position(4, 1))),
       ])
   })
+
+  test ('can navigate to a property definition', async () => {
+    const definitionURI = getDocumentURI('definition.wlk')
+    await testDefinition(definitionURI, new Position(18, 29), [
+      new Location(definitionURI, new Range(new Position(13, 1), new Position(13, 22))),
+    ])
+  })
 })
 
 async function testDefinition(uri: Uri, at: Position, expected: Array<Location | LocationLink>): Promise<void> {
