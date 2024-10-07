@@ -189,6 +189,7 @@
           "scope": "resource",
           "type": "string",
           "description": "Path to Wollok-CLI.",
+          "default": "wollok",
           "order": 10
         },
         "wollokLSP.language": {
