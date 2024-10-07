@@ -2,9 +2,12 @@ import { Connection } from 'vscode-languageserver/node'
 import { wollokLSPExtensionCode } from './shared-definitions'
 import { LANGUAGES } from 'wollok-ts'
 
+export const DEFAULT_PORT = 3000
+
 export interface WollokLSPSettings {
   maxNumberOfProblems: number
   language: LANGUAGES,
+  portNumber: number,
   openDynamicDiagramOnRepl: boolean,
   openInternalDynamicDiagram: boolean,
   dynamicDiagramDarkMode: boolean,
@@ -25,6 +28,7 @@ const envLang = () => {
 const defaultSettings: WollokLSPSettings = {
   maxNumberOfProblems: 1000,
   language: envLang(),
+  portNumber: DEFAULT_PORT,
   openDynamicDiagramOnRepl: true,
   openInternalDynamicDiagram: true,
   dynamicDiagramDarkMode: true,

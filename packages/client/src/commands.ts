@@ -14,6 +14,7 @@ import {
   fsToShell,
 } from './platform-string-utils'
 import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode, COMMAND_INIT_PROJECT } from './shared-definitions'
+import { DEFAULT_PORT } from '../../server/src/settings'
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
   context.subscriptions.push(registerCLICommand(COMMAND_START_REPL, startRepl))
@@ -74,16 +75,16 @@ const getCurrentFileName = (document: vscode.TextDocument | undefined) =>
 const getFiles = (document: vscode.TextDocument | undefined): [ReturnType<typeof fsToShell>] | []  =>
   document ? [fsToShell(document.uri.fsPath)] : []
 
-const DYNAMIC_DIAGRAM_URI = 'http://localhost:3000/'
-
 export const startRepl = (): Task => {
   const currentDocument = window.activeTextEditor?.document
   const wollokLSPConfiguration = workspace.getConfiguration(wollokLSPExtensionCode)
   const dynamicDiagramDarkMode = wollokLSPConfiguration.get('dynamicDiagram.dynamicDiagramDarkMode') as boolean
   const openDynamicDiagram = wollokLSPConfiguration.get('dynamicDiagram.openDynamicDiagramOnRepl') as boolean
   const millisecondsToOpenDynamicDiagram = wollokLSPConfiguration.get('dynamicDiagram.millisecondsToOpenDynamicDiagram') as number
+  const portNumber = wollokLSPConfiguration.get('repl.portNumber') as number ?? DEFAULT_PORT
+  const DYNAMIC_DIAGRAM_URI = `http://localhost:${portNumber}/`
 
-  const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations', dynamicDiagramDarkMode ? '--darkMode' : '', openDynamicDiagram ? '': '--skipDiagram']
+  const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations', '--port', portNumber.toString(), dynamicDiagramDarkMode ? '--darkMode' : '', openDynamicDiagram ? '': '--skipDiagram']
   // Terminate previous tasks
   vscode.commands.executeCommand('workbench.action.terminal.killAll')
   const replTask = wollokCLITask('repl', `Wollok Repl: ${getCurrentFileName(currentDocument)}`, cliCommands)

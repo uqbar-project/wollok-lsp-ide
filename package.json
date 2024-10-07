@@ -223,6 +223,13 @@
           "description": "Traces the communication between VS Code and the language server.",
           "order": 20
         },
+        "wollokLSP.repl.portNumber": {
+          "scope": "resource",
+          "type": "number",
+          "default": 3000,
+          "description": "Port number that will be used when running the REPL.",
+          "order": 25
+        },
         "wollokLSP.dynamicDiagram.openDynamicDiagramOnRepl": {
           "scope": "resource",
           "type": "boolean",
