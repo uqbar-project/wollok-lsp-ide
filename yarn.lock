@@ -8867,7 +8867,7 @@ __metadata:
     mocha: "npm:^10.7.3"
     nyc: "npm:^17.0.0"
     ts-mocha: "npm:^10.0.0"
-    wollok-ts: "file:../../../wollok-ts"
+    wollok-ts: "npm:4.1.6"
   languageName: unknown
   linkType: soft
 
@@ -8930,34 +8930,21 @@ __metadata:
     source-map-support: "npm:^0.5.21"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^4.9.5"
-    wollok-ts: "file:../wollok-ts"
+    wollok-ts: "npm:4.1.6"
     yarn-run-all: "npm:^3.1.1"
   languageName: unknown
   linkType: soft
 
-"wollok-ts@file:../../../wollok-ts::locator=wollok-debug-adapter%40workspace%3Apackages%2Fdebug-adapter":
-  version: 4.1.7
-  resolution: "wollok-ts@file:../../../wollok-ts#../../../wollok-ts::hash=3281d5&locator=wollok-debug-adapter%40workspace%3Apackages%2Fdebug-adapter"
+"wollok-ts@npm:4.1.6":
+  version: 4.1.6
+  resolution: "wollok-ts@npm:4.1.6"
   dependencies:
     "@types/parsimmon": "npm:^1.10.8"
     parsimmon: "npm:^1.18.1"
     prettier-printer: "npm:^1.1.4"
     unraw: "npm:^3.0.0"
     uuid: "npm:^9.0.1"
-  checksum: 10c0/516142fe553ce7787dfb070217273c943b1d08d66b1992cd43036c7f7345fc3244bd83919153437a5cf3986bbcaee8f6bfb2cef8f607ff0c278bccdd9fa56f16
-  languageName: node
-  linkType: hard
-
-"wollok-ts@file:../wollok-ts::locator=wollok-lsp-ide%40workspace%3A.":
-  version: 4.1.7
-  resolution: "wollok-ts@file:../wollok-ts#../wollok-ts::hash=3281d5&locator=wollok-lsp-ide%40workspace%3A."
-  dependencies:
-    "@types/parsimmon": "npm:^1.10.8"
-    parsimmon: "npm:^1.18.1"
-    prettier-printer: "npm:^1.1.4"
-    unraw: "npm:^3.0.0"
-    uuid: "npm:^9.0.1"
-  checksum: 10c0/516142fe553ce7787dfb070217273c943b1d08d66b1992cd43036c7f7345fc3244bd83919153437a5cf3986bbcaee8f6bfb2cef8f607ff0c278bccdd9fa56f16
+  checksum: 10c0/2248c12858540699ce9c58b6e22255d2dd685ef0ae1c32ca023cc0a7c9d8489057a5b0600c0291e4f45cb831dc4c7ccd43de73b4c041b8569300d66c0c7bbbcf
   languageName: node
   linkType: hard
 
