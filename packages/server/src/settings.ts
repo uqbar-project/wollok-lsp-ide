@@ -1,9 +1,10 @@
 import { Connection } from 'vscode-languageserver/node'
 import { wollokLSPExtensionCode } from './shared-definitions'
+import { LANGUAGES } from 'wollok-ts'
 
 export interface WollokLSPSettings {
   maxNumberOfProblems: number
-  language: string,
+  language: LANGUAGES,
   openDynamicDiagramOnRepl: boolean,
   openInternalDynamicDiagram: boolean,
   dynamicDiagramDarkMode: boolean,
@@ -15,13 +16,10 @@ export interface WollokLSPSettings {
 // INTERNAL & PUBLISHED STATE
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-const SPANISH = 'es'
-const ENGLISH = 'en'
-
 const envLang = () => {
   const env = process.env
-  const fullLanguage = env.LC_ALL || env.LC_MESSAGES || env.LANG || env.LANGUAGE
-  return fullLanguage ? fullLanguage.substring(0, 2) : SPANISH
+  const fullLanguage = env.LC_ALL ?? env.LC_MESSAGES ?? env.LANG ?? env.LANGUAGE
+  return fullLanguage === 'es' ? LANGUAGES.SPANISH : LANGUAGES.ENGLISH
 }
 
 const defaultSettings: WollokLSPSettings = {
@@ -36,9 +34,9 @@ const defaultSettings: WollokLSPSettings = {
 
 let globalSettings: WollokLSPSettings = defaultSettings
 
-const languageDescription: { [key: string]: string } = {
-  Spanish: SPANISH,
-  English: ENGLISH,
+const languageDescription: { [key: string]: LANGUAGES } = {
+  Spanish: LANGUAGES.SPANISH,
+  English: LANGUAGES.ENGLISH,
 }
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -59,7 +57,7 @@ export const initializeSettings = async (
   await updateDocumentSettings(connection)
 }
 
-export const lang = (): string =>
+export const lang = (): LANGUAGES =>
   languageDescription[globalSettings.language] || envLang()
 
 export const maxThreshold = (): number => globalSettings.maxThreshold

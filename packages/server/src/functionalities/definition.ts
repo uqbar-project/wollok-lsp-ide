@@ -1,7 +1,7 @@
 import { Location, TextDocumentPositionParams } from 'vscode-languageserver'
-import { Environment, Method, Module, Node, Reference, Self, Send, Super, is, match, sendDefinitions, when } from 'wollok-ts'
-import { getNodesByPosition, nodeToLocation } from '../utils/text-documents'
+import { Environment, getNodeDefinition, Method, Node, Send, sendDefinitions } from 'wollok-ts'
 import { logger } from '../utils/logger'
+import { getNodesByPosition, nodeToLocation } from '../utils/text-documents'
 
 export const definition = (environment: Environment) => (
   textDocumentPosition: TextDocumentPositionParams
@@ -13,42 +13,18 @@ export const definition = (environment: Environment) => (
 
 export const getDefinition = (environment: Environment) => (node: Node): Node[] => {
   try {
+    if (node.is(Send)) {
+      // TODO: migrate to wollok-ts
+      const getDefinitionFromSyntheticMethod = (method: Method) => {
+        return method.parent.allFields.find((field) => field.name === method.name && field.isProperty)
+      }
+
+      const definitions = sendDefinitions(environment)(node)
+      return definitions.map((method: Method) => method.isSynthetic ? getDefinitionFromSyntheticMethod(method) : method)
+    }
     return getNodeDefinition(environment)(node)
   } catch (error) {
     logger.error(`✘ Error in getDefinition: ${error}`, error)
     return [node]
   }
 }
-
-// TODO: terminar de migrar a wollok-ts estas 4 definiciones
-export const getNodeDefinition = (environment: Environment) => (node: Node): Node[] => {
-  try {
-    return match(node)(
-      when(Reference)(node => definedOrEmpty(node.target)),
-      when(Send)(node => mapSyntheticMethods(environment, node)),
-      when(Super)(node => definedOrEmpty(superMethodDefinition(node))),
-      when(Self)(node => definedOrEmpty(getParentModule(node)))
-    )
-  } catch {
-    return [node]
-  }
-}
-
-const mapSyntheticMethods = (environment: Environment, node: Send) => {
-  const definitions = sendDefinitions(environment)(node)
-  return definitions.map((method: Method) => method.isSynthetic ? getDefinitionFromSyntheticMethod(method) : method)
-}
-
-const getDefinitionFromSyntheticMethod = (method: Method) => {
-  return method.parent.allFields.find((field) => field.name === method.name && field.isProperty)
-}
-
-const superMethodDefinition = (superNode: Super): Method | undefined => {
-  const currentMethod = superNode.ancestors.find(is(Method))!
-  const module = getParentModule(superNode)
-  return module ? module.lookupMethod(currentMethod.name, superNode.args.length, { lookupStartFQN: module.fullyQualifiedName }) : undefined
-}
-
-const getParentModule = (node: Node) => node.ancestors.find(is(Module))
-
-const definedOrEmpty = <T>(value: T | undefined): T[] => value ? [value] : []
