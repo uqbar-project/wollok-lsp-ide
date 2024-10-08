@@ -3,8 +3,8 @@ import { DebugClient } from '@vscode/debugadapter-testsupport'
 import * as assert from 'node:assert'
 import { DebugProtocol } from '@vscode/debugprotocol'
 
-const DEBUG_ADAPTER = path.resolve(__dirname, '../../../../out/debug-adapter/src/test/start-debug-session.js')
-const FIXTURES_ROOT = path.resolve(__dirname, 'fixtures')
+const DEBUG_ADAPTER = path.resolve(__dirname, 'start-debug-session.js')
+const FIXTURES_ROOT = path.resolve(__dirname, '../../../../packages/debug-adapter/src/test/fixtures')
 const PROGRAM = path.resolve(FIXTURES_ROOT, 'aProgram.wpgm')
 const WLK = path.resolve(FIXTURES_ROOT, 'anObject.wlk')
 
@@ -12,7 +12,7 @@ describe('debug adapter', function () {
   let dc: DebugClient
 
   this.beforeEach( function () {
-    dc = new DebugClient('node', DEBUG_ADAPTER, 'wollok')
+    dc = new DebugClient('node', DEBUG_ADAPTER, 'wollok', { stdio: 'pipe' }, true)
     return dc.start()
   })
 
@@ -33,7 +33,7 @@ describe('debug adapter', function () {
           },
         }),
         dc.configurationDoneRequest(),
-        dc.waitForEvent('terminated', 1000),
+        dc.waitForEvent('terminated', 3000),
       ])
     })
 
@@ -47,7 +47,7 @@ describe('debug adapter', function () {
           },
         }),
         dc.configurationDoneRequest(),
-        dc.waitForEvent('stopped', 1000),
+        dc.waitForEvent('stopped', 3000),
       ])
 
 

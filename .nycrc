@@ -1,0 +1,6 @@
+{
+  "extends": "@istanbuljs/nyc-config-typescript",
+  "lines": 70,
+  "all": true,
+  "include": ["out/**", "packages/**"]
+}

@@ -8,7 +8,7 @@ client/server
 .yalc
 yalc.lock
 .DS_Store
-coverage
+coverage-*
 .nyc_output
 wollok.log
 tsconfig.tsbuildinfo

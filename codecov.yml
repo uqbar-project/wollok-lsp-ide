@@ -1,0 +1,29 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 2%
+        base: auto
+
+comment:
+  layout: 'diff, components, files'
+  behavior: default
+
+component_management:
+  default_rules:
+    statuses:
+      - target: auto
+  individual_components:
+    - component_id: debug-adapter
+      name: Debugger
+      paths:
+        - packages/debug-adapter/
+    - component_id: client
+      name: Extension Client
+      paths:
+        - packages/client/
+    - component_id: lsp-server
+      name: LSP Server
+      paths:
+        - packages/server/
