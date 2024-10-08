@@ -14,7 +14,7 @@ import {
   fsToShell,
 } from './platform-string-utils'
 import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode, COMMAND_INIT_PROJECT } from './shared-definitions'
-import { DEFAULT_PORT } from '../../server/src/settings'
+import { DEFAULT_REPL_PORT, DEFAULT_GAME_PORT } from '../../server/src/settings'
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
   context.subscriptions.push(registerCLICommand(COMMAND_START_REPL, startRepl))
@@ -38,11 +38,14 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
  */
 
 export const runProgram = (isGame = false) => ([fqn]: [string]): Task => {
+  const wollokLSPConfiguration = workspace.getConfiguration(wollokLSPExtensionCode)
+  const portNumber = wollokLSPConfiguration.get('gamePortNumber') as number ?? DEFAULT_GAME_PORT
+
   // Terminate previous terminal session
   vscode.commands.executeCommand('workbench.action.terminal.killAll')
   return wollokCLITask('run program', `Wollok run ${isGame ? 'game' : 'program'}`, [
     'run',
-    ...isGame ? ['-g'] : [],
+    ...isGame ? ['-g', '--port', portNumber.toString()] : [],
     asShellString(fqn),
     '--skipValidations',
   ])
@@ -81,7 +84,7 @@ export const startRepl = (): Task => {
   const dynamicDiagramDarkMode = wollokLSPConfiguration.get('dynamicDiagram.dynamicDiagramDarkMode') as boolean
   const openDynamicDiagram = wollokLSPConfiguration.get('dynamicDiagram.openDynamicDiagramOnRepl') as boolean
   const millisecondsToOpenDynamicDiagram = wollokLSPConfiguration.get('dynamicDiagram.millisecondsToOpenDynamicDiagram') as number
-  const portNumber = wollokLSPConfiguration.get('repl.portNumber') as number ?? DEFAULT_PORT
+  const portNumber = wollokLSPConfiguration.get('replPortNumber') as number ?? DEFAULT_REPL_PORT
   const DYNAMIC_DIAGRAM_URI = `http://localhost:${portNumber}/`
 
   const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations', '--port', portNumber.toString(), dynamicDiagramDarkMode ? '--darkMode' : '', openDynamicDiagram ? '': '--skipDiagram']
