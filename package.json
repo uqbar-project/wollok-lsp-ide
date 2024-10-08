@@ -279,6 +279,11 @@
         "title": "Run all tests",
         "when": "resourceExtname == .wtest",
         "category": "Wollok"
+      },
+      {
+        "command": "wollok.init.project",
+        "title": "Initialize new Wollok project in the workspace directory",
+        "category": "Wollok"
       }
     ],
     "keybindings": [

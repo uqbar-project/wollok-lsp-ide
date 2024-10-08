@@ -13,7 +13,7 @@ import {
   asShellString,
   fsToShell,
 } from './platform-string-utils'
-import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode } from './shared-definitions'
+import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode, COMMAND_INIT_PROJECT } from './shared-definitions'
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
   context.subscriptions.push(registerCLICommand(COMMAND_START_REPL, startRepl))
@@ -26,6 +26,9 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
   )
   context.subscriptions.push(
     registerCLICommand(COMMAND_RUN_GAME, runProgram(true)),
+  )
+  context.subscriptions.push(
+    registerCLICommand(COMMAND_INIT_PROJECT, initProject),
   )
 }
 
@@ -58,6 +61,11 @@ export const runAllTests = (): Task =>
   wollokCLITask('run tests', 'Wollok run all tests', [
     'test',
     '--skipValidations',
+  ])
+
+export const initProject = (): Task =>
+  wollokCLITask('init project', 'Initialize a new project', [
+    'init',
   ])
 
 const getCurrentFileName = (document: vscode.TextDocument | undefined) =>

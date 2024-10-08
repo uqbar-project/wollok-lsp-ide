@@ -2,7 +2,7 @@ import * as assert from 'assert'
 import { afterEach, beforeEach } from 'mocha'
 import * as sinon from 'sinon'
 import { ShellExecution, ShellQuotedString, ShellQuoting, Task, Uri, workspace } from 'vscode'
-import { runAllTests, runProgram, runTest, startRepl } from '../commands'
+import { initProject, runAllTests, runProgram, runTest, startRepl } from '../commands'
 import { activate, getDocumentURI, getFolderURI } from './helper'
 
 suite('Should run commands', () => {
@@ -97,6 +97,18 @@ suite('Should run commands', () => {
           quoted(folderURI.fsPath),
         ],
       )
+  })
+
+  test('create a new project in the workspace directory', () => {
+    return testCommand(
+      pepitaURI,
+      initProject,
+      [
+        'init',
+        '-p',
+        quoted(folderURI.fsPath),
+      ],
+    )
   })
 })
 
