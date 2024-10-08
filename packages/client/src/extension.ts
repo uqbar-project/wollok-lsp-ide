@@ -21,10 +21,11 @@ import {
   TransportKind,
   WorkDoneProgress,
 } from 'vscode-languageclient/node'
+import { WollokDebugAdapterFactory, WollokDebugConfigurationProvider } from '../../debug-adapter/src/index'
 import { subscribeWollokCommands } from './commands'
+import { getLSPMessage } from './messages'
 import { wollokLSPExtensionId } from './shared-definitions'
 import { allWollokFiles } from './utils'
-import { WollokDebugAdapterFactory, WollokDebugConfigurationProvider } from '../../debug-adapter/src/index'
 
 let client: LanguageClient
 
@@ -81,7 +82,7 @@ export function activate(context: ExtensionContext): void {
 
   client.onProgress(WorkDoneProgress.type, 'wollok-build', (progress) => {
     if (progress.kind === 'begin' || progress.kind === 'report') {
-      statusBarItem.text = '$(loading~spin) Wollok Building...'
+      statusBarItem.text = '$(loading~spin) ' + getLSPMessage('wollokBuilding')
       statusBarItem.show()
     } else {
       statusBarItem.hide()

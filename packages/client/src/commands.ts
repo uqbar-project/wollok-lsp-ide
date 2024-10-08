@@ -9,14 +9,13 @@ import {
   window,
   workspace,
 } from 'vscode'
+import { DEFAULT_GAME_PORT, DEFAULT_REPL_PORT } from '../../server/src/settings'
 import {
   asShellString,
   fsToShell,
 } from './platform-string-utils'
 import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode, COMMAND_INIT_PROJECT } from './shared-definitions'
-import { DEFAULT_REPL_PORT, DEFAULT_GAME_PORT } from '../../server/src/settings'
-import { getMessage } from 'wollok-ts'
-import { lang, lspClientMessages } from './messages'
+import { getLSPMessage } from './messages'
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
   context.subscriptions.push(registerCLICommand(COMMAND_START_REPL, startRepl))
@@ -124,7 +123,7 @@ const wollokCLITask = (task: string, name: string, cliCommands: Array<string | v
   const wollokCliPath: string = wollokLSPConfiguration.get('cli-path')
   if (!wollokCliPath) {
     vscode.commands.executeCommand('workbench.action.openSettings', wollokLSPExtensionCode)
-    throw new Error(getMessage({ message: 'missingWollokCliPath', language: lang(wollokLSPConfiguration.get('wollokLSP.language')), customMessages: lspClientMessages }))
+    throw new Error(getLSPMessage('missingWollokCliPath'))
   }
 
   const folder = workspace.workspaceFolders[0]
