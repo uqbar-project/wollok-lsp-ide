@@ -15,6 +15,8 @@ import {
 } from './platform-string-utils'
 import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode, COMMAND_INIT_PROJECT } from './shared-definitions'
 import { DEFAULT_REPL_PORT, DEFAULT_GAME_PORT } from '../../server/src/settings'
+import { getMessage } from 'wollok-ts'
+import { lang, lspClientMessages } from './messages'
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
   context.subscriptions.push(registerCLICommand(COMMAND_START_REPL, startRepl))
@@ -118,11 +120,11 @@ const registerCLICommand = (
   )
 
 const wollokCLITask = (task: string, name: string, cliCommands: Array<string | vscode.ShellQuotedString>) => {
-  const wollokCliPath: string = workspace.getConfiguration(wollokLSPExtensionCode).get('cli-path')
-  // TODO: i18n - but it's in the server
+  const wollokLSPConfiguration = workspace.getConfiguration(wollokLSPExtensionCode)
+  const wollokCliPath: string = wollokLSPConfiguration.get('cli-path')
   if (!wollokCliPath) {
     vscode.commands.executeCommand('workbench.action.openSettings', wollokLSPExtensionCode)
-    throw new Error('Missing configuration WollokLSP/cli-path. Set the path where wollok-ts-cli is located in order to run Wollok tasks')
+    throw new Error(getMessage({ message: 'missingWollokCliPath', language: lang(wollokLSPConfiguration.get('wollokLSP.language')), customMessages: lspClientMessages }))
   }
 
   const folder = workspace.workspaceFolders[0]
