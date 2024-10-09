@@ -6500,7 +6500,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nyc@npm:^17.1.0":
+"nyc@npm:^17.0.0, nyc@npm:^17.1.0":
   version: 17.1.0
   resolution: "nyc@npm:17.1.0"
   dependencies:
