@@ -343,7 +343,7 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "wollok-ts": "4.1.6"
+    "wollok-ts": "4.1.8"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
