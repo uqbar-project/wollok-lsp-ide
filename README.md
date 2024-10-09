@@ -1,4 +1,4 @@
-<!-- DO NOT REMOVE - contributor_list:data:start:["ivojawer", "fdodino", "PalumboN", "npasserini", "FerRomMu", "dependabot[bot]"]:end -->
+<!-- DO NOT REMOVE - contributor_list:data:start:["ivojawer", "fdodino", "PalumboN", "npasserini", "Miranda-03", "FerRomMu", "dependabot[bot]"]:end -->
 
 
 # Wollok IDE
@@ -41,6 +41,6 @@ Do you want to contribute? Great, you are always welcome!
 <!-- DO NOT REMOVE - contributor_list:start -->
 ## 👥 Contributors
 
-<img src="https://avatars.githubusercontent.com/u/18614957?v=4" height="40" width="40" alt="ivojawer" title="ivojawer" class="avatar circle"/>&nbsp;<img src="https://avatars.githubusercontent.com/u/4549002?v=4" height="40" width="40" alt="fdodino" title="fdodino" class="avatar circle"/>&nbsp;<img src="https://avatars.githubusercontent.com/u/4098184?v=4" height="40" width="40" alt="PalumboN" title="PalumboN" class="avatar circle"/>&nbsp;<img src="https://avatars.githubusercontent.com/u/4633913?v=4" height="40" width="40" alt="npasserini" title="npasserini" class="avatar circle"/>&nbsp;<img src="https://avatars.githubusercontent.com/u/70177008?v=4" height="40" width="40" alt="FerRomMu" title="FerRomMu" class="avatar circle"/>&nbsp;<img src="https://avatars.githubusercontent.com/in/29110?v=4" height="40" width="40" alt="dependabot[bot]" title="dependabot[bot]" class="avatar circle"/>&nbsp;
+<img src="https://avatars.githubusercontent.com/u/18614957?v=4" height="40" width="40" alt="ivojawer" title="ivojawer" class="avatar circle"/>&nbsp;<img src="https://avatars.githubusercontent.com/u/4549002?v=4" height="40" width="40" alt="fdodino" title="fdodino" class="avatar circle"/>&nbsp;<img src="https://avatars.githubusercontent.com/u/4098184?v=4" height="40" width="40" alt="PalumboN" title="PalumboN" class="avatar circle"/>&nbsp;<img src="https://avatars.githubusercontent.com/u/4633913?v=4" height="40" width="40" alt="npasserini" title="npasserini" class="avatar circle"/>&nbsp;<img src="https://avatars.githubusercontent.com/u/72475370?v=4" height="40" width="40" alt="Miranda-03" title="Miranda-03" class="avatar circle"/>&nbsp;<img src="https://avatars.githubusercontent.com/u/70177008?v=4" height="40" width="40" alt="FerRomMu" title="FerRomMu" class="avatar circle"/>&nbsp;<img src="https://avatars.githubusercontent.com/in/29110?v=4" height="40" width="40" alt="dependabot[bot]" title="dependabot[bot]" class="avatar circle"/>&nbsp;
 <!-- DO NOT REMOVE - contributor_list:end -->
 <!-- prettier-ignore-end -->
