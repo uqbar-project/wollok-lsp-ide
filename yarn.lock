@@ -6500,7 +6500,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nyc@npm:^17.1.0":
+"nyc@npm:^17.0.0, nyc@npm:^17.1.0":
   version: 17.1.0
   resolution: "nyc@npm:17.1.0"
   dependencies:
@@ -8865,6 +8865,9 @@ __metadata:
     "@vscode/debugadapter-testsupport": "npm:^1.67.0"
     "@vscode/debugprotocol": "npm:^1.66.0"
     mocha: "npm:^10.7.3"
+    nyc: "npm:^17.0.0"
+    ts-mocha: "npm:^10.0.0"
+    wollok-ts: "npm:4.1.6"
   languageName: unknown
   linkType: soft
 
@@ -8927,7 +8930,7 @@ __metadata:
     source-map-support: "npm:^0.5.21"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^4.9.5"
-    wollok-ts: "npm:4.1.6"
+    wollok-ts: "npm:4.1.8"
     yarn-run-all: "npm:^3.1.1"
   languageName: unknown
   linkType: soft
@@ -8942,6 +8945,19 @@ __metadata:
     unraw: "npm:^3.0.0"
     uuid: "npm:^9.0.1"
   checksum: 10c0/2248c12858540699ce9c58b6e22255d2dd685ef0ae1c32ca023cc0a7c9d8489057a5b0600c0291e4f45cb831dc4c7ccd43de73b4c041b8569300d66c0c7bbbcf
+  languageName: node
+  linkType: hard
+
+"wollok-ts@npm:4.1.8":
+  version: 4.1.8
+  resolution: "wollok-ts@npm:4.1.8"
+  dependencies:
+    "@types/parsimmon": "npm:^1.10.8"
+    parsimmon: "npm:^1.18.1"
+    prettier-printer: "npm:^1.1.4"
+    unraw: "npm:^3.0.0"
+    uuid: "npm:^9.0.1"
+  checksum: 10c0/57656102b6bfc7d4c3b84a6c27038fd8b6a9708c0e8a18526cdcb9e369ca229639503f7d26ef720c15644ab9230f019a422b39837e1bee90fa911afbd1a1b90d
   languageName: node
   linkType: hard
 

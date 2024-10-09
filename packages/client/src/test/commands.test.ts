@@ -4,14 +4,23 @@ import * as sinon from 'sinon'
 import { ShellExecution, ShellQuotedString, ShellQuoting, Task, Uri, workspace } from 'vscode'
 import { initProject, runAllTests, runProgram, runTest, startRepl } from '../commands'
 import { activate, getDocumentURI, getFolderURI } from './helper'
+import { DEFAULT_GAME_PORT, DEFAULT_REPL_PORT } from '../../../server/src/settings'
 
 suite('Should run commands', () => {
   const folderURI = getFolderURI()
   const pepitaURI = getDocumentURI('pepita.wlk')
 
+  const configuration = {
+    gamePortNumber: DEFAULT_GAME_PORT,
+    replPortNumber: DEFAULT_REPL_PORT,
+    'cli-path': '/usr/bin/wollok-ts-cli',
+    'dynamicDiagram.dynamicDiagramDarkMode': true,
+    'dynamicDiagram.openDynamicDiagramOnRepl': true,
+  }
+
   beforeEach(() => {
     sinon.stub(workspace, 'getConfiguration').value((_configuration: string) => ({
-      get: (_value: string) => '/usr/bin/wollok-ts-cli',
+      get: (_value: string) => configuration[_value],
     }))
   })
 
@@ -40,6 +49,8 @@ suite('Should run commands', () => {
       [
         'run',
         '-g',
+        '--port',
+        DEFAULT_GAME_PORT.toString(),
         quoted('file.program'),
         '--skipValidations',
         '-p',
@@ -91,6 +102,8 @@ suite('Should run commands', () => {
           'repl',
           quoted(pepitaURI.fsPath),
           '--skipValidations',
+          '--port',
+          DEFAULT_REPL_PORT.toString(),
           '--darkMode',
           '', // do not open dynamic diagram
           '-p',

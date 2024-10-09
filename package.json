@@ -189,6 +189,7 @@
           "scope": "resource",
           "type": "string",
           "description": "Path to Wollok-CLI.",
+          "default": "wollok",
           "order": 10
         },
         "wollokLSP.language": {
@@ -221,6 +222,20 @@
           "default": "off",
           "description": "Traces the communication between VS Code and the language server.",
           "order": 20
+        },
+        "wollokLSP.replPortNumber": {
+          "scope": "resource",
+          "type": "number",
+          "default": 3000,
+          "description": "Port number that will be used when running the REPL.",
+          "order": 25
+        },
+        "wollokLSP.gamePortNumber": {
+          "scope": "resource",
+          "type": "number",
+          "default": 4200,
+          "description": "Port number that will be used when running a game.",
+          "order": 26
         },
         "wollokLSP.dynamicDiagram.openDynamicDiagramOnRepl": {
           "scope": "resource",
@@ -328,7 +343,7 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "wollok-ts": "4.1.6"
+    "wollok-ts": "4.1.8"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",

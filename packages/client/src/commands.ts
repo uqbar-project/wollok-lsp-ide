@@ -9,11 +9,13 @@ import {
   window,
   workspace,
 } from 'vscode'
+import { DEFAULT_GAME_PORT, DEFAULT_REPL_PORT } from '../../server/src/settings'
 import {
   asShellString,
   fsToShell,
 } from './platform-string-utils'
 import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode, COMMAND_INIT_PROJECT } from './shared-definitions'
+import { getLSPMessage } from './messages'
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
   context.subscriptions.push(registerCLICommand(COMMAND_START_REPL, startRepl))
@@ -37,11 +39,14 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
  */
 
 export const runProgram = (isGame = false) => ([fqn]: [string]): Task => {
+  const wollokLSPConfiguration = workspace.getConfiguration(wollokLSPExtensionCode)
+  const portNumber = wollokLSPConfiguration.get('gamePortNumber') as number ?? DEFAULT_GAME_PORT
+
   // Terminate previous terminal session
   vscode.commands.executeCommand('workbench.action.terminal.killAll')
   return wollokCLITask('run program', `Wollok run ${isGame ? 'game' : 'program'}`, [
     'run',
-    ...isGame ? ['-g'] : [],
+    ...isGame ? ['-g', '--port', portNumber.toString()] : [],
     asShellString(fqn),
     '--skipValidations',
   ])
@@ -74,16 +79,16 @@ const getCurrentFileName = (document: vscode.TextDocument | undefined) =>
 const getFiles = (document: vscode.TextDocument | undefined): [ReturnType<typeof fsToShell>] | []  =>
   document ? [fsToShell(document.uri.fsPath)] : []
 
-const DYNAMIC_DIAGRAM_URI = 'http://localhost:3000/'
-
 export const startRepl = (): Task => {
   const currentDocument = window.activeTextEditor?.document
   const wollokLSPConfiguration = workspace.getConfiguration(wollokLSPExtensionCode)
   const dynamicDiagramDarkMode = wollokLSPConfiguration.get('dynamicDiagram.dynamicDiagramDarkMode') as boolean
   const openDynamicDiagram = wollokLSPConfiguration.get('dynamicDiagram.openDynamicDiagramOnRepl') as boolean
   const millisecondsToOpenDynamicDiagram = wollokLSPConfiguration.get('dynamicDiagram.millisecondsToOpenDynamicDiagram') as number
+  const portNumber = wollokLSPConfiguration.get('replPortNumber') as number ?? DEFAULT_REPL_PORT
+  const DYNAMIC_DIAGRAM_URI = `http://localhost:${portNumber}/`
 
-  const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations', dynamicDiagramDarkMode ? '--darkMode' : '', openDynamicDiagram ? '': '--skipDiagram']
+  const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations', '--port', portNumber.toString(), dynamicDiagramDarkMode ? '--darkMode' : '', openDynamicDiagram ? '': '--skipDiagram']
   // Terminate previous tasks
   vscode.commands.executeCommand('workbench.action.terminal.killAll')
   const replTask = wollokCLITask('repl', `Wollok Repl: ${getCurrentFileName(currentDocument)}`, cliCommands)
@@ -114,11 +119,11 @@ const registerCLICommand = (
   )
 
 const wollokCLITask = (task: string, name: string, cliCommands: Array<string | vscode.ShellQuotedString>) => {
-  const wollokCliPath: string = workspace.getConfiguration(wollokLSPExtensionCode).get('cli-path')
-  // TODO: i18n - but it's in the server
+  const wollokLSPConfiguration = workspace.getConfiguration(wollokLSPExtensionCode)
+  const wollokCliPath: string = wollokLSPConfiguration.get('cli-path')
   if (!wollokCliPath) {
     vscode.commands.executeCommand('workbench.action.openSettings', wollokLSPExtensionCode)
-    throw new Error('Missing configuration WollokLSP/cli-path. Set the path where wollok-ts-cli is located in order to run Wollok tasks')
+    throw new Error(getLSPMessage('missingWollokCliPath'))
   }
 
   const folder = workspace.workspaceFolders[0]
