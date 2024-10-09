@@ -1,8 +1,18 @@
 # Changelog
 
+## v0.3.6
+- Navigate to properties ⛵
+- Add wollok init command 🌱
+- Started to enhance i18n messages 🌐
+- Added configuration for REPL & game ports 🛠️
+- Fixed coverage 🛡️
+- Update Wollok-TS 4.1.8 ⬆️
+- VSC minimum version 1.88 required 🆙
+
 ## v0.3.5
 - Habemus **Debugger**! 🐞
 - Update Wollok-TS 4.1.6 ⬆️
+- Published in Open VSX 🌈
 
 ## v0.3.4
 - Fixes quoting for shell tasks (run, repl, tests, etc.) 🙌

@@ -29,7 +29,7 @@
   ],
   "icon": "images/extension/wollokIdeLogo.png",
   "engines": {
-    "vscode": "^1.80.0"
+    "vscode": "^1.88.0"
   },
   "activationEvents": [
     "onLanguage:wollok"
