@@ -5,7 +5,7 @@
   "author": "Uqbar Foundation",
   "license": "LGPL-3.0",
   "publisher": "uqbar",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/uqbar-project/wollok-lsp-ide.git"
@@ -351,7 +351,7 @@
     "@typescript-eslint/eslint-plugin": "^5.53.0",
     "@typescript-eslint/parser": "^5.53.0",
     "@vscode/test-cli": "^0.0.10",
-    "@vscode/vsce": "^3.0.0",
+    "@vscode/vsce": "^3.1.1",
     "c8": "^10.1.2",
     "cpy-cli": "^5.0.0",
     "esbuild": "^0.23.1",

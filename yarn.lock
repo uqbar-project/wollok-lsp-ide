@@ -1751,9 +1751,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/vsce@npm:^3.0.0":
-  version: 3.1.0
-  resolution: "@vscode/vsce@npm:3.1.0"
+"@vscode/vsce@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "@vscode/vsce@npm:3.1.1"
   dependencies:
     "@azure/identity": "npm:^4.1.0"
     "@vscode/vsce-sign": "npm:^2.0.0"
@@ -1785,7 +1785,7 @@ __metadata:
       optional: true
   bin:
     vsce: vsce
-  checksum: 10c0/104004796162c95f1cb92555b634f4d1df13597082b5e2f54014c150e191a1585c1f8b9c547fa5f362233376f8adb578e90b4ec937f9974c409913d09b6bc15c
+  checksum: 10c0/f583457bf1f7e51f0d79c45895e47f559dab1fcdc192e7053df96e6891743112ed4d0fa29830774ba04fabe55da7f262c1805fe35ceca93b04b965b2935c8e3e
   languageName: node
   linkType: hard
 
@@ -8918,7 +8918,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^5.53.0"
     "@typescript-eslint/parser": "npm:^5.53.0"
     "@vscode/test-cli": "npm:^0.0.10"
-    "@vscode/vsce": "npm:^3.0.0"
+    "@vscode/vsce": "npm:^3.1.1"
     c8: "npm:^10.1.2"
     cpy-cli: "npm:^5.0.0"
     esbuild: "npm:^0.23.1"

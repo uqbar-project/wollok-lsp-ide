@@ -25,6 +25,10 @@ if ! grep -q -F $TAG "CHANGELOG.md"; then
 fi
 
 echo "Everything ok. Publishing $TAG in Marketplace..."
-npm i -g vsce
 vsce publish --no-dependencies
+if [ $? -ne 0 ]; then
+  echo "Error while publishing component. Please check the previous error"
+  exit 5
+fi
+
 echo "Check new version in https://marketplace.visualstudio.com/manage/publishers/uqbar"
