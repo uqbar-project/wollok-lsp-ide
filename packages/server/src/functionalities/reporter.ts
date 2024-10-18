@@ -11,8 +11,8 @@ export const SERVER_PROCESSING_REQUEST = 'server_processing_request'
 export const ERROR_MISSING_WORKSPACE_FOLDER = 'missing_workspace_folder'
 
 const lspMessagesEn = {
-  [COMMAND_RUN_GAME]: 'Run Game',
-  [COMMAND_RUN_PROGRAM]: 'Run Program',
+  [COMMAND_RUN_GAME]: 'Run game',
+  [COMMAND_RUN_PROGRAM]: 'Run program',
   [COMMAND_START_REPL]: 'Run in REPL',
   [COMMAND_RUN_ALL_TESTS]: 'Run all tests',
   [COMMAND_RUN_TEST]: 'Run test',
