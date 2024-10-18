@@ -2,7 +2,8 @@ import { CodeLens, CodeLensParams, Position, Range } from 'vscode-languageserver
 import { Describe, Node, Package, Test, Program, Environment, is, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Class, Singleton, Entity } from 'wollok-ts'
 import { getWollokFileExtension, packageFromURI, toVSCRange } from '../utils/text-documents'
 import { removeQuotes } from '../utils/strings'
-import { COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../shared-definitions'
+import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../shared-definitions'
+import { COMMAND_EXECUTE, getLSPMessage } from './reporter'
 
 export const codeLenses = (environment: Environment) => (params: CodeLensParams): CodeLens[] | null => {
   const fileExtension = getWollokFileExtension(params.textDocument.uri)
@@ -23,8 +24,8 @@ export const codeLenses = (environment: Environment) => (params: CodeLensParams)
 
 export const getProgramCodeLenses = (file: Package): CodeLens[] =>
   file.members.filter(is(Program)).flatMap(program => [
-    buildLens(program, COMMAND_RUN_GAME, 'Run game'),
-    buildLens(program, COMMAND_RUN_PROGRAM, 'Run program'),
+    buildLens(program, COMMAND_RUN_GAME, getLSPMessage(COMMAND_RUN_GAME)),
+    buildLens(program, COMMAND_RUN_PROGRAM, getLSPMessage(COMMAND_RUN_PROGRAM)),
   ])
 
 
@@ -43,7 +44,7 @@ export const getTestCodeLenses = (file: Package): CodeLens[] => {
 
 export const getWollokFileCodeLenses = (file: Package): CodeLens[] =>
   file.members.filter(isWollokDefinition).map(definition =>
-    buildLens(definition, COMMAND_START_REPL, 'Run in REPL'),
+    buildLens(definition, COMMAND_START_REPL, getLSPMessage(COMMAND_START_REPL)),
   )
 
 /************************************************************************************************/
@@ -60,7 +61,7 @@ const buildRunAllTestsCodeLens = (file: Package): CodeLens =>
   buildTestsCodeLens(
     Range.create(Position.create(0, 0), Position.create(0, 0)),
     'wollok.run.test',
-    'Run all tests',
+    getLSPMessage(COMMAND_RUN_ALL_TESTS),
     [null, file.fileName!, null, null]
   )
 
@@ -72,7 +73,7 @@ const buildTestCodeLens = (file: Package, node: Test | Describe): CodeLens => {
   return buildTestsCodeLens(
     toVSCRange(node.sourceMap!),
     COMMAND_RUN_TEST,
-    `Run ${node.is(Test) ? 'test' : 'describe'}`,
+    getLSPMessage(COMMAND_EXECUTE, [`${node.is(Test) ? 'test' : 'describe'}`]),
     [
       null,
       file.fileName!,
