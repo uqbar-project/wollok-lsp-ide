@@ -44,7 +44,7 @@ export const runProgram = (isGame = false) => ([fqn]: [string]): Task => {
 
   // Terminate previous terminal session
   vscode.commands.executeCommand('workbench.action.terminal.killAll')
-  return wollokCLITask('run program', `Wollok run ${isGame ? 'game' : 'program'}`, [
+  return wollokCLITask('run program', `Wollok ${getLSPMessage(isGame ? COMMAND_RUN_GAME : COMMAND_RUN_PROGRAM)}`, [
     'run',
     ...isGame ? ['-g', '--port', portNumber.toString()] : [],
     asShellString(fqn),
@@ -53,7 +53,7 @@ export const runProgram = (isGame = false) => ([fqn]: [string]): Task => {
 }
 
 export const runTest = ([filter, file, describe, test]: [string|null, string|null, string|null, string|null]): Task =>
-  wollokCLITask('run tests', 'Wollok run test', [
+  wollokCLITask('run tests', `Wollok ${getLSPMessage(COMMAND_RUN_TEST)}`, [
     'test',
     ...filter ? [asShellString(filter)] : [],
     ...file ? ['-f', asShellString(file)] : [],
@@ -63,7 +63,7 @@ export const runTest = ([filter, file, describe, test]: [string|null, string|nul
   ])
 
 export const runAllTests = (): Task =>
-  wollokCLITask('run tests', 'Wollok run all tests', [
+  wollokCLITask('run tests', `Wollok ${getLSPMessage(COMMAND_RUN_ALL_TESTS)}`, [
     'test',
     '--skipValidations',
   ])
