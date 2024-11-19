@@ -1,4 +1,4 @@
-import { DebugSession, InitializedEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread, Variable } from '@vscode/debugadapter'
+import { DebugSession, InitializedEvent, OutputEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread, Variable } from '@vscode/debugadapter'
 import { DebugProtocol } from '@vscode/debugprotocol'
 import path = require('path')
 import * as vscode from 'vscode'
@@ -166,6 +166,13 @@ export class WollokDebugSession extends DebugSession {
       this.stoppedNode = state.next
       this.sendEvent(new StoppedEvent(stoppedReason, WollokDebugSession.THREAD_ID))
     } else {
+      if(state.error) {
+        this.sendEvent(new OutputEvent(state.error.message, 'stderr'))
+      } else {
+        if(state.done) {
+          this.sendEvent(new OutputEvent('Finished executing without errors', 'stdout'))
+        }
+      }
       this.sendEvent(new TerminatedEvent())
     }
   }

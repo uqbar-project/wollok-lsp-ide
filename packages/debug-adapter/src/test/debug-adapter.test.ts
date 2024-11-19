@@ -6,6 +6,7 @@ import { DebugProtocol } from '@vscode/debugprotocol'
 const DEBUG_ADAPTER = path.resolve(__dirname, 'start-debug-session.js')
 const FIXTURES_ROOT = path.resolve(__dirname, '../../../../packages/debug-adapter/src/test/fixtures')
 const PROGRAM = path.resolve(FIXTURES_ROOT, 'aProgram.wpgm')
+const TEST_FILE = path.resolve(FIXTURES_ROOT, 'aTest.wtest')
 const WLK = path.resolve(FIXTURES_ROOT, 'anObject.wlk')
 
 describe('debug adapter', function () {
@@ -130,6 +131,40 @@ describe('debug adapter', function () {
           assert(actualVariables.map(variable => variable.name).includes(expectedVariable))
         }
       }))
+    })
+  })
+
+  describe('finished execution', function (){
+    it('finishing without errors', async function (){
+      await Promise.all([
+        dc.launch({
+            "stopOnEntry": false,
+            "file": TEST_FILE,
+            "target": {
+              "describe": "some tests",
+              "test": "does not break",
+            },
+          }),
+          dc.configurationDoneRequest(),
+      ])
+        await dc.assertOutput('stdout', "Finished executing without errors", 1000)
+        await dc.waitForEvent('terminated', 1000)
+    })
+
+    it('finishing with errors', async function (){
+      await Promise.all([
+        dc.launch({
+            "stopOnEntry": false,
+            "file": TEST_FILE,
+            "target": {
+              "describe": "some tests",
+              "test": "breaks",
+            },
+          }),
+          dc.configurationDoneRequest(),
+      ])
+        await dc.assertOutput('stderr', "My exception message", 1000)
+        await dc.waitForEvent('terminated', 1000)
     })
   })
 })
