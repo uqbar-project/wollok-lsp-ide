@@ -171,9 +171,9 @@ export class WollokDebugSession extends DebugSession {
       this.sendEvent(new StoppedEvent(stoppedReason, WollokDebugSession.THREAD_ID))
     } else {
       if(state.error) {
-        this.sendEvent(new OutputEvent(state.error.message, 'stderr', {
+        this.sendEvent(new OutputEvent(state.error.message, 'stderr', this.stoppedNode && {
           source: this.sourceFromNode(this.stoppedNode),
-          ...this.stoppedNode.sourceMap && this.positionConverter.convertPositionToClient(this.stoppedNode.sourceMap?.start),
+          ...this.positionConverter.convertPositionToClient(this.stoppedNode.sourceMap?.start),
         }))
       } else {
           this.sendEvent(new OutputEvent('Finished executing without errors', 'stdout'))
