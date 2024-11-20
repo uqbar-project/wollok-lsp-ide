@@ -3,6 +3,7 @@ import { DebugProtocol } from '@vscode/debugprotocol'
 import path = require('path')
 import * as vscode from 'vscode'
 import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, Environment, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, is, LIST_MODULE, Node, NUMBER_MODULE, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
+import { WollokPositionConverter } from './utils/wollok-position-converter'
 export class WollokDebugSession extends DebugSession {
   protected static readonly THREAD_ID = 1
   protected static WOLLOK_PATH_SEPARATOR = '/'
@@ -17,6 +18,7 @@ export class WollokDebugSession extends DebugSession {
   protected configurationDone: Promise<void>
   protected notifyConfigurationDone: () => void
 
+  protected positionConverter: WollokPositionConverter
 
   constructor(protected workspace: typeof vscode.workspace){
     super()
@@ -30,7 +32,7 @@ export class WollokDebugSession extends DebugSession {
     this.notifyConfigurationDone()
   }
 
-  protected initializeRequest(response: DebugProtocol.InitializeResponse, _args: DebugProtocol.InitializeRequestArguments): void {
+  protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
     // capabilities
     response.body = {
       ...response.body,
@@ -39,6 +41,8 @@ export class WollokDebugSession extends DebugSession {
       supportsConfigurationDoneRequest: true,
       supportsSingleThreadExecutionRequests: false,
     }
+
+    this.positionConverter = new WollokPositionConverter(args.linesStartAt1, args.columnsStartAt1)
 
     // initialize wollok interpreter
     const debuggableFileExtensions = [WOLLOK_FILE_EXTENSION, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION]
@@ -137,10 +141,7 @@ export class WollokDebugSession extends DebugSession {
       response.body = {
         breakpoints: sentences.map(sentence => ({
             verified: true,
-            line: sentence.sourceMap.start.line,
-            column: sentence.sourceMap.start.column,
-            endColumn: sentence.sourceMap.end.column,
-            endLine: sentence.sourceMap.end.line,
+            ...this.positionConverter.convertSourceMapToClient(sentence.sourceMap),
             source: this.sourceFromNode(sentence),
           })
         ),
@@ -172,8 +173,7 @@ export class WollokDebugSession extends DebugSession {
       if(state.error) {
         this.sendEvent(new OutputEvent(state.error.message, 'stderr', {
           source: this.sourceFromNode(this.stoppedNode),
-          line: this.stoppedNode.sourceMap?.start.line,
-          column: this.stoppedNode.sourceMap?.start.column,
+          ...this.stoppedNode.sourceMap && this.positionConverter.convertPositionToClient(this.stoppedNode.sourceMap?.start),
         }))
       } else {
           this.sendEvent(new OutputEvent('Finished executing without errors', 'stdout'))
@@ -224,10 +224,7 @@ export class WollokDebugSession extends DebugSession {
     return {
       id: this.frames.getIdFor(frame),
       name: frame.description,
-      line: currentNode.sourceMap?.start.line,
-      column: currentNode.sourceMap?.start.column,
-      endColumn: currentNode.sourceMap?.end.column,
-      endLine: currentNode.sourceMap?.end.line,
+      ...currentNode.sourceMap && this.positionConverter.convertSourceMapToClient(currentNode.sourceMap),
       source: !!currentNode.sourceFileName && this.sourceFromNode(currentNode),
     }
   }
