@@ -164,14 +164,19 @@ export class WollokDebugSession extends DebugSession {
     const stoppedReason = overrideStoppedReason || (state.done ? state.error ? 'exception' : 'done' : 'breakpoint')
     if(!state.done && 'next' in state) {
       this.stoppedNode = state.next
+      if(this.stoppedNode.isSynthetic) {
+        return this.moveExecution(() => this.executionDirector.stepOver(), overrideStoppedReason)
+      }
       this.sendEvent(new StoppedEvent(stoppedReason, WollokDebugSession.THREAD_ID))
     } else {
       if(state.error) {
-        this.sendEvent(new OutputEvent(state.error.message, 'stderr'))
+        this.sendEvent(new OutputEvent(state.error.message, 'stderr', {
+          source: this.sourceFromNode(this.stoppedNode),
+          line: this.stoppedNode.sourceMap?.start.line,
+          column: this.stoppedNode.sourceMap?.start.column,
+        }))
       } else {
-        if(state.done) {
           this.sendEvent(new OutputEvent('Finished executing without errors', 'stdout'))
-        }
       }
       this.sendEvent(new TerminatedEvent())
     }
