@@ -75,6 +75,39 @@ describe('debug adapter', function () {
         { column: 3, path: PROGRAM, line: 4, verified: true },
       )
     })
+
+    it('in-line breakpoint locations', async () => {
+      await Promise.all([
+        dc.launch({
+          "stopOnEntry": true,
+          "file": PROGRAM,
+          "target": {
+            "program": "aWollokProgram",
+          },
+        }),
+        dc.configurationDoneRequest(),
+      ])
+
+      const response = await dc.send('breakpointLocations', {
+        source: { path: PROGRAM },
+        line: 4,
+      })
+
+      const expectedBreakpoints = [
+        { line: 4, column: 3, lineEnd: 4, columnEnd: 21 },
+        { line: 4, column: 15, lineEnd: 5, columnEnd: 1 },
+      ]
+
+      assert.equal(response.body.breakpoints.length, expectedBreakpoints.length)
+      for(const location of response.body.breakpoints) {
+        assert(expectedBreakpoints.some(expected =>
+          expected.line === location.line &&
+          expected.column === location.column &&
+          expected.lineEnd === location.lineEnd &&
+          expected.columnEnd === location.columnEnd
+        ))
+      }
+    })
   })
 
   describe('stopped at breakpoint', function () {

@@ -29,6 +29,6 @@ export class WollokPositionConverter {
   }
 
   convertDebuggerColumnToClient(column: number): number {
-    return this.columnStartsAt1 ? column : column - 1
+    return this.columnStartsAt1 ? column > 0 ? column : 1 : column - 1
   }
 }

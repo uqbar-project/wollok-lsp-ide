@@ -36,7 +36,7 @@ export class WollokDebugSession extends DebugSession {
     // capabilities
     response.body = {
       ...response.body,
-      // ToDo: supportsBreakpointLocationsRequest: true
+      supportsBreakpointLocationsRequest: true,
       supportsDelayedStackTraceLoading: true,
       supportsConfigurationDoneRequest: true,
       supportsSingleThreadExecutionRequests: false,
@@ -119,30 +119,33 @@ export class WollokDebugSession extends DebugSession {
   }
 
   protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments, _request?: DebugProtocol.Request): void {
-    const sourcePath = this.toWollokPath(args.source.path)
-    const breakpointsPackage = this.environment.descendants.find<Package>(function (node): node is Package {
-      return node.is(Package) && node.sourceFileName === sourcePath
-    })
+    const breakpointsPackage = this.packageFromSource(args.source as Source)
 
+    const breakpointsToRemove = []
     this.executionDirector.breakpoints.forEach(breakpointedNode => {
-      if(breakpointedNode.sourceFileName === breakpointsPackage.sourceFileName) {
-        this.executionDirector.removeBreakpoint(breakpointedNode)
+      if(breakpointedNode.parentPackage.id === breakpointsPackage.id) {
+        breakpointsToRemove.push(breakpointedNode)
       }
     })
+    breakpointsToRemove.forEach(breapointedNode => this.executionDirector.removeBreakpoint(breapointedNode))
 
-    if(breakpointsPackage){
-      const sentences = breakpointsPackage.descendants.filter<Sentence>(function (node): node is Sentence {
-        return node.is(Sentence) && node.parent.is(Body) && args.breakpoints.map(breakpoint => breakpoint.line).includes(node.sourceMap?.start.line)
+    if(breakpointsPackage) {
+      const nodesToBreakAt = breakpointsPackage.descendants.filter((node: Node) => {
+        return args.breakpoints.some(breakpoint =>
+          breakpoint.column ?
+            this.positionConverter.convertDebuggerLineToClient(node.sourceMap?.start.line) === breakpoint.line && this.positionConverter.convertDebuggerColumnToClient(node.sourceMap?.start.column) === breakpoint.column :
+            node.is(Sentence) && node.parent.is(Body) && this.positionConverter.convertDebuggerLineToClient(node.sourceMap?.start.line) === breakpoint.line
+        )
       })
-      sentences.forEach(sentence => {
+      nodesToBreakAt.forEach(sentence => {
         this.executionDirector.addBreakpoint(sentence)
       })
 
       response.body = {
-        breakpoints: sentences.map(sentence => ({
+        breakpoints: nodesToBreakAt.map(node => ({
             verified: true,
-            ...this.positionConverter.convertSourceMapToClient(sentence.sourceMap),
-            source: this.sourceFromNode(sentence),
+            ...this.positionConverter.convertSourceMapToClient(node.sourceMap),
+            source: this.sourceFromNode(node),
           })
         ),
 
@@ -151,9 +154,6 @@ export class WollokDebugSession extends DebugSession {
     this.sendResponse(response)
   }
 
-  protected setExceptionBreakPointsRequest(response: DebugProtocol.SetExceptionBreakpointsResponse, _args: DebugProtocol.SetExceptionBreakpointsArguments, _request?: DebugProtocol.Request): void {
-    this.sendResponse(response)
-  }
 
   protected moveExecution(action: () => ExecutionState<unknown>, overrideStoppedReason?: string): void{
     const state = action()
@@ -171,10 +171,7 @@ export class WollokDebugSession extends DebugSession {
       this.sendEvent(new StoppedEvent(stoppedReason, WollokDebugSession.THREAD_ID))
     } else {
       if(state.error) {
-        this.sendEvent(new OutputEvent(state.error.message, 'stderr', this.stoppedNode && {
-          source: this.sourceFromNode(this.stoppedNode),
-          ...this.positionConverter.convertPositionToClient(this.stoppedNode.sourceMap?.start),
-        }))
+        this.sendEvent(new OutputEvent(state.error.message, 'stderr'))
       } else {
           this.sendEvent(new OutputEvent('Finished executing without errors', 'stdout'))
       }
@@ -227,6 +224,23 @@ export class WollokDebugSession extends DebugSession {
       ...currentNode.sourceMap && this.positionConverter.convertSourceMapToClient(currentNode.sourceMap),
       source: !!currentNode.sourceFileName && this.sourceFromNode(currentNode),
     }
+  }
+
+  protected breakpointLocationsRequest(response: DebugProtocol.BreakpointLocationsResponse, args: DebugProtocol.BreakpointLocationsArguments, _request?: DebugProtocol.Request): void {
+    const pkg = this.packageFromSource(args.source as Source)
+    const breakpoints = pkg.descendants.filter(node => {
+      if(!node.sourceMap) return false
+      const nodeLocation = this.positionConverter.convertSourceMapToClient(node.sourceMap!)
+      return args.endLine ?
+        nodeLocation.line >= args.line && nodeLocation.lineEnd <= args.endLine && nodeLocation.column >= args.column && nodeLocation.columnEnd <= args.endColumn :
+        nodeLocation.line === args.line
+    }).map(node => this.positionConverter.convertSourceMapToClient(node.sourceMap!))
+
+    response.body = {
+      breakpoints,
+    }
+
+    this.sendResponse(response)
   }
 
   protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments, _request?: DebugProtocol.Request): void {
@@ -295,6 +309,14 @@ export class WollokDebugSession extends DebugSession {
 
   private sourceFromNode<T extends Node>(node: T): Source {
     return new Source(node.sourceFileName.split('/').pop()!, this.toClientPath(node.sourceFileName))
+  }
+
+  private packageFromSource(source: Source): Package {
+    const pkg = this.environment.descendants.find(node => node.is(Package) && this.toWollokPath(source.path) === node.sourceFileName) as Package | undefined
+    if(!pkg) {
+      throw new Error(`Could not find package for source ${source.path}`)
+    }
+    return pkg
   }
 }
 
