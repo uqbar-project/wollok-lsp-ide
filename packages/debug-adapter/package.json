@@ -23,7 +23,6 @@
     "@vscode/debugadapter-testsupport": "^1.67.0",
     "mocha": "^10.7.3",
     "nyc": "^17.0.0",
-    "ts-mocha": "^10.0.0",
-    "wollok-ts": "4.1.6"
+    "ts-mocha": "^10.0.0"
   }
 }
