@@ -1,12 +1,12 @@
 import { DebugSession, InitializedEvent, OutputEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread, Variable } from '@vscode/debugadapter'
 import { DebugProtocol } from '@vscode/debugprotocol'
-import path = require('path')
 import * as vscode from 'vscode'
-import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, interprete, is, LIST_MODULE, Node, NUMBER_MODULE, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Interpreter } from 'wollok-ts'
+import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, interprete, is, LIST_MODULE, Node, NUMBER_MODULE, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Interpreter, Describe } from 'wollok-ts'
+import { LaunchTargetArguments, Target, targetFinder } from './target-finders'
+import { toClientPath, toWollokPath } from './utils/path-converters'
 import { WollokPositionConverter } from './utils/wollok-position-converter'
 export class WollokDebugSession extends DebugSession {
   protected static readonly THREAD_ID = 1
-  protected static WOLLOK_PATH_SEPARATOR = '/'
 
   protected interpreter: DirectedInterpreter
   protected executionDirector: ExecutionDirector<unknown>
@@ -49,7 +49,7 @@ export class WollokDebugSession extends DebugSession {
       const wollokPackages = await Promise.all(files.map(file =>
 
         new Promise<FileContent>(resolve => this.workspace.openTextDocument(file).then(textDocument => {
-          resolve({ name: this.toWollokPath(textDocument.uri.fsPath), content: textDocument.getText() })
+          resolve({ name: toWollokPath(textDocument.uri.fsPath), content: textDocument.getText() })
         }))
       ))
 
@@ -61,28 +61,11 @@ export class WollokDebugSession extends DebugSession {
   }
 
   protected launchRequest(response: DebugProtocol.LaunchResponse, args: WollokLaunchArguments, _request?: DebugProtocol.Request): void {
-    const containerPackage = this.interpreter.evaluation.environment.descendants.filter<Package>(is(Package)).find(pkg => pkg.sourceFileName === this.toWollokPath(args.file))
+    let container: Target
 
-    if(!containerPackage){
-      this.sendErrorResponse(response, 404, 'Could not find target file')
-      return
-    }
-
-    const container: Test | Program | undefined = containerPackage.descendants.find<Test|Program>(function (node: Node): node is Test | Program {
-      if('test' in args.target) {
-        const isPossibleTargetTest = node.is(Test) && node.name === `"${args.target.test}"`
-        if(args.target.describe) {
-          // possible bug: recursive describes?
-          return isPossibleTargetTest && node.parent.name === `"${args.target.describe}"`
-        } else {
-          return isPossibleTargetTest
-        }
-      } else {
-        return node.is(Program) && node.name === args.target.program
-      }
-    })
-
-    if(!container){
+    try  {
+      container = targetFinder(args.target).findTarget(this.interpreter.evaluation.environment)
+    } catch(_error) {
       this.sendErrorResponse(response, 404, 'Could not find target test or program')
       return
     }
@@ -100,14 +83,12 @@ export class WollokDebugSession extends DebugSession {
       this.sendResponse(response)
       this.moveExecution(() => {
         return this.executionDirector.resume(
-          args.stopOnEntry ? node => container.body.sentences[0]?.id === node.id : undefined
+          args.stopOnEntry ? node => (container as any).body.sentences[0]?.id === node.id : undefined
         )
       }, args.stopOnEntry ? 'entry' : undefined)
     })
   }
-
   protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
-
     // runtime supports no threads so just return a default thread.
     response.body = {
       threads: [
@@ -272,14 +253,6 @@ export class WollokDebugSession extends DebugSession {
     this.sendResponse(response)
   }
 
-  protected toWollokPath(aPath: string): string {
-    return aPath.replace(new RegExp( '\\' + path.sep, 'g'), WollokDebugSession.WOLLOK_PATH_SEPARATOR)
-  }
-
-  protected toClientPath(aWollokPath: string): string {
-    return aWollokPath.replace(new RegExp( '\\' + WollokDebugSession.WOLLOK_PATH_SEPARATOR, 'g'), path.sep)
-  }
-
   protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments, _request?: DebugProtocol.Request): void {
     const variables: DebugProtocol.VariablesResponse['body']['variables'] = []
     const context = this.contexts.get(args.variablesReference)
@@ -324,11 +297,11 @@ export class WollokDebugSession extends DebugSession {
   }
 
   private sourceFromNode<T extends Node>(node: T): Source {
-    return new Source(node.sourceFileName.split('/').pop()!, this.toClientPath(node.sourceFileName))
+    return new Source(node.sourceFileName.split('/').pop()!, toClientPath(node.sourceFileName))
   }
 
   private packageFromSource(source: Source): Package {
-    const pkg = this.interpreter.evaluation.environment.descendants.find(node => node.is(Package) && this.toWollokPath(source.path) === node.sourceFileName) as Package | undefined
+    const pkg = this.interpreter.evaluation.environment.descendants.find(node => node.is(Package) && toWollokPath(source.path) === node.sourceFileName) as Package | undefined
     if(!pkg) {
       throw new Error(`Could not find package for source ${source.path}`)
     }
@@ -357,11 +330,7 @@ function getLabel(value: RuntimeObject): string {
 
 interface WollokLaunchArguments extends DebugProtocol.LaunchRequestArguments {
   stopOnEntry?: boolean
-  file: string,
-  target: {
-    test: string,
-    describe?: string
-  } | { program: string }
+  target: LaunchTargetArguments
 }
 
 class WollokIdMap<T extends { id: string }> extends Map<number, T> {

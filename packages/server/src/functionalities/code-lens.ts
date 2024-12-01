@@ -2,7 +2,7 @@ import { CodeLens, CodeLensParams, Position, Range } from 'vscode-languageserver
 import { Describe, Node, Package, Test, Program, Environment, is, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Class, Singleton, Entity } from 'wollok-ts'
 import { getWollokFileExtension, packageFromURI, toVSCRange } from '../utils/text-documents'
 import { removeQuotes } from '../utils/strings'
-import { COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../shared-definitions'
+import { COMMAND_DEBUG, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../shared-definitions'
 
 export const codeLenses = (environment: Environment) => (params: CodeLensParams): CodeLens[] | null => {
   const fileExtension = getWollokFileExtension(params.textDocument.uri)
@@ -25,6 +25,7 @@ export const getProgramCodeLenses = (file: Package): CodeLens[] =>
   file.members.filter(is(Program)).flatMap(program => [
     buildLens(program, COMMAND_RUN_GAME, 'Run game'),
     buildLens(program, COMMAND_RUN_PROGRAM, 'Run program'),
+    buildLens(program, COMMAND_DEBUG, 'Debug program'),
   ])
 
 
@@ -32,12 +33,11 @@ export const getTestCodeLenses = (file: Package): CodeLens[] => {
   const runAllTests = buildRunAllTestsCodeLens(file)
 
   return [
-    runAllTests
-    ,
+    runAllTests,
     ...file
       .descendants
       .filter(isTesteable)
-      .map(node => buildTestCodeLens(file, node)),
+      .flatMap(node => buildTestCodeLens(file, node)),
   ]
 }
 
@@ -57,7 +57,7 @@ const isWollokDefinition = (node: Node): node is Class | Singleton =>
   node.is(Class) || node.is(Singleton)
 
 const buildRunAllTestsCodeLens = (file: Package): CodeLens =>
-  buildTestsCodeLens(
+  buildCommandCodeLens(
     Range.create(Position.create(0, 0), Position.create(0, 0)),
     'wollok.run.test',
     'Run all tests',
@@ -65,24 +65,34 @@ const buildRunAllTestsCodeLens = (file: Package): CodeLens =>
   )
 
 
-const buildTestCodeLens = (file: Package, node: Test | Describe): CodeLens => {
+const buildTestCodeLens = (file: Package, node: Test | Describe): CodeLens[] => {
   const describe = node.is(Describe) ? node.name : node.parent?.is(Describe) ? node.parent.name : null
   const test = node.is(Test) ? node.name : null
 
-  return buildTestsCodeLens(
-    toVSCRange(node.sourceMap!),
-    COMMAND_RUN_TEST,
-    `Run ${node.is(Test) ? 'test' : 'describe'}`,
-    [
-      null,
-      file.fileName!,
-      describe ? removeQuotes(describe) : null,
-      test ? removeQuotes(test) : null,
-    ]
-  )
+  return [
+    buildCommandCodeLens(
+      toVSCRange(node.sourceMap!),
+      COMMAND_RUN_TEST,
+      `Run ${node.is(Test) ? 'test' : 'describe'}`,
+      [
+        null,
+        file.fileName!,
+        describe ? removeQuotes(describe) : null,
+        test ? removeQuotes(test) : null,
+      ]
+    ),
+    buildCommandCodeLens(
+      toVSCRange(node.sourceMap!),
+      COMMAND_DEBUG,
+      `Debug ${node.is(Test) ? 'test' : 'describe'}`,
+      [
+        node.fullyQualifiedName,
+      ]
+    ),
+  ]
 }
 
-const buildTestsCodeLens = (range: Range, command: string, title: string, args: [string|null, string|null, string|null, string|null]):  CodeLens => ({
+const buildCommandCodeLens = (range: Range, command: string, title: string, args: Array<string|null>):  CodeLens => ({
   range,
   command: {
     command,
