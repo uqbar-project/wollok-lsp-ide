@@ -82,14 +82,14 @@ const buildTestCodeLens = (file: Package, node: Test | Describe): CodeLens[] => 
         test ? removeQuotes(test) : null,
       ]
     ),
-    buildCommandCodeLens(
+    ...node.is(Test) ? [buildCommandCodeLens(
       toVSCRange(node.sourceMap!),
       COMMAND_DEBUG,
       getLSPMessage(COMMAND_EXECUTE_DEBUG, [messageDescription]),
       [
         node.fullyQualifiedName,
       ]
-    ),
+    )] : [],
   ]
 }
 
