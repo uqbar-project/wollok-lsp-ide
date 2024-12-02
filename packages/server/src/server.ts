@@ -30,6 +30,7 @@ import { ProgressReporter } from './utils/progress-reporter'
 import { setWorkspaceUri, WORKSPACE_URI } from './utils/text-documents'
 import { EnvironmentProvider } from './utils/vm/environment'
 import { completions } from './functionalities/autocomplete/autocomplete'
+import { ERROR_MISSING_WORKSPACE_FOLDER, getLSPMessage, SERVER_PROCESSING_REQUEST } from './functionalities/reporter'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -57,7 +58,7 @@ const config = new Subject<ClientConfigurations>()
 config.forEach(config => environmentProvider.inferTypes = config.typeSystem.enabled)
 const requestContext = combineLatest([environmentProvider.$environment.pipe(filter(environment => environment != null)), config])
 
-const requestProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-request', title: 'Processing Request...' })
+const requestProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-request', title: getLSPMessage(SERVER_PROCESSING_REQUEST) })
 
 let hasWorkspaceFolderCapability = false
 
@@ -137,7 +138,7 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
   try {
     if (!WORKSPACE_URI) { // Too fast! We cannot yet...
       deferredChanges.push(change) // Will be executed when workspace folder arrive
-      throw new Error('Missing workspace folder!')
+      throw new Error(getLSPMessage(ERROR_MISSING_WORKSPACE_FOLDER))
     }
 
     environmentProvider.updateEnvironmentWith(change.document)

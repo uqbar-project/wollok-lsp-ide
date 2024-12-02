@@ -1,18 +1,38 @@
 import { getMessage, LANGUAGES, Messages, Problem } from 'wollok-ts'
 import { lang } from '../settings'
+import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../shared-definitions'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // CUSTOM MESSAGES DEFINITION
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
-const MISSING_WOLLOK_TS_CLI = 'missing_wollok_ts_cli'
+export const COMMAND_EXECUTE = 'command.execute'
+export const COMMAND_EXECUTE_DEBUG = 'command.execute_debug'
+export const SERVER_PROCESSING_REQUEST = 'server_processing_request'
+export const ERROR_MISSING_WORKSPACE_FOLDER = 'missing_workspace_folder'
 
 const lspMessagesEn = {
-  [MISSING_WOLLOK_TS_CLI]: 'Missing configuration WollokLSP/cli-path in order to run Wollok tasks',
+  [COMMAND_RUN_GAME]: 'Run game',
+  [COMMAND_RUN_PROGRAM]: 'Run program',
+  [COMMAND_START_REPL]: 'Run in REPL',
+  [COMMAND_RUN_ALL_TESTS]: 'Run all tests',
+  [COMMAND_RUN_TEST]: 'Run test',
+  [COMMAND_EXECUTE]: 'Run {0}',
+  [COMMAND_EXECUTE_DEBUG]: 'Debug {0}',
+  [SERVER_PROCESSING_REQUEST]: 'Processing Request...',
+  [ERROR_MISSING_WORKSPACE_FOLDER]: 'Missing workspace folder!',
 }
 
 const lspMessagesEs = {
-  [MISSING_WOLLOK_TS_CLI]: 'Falta la configuración WollokLSP/cli-path para poder ejecutar tareas de Wollok',
+  [COMMAND_RUN_GAME]: 'Jugar',
+  [COMMAND_RUN_PROGRAM]: 'Ejecutar programa',
+  [COMMAND_START_REPL]: 'Ejecutar REPL',
+  [COMMAND_RUN_ALL_TESTS]: 'Ejecutar todos los tests',
+  [COMMAND_RUN_TEST]: 'Ejecutar test',
+  [COMMAND_EXECUTE]: 'Ejecutar {0}',
+  [COMMAND_EXECUTE_DEBUG]: 'Depurar {0}',
+  [SERVER_PROCESSING_REQUEST]: 'Procesando...',
+  [ERROR_MISSING_WORKSPACE_FOLDER]: '¡No existe la carpeta de trabajo principal!',
 }
 
 const lspMessages: Messages = {
@@ -31,5 +51,5 @@ const lspMessages: Messages = {
 export const reportValidationMessage = (problem: Problem): string =>
   getMessage({ message: problem.code, values: problem.values.concat(), language: lang() })
 
-export const getLSPMessage = (message: string, values: string[]): string =>
+export const getLSPMessage = (message: string, values: string[] = []): string =>
   getMessage({ message, values, language: lang(), customMessages: lspMessages })

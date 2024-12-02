@@ -26,7 +26,7 @@ abstract class TargetFinder {
   abstract findTargetOrUndefined(environment: Environment): Target | undefined
 }
 
-class FqnTargetFinder extends TargetFinder {
+export class FqnTargetFinder extends TargetFinder {
   constructor(private fqn: string) {
     super()
   }
@@ -55,7 +55,7 @@ abstract class FileTargetFinder extends TargetFinder{
   abstract isValidTarget(node: Node): boolean
 }
 
-class ProgramTargetFinder extends FileTargetFinder {
+export class ProgramTargetFinder extends FileTargetFinder {
   constructor(filePath: string, private program: string){
     super(filePath)
   }
@@ -65,7 +65,7 @@ class ProgramTargetFinder extends FileTargetFinder {
   }
 }
 
-class TestTargetFinder extends FileTargetFinder {
+export class TestTargetFinder extends FileTargetFinder {
   constructor(filePath: string, private test: string, private describe?: string){
     super(filePath)
   }

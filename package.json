@@ -312,7 +312,7 @@
       },
       {
         "command": "wollok.init.project",
-        "title": "Initialize new Wollok project in the workspace directory",
+        "title": "Generate a new Wollok project in current folder",
         "category": "Wollok"
       }
     ],

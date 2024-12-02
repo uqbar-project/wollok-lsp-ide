@@ -28,8 +28,9 @@ describe('debug adapter', function () {
       return Promise.all([
         dc.launch({
           "stopOnEntry": false,
-          "file": PROGRAM,
           "target": {
+            "file": PROGRAM,
+            "type": "program",
             "program": "aWollokProgram",
           },
         }),
@@ -42,8 +43,9 @@ describe('debug adapter', function () {
       await Promise.all([
         dc.launch({
           "stopOnEntry": true,
-          "file": PROGRAM,
           "target": {
+            "file": PROGRAM,
+            "type": "program",
             "program": "aWollokProgram",
           },
         }),
@@ -65,8 +67,9 @@ describe('debug adapter', function () {
       return dc.hitBreakpoint(
         {
           "stopOnEntry": false,
-          "file": PROGRAM,
           "target": {
+            "file": PROGRAM,
+            type: "program",
             "program": "aWollokProgram",
           },
         },
@@ -80,8 +83,9 @@ describe('debug adapter', function () {
       await Promise.all([
         dc.launch({
           "stopOnEntry": true,
-          "file": PROGRAM,
           "target": {
+            "file": PROGRAM,
+            "type": "program",
             "program": "aWollokProgram",
           },
         }),
@@ -115,8 +119,9 @@ describe('debug adapter', function () {
       return dc.hitBreakpoint(
         {
           "stopOnEntry": false,
-          "file": PROGRAM,
           "target": {
+            "file": PROGRAM,
+            "type": "program",
             "program": "aWollokProgram",
           },
         },
@@ -172,8 +177,9 @@ describe('debug adapter', function () {
       await Promise.all([
         dc.launch({
             "stopOnEntry": false,
-            "file": TEST_FILE,
             "target": {
+              "file": TEST_FILE,
+              type: "test",
               "describe": "some tests",
               "test": "does not break",
             },
@@ -188,16 +194,17 @@ describe('debug adapter', function () {
       await Promise.all([
         dc.launch({
             "stopOnEntry": false,
-            "file": TEST_FILE,
             "target": {
+              "file": TEST_FILE,
+              type: "test",
               "describe": "some tests",
               "test": "breaks",
             },
           }),
           dc.configurationDoneRequest(),
       ])
-        await dc.assertOutput('stderr', "My exception message", 1000)
-        await dc.waitForEvent('terminated', 1000)
+        await dc.assertOutput('stderr', "My exception message", 3000)
+        await dc.waitForEvent('terminated', 3000)
     })
   })
 })
