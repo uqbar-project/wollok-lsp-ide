@@ -96,12 +96,10 @@
         "languages": [
           "wollok"
         ],
-        "program": "./out/debug-adapter/src/index.js",
         "runtime": "node",
         "configurationAttributes": {
           "launch": {
             "required": [
-              "file",
               "target"
             ],
             "properties": {
@@ -109,24 +107,41 @@
                 "type": "object",
                 "description": "Program or test to run.",
                 "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "The type of targetting.",
+                    "enum": [
+                      "program",
+                      "test",
+                      "fqn"
+                    ],
+                    "enumDescriptions": [
+                      "Target a program, should specify program and file",
+                      "Target a test, should specify test, describe and file",
+                      "Target a fully qualified name, should specify fqn"
+                    ]
+                  },
                   "program": {
                     "type": "string",
                     "description": "The program's name."
                   },
                   "describe": {
                     "type": "string",
-                    "description": "(optional) The describe's name.",
-                    "optional": true
+                    "description": "(optional) The describe's name."
                   },
                   "test": {
                     "type": "string",
                     "description": "The test's name."
+                  },
+                  "fqn": {
+                    "type": "string",
+                    "description": "The fully qualified name of the describe/test/program you want to run."
+                  },
+                  "file": {
+                    "type": "string",
+                    "description": "Absolute path to a Wollok file."
                   }
                 }
-              },
-              "file": {
-                "type": "string",
-                "description": "Absolute path to a Wollok file."
               },
               "stopOnEntry": {
                 "type": "boolean",
@@ -343,7 +358,7 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "wollok-ts": "4.1.8"
+    "wollok-ts": "../wollok-ts"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",

@@ -1,0 +1,10 @@
+describe "some tests" {
+  test "breaks" {
+    throw new DomainException(message = "My exception message")
+    assert.that(true)
+  }
+
+  test "does not break" {
+    assert.that(true)
+  }
+}
