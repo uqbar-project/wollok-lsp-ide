@@ -8867,7 +8867,7 @@ __metadata:
     mocha: "npm:^10.7.3"
     nyc: "npm:^17.0.0"
     ts-mocha: "npm:^10.0.0"
-    wollok-ts: "npm:4.1.6"
+    wollok-ts: "npm:4.1.9"
   languageName: unknown
   linkType: soft
 
@@ -8934,19 +8934,6 @@ __metadata:
     yarn-run-all: "npm:^3.1.1"
   languageName: unknown
   linkType: soft
-
-"wollok-ts@npm:4.1.6":
-  version: 4.1.6
-  resolution: "wollok-ts@npm:4.1.6"
-  dependencies:
-    "@types/parsimmon": "npm:^1.10.8"
-    parsimmon: "npm:^1.18.1"
-    prettier-printer: "npm:^1.1.4"
-    unraw: "npm:^3.0.0"
-    uuid: "npm:^9.0.1"
-  checksum: 10c0/2248c12858540699ce9c58b6e22255d2dd685ef0ae1c32ca023cc0a7c9d8489057a5b0600c0291e4f45cb831dc4c7ccd43de73b4c041b8569300d66c0c7bbbcf
-  languageName: node
-  linkType: hard
 
 "wollok-ts@npm:4.1.9":
   version: 4.1.9
