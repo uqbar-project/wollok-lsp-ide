@@ -47,6 +47,11 @@
     "hoverProvider": true
   },
   "main": "./out/client/src/extension",
+  "configurationDefaults": {
+    "[wollok]": {
+      "editor.semanticHighlighting.enabled": true
+    }
+  },
   "contributes": {
     "menus": {
       "editor/title/run": [
@@ -315,6 +320,29 @@
         "key": "ctrl+r",
         "mac": "cmd+r",
         "when": "editorTextFocus && resourceExtname == .wtest"
+      }
+    ],
+    "semanticTokenTypes": [
+      {
+        "id": "keyword",
+        "superType": "type",
+        "description": "palabra reservada de wollok"
+      },
+      {
+        "id": "object",
+        "superType": "type",
+        "description": "singleton"
+      },
+      {
+        "id": "parameter",
+        "superType": "type",
+        "description": "parametro de metodos o funciones"
+      }
+    ],
+    "semanticTokenModifiers": [
+      {
+        "id": "native",
+        "description": "simbolo nativo de wollok"
       }
     ]
   },
