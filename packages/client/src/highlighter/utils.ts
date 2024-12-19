@@ -1,5 +1,8 @@
 import * as vscode from 'vscode'
 
+// This is the implementation, we should finally use this code
+// and adapt tests to run as integration tests
+
 export const createRange = (line: number, column: number, length: number): vscode.Range =>
   new vscode.Range(
     new vscode.Position(line, column),
@@ -12,6 +15,13 @@ export const createRange = (line: number, column: number, length: number): vscod
     tokenModifiers?: string[]
   }
 
+  // ================================================================================================
+  // 
+  // Uncomment this to have quick answer by running
+  // yarn run test:highlighter
+  //
+  // ================================================================================================
+  //
 // export const createRange = (line: number, column: number, length: number): Range =>
 //   ({
 //     start: {
