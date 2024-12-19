@@ -1,5 +1,4 @@
-import * as vscode from 'vscode'
-//const tokenTypes = ['Parameter', 'ParameterizedType', 'NamedArgument', 'Import', 'Body', 'Catch', 'Package', 'Program', 'Test', 'Class', 'Singleton', 'Mixin', 'Describe', 'Variable', 'Field', 'Method', 'Return', 'Assignment', 'Reference', 'Self', 'Literal', 'Send', 'Super', 'New', 'If', 'Throw', 'Try', 'Environment']
+import { createRange, NodePlotter } from './utils'
 
 export const tokenModifiers = ['declaration', 'definition', 'documentation', 'keyword']
 export const tokenTypeObj = {
@@ -12,12 +11,12 @@ export const tokenTypeObj = {
   'Package': 'property',
   'Program': 'property',
   'Test': 'function',
-  'Singleton': 'object', //'entity.name.type.class',//
+  'Singleton': 'object',
   'Mixin': 'property',
   'Describe': 'property',
   'Variable': 'variable',
   'Field': 'property',
-  'Method': 'method', //'entity.name.function.member',
+  'Method': 'method',
   'Return': 'keyword',
   'Assignment': 'property',
   'Reference': 'property',
@@ -157,18 +156,9 @@ export const tokenTypes = [
   'comment',
 ]
 
-export type NodePlotter = {
-  range: vscode.Range
-  tokenType: string
-  tokenModifiers?: string[]
-}
-
 export function plotter(start: { ln, col, len }, kind: string): NodePlotter {
   return {
-    range: new vscode.Range(
-      new vscode.Position(start.ln, start.col),
-      new vscode.Position(start.ln, start.col + start.len),
-    ),
+    range: createRange(start.ln, start.col, start.len),
     tokenType: tokenTypeObj[kind],
     tokenModifiers: tokenTypeModifierObj[kind],
   }

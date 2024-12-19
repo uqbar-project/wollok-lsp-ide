@@ -1,32 +1,36 @@
-import { plotter, NodePlotter, keywords, tokenTypeObj } from './definition'
+import { NodePlotter } from './utils'
+import { plotter, keywords, tokenTypeObj } from './definition'
 import { Assignment, Class, Describe, Field, If, Import, Literal, match, Method, Node, Package, Parameter, Program, Reference, Return, Send, Singleton, Test, Variable, when } from 'wollok-ts'
 
 //Nota: no todos los node's tienen .start (dando undefined), pueden provocar excepciones.
-function extraerLineaColumna(node: Node, documentoStr: string[]) {
-  const linea = node.sourceMap.start.line-1
-  const columna = node.sourceMap.start.column-1
+function getLine(node: Node, documentoStr: string[]) {
+  const start = node.sourceMap.start
+  const linea = start.line-1
+  const columna = start.column-1
 
   return {
-    linea: linea,
-    columna: columna,
+    linea,
+    columna,
     subStr:documentoStr[linea].substring(columna),
   }
 }
 
+const nullHighlighting = { result: undefined, references: undefined }
+
 function processNode(node: Node, documentoStr: string[], context: NodeContext[]): HighlightingResult {
+  if (!node.sourceMap) return nullHighlighting
   const generar_plotter = node => {
-    const { linea, columna, subStr } = extraerLineaColumna(node, documentoStr)
+    const { linea, columna, subStr } = getLine(node, documentoStr)
     const col = columna + subStr.indexOf(node.name)
     return plotter({ ln: linea, col: col, len: node.name.length }, node.kind)
   }
   const keyword_plotter = (node, mensaje) => {
-    const { linea, columna, subStr } = extraerLineaColumna(node, documentoStr)
+    const { linea, columna, subStr } = getLine(node, documentoStr)
     const col = columna + subStr.indexOf(mensaje)
     return plotter({ ln: linea, col: col, len: mensaje.length }, 'Keyword')
   }
   const saveReference = node => { return { name: node.name, type: node.kind }}
   const dropReference = node => { return { result: node, references: undefined }}
-  const nullHighlighting = { result: undefined, references: undefined }
 
   if(node.kind === 'New' || node.kind === 'Self'){ //por alguna razon no hace match
     return dropReference(keyword_plotter(node, keywords[node.kind]))
@@ -102,7 +106,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     when(Assignment)(node => {
       //node.variable
       //node.value
-      const { linea, columna, subStr } = extraerLineaColumna(node, documentoStr)
+      const { linea, columna, subStr } = getLine(node, documentoStr)
       const col = columna + subStr.indexOf(node.variable.name)
       return {
         result: [
@@ -112,7 +116,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       }
     }),
     when(Parameter)(node => {
-      const { linea, columna, subStr } = extraerLineaColumna(node, documentoStr)
+      const { linea, columna, subStr } = getLine(node, documentoStr)
       const col = columna + subStr.indexOf(node.name)
       return {
         result: [plotter({ ln: linea, col: col, len: node.name.length }, node.kind)],
@@ -124,7 +128,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
         return nullHighlighting
       }
 
-      const { linea, columna, subStr } = extraerLineaColumna(node, documentoStr)
+      const { linea, columna, subStr } = getLine(node, documentoStr)
       const col = columna + subStr.indexOf(node.name)
 
       return {
@@ -136,7 +140,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     }),
     when(Send)(node => {
       const curretKeyboard = keywords[node.kind]
-      const { linea, columna,  subStr } = extraerLineaColumna(node, documentoStr)
+      const { linea, columna,  subStr } = getLine(node, documentoStr)
       if(curretKeyboard && curretKeyboard.includes(node.message)){
         if(node.message == 'negate'){//es la forma alternativa del simbolo '!'
           const idx_negate = subStr.indexOf('!')
@@ -176,7 +180,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
         return nullHighlighting//plotter({ ln: linea, col: col, len: len }, 'Singleton')
       }
 
-      const { linea, columna, subStr } = extraerLineaColumna(node, documentoStr)
+      const { linea, columna, subStr } = getLine(node, documentoStr)
       switch (tipo) {
         case 'number':
         case 'bigint':
