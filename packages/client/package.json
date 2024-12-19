@@ -11,6 +11,9 @@
   "dependencies": {
     "wollok-debug-adapter": "workspace:^"
   },
+  "scripts": {
+    "test:highlighter": "mocha -u tdd -r ts-node/register/transpile-only --loader=ts-node/esm src/test/highlighter/**.test.ts --timeout 2000"
+  },
   "devDependencies": {
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.14.1",
