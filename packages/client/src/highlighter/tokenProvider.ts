@@ -1,4 +1,4 @@
-import { NodePlotter } from './utils'
+import { WollokNodePlotter } from './utils'
 import { plotter, keywords, tokenTypeObj } from './definition'
 import { Assignment, Class, Describe, Field, If, Import, Literal, match, Method, Node, Package, Parameter, Program, Reference, Return, Send, Singleton, Test, Variable, when } from 'wollok-ts'
 
@@ -11,7 +11,7 @@ function getLine(node: Node, documentoStr: string[]) {
   return {
     linea,
     columna,
-    subStr:documentoStr[linea].substring(columna),
+    subStr: documentoStr[linea].substring(columna),
   }
 }
 
@@ -24,26 +24,37 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     const col = columna + subStr.indexOf(node.name)
     return plotter({ ln: linea, col: col, len: node.name.length }, node.kind)
   }
-  const keyword_plotter = (node, mensaje) => {
+  const keywordPlotter = (node, mensaje) => {
+    console.info('  mensaje', mensaje, node.kind)
     const { linea, columna, subStr } = getLine(node, documentoStr)
     const col = columna + subStr.indexOf(mensaje)
-    return plotter({ ln: linea, col: col, len: mensaje.length }, 'Keyword')
+    console.info(' col', col)
+    return plotter({ ln: linea, col, len: mensaje.length }, 'Keyword')
   }
   const saveReference = node => { return { name: node.name, type: node.kind }}
   const dropReference = node => { return { result: node, references: undefined }}
 
+  const resultForReference = (node: Variable | Field) =>
+    ({
+      result: [
+        keywordPlotter(node, node.isConstant ? 'const' : 'var'),
+        generar_plotter(node),
+      ],
+      references: saveReference(node),
+    })
+
   if(node.kind === 'New' || node.kind === 'Self'){ //por alguna razon no hace match
-    return dropReference(keyword_plotter(node, keywords[node.kind]))
+    return dropReference(keywordPlotter(node, keywords[node.kind]))
   }
   if(node.kind === 'If'){ //por alguna razon no hace match
-    const if_keywords = [keyword_plotter(node, keywords[node.kind])]
+    const if_keywords = [keywordPlotter(node, keywords[node.kind])]
     // if(node.elseBody)
     //   if_keywords.push(keyword_plotter(node, keywords['Else']))
     return dropReference(if_keywords)
   }
   if(node.kind === 'Describe' || node.kind === 'Test'){ //tampoco hay match, se consideran 'Entity'
     return dropReference([
-      keyword_plotter(node, keywords[node.kind]),
+      keywordPlotter(node, keywords[node.kind]),
       generar_plotter(node),
     ])
   }
@@ -51,8 +62,8 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
   return match(node)(
     when(Class)(node => {
       const acum = []
-      acum.push(keyword_plotter(node, 'class'))
-      node.supertypes.length>0 && acum.push(keyword_plotter(node, 'inherits'))
+      acum.push(keywordPlotter(node, 'class'))
+      node.supertypes.length>0 && acum.push(keywordPlotter(node, 'inherits'))
       acum.push(generar_plotter(node))
       return { result: acum, references: saveReference(node) }
     }),
@@ -60,29 +71,14 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       if(node.sourceMap == undefined) return nullHighlighting
       const acum = []
       node.members.reduce((prev, curr) => !curr.name.startsWith('<') && prev, true)
-        && acum.push(keyword_plotter(node, keywords[node.kind]))
+        && acum.push(keywordPlotter(node, keywords[node.kind]))
       acum.push(generar_plotter(node))
       return { result: acum, references: saveReference(node) }
     }),
-    when(Field)(node => {
-      if(node.isSynthetic) return nullHighlighting
-      return {
-        result: [
-          keyword_plotter(node, keywords[node.kind]),
-          generar_plotter(node),
-        ],
-        references: saveReference(node),
-      }
-    }),
-    when(Variable)(node => {
-      return {
-        result: [
-          generar_plotter(node),
-          keyword_plotter(node, node.isConstant? 'const':'var'),
-        ],
-        references: saveReference(node),
-      }
-    }),
+    when(Field)(node =>
+      node.isSynthetic ? nullHighlighting : resultForReference(node)
+    ),
+    when(Variable)(resultForReference),
     when(Reference)(node => {
       //node.variable
       //node.value
@@ -111,7 +107,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       return {
         result: [
           plotter({ ln: linea, col: col, len: node.variable.name.length }, node.kind),
-          keyword_plotter(node, keywords[node.kind]),
+          keywordPlotter(node, keywords[node.kind]),
         ], references: undefined,
       }
     }),
@@ -134,7 +130,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       return {
         result: [
           plotter({ ln: linea, col: col, len: node.name.length }, node.kind),
-          keyword_plotter(node, keywords[node.kind]),
+          keywordPlotter(node, keywords[node.kind]),
         ], references: undefined,
       }
     }),
@@ -164,7 +160,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       }
     }),
     when(Return)(node => {
-      return dropReference(keyword_plotter(node, keywords[node.kind]))
+      return dropReference(keywordPlotter(node, keywords[node.kind]))
     }),
     when(Literal)(node => {
       if(node.isSynthetic) return nullHighlighting
@@ -213,7 +209,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       try { //alternativamente examinar si el keyword tiene indice negativo
         return {
           result: [
-            keyword_plotter(node, keywords[node.kind]),
+            keywordPlotter(node, keywords[node.kind]),
             generar_plotter(node),
           ], references: saveReference(node),
         }}
@@ -225,25 +221,25 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     when(Import)(node => {
       return {
         result: [
-          keyword_plotter(node, keywords[node.kind]),
+          keywordPlotter(node, keywords[node.kind]),
           generar_plotter(node.entity),
         ], references: saveReference(node.entity),
       }
     }),
     when(Program)(node => {
       return dropReference([
-        keyword_plotter(node, keywords[node.kind]),
+        keywordPlotter(node, keywords[node.kind]),
         generar_plotter(node),
       ])
     }),
     when(Describe)(node => {
-      return dropReference(keyword_plotter(node, keywords[node.kind]))
+      return dropReference(keywordPlotter(node, keywords[node.kind]))
     }),
     when(Test)(node => {
-      return dropReference(keyword_plotter(node, keywords[node.kind]))
+      return dropReference(keywordPlotter(node, keywords[node.kind]))
     }),
     when(If)(node => {
-      return dropReference(keyword_plotter(node, keywords[node.kind]))
+      return dropReference(keywordPlotter(node, keywords[node.kind]))
     }),
     when(Node)(_ => nullHighlighting)
   )
@@ -255,11 +251,11 @@ type NodeContext = {
 }
 
 export type HighlightingResult = {
-  result: NodePlotter[];
+  result: WollokNodePlotter[];
   references: NodeContext | NodeContext[];
 }
 
-export function processCode(node: Node, documentoStr: string[]): NodePlotter[] {
+export function processCode(node: Node, documentoStr: string[]): WollokNodePlotter[] {
   return node.reduce((acum, node: Node) =>
   {
     const proc_nodo = processNode(node, documentoStr, acum.references)
@@ -279,7 +275,7 @@ function plotterMultiLinea(arr: any[]) {
 }
 
 type ProcesamientoComentario = {
-  result: NodePlotter[];
+  result: WollokNodePlotter[];
   multilinea?: {
     ln: number,
     col: number,
@@ -289,7 +285,7 @@ type ProcesamientoComentario = {
   presetIndex?: number;
 }
 
-export function processComments(docText: string[]): NodePlotter[] {
+export function processComments(docText: string[]): WollokNodePlotter[] {
   return docText.reduce( processCommentLine, { result:[], multilinea:undefined }).result
 
   function processCommentLine(acum: ProcesamientoComentario, strln, linea) {

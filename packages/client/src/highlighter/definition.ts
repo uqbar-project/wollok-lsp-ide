@@ -1,4 +1,4 @@
-import { createRange, NodePlotter } from './utils'
+import { createRange, WollokNodePlotter } from './utils'
 
 export const tokenModifiers = ['declaration', 'definition', 'documentation', 'keyword']
 export const tokenTypeObj = {
@@ -156,7 +156,7 @@ export const tokenTypes = [
   'comment',
 ]
 
-export function plotter(start: { ln, col, len }, kind: string): NodePlotter {
+export function plotter(start: { ln, col, len }, kind: string): WollokNodePlotter {
   return {
     range: createRange(start.ln, start.col, start.len),
     tokenType: tokenTypeObj[kind],
