@@ -22,7 +22,7 @@ export const completionsForNode = (node: Node): CompletionItem[] => {
     )
   } catch (error) {
     logger.error(`✘ Completions for node ${node.kind} (${node.sourceMap} - ${node.sourceFileName}) failed: ${error}`, error)
-    return [] // completeForParent(node)
+    return completeForParent(node)
   }
 }
 

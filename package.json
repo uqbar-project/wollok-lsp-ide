@@ -358,7 +358,7 @@
     "lint:fix": "cd client && eslint . --fix && cd ../server && eslint . --fix && cd ..",
     "test": "yarn compile-tests && yarn lint && yarn test:e2e && yarn test:unit",
     "test:e2e": "vscode-test",
-    "test:unit": "cd client && yarn run test:highlighter && cd .. && yarn workspaces foreach -Rpt --from '{wollok-lsp-ide-server,wollok-debug-adapter}' run test",
+    "test:unit": "cd packages/client && yarn run test:highlighter && cd .. && yarn workspaces foreach -Rpt --from '{wollok-lsp-ide-server,wollok-debug-adapter}' run test",
     "nyc": "nyc",
     "build-coverage-report": "rimraf coverage-total && cpy --flat ./coverage-e2e/coverage-final.json ./coverage-total --rename=coverage-e2e.json && cpy --flat ./coverage-unit/coverage-final.json ./coverage-total --rename=coverage-unit.json && nyc merge ./coverage-total ./coverage-total/coverage.json",
     "coverage": "yarn cover:unit && yarn cover:e2e",
