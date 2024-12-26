@@ -1,6 +1,6 @@
 object pepita {
   var property energy = 100
-  const property name = "Pepita"
+  const name = "Pepita"
 
   method fly(minutes) {
     energy = energy + (10 * minutes)

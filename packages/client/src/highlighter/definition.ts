@@ -124,10 +124,8 @@ export const keywords = {
   'Class': 'class',
 }
 
-//const tokenTypes = ['Parameter', 'ParameterizedType', 'NamedArgument', 'Import', 'Body', 'Catch', 'Package', 'Program', 'Test', 'Class', 'Singleton', 'Mixin', 'Describe', 'Variable', 'Field', 'Method', 'Return', 'Assignment', 'Reference', 'Self', 'Literal', 'Send', 'Super', 'New', 'If', 'Throw', 'Try', 'Environment']
-
-//Standard token types:
-//ID   Description
+// Standard token types:
+// ID   Description
 export const tokenTypes = [
   'namespace', //      For identifiers that declare or reference a namespace, module, or package.
   'class', //  For identifiers that declare or reference a class type.

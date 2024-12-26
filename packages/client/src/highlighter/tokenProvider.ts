@@ -2,16 +2,23 @@ import { WollokNodePlotter } from './utils'
 import { plotter, keywords, tokenTypeObj } from './definition'
 import { Assignment, Class, Describe, Field, If, Import, Literal, match, Method, Node, Package, Parameter, Program, Reference, Return, Send, Singleton, Test, Variable, when } from 'wollok-ts'
 
-//Nota: no todos los node's tienen .start (dando undefined), pueden provocar excepciones.
-function getLine(node: Node, documentoStr: string[]) {
+type NamedNode = Node & { name: string }
+
+type LineResult = {
+  line: number,
+  column: number,
+  word: string,
+}
+
+function getLine(node: Node, documentLines: string[]): LineResult {
   const start = node.sourceMap.start
-  const linea = start.line-1
-  const columna = start.column-1
+  const line = start.line - 1
+  const column = start.column - 1
 
   return {
-    linea,
-    columna,
-    subStr: documentoStr[linea].substring(columna),
+    line: line,
+    column: column,
+    word: documentLines[line].substring(column),
   }
 }
 
@@ -19,43 +26,45 @@ const nullHighlighting = { result: undefined, references: undefined }
 
 function processNode(node: Node, documentoStr: string[], context: NodeContext[]): HighlightingResult {
   if (!node.sourceMap) return nullHighlighting
-  const generar_plotter = node => {
-    const { linea, columna, subStr } = getLine(node, documentoStr)
-    const col = columna + subStr.indexOf(node.name)
-    return plotter({ ln: linea, col: col, len: node.name.length }, node.kind)
+  const generatePlotter = (node: NamedNode) => keywordPlotter(node, node.name, node.kind)
+
+  const keywordPlotter = (node: Node, token: string, kind = 'Keyword') => {
+    const { line, column, word } = getLine(node, documentoStr)
+    const col = column + word.indexOf(token)
+    return plotter({ ln: line, col, len: token.length }, kind)
   }
-  const keywordPlotter = (node, mensaje) => {
-    console.info('  mensaje', mensaje, node.kind)
-    const { linea, columna, subStr } = getLine(node, documentoStr)
-    const col = columna + subStr.indexOf(mensaje)
-    console.info(' col', col)
-    return plotter({ ln: linea, col, len: mensaje.length }, 'Keyword')
-  }
+
   const saveReference = node => { return { name: node.name, type: node.kind }}
   const dropReference = node => { return { result: node, references: undefined }}
 
-  const resultForReference = (node: Variable | Field) =>
-    ({
-      result: [
-        keywordPlotter(node, node.isConstant ? 'const' : 'var'),
-        generar_plotter(node),
-      ],
+  const resultForReference = (node: Variable | Field) => {
+    const result = [
+      keywordPlotter(node, node.isConstant ? 'const' : 'var'),
+    ]
+    .concat(
+      ...node.is(Field) && node.isProperty ? [keywordPlotter(node, 'property')] : [],
+    ).concat(
+      [generatePlotter(node)]
+    )
+    return {
+      result,
       references: saveReference(node),
-    })
+    }
+  }
 
   if(node.kind === 'New' || node.kind === 'Self'){ //por alguna razon no hace match
     return dropReference(keywordPlotter(node, keywords[node.kind]))
   }
-  if(node.kind === 'If'){ //por alguna razon no hace match
+  if (node.is(If)) {
     const if_keywords = [keywordPlotter(node, keywords[node.kind])]
     // if(node.elseBody)
     //   if_keywords.push(keyword_plotter(node, keywords['Else']))
     return dropReference(if_keywords)
   }
-  if(node.kind === 'Describe' || node.kind === 'Test'){ //tampoco hay match, se consideran 'Entity'
+  if (node.is(Describe) || node.is(Test)) {
     return dropReference([
       keywordPlotter(node, keywords[node.kind]),
-      generar_plotter(node),
+      generatePlotter(node),
     ])
   }
 
@@ -64,15 +73,15 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       const acum = []
       acum.push(keywordPlotter(node, 'class'))
       node.supertypes.length>0 && acum.push(keywordPlotter(node, 'inherits'))
-      acum.push(generar_plotter(node))
+      acum.push(generatePlotter(node))
       return { result: acum, references: saveReference(node) }
     }),
     when(Singleton)(node => {
-      if(node.sourceMap == undefined) return nullHighlighting
+      if (node.sourceMap == undefined) return nullHighlighting
       const acum = []
       node.members.reduce((prev, curr) => !curr.name.startsWith('<') && prev, true)
         && acum.push(keywordPlotter(node, keywords[node.kind]))
-      acum.push(generar_plotter(node))
+      if (node.name) acum.push(generatePlotter(node as unknown as NamedNode))
       return { result: acum, references: saveReference(node) }
     }),
     when(Field)(node =>
@@ -89,33 +98,27 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       || node.name == 'wollok.lang.Set')
         return nullHighlighting
 
-      const referencia  = context.find(x => x.name==node.name)
+      const referencia  = context.find(currentNode => currentNode.name === node.name)
       //TODO: Encontrar la forma de incorporar referencias de las importaciones
-      //como console
-      if(referencia){
-        const pl = generar_plotter(node)
+      if (referencia){
+        const pl = generatePlotter(node)
         pl.tokenType = tokenTypeObj[referencia.type]
         return { result: pl, references: undefined } //no agrego informacion
       }
       return nullHighlighting
     }),
     when(Assignment)(node => {
-      //node.variable
-      //node.value
-      const { linea, columna, subStr } = getLine(node, documentoStr)
-      const col = columna + subStr.indexOf(node.variable.name)
       return {
         result: [
-          plotter({ ln: linea, col: col, len: node.variable.name.length }, node.kind),
           keywordPlotter(node, keywords[node.kind]),
         ], references: undefined,
       }
     }),
     when(Parameter)(node => {
-      const { linea, columna, subStr } = getLine(node, documentoStr)
-      const col = columna + subStr.indexOf(node.name)
+      const { line, column, word } = getLine(node, documentoStr)
+      const col = column + word.indexOf(node.name)
       return {
-        result: [plotter({ ln: linea, col: col, len: node.name.length }, node.kind)],
+        result: [plotter({ ln: line, col, len: node.name.length }, node.kind)],
         references: saveReference(node),
       }
     }),
@@ -124,38 +127,38 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
         return nullHighlighting
       }
 
-      const { linea, columna, subStr } = getLine(node, documentoStr)
-      const col = columna + subStr.indexOf(node.name)
+      const { line, column, word } = getLine(node, documentoStr)
+      const col = column + word.indexOf(node.name)
 
       return {
         result: [
-          plotter({ ln: linea, col: col, len: node.name.length }, node.kind),
+          plotter({ ln: line, col, len: node.name.length }, node.kind),
           keywordPlotter(node, keywords[node.kind]),
         ], references: undefined,
       }
     }),
     when(Send)(node => {
-      const curretKeyboard = keywords[node.kind]
-      const { linea, columna,  subStr } = getLine(node, documentoStr)
-      if(curretKeyboard && curretKeyboard.includes(node.message)){
+      const currentKeyboard = keywords[node.kind]
+      const { line, column,  word } = getLine(node, documentoStr)
+      if(currentKeyboard && currentKeyboard.includes(node.message)){
         if(node.message == 'negate'){//es la forma alternativa del simbolo '!'
-          const idx_negate = subStr.indexOf('!')
-          const col_offset: number= idx_negate == -1? subStr.indexOf('not'): idx_negate
+          const idx_negate = word.indexOf('!')
+          const col_offset: number= idx_negate == -1? word.indexOf('not'): idx_negate
           const plotKeyboard =  plotter({
-            ln: linea,
-            col: columna + col_offset,
+            ln: line,
+            col: column + col_offset,
             len: idx_negate == -1? 3: 1,
           }, node.kind)
           return dropReference(plotKeyboard)
         }
-        const col = columna + subStr.indexOf(node.message)
-        const plotKeyboard = plotter({ ln: linea, col: col, len: node.message.length }, node.kind)
+        const col = column + word.indexOf(node.message)
+        const plotKeyboard = plotter({ ln: line, col, len: node.message.length }, node.kind)
         return dropReference(plotKeyboard)
       }
       //if(keywords.Send.includes(node.message)) return null_case
-      const col = columna + subStr.indexOf(node.message)
+      const col = column + word.indexOf(node.message)
       return {
-        result: plotter({ ln: linea, col: col, len: node.message.length }, 'Method'), //node.kind)
+        result: plotter({ ln: line, col, len: node.message.length }, 'Method'), //node.kind)
         references: undefined,
       }
     }),
@@ -176,28 +179,28 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
         return nullHighlighting//plotter({ ln: linea, col: col, len: len }, 'Singleton')
       }
 
-      const { linea, columna, subStr } = getLine(node, documentoStr)
+      const { line, column, word } = getLine(node, documentoStr)
       switch (tipo) {
         case 'number':
         case 'bigint':
           const valor_numerico = node.value.toString()
           return dropReference(plotter({
-            ln: linea,
-            col: columna + subStr.indexOf(valor_numerico),
+            ln: line,
+            col: column + word.indexOf(valor_numerico),
             len: valor_numerico.length,
           }, 'Literal_number'))
         case 'boolean':
           const valor_booleano = node.value.toString()
           return dropReference(plotter({
-            ln: linea,
-            col: columna + subStr.indexOf(valor_booleano),
+            ln: line,
+            col: column + word.indexOf(valor_booleano),
             len: valor_booleano.length,
           }, 'Literal_bool'))
         case 'string':
           const valor_string = node.value.toString()
           return dropReference(plotter({
-            ln: linea,
-            col: columna + subStr.indexOf(valor_string) - 1,
+            ln: line,
+            col: column + word.indexOf(valor_string) - 1,
             len: valor_string.length + 2,
           }, 'Literal_string'))
         default:
@@ -210,11 +213,10 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
         return {
           result: [
             keywordPlotter(node, keywords[node.kind]),
-            generar_plotter(node),
+            generatePlotter(node),
           ], references: saveReference(node),
         }}
       catch(e){
-        //console.log('Package '+ node.name + ' no encontrado', e)
         return nullHighlighting
       }
     }),
@@ -222,14 +224,14 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       return {
         result: [
           keywordPlotter(node, keywords[node.kind]),
-          generar_plotter(node.entity),
+          generatePlotter(node.entity),
         ], references: saveReference(node.entity),
       }
     }),
     when(Program)(node => {
       return dropReference([
         keywordPlotter(node, keywords[node.kind]),
-        generar_plotter(node),
+        generatePlotter(node),
       ])
     }),
     when(Describe)(node => {
@@ -266,8 +268,6 @@ export function processCode(node: Node, documentoStr: string[]): WollokNodePlott
     }
   }, { result:[], references: [{ name: 'console', type: 'Reference' }] }).result
 }
-//return { result: [...acum.result, procesar(node, documentoStr), plotKeyboard], references: acum.references }
-//return { result: [...acum.result, procesar(node, documentoStr), plotKeyboard], references: acum.references}
 
 //TODO: al no poder procesar comentarios multilinea se transforma a comentarios comunes.
 function plotterMultiLinea(arr: any[]) {
