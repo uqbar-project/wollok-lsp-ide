@@ -63,7 +63,6 @@ suite('an object sample', () => {
   })
 
   test('highlights properties', () => {
-    console.info(JSON.stringify(processed.filter(token => token.tokenType === 'property')))
     const propertyTokens = processed.filter(token => token.tokenType === 'property')
     expect(propertyTokens.length).toBe(6)
   })
@@ -157,7 +156,6 @@ suite('a class sample', () => {
     expect(birthdateDefinitionRange.start).toEqual({ line: 2, column: 15 })
     expect(birthdateDefinitionRange.end).toEqual({ line: 2, column: 24 })
 
-    // ==> está duplicado!!!
     const energyInFlyMethodRange1 = nextRange()
     expect(energyInFlyMethodRange1.start).toEqual({ line: 5, column: 4 })
     expect(energyInFlyMethodRange1.end).toEqual({ line: 5, column: 10 })
