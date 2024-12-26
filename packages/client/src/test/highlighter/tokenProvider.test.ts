@@ -21,6 +21,7 @@ suite('an object sample', () => {
   })
 
   test('highlights object keyword', () => {
+    console.info(JSON.stringify(processed.filter(token => token.tokenType === 'keyword')))
     const keywordsTokens = processed.filter(token => token.tokenType === 'keyword').values()
 
     const nextRange = () => keywordsTokens.next().value.range
@@ -143,7 +144,6 @@ suite('a class sample', () => {
   })
 
   test('highlights property name', () => {
-    console.info(JSON.stringify(processed.filter(token => token.tokenType === 'property')))
     const propertyTokens = processed.filter(token => token.tokenType === 'property').values()
 
     const nextRange = () => propertyTokens.next().value.range
@@ -168,5 +168,38 @@ suite('a class sample', () => {
     expect(birthdateInIsYoungMethodRange.start).toEqual({ line: 9, column: 40 })
     expect(birthdateInIsYoungMethodRange.end).toEqual({ line: 9, column: 49 })
   })
+
+  test('highlights methods name', () => {
+    const methodTokens = processed.filter(token => token.tokenType === 'method').values()
+
+    const nextRange = () => methodTokens.next().value.range
+
+    const flyMethodRange = nextRange()
+    expect(flyMethodRange.start).toEqual({ line: 4, column: 9 })
+    expect(flyMethodRange.end).toEqual({ line: 4, column: 12 })
+
+    const isYoungMethodRange = nextRange()
+    expect(isYoungMethodRange.start).toEqual({ line: 8, column: 9 })
+    expect(isYoungMethodRange.end).toEqual({ line: 8, column: 16 })
+
+    const differenceMessageRange = nextRange()
+    expect(differenceMessageRange.start).toEqual({ line: 9, column: 29 })
+    expect(differenceMessageRange.end).toEqual({ line: 9, column: 39 })
+  })
+
+  test('highlights parameters', () => {
+    const parameterTokens = processed.filter(token => token.tokenType === 'parameter').values()
+
+    const nextRange = () => parameterTokens.next().value.range
+
+    const minutesParameterRange = nextRange()
+    expect(minutesParameterRange.start).toEqual({ line: 4, column: 13 })
+    expect(minutesParameterRange.end).toEqual({ line: 4, column: 20 })
+
+    const minutesUsageParameterRange = nextRange()
+    expect(minutesUsageParameterRange.start).toEqual({ line: 5, column: 28 })
+    expect(minutesUsageParameterRange.end).toEqual({ line: 5, column: 35 })
+  })
+
 
 })
