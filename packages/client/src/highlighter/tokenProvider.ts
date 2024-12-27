@@ -1,6 +1,6 @@
 import { WollokNodePlotter } from './utils'
 import { plotter, keywords, tokenTypeObj } from './definition'
-import { Assignment, Class, Describe, Field, If, Import, Literal, match, Method, Node, Package, Parameter, Program, Reference, Return, Send, Singleton, Test, Variable, when } from 'wollok-ts'
+import { Assignment, Class, Describe, Field, If, Import, KEYWORDS, Literal, match, Method, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Test, Variable, when } from 'wollok-ts'
 
 type NodeContext = {
   name: string,
@@ -49,14 +49,13 @@ const nullHighlighting = { result: undefined, references: undefined }
 
 function processNode(node: Node, documentoStr: string[], context: NodeContext[]): HighlightingResult {
   if (!node.sourceMap) return nullHighlighting
-  const generatePlotter = (node: NamedNode) => keywordPlotter(node, node.name, node.kind)
 
+  const generatePlotter = (node: NamedNode) => keywordPlotter(node, node.name, node.kind)
   const keywordPlotter = (node: Node, token: string, kind = 'Keyword') => {
     const { line, column, word } = getLine(node, documentoStr)
     const col = column + word.indexOf(token)
     return plotter({ ln: line, col, len: token.length }, kind)
   }
-
   const defaultKeywordPlotter = (node: Node) => keywordPlotter(node, keywords[node.kind])
 
   const saveReference = (node: NamedNode) => ({ name: node.name, type: node.kind })
@@ -65,10 +64,10 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
 
   const resultForReference = (node: Variable | Field) => {
     const result = [
-      keywordPlotter(node, node.isConstant ? 'const' : 'var'),
+      keywordPlotter(node, node.isConstant ? KEYWORDS.CONST : KEYWORDS.VAR),
     ]
     .concat(
-      ...node.is(Field) && node.isProperty ? [keywordPlotter(node, 'property')] : [],
+      ...node.is(Field) && node.isProperty ? [keywordPlotter(node, KEYWORDS.PROPERTY)] : [],
     ).concat(
       [generatePlotter(node)]
     )
@@ -78,9 +77,9 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     }
   }
 
-  if(node.kind === 'New' || node.kind === 'Self'){ //por alguna razon no hace match
-    return dropSingleReference(defaultKeywordPlotter(node))
-  }
+  const defaultHighlight = (node: Node): HighlightingResult => dropSingleReference(defaultKeywordPlotter(node))
+
+  // TODO: ubicarlo dentro del match
   if (node.is(If)) {
     const ifKeywords = [defaultKeywordPlotter(node)]
     // if(node.elseBody)
@@ -98,8 +97,8 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     when(Class)(node => ({ result: [
         defaultKeywordPlotter(node),
       ].concat(
-        node.supertypes.length ? keywordPlotter(node, 'inherits') : []
-      ).concat(generatePlotter(node)), 
+        node.supertypes.length ? keywordPlotter(node, KEYWORDS.INHERITS) : []
+      ).concat(generatePlotter(node)),
       references: saveReference(node) })
     ),
     when(Singleton)(node => {
@@ -110,7 +109,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       } as unknown as NamedNode
       return { result: [
         !node.isClosure() ? defaultKeywordPlotter(node) : [],
-        node.supertypes.length ? keywordPlotter(node, 'inherits') : [],
+        node.supertypes.length ? keywordPlotter(node, KEYWORDS.INHERITS) : [],
         node.name ? generatePlotter(node as unknown as NamedNode) : [],
       ], references: saveReference(currentNode) }
     }),
@@ -258,21 +257,15 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
         ], references: saveReference(node.entity),
       }
     }),
-    when(Program)(node => {
-      return dropReference([
-        defaultKeywordPlotter(node),
-        generatePlotter(node),
-      ])
-    }),
-    when(Describe)(node => {
-      return dropSingleReference(defaultKeywordPlotter(node))
-    }),
-    when(Test)(node => {
-      return dropSingleReference(defaultKeywordPlotter(node))
-    }),
-    when(If)(node => {
-      return dropSingleReference(defaultKeywordPlotter(node))
-    }),
+    when(Program)(node => dropReference([
+      defaultKeywordPlotter(node),
+      generatePlotter(node),
+    ])),
+    when(Describe)(defaultHighlight),
+    when(Test)(defaultHighlight),
+    when(If)(defaultHighlight),
+    when(New)(defaultHighlight),
+    when(Self)(defaultHighlight),
     when(Node)(_ => nullHighlighting)
   )
 }

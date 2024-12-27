@@ -11,4 +11,4 @@ export const readFileForTokenProvider = (filePath: string): WollokNodePlotter[] 
   return excludeNullish(processCode(tp.members[0], splittedLines))
 }
 
-export const processedByTokenType = (processed: WollokNodePlotter[], tokenType: string): ArrayIterator<WollokNodePlotter> => processed.filter(token => token.tokenType === tokenType).values()
+export const processedByTokenType = (processed: WollokNodePlotter[], tokenType: string): IterableIterator<WollokNodePlotter> => processed.filter(token => token.tokenType === tokenType).values()
