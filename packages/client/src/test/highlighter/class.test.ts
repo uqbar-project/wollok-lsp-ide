@@ -1,74 +1,6 @@
-import { excludeNullish, parse } from 'wollok-ts'
-import { readFileSync } from 'fs'
-import { processCode } from '../../highlighter/tokenProvider'
 import { WollokNodePlotter } from '../../highlighter/utils'
 import { expect } from 'expect'
-
-const readFileForTokenProvider = (filePath: string) => {
-  const parsedFile = parse.File(filePath)
-  const docText = readFileSync(filePath, { encoding: 'utf-8' })
-  const tp = parsedFile.tryParse(docText)
-  const splittedLines = docText.split('\n')
-  return excludeNullish(processCode(tp.members[0], splittedLines))
-}
-
-suite('an object sample', () => {
-
-  let processed: WollokNodePlotter[]
-
-  setup(() => {
-    processed = readFileForTokenProvider('src/test/highlighter/highlighter-samples/objectSample.wlk')
-  })
-
-  test('highlights object keyword', () => {
-    console.info(JSON.stringify(processed.filter(token => token.tokenType === 'keyword')))
-    const keywordsTokens = processed.filter(token => token.tokenType === 'keyword').values()
-
-    const nextRange = () => keywordsTokens.next().value.range
-
-    const objectRange = nextRange()
-    expect(objectRange.start).toEqual({ line: 0, column: 0 })
-    expect(objectRange.end).toEqual({ line: 0, column: 6 })
-
-    const varRange = nextRange()
-    expect(varRange.start).toEqual({ line: 1, column: 2 })
-    expect(varRange.end).toEqual({ line: 1, column: 5 })
-
-    const propertyRange = nextRange()
-    expect(propertyRange.start).toEqual({ line: 1, column: 6 })
-    expect(propertyRange.end).toEqual({ line: 1, column: 14 })
-
-    const constRange = nextRange()
-    expect(constRange.start).toEqual({ line: 2, column: 2 })
-    expect(constRange.end).toEqual({ line: 2, column: 7 })
-
-    const methodFlyRange = nextRange()
-    expect(methodFlyRange.start).toEqual({ line: 4, column: 2 })
-    expect(methodFlyRange.end).toEqual({ line: 4, column: 8 })
-
-    const equalRange = nextRange()
-    expect(equalRange.start).toEqual({ line: 5, column: 11 })
-    expect(equalRange.end).toEqual({ line: 5, column: 12 })
-
-    const methodRealEnergyRange = nextRange()
-    expect(methodRealEnergyRange.start).toEqual({ line: 8, column: 2 })
-    expect(methodRealEnergyRange.end).toEqual({ line: 8, column: 8 })
-
-    const selfRange = nextRange()
-    expect(selfRange.start).toEqual({ line: 8, column: 33 })
-    expect(selfRange.end).toEqual({ line: 8, column: 37 })
-
-    const methodNameValueRange = nextRange()
-    expect(methodNameValueRange.start).toEqual({ line: 9, column: 2 })
-    expect(methodNameValueRange.end).toEqual({ line: 9, column: 8 })
-  })
-
-  test('highlights properties', () => {
-    const propertyTokens = processed.filter(token => token.tokenType === 'property')
-    expect(propertyTokens.length).toBe(6)
-  })
-
-})
+import { processedByTokenType, readFileForTokenProvider } from './utils'
 
 suite('a class sample', () => {
 
@@ -79,7 +11,7 @@ suite('a class sample', () => {
   })
 
   test('highlights class keyword', () => {
-    const keywordsTokens = processed.filter(token => token.tokenType === 'keyword').values()
+    const keywordsTokens = processedByTokenType(processed, 'keyword')
 
     const nextRange = () => keywordsTokens.next().value.range
 
@@ -128,13 +60,8 @@ suite('a class sample', () => {
     expect(returnValueForIsYoungMethodRange.end).toEqual({ line: 10, column: 10 })
   })
 
-  test('highlights properties', () => {
-    const propertyTokens = processed.filter(token => token.tokenType === 'property')
-    expect(propertyTokens.length).toBe(5)
-  })
-
   test('highlights class name', () => {
-    const classTokens = processed.filter(token => token.tokenType === 'class').values()
+    const classTokens = processedByTokenType(processed, 'class')
 
     const nextRange = () => classTokens.next().value.range
 
@@ -144,7 +71,7 @@ suite('a class sample', () => {
   })
 
   test('highlights property name', () => {
-    const propertyTokens = processed.filter(token => token.tokenType === 'property').values()
+    const propertyTokens = processedByTokenType(processed, 'property')
 
     const nextRange = () => propertyTokens.next().value.range
 
@@ -169,8 +96,8 @@ suite('a class sample', () => {
     expect(birthdateInIsYoungMethodRange.end).toEqual({ line: 9, column: 49 })
   })
 
-  test('highlights methods name', () => {
-    const methodTokens = processed.filter(token => token.tokenType === 'method').values()
+  test('highlights method names', () => {
+    const methodTokens = processedByTokenType(processed, 'method')
 
     const nextRange = () => methodTokens.next().value.range
 
@@ -188,7 +115,7 @@ suite('a class sample', () => {
   })
 
   test('highlights parameters', () => {
-    const parameterTokens = processed.filter(token => token.tokenType === 'parameter').values()
+    const parameterTokens = processedByTokenType(processed, 'parameter')
 
     const nextRange = () => parameterTokens.next().value.range
 
@@ -201,5 +128,74 @@ suite('a class sample', () => {
     expect(minutesUsageParameterRange.end).toEqual({ line: 5, column: 35 })
   })
 
+  test('highlights operators', () => {
+    const operatorTokens = processedByTokenType(processed, 'operator')
+
+    const nextRange = () => operatorTokens.next().value.range
+
+    const plusOperatorRange = nextRange()
+    expect(plusOperatorRange.start).toEqual({ line: 5, column: 20 })
+    expect(plusOperatorRange.end).toEqual({ line: 5, column: 21 })
+
+    const multiplyOperatorRange = nextRange()
+    expect(multiplyOperatorRange.start).toEqual({ line: 5, column: 26 })
+    expect(multiplyOperatorRange.end).toEqual({ line: 5, column: 27 })
+
+    const divideOperatorRange = nextRange()
+    expect(divideOperatorRange.start).toEqual({ line: 9, column: 51 })
+    expect(divideOperatorRange.end).toEqual({ line: 9, column: 52 })
+
+    const lessThanOperatorRange = nextRange()
+    expect(lessThanOperatorRange.start).toEqual({ line: 10, column: 17 })
+    expect(lessThanOperatorRange.end).toEqual({ line: 10, column: 18 })
+  })
+
+  test('highlights local variables', () => {
+    const operatorTokens = processedByTokenType(processed, 'variable')
+
+    const nextRange = () => operatorTokens.next().value.range
+
+    const yearsDefinitionRange = nextRange()
+    expect(yearsDefinitionRange.start).toEqual({ line: 9, column: 10 })
+    expect(yearsDefinitionRange.end).toEqual({ line: 9, column: 15 })
+
+    const yearsInMessageRange = nextRange()
+    expect(yearsInMessageRange.start).toEqual({ line: 10, column: 11 })
+    expect(yearsInMessageRange.end).toEqual({ line: 10, column: 16 })
+  })
+
+  test('highlights numbers', () => {
+    const numberTokens = processedByTokenType(processed, 'number')
+
+    const nextRange = () => numberTokens.next().value.range
+
+    const numberAsAValueOfFieldRange = nextRange()
+    expect(numberAsAValueOfFieldRange.start).toEqual({ line: 1, column: 15 })
+    expect(numberAsAValueOfFieldRange.end).toEqual({ line: 1, column: 18 })
+
+    const numberAsValueOfParameter1Range = nextRange()
+    expect(numberAsValueOfParameter1Range.start).toEqual({ line: 2, column: 42 })
+    expect(numberAsValueOfParameter1Range.end).toEqual({ line: 2, column: 43 })
+
+    const numberAsValueOfParameter2Range = nextRange()
+    expect(numberAsValueOfParameter2Range.start).toEqual({ line: 2, column: 53 })
+    expect(numberAsValueOfParameter2Range.end).toEqual({ line: 2, column: 54 })
+
+    const numberAsValueOfParameter3Range = nextRange()
+    expect(numberAsValueOfParameter3Range.start).toEqual({ line: 2, column: 63 })
+    expect(numberAsValueOfParameter3Range.end).toEqual({ line: 2, column: 67 })
+
+    const numberAsReceiverOfMessageRange = nextRange()
+    expect(numberAsReceiverOfMessageRange.start).toEqual({ line: 5, column: 23 })
+    expect(numberAsReceiverOfMessageRange.end).toEqual({ line: 5, column: 25 })
+
+    const numberAsParameterOfOperator1Range = nextRange()
+    expect(numberAsParameterOfOperator1Range.start).toEqual({ line: 9, column: 53 })
+    expect(numberAsParameterOfOperator1Range.end).toEqual({ line: 9, column: 56 })
+
+    const numberAsParameterOfOperator2Range = nextRange()
+    expect(numberAsParameterOfOperator2Range.start).toEqual({ line: 10, column: 19 })
+    expect(numberAsParameterOfOperator2Range.end).toEqual({ line: 10, column: 20 })
+  })
 
 })

@@ -57,6 +57,8 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     return plotter({ ln: line, col, len: token.length }, kind)
   }
 
+  const defaultKeywordPlotter = (node: Node) => keywordPlotter(node, keywords[node.kind])
+
   const saveReference = (node: NamedNode) => ({ name: node.name, type: node.kind })
   const dropSingleReference = (node: WollokNodePlotter): HighlightingResult => dropReference([node])
   const dropReference = (node: WollokNodePlotter[]): HighlightingResult => ({ result: node, references: undefined })
@@ -77,40 +79,40 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
   }
 
   if(node.kind === 'New' || node.kind === 'Self'){ //por alguna razon no hace match
-    return dropSingleReference(keywordPlotter(node, keywords[node.kind]))
+    return dropSingleReference(defaultKeywordPlotter(node))
   }
   if (node.is(If)) {
-    const ifKeywords = [keywordPlotter(node, keywords[node.kind])]
+    const ifKeywords = [defaultKeywordPlotter(node)]
     // if(node.elseBody)
     //   if_keywords.push(keyword_plotter(node, keywords['Else']))
     return dropReference(ifKeywords)
   }
   if (node.is(Describe) || node.is(Test)) {
     return dropReference([
-      keywordPlotter(node, keywords[node.kind]),
+      defaultKeywordPlotter(node),
       generatePlotter(node),
     ])
   }
 
   return match(node)(
-    when(Class)(node => {
-      const acum = []
-      acum.push(keywordPlotter(node, 'class'))
-      node.supertypes.length>0 && acum.push(keywordPlotter(node, 'inherits'))
-      acum.push(generatePlotter(node))
-      return { result: acum, references: saveReference(node) }
-    }),
+    when(Class)(node => ({ result: [
+        defaultKeywordPlotter(node),
+      ].concat(
+        node.supertypes.length ? keywordPlotter(node, 'inherits') : []
+      ).concat(generatePlotter(node)), 
+      references: saveReference(node) })
+    ),
     when(Singleton)(node => {
       if (node.sourceMap == undefined) return nullHighlighting
       const currentNode = {
         ...node,
         name: node.name ?? '',
       } as unknown as NamedNode
-      const acum = []
-      node.members.reduce((prev, curr) => !curr.name.startsWith('<') && prev, true)
-        && acum.push(keywordPlotter(node, keywords[node.kind]))
-      if (node.name) acum.push(generatePlotter(node as unknown as NamedNode))
-      return { result: acum, references: saveReference(currentNode) }
+      return { result: [
+        !node.isClosure() ? defaultKeywordPlotter(node) : [],
+        node.supertypes.length ? keywordPlotter(node, 'inherits') : [],
+        node.name ? generatePlotter(node as unknown as NamedNode) : [],
+      ], references: saveReference(currentNode) }
     }),
     when(Field)(node =>
       node.isSynthetic ? nullHighlighting : resultForReference(node)
@@ -138,7 +140,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     when(Assignment)(node => {
       return {
         result: [
-          keywordPlotter(node, keywords[node.kind]),
+          defaultKeywordPlotter(node),
         ], references: undefined,
       }
     }),
@@ -161,7 +163,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       return {
         result: [
           plotter({ ln: line, col, len: node.name.length }, node.kind),
-          keywordPlotter(node, keywords[node.kind]),
+          defaultKeywordPlotter(node),
         ], references: undefined,
       }
     }),
@@ -191,7 +193,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       }
     }),
     when(Return)(node => {
-      return dropSingleReference(keywordPlotter(node, keywords[node.kind]))
+      return dropSingleReference(defaultKeywordPlotter(node))
     }),
     when(Literal)(node => {
       if(node.isSynthetic) return nullHighlighting
@@ -240,7 +242,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       try { //alternativamente examinar si el keyword tiene indice negativo
         return {
           result: [
-            keywordPlotter(node, keywords[node.kind]),
+            defaultKeywordPlotter(node),
             generatePlotter(node),
           ], references: saveReference(node),
         }}
@@ -251,25 +253,25 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     when(Import)(node => {
       return {
         result: [
-          keywordPlotter(node, keywords[node.kind]),
+          defaultKeywordPlotter(node),
           generatePlotter(node.entity),
         ], references: saveReference(node.entity),
       }
     }),
     when(Program)(node => {
       return dropReference([
-        keywordPlotter(node, keywords[node.kind]),
+        defaultKeywordPlotter(node),
         generatePlotter(node),
       ])
     }),
     when(Describe)(node => {
-      return dropSingleReference(keywordPlotter(node, keywords[node.kind]))
+      return dropSingleReference(defaultKeywordPlotter(node))
     }),
     when(Test)(node => {
-      return dropSingleReference(keywordPlotter(node, keywords[node.kind]))
+      return dropSingleReference(defaultKeywordPlotter(node))
     }),
     when(If)(node => {
-      return dropSingleReference(keywordPlotter(node, keywords[node.kind]))
+      return dropSingleReference(defaultKeywordPlotter(node))
     }),
     when(Node)(_ => nullHighlighting)
   )
