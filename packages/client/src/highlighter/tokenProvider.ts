@@ -50,7 +50,7 @@ const nullHighlighting = { result: undefined, references: undefined }
 function processNode(node: Node, documentoStr: string[], context: NodeContext[]): HighlightingResult {
   if (!node.sourceMap) return nullHighlighting
 
-  const generatePlotter = (node: NamedNode) => keywordPlotter(node, node.name, node.kind)
+  const generatePlotterForNode = (node: NamedNode) => keywordPlotter(node, node.name, node.kind)
   const keywordPlotter = (node: Node, token: string, kind = 'Keyword') => {
     const { line, column, word } = getLine(node, documentoStr)
     const col = column + word.indexOf(token)
@@ -69,7 +69,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     .concat(
       ...node.is(Field) && node.isProperty ? [keywordPlotter(node, KEYWORDS.PROPERTY)] : [],
     ).concat(
-      [generatePlotter(node)]
+      [generatePlotterForNode(node)]
     )
     return {
       result,
@@ -89,7 +89,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
   if (node.is(Describe) || node.is(Test)) {
     return dropReference([
       defaultKeywordPlotter(node),
-      generatePlotter(node),
+      generatePlotterForNode(node),
     ])
   }
 
@@ -98,20 +98,18 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
         defaultKeywordPlotter(node),
       ].concat(
         node.supertypes.length ? keywordPlotter(node, KEYWORDS.INHERITS) : []
-      ).concat(generatePlotter(node)),
+      ).concat(generatePlotterForNode(node)),
       references: saveReference(node) })
     ),
     when(Singleton)(node => {
       if (node.sourceMap == undefined) return nullHighlighting
-      const currentNode = {
-        ...node,
-        name: node.name ?? '',
-      } as unknown as NamedNode
+      const currentNode = node as unknown as NamedNode
+      const validName = node.name !== undefined && node.name.trim().length
       return { result: [
         !node.isClosure() ? defaultKeywordPlotter(node) : [],
         node.supertypes.length ? keywordPlotter(node, KEYWORDS.INHERITS) : [],
-        node.name ? generatePlotter(node as unknown as NamedNode) : [],
-      ], references: saveReference(currentNode) }
+        validName ? generatePlotterForNode(currentNode) : [],
+      ], references: validName ? saveReference(currentNode) : undefined }
     }),
     when(Field)(node =>
       node.isSynthetic ? nullHighlighting : resultForReference(node)
@@ -130,19 +128,17 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       const referencia  = context.find(currentNode => currentNode.name === node.name)
       //TODO: Encontrar la forma de incorporar referencias de las importaciones
       if (referencia){
-        const pl = generatePlotter(node)
+        const pl = generatePlotterForNode(node)
         pl.tokenType = tokenTypeObj[referencia.type]
         return { result: pl, references: undefined } //no agrego informacion
       }
       return nullHighlighting
     }),
-    when(Assignment)(node => {
-      return {
-        result: [
-          defaultKeywordPlotter(node),
-        ], references: undefined,
-      }
-    }),
+    when(Assignment)(node => ({
+      result: [
+        defaultKeywordPlotter(node),
+      ], references: undefined,
+    })),
     when(Parameter)(node => {
       const { line, column, word } = getLine(node, documentoStr)
       const col = column + word.indexOf(node.name)
@@ -152,9 +148,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       }
     }),
     when(Method)(node => {
-      if(node.isSynthetic){ //es un singleton closure
-        return nullHighlighting
-      }
+      if (node.isSynthetic) return nullHighlighting
 
       const { line, column, word } = getLine(node, documentoStr)
       const col = column + word.indexOf(node.name)
@@ -191,9 +185,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
         references: undefined,
       }
     }),
-    when(Return)(node => {
-      return dropSingleReference(defaultKeywordPlotter(node))
-    }),
+    when(Return)(defaultHighlight),
     when(Literal)(node => {
       if(node.isSynthetic) return nullHighlighting
       const tipo = typeof node.value
@@ -242,24 +234,22 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
         return {
           result: [
             defaultKeywordPlotter(node),
-            generatePlotter(node),
+            generatePlotterForNode(node),
           ], references: saveReference(node),
-        }}
-      catch(e){
+        }
+      } catch (e) {
         return nullHighlighting
       }
     }),
-    when(Import)(node => {
-      return {
-        result: [
-          defaultKeywordPlotter(node),
-          generatePlotter(node.entity),
-        ], references: saveReference(node.entity),
-      }
-    }),
+    when(Import)(node => ({
+      result: [
+        defaultKeywordPlotter(node),
+        generatePlotterForNode(node.entity),
+      ], references: saveReference(node.entity),
+    })),
     when(Program)(node => dropReference([
       defaultKeywordPlotter(node),
-      generatePlotter(node),
+      generatePlotterForNode(node),
     ])),
     when(Describe)(defaultHighlight),
     when(Test)(defaultHighlight),
@@ -270,16 +260,15 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
   )
 }
 
-export function processCode(node: Node, documentoStr: string[]): WollokNodePlotter[] {
+export function processCode(node: Node, textDocument: string[]): WollokNodePlotter[] {
   return node.reduce((acum, node: Node) =>
   {
-    const proc_nodo = processNode(node, documentoStr, acum.references)
-
+    const processed = processNode(node, textDocument, acum.references)
     return {
-      result: proc_nodo.result? acum.result.concat(proc_nodo.result):acum.result,
-      references: acum.references.concat(proc_nodo.references || []),
+      result: acum.result.concat(processed.result ?? []),
+      references: acum.references.concat(processed.references || []),
     }
-  }, { result:[], references: [{ name: 'console', type: 'Reference' }] }).result
+  }, { result: [], references: [{ name: 'console', type: 'Reference' }] }).result
 }
 
 //TODO: al no poder procesar comentarios multilinea se transforma a comentarios comunes.

@@ -9,17 +9,22 @@ const convertToVSCPosition = (position: WollokPosition) =>
   new vscode.Position(position.line, position.column)
 
 const convertToVSCTokens = (wollokNodesPlotter: WollokNodePlotter[]) =>
-  wollokNodesPlotter.map(wollokNodePlotter => {
-    const { range } = wollokNodePlotter
-    const { start, end } = range
-    return {
-      ...wollokNodePlotter,
-      range: new vscode.Range(
-        convertToVSCPosition(start),
-        convertToVSCPosition(end),
-      ),
-    }
-  })
+  excludeNullish(wollokNodesPlotter)
+    .filter(wollokNodePlotter => {
+      const { range } = wollokNodePlotter
+      return !!range && range.start && range.end
+    })
+    .map(wollokNodePlotter => {
+      const { range } = wollokNodePlotter
+      const { start, end } = range
+      return {
+        ...wollokNodePlotter,
+        range: new vscode.Range(
+          convertToVSCPosition(start),
+          convertToVSCPosition(end),
+        ),
+      }
+    })
 
 export const provider: vscode.DocumentSemanticTokensProvider = {
   provideDocumentSemanticTokens(
