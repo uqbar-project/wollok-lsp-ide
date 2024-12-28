@@ -9,7 +9,7 @@ const convertToVSCPosition = (position: WollokPosition) =>
   new vscode.Position(position.line, position.column)
 
 const convertToVSCTokens = (wollokNodesPlotter: WollokNodePlotter[]) =>
-  excludeNullish(wollokNodesPlotter)
+  wollokNodesPlotter
     .filter(wollokNodePlotter => {
       const { range } = wollokNodePlotter
       return !!range && range.start && range.end
