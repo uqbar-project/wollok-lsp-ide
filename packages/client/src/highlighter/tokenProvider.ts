@@ -105,11 +105,14 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       if (node.sourceMap == undefined) return nullHighlighting
       const currentNode = node as unknown as NamedNode
       const validName = node.name !== undefined && node.name.trim().length
-      return { result: [
-        !node.isClosure() ? defaultKeywordPlotter(node) : [],
-        node.supertypes.length ? keywordPlotter(node, KEYWORDS.INHERITS) : [],
-        validName ? generatePlotterForNode(currentNode) : [],
-      ], references: validName ? saveReference(currentNode) : undefined }
+      const result = []
+      if (!node.isClosure()) result.push(defaultKeywordPlotter(node))
+      if (node.supertypes.length) result.push(keywordPlotter(node, KEYWORDS.INHERITS))
+      if (validName) result.push(generatePlotterForNode(currentNode))
+      return {
+        result,
+        references: validName ? saveReference(currentNode) : undefined,
+      }
     }),
     when(Field)(node =>
       node.isSynthetic ? nullHighlighting : resultForReference(node)

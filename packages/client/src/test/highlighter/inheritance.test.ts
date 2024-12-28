@@ -53,7 +53,6 @@ suite('inheritance sample', () => {
   })
 
   test('highlights class names', () => {
-    console.info(JSON.stringify(processed.filter(t => t.tokenType === 'class')))
     const keywordsTokens = processedByTokenType(processed, 'class')
 
     const nextRange = () => keywordsTokens.next().value.range

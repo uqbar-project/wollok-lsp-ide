@@ -10,10 +10,6 @@ const convertToVSCPosition = (position: WollokPosition) =>
 
 const convertToVSCTokens = (wollokNodesPlotter: WollokNodePlotter[]) =>
   wollokNodesPlotter
-    .filter(wollokNodePlotter => {
-      const { range } = wollokNodePlotter
-      return !!range && range.start && range.end
-    })
     .map(wollokNodePlotter => {
       const { range } = wollokNodePlotter
       const { start, end } = range
@@ -38,7 +34,8 @@ export const provider: vscode.DocumentSemanticTokensProvider = {
     const splittedLines = textFile.split('\n')
     const processed = excludeNullish([]
       .concat(convertToVSCTokens(processCode(parsedPackage.members[0], splittedLines)))
-      .concat(processComments(splittedLines)))
+      .concat(processComments(splittedLines))
+    )
 
     processed.forEach((node: WollokNodePlotter) =>
       tokensBuilder.push(node.range as unknown as vscode.Range, node.tokenType, node.tokenModifiers)
