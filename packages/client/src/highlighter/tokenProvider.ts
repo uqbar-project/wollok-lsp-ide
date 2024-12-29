@@ -7,17 +7,6 @@ type NodeContext = {
   type: string
 }
 
-type ProcesamientoComentario = {
-  result: WollokNodePlotter[];
-  multilinea?: {
-    ln: number,
-    col: number,
-    len: number
-  }[]
-  firstLineMC?: number;
-  presetIndex?: number;
-}
-
 type NamedNode = Node & { name: string }
 
 type LineResult = {
@@ -29,6 +18,17 @@ type LineResult = {
 export type HighlightingResult = {
   result: WollokNodePlotter[];
   references: NodeContext | NodeContext[];
+}
+
+type ProcesamientoComentario = {
+  result: WollokNodePlotter[];
+  multilinea?: {
+    ln: number,
+    col: number,
+    len: number
+  }[]
+  firstLineMC?: number;
+  presetIndex?: number;
 }
 
 /* ============================================================================ */
@@ -50,13 +50,21 @@ const nullHighlighting = { result: undefined, references: undefined }
 function processNode(node: Node, documentoStr: string[], context: NodeContext[]): HighlightingResult {
   if (!node.sourceMap) return nullHighlighting
 
-  const generatePlotterForNode = (node: NamedNode) => keywordPlotter(node, node.name, node.kind)
-  const keywordPlotter = (node: Node, token: string, kind = 'Keyword') => {
+  const generatePlotterForNode = (node: NamedNode) => customPlotter(node, node.name, node.kind)
+  const customPlotter = (node: Node, token: string, kind = 'Keyword') => {
     const { line, column, word } = getLine(node, documentoStr)
     const col = column + word.indexOf(token)
     return plotter({ ln: line, col, len: token.length }, kind)
   }
-  const defaultKeywordPlotter = (node: Node) => keywordPlotter(node, keywords[node.kind])
+  const generatePlotterAfterNode = (node: Node, token: string, kind = 'Keyword') => {
+    const { line, column } = node.sourceMap.end
+    return plotter({ ln: line - 1, col: column, len: token.length }, kind)
+  }
+  const defaultKeywordPlotter = (node: Node) => customPlotter(node, keywords[node.kind])
+  const keywordAndNodePlotter = (node: NamedNode) => dropReference([
+    defaultKeywordPlotter(node),
+    generatePlotterForNode(node),
+  ])
 
   const saveReference = (node: NamedNode) => ({ name: node.name, type: node.kind })
   const dropSingleReference = (node: WollokNodePlotter): HighlightingResult => dropReference([node])
@@ -64,10 +72,10 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
 
   const resultForReference = (node: Variable | Field) => {
     const result = [
-      keywordPlotter(node, node.isConstant ? KEYWORDS.CONST : KEYWORDS.VAR),
+      customPlotter(node, node.isConstant ? KEYWORDS.CONST : KEYWORDS.VAR),
     ]
     .concat(
-      ...node.is(Field) && node.isProperty ? [keywordPlotter(node, KEYWORDS.PROPERTY)] : [],
+      ...node.is(Field) && node.isProperty ? [customPlotter(node, KEYWORDS.PROPERTY)] : [],
     ).concat(
       [generatePlotterForNode(node)]
     )
@@ -77,27 +85,20 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     }
   }
 
-  const defaultHighlight = (node: Node): HighlightingResult => dropSingleReference(defaultKeywordPlotter(node))
-
-  // TODO: ubicarlo dentro del match
-  if (node.is(If)) {
-    const ifKeywords = [defaultKeywordPlotter(node)]
-    // if(node.elseBody)
-    //   if_keywords.push(keyword_plotter(node, keywords['Else']))
-    return dropReference(ifKeywords)
-  }
-  if (node.is(Describe) || node.is(Test)) {
-    return dropReference([
+  const defaultHighlightWithReference = (node: NamedNode) => ({ result: [
       defaultKeywordPlotter(node),
       generatePlotterForNode(node),
-    ])
-  }
+    ],
+    references: saveReference(node),
+  })
+
+  const defaultHighlightNoReference = (node: Node): HighlightingResult => dropSingleReference(defaultKeywordPlotter(node))
 
   return match(node)(
     when(Class)(node => ({ result: [
         defaultKeywordPlotter(node),
       ].concat(
-        node.supertypes.length ? keywordPlotter(node, KEYWORDS.INHERITS) : []
+        node.supertypes.length ? customPlotter(node, KEYWORDS.INHERITS) : []
       ).concat(generatePlotterForNode(node)),
       references: saveReference(node) })
     ),
@@ -107,7 +108,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       const validName = node.name !== undefined && node.name.trim().length
       const result = []
       if (!node.isClosure()) result.push(defaultKeywordPlotter(node))
-      if (node.supertypes.length) result.push(keywordPlotter(node, KEYWORDS.INHERITS))
+      if (node.supertypes.length) result.push(customPlotter(node, KEYWORDS.INHERITS))
       if (validName) result.push(generatePlotterForNode(currentNode))
       return {
         result,
@@ -129,7 +130,6 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
         return nullHighlighting
 
       const referencia  = context.find(currentNode => currentNode.name === node.name)
-      //TODO: Encontrar la forma de incorporar referencias de las importaciones
       if (referencia){
         const pl = generatePlotterForNode(node)
         pl.tokenType = tokenTypeObj[referencia.type]
@@ -188,7 +188,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
         references: undefined,
       }
     }),
-    when(Return)(defaultHighlight),
+    when(Return)(defaultHighlightNoReference),
     when(Literal)(node => {
       if(node.isSynthetic) return nullHighlighting
       const tipo = typeof node.value
@@ -232,8 +232,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       }
     }),
     when(Package)(node => {
-      //el nombre puede o no estar
-      try { //alternativamente examinar si el keyword tiene indice negativo
+      try {
         return {
           result: [
             defaultKeywordPlotter(node),
@@ -247,18 +246,20 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     when(Import)(node => ({
       result: [
         defaultKeywordPlotter(node),
-        generatePlotterForNode(node.entity),
       ], references: saveReference(node.entity),
     })),
-    when(Program)(node => dropReference([
-      defaultKeywordPlotter(node),
-      generatePlotterForNode(node),
-    ])),
-    when(Describe)(defaultHighlight),
-    when(Test)(defaultHighlight),
-    when(If)(defaultHighlight),
-    when(New)(defaultHighlight),
-    when(Self)(defaultHighlight),
+    when(Program)(defaultHighlightWithReference),
+    when(Describe)(defaultHighlightWithReference),
+    when(Test)(defaultHighlightWithReference),
+    when(If)(node => {
+      const result = [defaultKeywordPlotter(node)]
+      if (node.elseBody && node.elseBody.sourceMap) {
+        result.push(generatePlotterAfterNode(node.thenBody, KEYWORDS.ELSE))
+      }
+      return dropReference(result)
+    }),
+    when(New)(defaultHighlightNoReference),
+    when(Self)(defaultHighlightNoReference),
     when(Node)(_ => nullHighlighting)
   )
 }
