@@ -96,46 +96,80 @@ suite('describe sample', () => {
     expect(describeRange.end).toEqual({ line: 3, column: 24 })
   })
 
-  // test('highlights properties', () => {
-  //   const keywordsTokens = processedByTokenType(processed, 'property')
+  test('highlights numbers', () => {
+    const numberTokens = processedByTokenType(processed, 'number')
 
-  //   const nextRange = () => keywordsTokens.next().value.range
+    const nextRange = () => numberTokens.next().value.range
 
-  //   const energyVarFromBirdRange = nextRange()
-  //   expect(energyVarFromBirdRange.start).toEqual({ line: 1, column: 6 })
-  //   expect(energyVarFromBirdRange.end).toEqual({ line: 1, column: 12 })
-  // })
+    const valueForDescribeVariableRange = nextRange()
+    expect(valueForDescribeVariableRange.start).toEqual({ line: 4, column: 14 })
+    expect(valueForDescribeVariableRange.end).toEqual({ line: 4, column: 16 })
 
-  // test('highlights variables', () => {
-  //   const keywordsTokens = processedByTokenType(processed, 'variable')
+    const valueForParameterRange = nextRange()
+    expect(valueForParameterRange.start).toEqual({ line: 6, column: 16 })
+    expect(valueForParameterRange.end).toEqual({ line: 6, column: 17 })
 
-  //   const nextRange = () => keywordsTokens.next().value.range
+    const valueForAssignmentRange = nextRange()
+    expect(valueForAssignmentRange.start).toEqual({ line: 6, column: 27 })
+    expect(valueForAssignmentRange.end).toEqual({ line: 6, column: 29 })
 
-  //   const unnamedObjectConstRange = nextRange()
-  //   expect(unnamedObjectConstRange.start).toEqual({ line: 8, column: 6 })
-  //   expect(unnamedObjectConstRange.end).toEqual({ line: 8, column: 14 })
-  // })
+    const valueForParameter2Range = nextRange()
+    expect(valueForParameter2Range.start).toEqual({ line: 7, column: 37 })
+    expect(valueForParameter2Range.end).toEqual({ line: 7, column: 38 })
 
-  // test('highlights numbers', () => {
-  //   const keywordsTokens = processedByTokenType(processed, 'number')
+    const valueForAssignment2Range = nextRange()
+    expect(valueForAssignment2Range.start).toEqual({ line: 7, column: 40 })
+    expect(valueForAssignment2Range.end).toEqual({ line: 7, column: 41 })
 
-  //   const nextRange = () => keywordsTokens.next().value.range
+    const valueForAssignment3Range = nextRange()
+    expect(valueForAssignment3Range.start).toEqual({ line: 7, column: 47 })
+    expect(valueForAssignment3Range.end).toEqual({ line: 7, column: 48 })
 
-  //   const numberForVariableEnergyRange = nextRange()
-  //   expect(numberForVariableEnergyRange.start).toEqual({ line: 1, column: 15 })
-  //   expect(numberForVariableEnergyRange.end).toEqual({ line: 1, column: 17 })
+    const valuePassedInAssertRange = nextRange()
+    expect(valuePassedInAssertRange.start).toEqual({ line: 8, column: 18 })
+    expect(valuePassedInAssertRange.end).toEqual({ line: 8, column: 19 })
+  })
 
-  //   const numberForNamedArgumentInPepitaRange = nextRange()
-  //   expect(numberForNamedArgumentInPepitaRange.start).toEqual({ line: 4, column: 37 })
-  //   expect(numberForNamedArgumentInPepitaRange.end).toEqual({ line: 4, column: 40 })
+  test('highlights methods', () => {
+    const methodTokens = processedByTokenType(processed, 'method')
 
-  //   const numberForNamedArgumentInMockingBirdRange = nextRange()
-  //   expect(numberForNamedArgumentInMockingBirdRange.start).toEqual({ line: 6, column: 41 })
-  //   expect(numberForNamedArgumentInMockingBirdRange.end).toEqual({ line: 6, column: 44 })
+    const nextRange = () => methodTokens.next().value.range
 
-  //   const numberForNamedArgumentInUnnamedObjectRange = nextRange()
-  //   expect(numberForNamedArgumentInUnnamedObjectRange.start).toEqual({ line: 8, column: 47 })
-  //   expect(numberForNamedArgumentInUnnamedObjectRange.end).toEqual({ line: 8, column: 49 })
-  // })
+    const testRange = nextRange()
+    expect(testRange.start).toEqual({ line: 5, column: 7 })
+    expect(testRange.end).toEqual({ line: 5, column: 18 })
+
+    const messageRange = nextRange()
+    expect(messageRange.start).toEqual({ line: 8, column: 11 })
+    expect(messageRange.end).toEqual({ line: 8, column: 17 })
+  })
+
+  test('highlights variable', () => {
+    const variableTokens = processedByTokenType(processed, 'variable')
+
+    const nextRange = () => variableTokens.next().value.range
+
+    const localVariableRange = nextRange()
+    expect(localVariableRange.start).toEqual({ line: 7, column: 10 })
+    expect(localVariableRange.end).toEqual({ line: 7, column: 22 })
+
+    const localVariableUseRange = nextRange()
+    expect(localVariableUseRange.start).toEqual({ line: 8, column: 21 })
+    expect(localVariableUseRange.end).toEqual({ line: 8, column: 33 })
+  })
+
+  test('highlights operator', () => {
+    const operatorTokens = processedByTokenType(processed, 'operator')
+
+    const nextRange = () => operatorTokens.next().value.range
+
+    const lessThanOperatorRange = nextRange()
+    expect(lessThanOperatorRange.start).toEqual({ line: 6, column: 14 })
+    expect(lessThanOperatorRange.end).toEqual({ line: 6, column: 15 })
+
+    const greaterThanOperatorRange = nextRange()
+    expect(greaterThanOperatorRange.start).toEqual({ line: 7, column: 35 })
+    expect(greaterThanOperatorRange.end).toEqual({ line: 7, column: 36 })
+  })
 
 })

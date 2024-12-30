@@ -16,6 +16,7 @@ export const readFileForTokenProvider = (filePath: string): WollokNodePlotter[] 
   const splittedLines = docText.split('\n')
   const processed = excludeNullish(processCode(parsedPackage.members[0], splittedLines)).concat(processComments(splittedLines))
   validateHighlighter(processed)
+  processed.sort((a, b) => a.range.start.line <= b.range.start.line && a.range.start.column <= b.range.start.column ? -1 : 1)
   return processed
 }
 
