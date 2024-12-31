@@ -31,11 +31,24 @@ type ProcesamientoComentario = {
   presetIndex?: number;
 }
 
-type LiteralType = 'number' | 'bigint' | 'boolean' | 'string' | 'object' | 'function' | 'symbol' | 'undefined'
+/* ============================================================================ */
+
+const getKindForLiteral = (node: Literal): string | undefined => {
+  if (node.isNumeric()) return 'Literal_number'
+  if (node.isBoolean()) return 'Literal_bool'
+  if (node.isString()) return 'Literal_string'
+  return undefined
+}
+
+const getLengthForLiteral = (node: Literal, value: string): number =>
+  value.length + (node.isString() ? 2 : 0)
+
+const getColumnForLiteral = (node: Literal, word: string, value: string): number =>
+  word.indexOf(value) - (node.isString() ? 1 : 0)
 
 /* ============================================================================ */
 
-function getLine(node: Node, documentLines: string[]): LineResult {
+const getLine = (node: Node, documentLines: string[]): LineResult => {
   const start = node.sourceMap.start
   const line = start.line - 1
   const column = start.column - 1
@@ -194,40 +207,18 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
     }),
     when(Return)(defaultHighlightNoReference),
     when(Literal)(node => {
-      const getKindForLiteral = (type: LiteralType): string | undefined => {
-        switch (type) {
-          case 'number':
-          case 'bigint':
-            return 'Literal_number'
-          case 'boolean':
-            return 'Literal_bool'
-          case 'string':
-            return 'Literal_string'
-          default:
-            return undefined
-        }
-      }
-
-      const getLengthForLiteral = (type: LiteralType, value: string): number =>
-        value.length + (type === 'string' ? 2 : 0)
-
-      const getColumnForLiteral = (word: string, value: string): number =>
-        word.indexOf(value) - (type === 'string' ? 1 : 0)
-
       if (node.isSynthetic) return nullHighlighting
+      if (node.isNull()) return dropSingleReference(customPlotter(node, KEYWORDS.NULL))
 
-      if (node.value === null) return dropSingleReference(customPlotter(node, KEYWORDS.NULL))
-
-      const type = typeof node.value
       const value = node.value?.toString()
-      const literalKind = getKindForLiteral(type)
+      const literalKind = getKindForLiteral(node)
       if (!literalKind) return nullHighlighting
 
       const { line, column, word } = getLine(node, textDocument)
       return dropSingleReference(plotter({
         ln: line,
-        col: column + getColumnForLiteral(word, value),
-        len: getLengthForLiteral(type, value),
+        col: column + getColumnForLiteral(node, word, value),
+        len: getLengthForLiteral(node, value),
       }, literalKind))
     }),
     when(Package)(node => {
