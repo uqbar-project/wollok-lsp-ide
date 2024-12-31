@@ -10,7 +10,7 @@ suite('an object sample', () => {
     processed = readFileForTokenProvider('src/test/highlighter/highlighter-samples/objectSample.wlk')
   })
 
-  test('highlights object keyword', () => {
+  test('highlights keywords', () => {
     const keywordsTokens = processedByTokenType(processed, 'keyword')
 
     const nextRange = () => keywordsTokens.next().value.range
@@ -50,6 +50,14 @@ suite('an object sample', () => {
     const methodNameValueRange = nextRange()
     expect(methodNameValueRange.start).toEqual({ line: 9, column: 2 })
     expect(methodNameValueRange.end).toEqual({ line: 9, column: 8 })
+
+    const nativeMethodNameValueRange = nextRange()
+    expect(nativeMethodNameValueRange.start).toEqual({ line: 10, column: 2 })
+    expect(nativeMethodNameValueRange.end).toEqual({ line: 10, column: 8 })
+
+    const nativeKeywordNameValueRange = nextRange()
+    expect(nativeKeywordNameValueRange.start).toEqual({ line: 10, column: 24 })
+    expect(nativeKeywordNameValueRange.end).toEqual({ line: 10, column: 30 })
   })
 
   test('highlights properties', () => {

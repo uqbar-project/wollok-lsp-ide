@@ -8,4 +8,5 @@ object pepita {
 
   method realEnergy() = energy * self.nameValue()
   method nameValue() = name.length()
+  method nativeMethod() native
 }

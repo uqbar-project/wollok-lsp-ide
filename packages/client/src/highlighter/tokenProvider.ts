@@ -53,10 +53,10 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
   if (!node.sourceMap) return nullHighlighting
 
   const generatePlotterForNode = (node: NamedNode) => customPlotter(node, node.name, node.kind)
-  const customPlotter = (node: Node, token: string, kind = 'Keyword') => {
+  const customPlotter = (node: Node, token: string, kind = 'Keyword', after?: number) => {
     if (!token) throw new Error(`Invalid token for node ${node.kind}`)
     const { line, column, word } = getLine(node, textDocument)
-    const col = column + word.indexOf(token)
+    const col = column + word.indexOf(token, after)
     return plotter({ ln: line, col, len: token.length }, kind)
   }
   const generatePlotterAfterNode = (node: Node, token: string, kind = 'Keyword') => {
@@ -160,6 +160,7 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
             plotter({ ln: line, col, len: node.name.length }, node.kind),
             defaultKeywordPlotter(node),
           ]
+        .concat(node.isNative() ? [customPlotter(node, KEYWORDS.NATIVE, 'Keyword', KEYWORDS.METHOD.length + 1 + node.name.length)] : [])
         )
 
       return {
