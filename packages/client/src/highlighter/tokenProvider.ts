@@ -247,7 +247,12 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
     })),
     when(Program)(defaultHighlightWithReference),
     when(Describe)(defaultHighlightWithReference),
-    when(Test)(defaultHighlightWithReference),
+    when(Test)(node => ({
+      result: (node.isOnly ? [customPlotter(node, KEYWORDS.ONLY)] : []).concat([
+        defaultKeywordPlotter(node),
+        generatePlotterForNode(node),
+      ]), references: saveReference(node),
+    })),
     when(If)(node => {
       const result = [defaultKeywordPlotter(node)]
       if (node.elseBody && node.elseBody.sourceMap) {

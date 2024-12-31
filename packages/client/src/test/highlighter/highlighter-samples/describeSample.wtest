@@ -8,4 +8,7 @@ describe "some describe" {
     const anotherValue = if (value > 5) 2 else 1
     assert.equals(2, anotherValue)
   }
+  only test "another test" {
+    assert.notThat(false)
+  }
 }

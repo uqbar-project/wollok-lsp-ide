@@ -54,6 +54,14 @@ suite('describe sample', () => {
     const elseRange = nextRange()
     expect(elseRange.start).toEqual({ line: 7, column: 42 })
     expect(elseRange.end).toEqual({ line: 7, column: 46 })
+
+    const onlyKeywordRange = nextRange()
+    expect(onlyKeywordRange.start).toEqual({ line: 10, column: 2 })
+    expect(onlyKeywordRange.end).toEqual({ line: 10, column: 6 })
+
+    const test2Range = nextRange()
+    expect(test2Range.start).toEqual({ line: 10, column: 7 })
+    expect(test2Range.end).toEqual({ line: 10, column: 11 })
   })
 
   test('highlights property names', () => {
@@ -131,17 +139,27 @@ suite('describe sample', () => {
   })
 
   test('highlights methods', () => {
+    console.info(JSON.stringify(processed.filter(t => t.tokenType === 'method')))
+
     const methodTokens = processedByTokenType(processed, 'method')
 
     const nextRange = () => methodTokens.next().value.range
 
-    const testRange = nextRange()
-    expect(testRange.start).toEqual({ line: 5, column: 7 })
-    expect(testRange.end).toEqual({ line: 5, column: 18 })
+    const testNameRange = nextRange()
+    expect(testNameRange.start).toEqual({ line: 5, column: 7 })
+    expect(testNameRange.end).toEqual({ line: 5, column: 18 })
 
     const messageRange = nextRange()
     expect(messageRange.start).toEqual({ line: 8, column: 11 })
     expect(messageRange.end).toEqual({ line: 8, column: 17 })
+
+    const testNameRange2 = nextRange()
+    expect(testNameRange2.start).toEqual({ line: 10, column: 12 })
+    expect(testNameRange2.end).toEqual({ line: 10, column: 26 })
+
+    const messageRange2 = nextRange()
+    expect(messageRange2.start).toEqual({ line: 11, column: 11 })
+    expect(messageRange2.end).toEqual({ line: 11, column: 18 })
   })
 
   test('highlights variable', () => {
@@ -170,6 +188,16 @@ suite('describe sample', () => {
     const greaterThanOperatorRange = nextRange()
     expect(greaterThanOperatorRange.start).toEqual({ line: 7, column: 35 })
     expect(greaterThanOperatorRange.end).toEqual({ line: 7, column: 36 })
+  })
+
+  test('highlights booleans', () => {
+    const booleanTokens = processedByTokenType(processed, 'enum')
+
+    const nextRange = () => booleanTokens.next().value.range
+
+    const describeRange = nextRange()
+    expect(describeRange.start).toEqual({ line: 11, column: 19 })
+    expect(describeRange.end).toEqual({ line: 11, column: 24 })
   })
 
 })
