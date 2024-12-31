@@ -69,6 +69,7 @@ export const keywords = {
   'Assignment':'=',
   //'Reference':'property',
   'Self':'self',
+  'Super':'super',
   'New':'new',
   'If':'if',
   'Else':'else',

@@ -1,4 +1,4 @@
-import { Assignment, Class, Describe, Field, If, Import, KEYWORDS, Literal, match, Method, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Test, Variable, when } from 'wollok-ts'
+import { Assignment, Class, Describe, Field, If, Import, KEYWORDS, Literal, match, Method, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Super, Test, Variable, when } from 'wollok-ts'
 import { keywords, plotter, tokenTypeObj } from './definition'
 import { WollokNodePlotter } from './utils'
 
@@ -41,8 +41,8 @@ function getLine(node: Node, documentLines: string[]): LineResult {
   const column = start.column - 1
 
   return {
-    line: line,
-    column: column,
+    line,
+    column,
     word: documentLines[line].substring(column),
   }
 }
@@ -54,6 +54,7 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
 
   const generatePlotterForNode = (node: NamedNode) => customPlotter(node, node.name, node.kind)
   const customPlotter = (node: Node, token: string, kind = 'Keyword') => {
+    if (!token) throw new Error(`Invalid token for node ${node.kind}`)
     const { line, column, word } = getLine(node, textDocument)
     const col = column + word.indexOf(token)
     return plotter({ ln: line, col, len: token.length }, kind)
@@ -153,11 +154,16 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
       const { line, column, word } = getLine(node, textDocument)
       const col = column + word.indexOf(node.name)
 
+      const result = (node.isOverride ? [customPlotter(node, KEYWORDS.OVERRIDE)] : [])
+        .concat(
+          [
+            plotter({ ln: line, col, len: node.name.length }, node.kind),
+            defaultKeywordPlotter(node),
+          ]
+        )
+
       return {
-        result: [
-          plotter({ ln: line, col, len: node.name.length }, node.kind),
-          defaultKeywordPlotter(node),
-        ], references: undefined,
+        result, references: undefined,
       }
     }),
     when(Send)(node => {
@@ -255,6 +261,7 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
       ], references: undefined,
     })),
     when(Self)(defaultHighlightNoReference),
+    when(Super)(defaultHighlightNoReference),
     when(Node)(_ => nullHighlighting)
   )
 }
