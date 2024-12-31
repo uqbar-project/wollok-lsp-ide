@@ -46,6 +46,14 @@ suite('literals sample', () => {
     const var4Range = nextRange()
     expect(var4Range.start).toEqual({ line: 6, column: 2 })
     expect(var4Range.end).toEqual({ line: 6, column: 5 })
+
+    const nullRange = nextRange()
+    expect(nullRange.start).toEqual({ line: 6, column: 18 })
+    expect(nullRange.end).toEqual({ line: 6, column: 22 })
+
+    const var5Range = nextRange()
+    expect(var5Range.start).toEqual({ line: 7, column: 2 })
+    expect(var5Range.end).toEqual({ line: 7, column: 5 })
   })
 
   test('highlights property names', () => {
@@ -77,9 +85,13 @@ suite('literals sample', () => {
     expect(classInNewRange.start).toEqual({ line: 5, column: 19 })
     expect(classInNewRange.end).toEqual({ line: 5, column: 23 })
 
+    const nullVarRange = nextRange()
+    expect(nullVarRange.start).toEqual({ line: 6, column: 6 })
+    expect(nullVarRange.end).toEqual({ line: 6, column: 15 })
+
     const closureVarRange = nextRange()
-    expect(closureVarRange.start).toEqual({ line: 6, column: 6 })
-    expect(closureVarRange.end).toEqual({ line: 6, column: 13 })
+    expect(closureVarRange.start).toEqual({ line: 7, column: 6 })
+    expect(closureVarRange.end).toEqual({ line: 7, column: 13 })
   })
 
   test('highlights class', () => {
@@ -106,8 +118,8 @@ suite('literals sample', () => {
     expect(bigEnergyValueRange.end).toEqual({ line: 2, column: 31 })
 
     const twoAsParameterRange = nextRange()
-    expect(twoAsParameterRange.start).toEqual({ line: 6, column: 35 })
-    expect(twoAsParameterRange.end).toEqual({ line: 6, column: 36 })
+    expect(twoAsParameterRange.start).toEqual({ line: 7, column: 35 })
+    expect(twoAsParameterRange.end).toEqual({ line: 7, column: 36 })
   })
 
   test('highlights strings', () => {
@@ -122,9 +134,9 @@ suite('literals sample', () => {
 
 
   test('highlights boolean', () => {
-    const operatorTokens = processedByTokenType(processed, 'enum')
+    const booleanTokens = processedByTokenType(processed, 'enum')
 
-    const nextRange = () => operatorTokens.next().value.range
+    const nextRange = () => booleanTokens.next().value.range
 
     const booleanRange = nextRange()
     expect(booleanRange.start).toEqual({ line: 4, column: 14 })
@@ -137,12 +149,12 @@ suite('literals sample', () => {
     const nextRange = () => variableTokens.next().value.range
 
     const parameterInClosureDefinitionRange = nextRange()
-    expect(parameterInClosureDefinitionRange.start).toEqual({ line: 6, column: 18 })
-    expect(parameterInClosureDefinitionRange.end).toEqual({ line: 6, column: 23 })
+    expect(parameterInClosureDefinitionRange.start).toEqual({ line: 7, column: 18 })
+    expect(parameterInClosureDefinitionRange.end).toEqual({ line: 7, column: 23 })
 
     const parameterInClosureUseRange = nextRange()
-    expect(parameterInClosureUseRange.start).toEqual({ line: 6, column: 27 })
-    expect(parameterInClosureUseRange.end).toEqual({ line: 6, column: 32 })
+    expect(parameterInClosureUseRange.start).toEqual({ line: 7, column: 27 })
+    expect(parameterInClosureUseRange.end).toEqual({ line: 7, column: 32 })
   })
 
   test('highlights operator', () => {
@@ -151,8 +163,8 @@ suite('literals sample', () => {
     const nextRange = () => operatorTokens.next().value.range
 
     const lessThanOperatorRange = nextRange()
-    expect(lessThanOperatorRange.start).toEqual({ line: 6, column: 33 })
-    expect(lessThanOperatorRange.end).toEqual({ line: 6, column: 34 })
+    expect(lessThanOperatorRange.start).toEqual({ line: 7, column: 33 })
+    expect(lessThanOperatorRange.end).toEqual({ line: 7, column: 34 })
   })
 
 })

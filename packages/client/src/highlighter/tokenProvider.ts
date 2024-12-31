@@ -216,8 +216,10 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
 
       if (node.isSynthetic) return nullHighlighting
 
+      if (node.value === null) return dropSingleReference(customPlotter(node, KEYWORDS.NULL))
+
       const type = typeof node.value
-      const value = node.value.toString()
+      const value = node.value?.toString()
       const literalKind = getKindForLiteral(type)
       if (!literalKind) return nullHighlighting
 

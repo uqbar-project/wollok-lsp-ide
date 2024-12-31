@@ -4,5 +4,6 @@ class Bird {
   const name = "Pepita"
   var happy = true
   const born = new Date()
+  var nullValue = null
   var closure = { value => value * 2 }
 }
