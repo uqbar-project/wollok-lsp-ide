@@ -14,7 +14,7 @@ export const tokenTypeObj = {
   'If': 'property',
   'Import': 'namespace',
   'Keyword': 'keyword',
-  'Literal_bool': 'keyword',
+  'Literal_bool': 'enum',
   'Literal_number': 'number',
   'Literal_string': 'string',
   'Literal': 'property',
@@ -84,31 +84,30 @@ export const keywords = {
 // Standard token types:
 // ID   Description
 export const tokenTypes = [
-  'namespace', //      For identifiers that declare or reference a namespace, module, or package.
   'class', //  For identifiers that declare or reference a class type.
-  'object', //No es parte de los tipos por default
-  'enum', //   For identifiers that declare or reference an enumeration type.
-  'interface', //      For identifiers that declare or reference an interface type.
-  'struct', // For identifiers that declare or reference a struct type.
-  'typeParameter', //  For identifiers that declare or reference a type parameter.
-  'type', //   For identifiers that declare or reference a type that is not covered above.
-  'parameter', //      For identifiers that declare or reference a function or method parameters.
-  'variable', //       For identifiers that declare or reference a local or global variable.
-  'property', //       For identifiers that declare or reference a member property, member field, or member variable.
-  'enumMember', //     For identifiers that declare or reference an enumeration property, constant, or member.
+  'comment', //        For tokens that represent a comment.
   'decorator', //      For identifiers that declare or reference decorators and annotations.
+  'enum', //   For identifiers that declare or reference an enumeration type.
+  'enumMember', //     For identifiers that declare or reference an enumeration property, constant, or member.
   'event', //  For identifiers that declare an event property.
   'function', //       For identifiers that declare a function.
-  'method', // For identifiers that declare a member function or method.
-  'macro', //  For identifiers that declare a macro.
-  'label', //  For identifiers that declare a label.
-  'comment', //        For tokens that represent a comment.
-  'string', // For tokens that represent a string literal.
+  'interface', //      For identifiers that declare or reference an interface type.
   'keyword', //        For tokens that represent a language keyword.
+  'label', //  For identifiers that declare a label.
+  'macro', //  For identifiers that declare a macro.
+  'method', // For identifiers that declare a member function or method.
+  'namespace', //      For identifiers that declare or reference a namespace, module, or package.
   'number', // For tokens that represent a number literal.
-  'regexp', // For tokens that represent a regular expression literal.
+  'object', //No es parte de los tipos por default
   'operator', //       For tokens that represent an operator.
-  'comment',
+  'parameter', //      For identifiers that declare or reference a function or method parameters.
+  'property', //       For identifiers that declare or reference a member property, member field, or member variable.
+  'regexp', // For tokens that represent a regular expression literal.
+  'string', // For tokens that represent a string literal.
+  'struct', // For identifiers that declare or reference a struct type.
+  'type', //   For identifiers that declare or reference a type that is not covered above.
+  'typeParameter', //  For identifiers that declare or reference a type parameter.
+  'variable', //       For identifiers that declare or reference a local or global variable.
 ]
 
 export function plotter(start: { ln, col, len }, kind: string): WollokNodePlotter {

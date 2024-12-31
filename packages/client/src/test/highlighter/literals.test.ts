@@ -35,10 +35,6 @@ suite('literals sample', () => {
     expect(var3Range.start).toEqual({ line: 4, column: 2 })
     expect(var3Range.end).toEqual({ line: 4, column: 5 })
 
-    const booleanRange = nextRange()
-    expect(booleanRange.start).toEqual({ line: 4, column: 14 })
-    expect(booleanRange.end).toEqual({ line: 4, column: 18 })
-
     const const2Range = nextRange()
     expect(const2Range.start).toEqual({ line: 5, column: 2 })
     expect(const2Range.end).toEqual({ line: 5, column: 7 })
@@ -124,18 +120,15 @@ suite('literals sample', () => {
     expect(nameValueRange.end).toEqual({ line: 3, column: 23 })
   })
 
-  test('highlights parameter', () => {
-    const variableTokens = processedByTokenType(processed, 'parameter')
 
-    const nextRange = () => variableTokens.next().value.range
+  test('highlights boolean', () => {
+    const operatorTokens = processedByTokenType(processed, 'enum')
 
-    const parameterInClosureDefinitionRange = nextRange()
-    expect(parameterInClosureDefinitionRange.start).toEqual({ line: 6, column: 18 })
-    expect(parameterInClosureDefinitionRange.end).toEqual({ line: 6, column: 23 })
+    const nextRange = () => operatorTokens.next().value.range
 
-    const parameterInClosureUseRange = nextRange()
-    expect(parameterInClosureUseRange.start).toEqual({ line: 6, column: 27 })
-    expect(parameterInClosureUseRange.end).toEqual({ line: 6, column: 32 })
+    const booleanRange = nextRange()
+    expect(booleanRange.start).toEqual({ line: 4, column: 14 })
+    expect(booleanRange.end).toEqual({ line: 4, column: 18 })
   })
 
   test('highlights parameter', () => {
