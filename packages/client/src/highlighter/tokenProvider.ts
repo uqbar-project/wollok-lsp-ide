@@ -61,10 +61,6 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     return plotter({ ln: line - 1, col: column, len: token.length }, kind)
   }
   const defaultKeywordPlotter = (node: Node) => customPlotter(node, keywords[node.kind])
-  const keywordAndNodePlotter = (node: NamedNode) => dropReference([
-    defaultKeywordPlotter(node),
-    generatePlotterForNode(node),
-  ])
 
   const saveReference = (node: NamedNode) => ({ name: node.name, type: node.kind })
   const dropSingleReference = (node: WollokNodePlotter): HighlightingResult => dropReference([node])
@@ -103,11 +99,10 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       references: saveReference(node) })
     ),
     when(Singleton)(node => {
-      if (node.sourceMap == undefined) return nullHighlighting
+      if (node.sourceMap == undefined || node.isClosure()) return nullHighlighting
       const currentNode = node as unknown as NamedNode
       const validName = node.name !== undefined && node.name.trim().length
-      const result = []
-      if (!node.isClosure()) result.push(defaultKeywordPlotter(node))
+      const result = [defaultKeywordPlotter(node)]
       if (node.supertypes.length) result.push(customPlotter(node, KEYWORDS.INHERITS))
       if (validName) result.push(generatePlotterForNode(currentNode))
       return {
@@ -190,19 +185,8 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     }),
     when(Return)(defaultHighlightNoReference),
     when(Literal)(node => {
-      if(node.isSynthetic) return nullHighlighting
+      if (node.isSynthetic) return nullHighlighting
       const tipo = typeof node.value
-      if(tipo == 'object'){
-        const closure = node.value as unknown as Singleton
-        if(closure){
-          //Literal<Singleton> es un Closure. contiene Field y Method
-          /*closure.forEach(nodo => {
-            nodo
-          })*/
-        }
-        return nullHighlighting//plotter({ ln: linea, col: col, len: len }, 'Singleton')
-      }
-
       const { line, column, word } = getLine(node, documentoStr)
       switch (tipo) {
         case 'number':
@@ -258,7 +242,12 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       }
       return dropReference(result)
     }),
-    when(New)(defaultHighlightNoReference),
+    when(New)(node => ({
+      result: [
+        defaultKeywordPlotter(node),
+        generatePlotterForNode(node.instantiated),
+      ], references: undefined,
+    })),
     when(Self)(defaultHighlightNoReference),
     when(Node)(_ => nullHighlighting)
   )

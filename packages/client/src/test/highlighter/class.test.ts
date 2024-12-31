@@ -83,6 +83,10 @@ suite('a class sample', () => {
     expect(birthdateDefinitionRange.start).toEqual({ line: 2, column: 15 })
     expect(birthdateDefinitionRange.end).toEqual({ line: 2, column: 24 })
 
+    const classInNewRange = nextRange()
+    expect(classInNewRange.start).toEqual({ line: 2, column: 31 })
+    expect(classInNewRange.end).toEqual({ line: 2, column: 35 })
+
     const energyInFlyMethodRange1 = nextRange()
     expect(energyInFlyMethodRange1.start).toEqual({ line: 5, column: 4 })
     expect(energyInFlyMethodRange1.end).toEqual({ line: 5, column: 10 })
@@ -90,6 +94,10 @@ suite('a class sample', () => {
     const energyInFlyMethodRange2 = nextRange()
     expect(energyInFlyMethodRange2.start).toEqual({ line: 5, column: 13 })
     expect(energyInFlyMethodRange2.end).toEqual({ line: 5, column: 19 })
+
+    const classInNewRange2 = nextRange()
+    expect(classInNewRange2.start).toEqual({ line: 9, column: 22 })
+    expect(classInNewRange2.end).toEqual({ line: 9, column: 26 })
 
     const birthdateInIsYoungMethodRange = nextRange()
     expect(birthdateInIsYoungMethodRange.start).toEqual({ line: 9, column: 40 })
