@@ -1,6 +1,6 @@
-import { WollokNodePlotter } from './utils'
-import { plotter, keywords, tokenTypeObj } from './definition'
 import { Assignment, Class, Describe, Field, If, Import, KEYWORDS, Literal, match, Method, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Test, Variable, when } from 'wollok-ts'
+import { keywords, plotter, tokenTypeObj } from './definition'
+import { WollokNodePlotter } from './utils'
 
 type NodeContext = {
   name: string,
@@ -31,6 +31,8 @@ type ProcesamientoComentario = {
   presetIndex?: number;
 }
 
+type LiteralType = 'number' | 'bigint' | 'boolean' | 'string' | 'object' | 'function' | 'symbol' | 'undefined'
+
 /* ============================================================================ */
 
 function getLine(node: Node, documentLines: string[]): LineResult {
@@ -47,12 +49,12 @@ function getLine(node: Node, documentLines: string[]): LineResult {
 
 const nullHighlighting = { result: undefined, references: undefined }
 
-function processNode(node: Node, documentoStr: string[], context: NodeContext[]): HighlightingResult {
+function processNode(node: Node, textDocument: string[], context: NodeContext[]): HighlightingResult {
   if (!node.sourceMap) return nullHighlighting
 
   const generatePlotterForNode = (node: NamedNode) => customPlotter(node, node.name, node.kind)
   const customPlotter = (node: Node, token: string, kind = 'Keyword') => {
-    const { line, column, word } = getLine(node, documentoStr)
+    const { line, column, word } = getLine(node, textDocument)
     const col = column + word.indexOf(token)
     return plotter({ ln: line, col, len: token.length }, kind)
   }
@@ -138,7 +140,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
       ], references: undefined,
     })),
     when(Parameter)(node => {
-      const { line, column, word } = getLine(node, documentoStr)
+      const { line, column, word } = getLine(node, textDocument)
       const col = column + word.indexOf(node.name)
       return {
         result: [plotter({ ln: line, col, len: node.name.length }, node.kind)],
@@ -148,7 +150,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     when(Method)(node => {
       if (node.isSynthetic) return nullHighlighting
 
-      const { line, column, word } = getLine(node, documentoStr)
+      const { line, column, word } = getLine(node, textDocument)
       const col = column + word.indexOf(node.name)
 
       return {
@@ -160,7 +162,7 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     }),
     when(Send)(node => {
       const currentKeyboard = keywords[node.kind]
-      const { line, column,  word } = getLine(node, documentoStr)
+      const { line, column,  word } = getLine(node, textDocument)
       if(currentKeyboard && currentKeyboard.includes(node.message)){
         if(node.message == 'negate'){//es la forma alternativa del simbolo '!'
           const idx_negate = word.indexOf('!')
@@ -185,35 +187,39 @@ function processNode(node: Node, documentoStr: string[], context: NodeContext[])
     }),
     when(Return)(defaultHighlightNoReference),
     when(Literal)(node => {
-      if (node.isSynthetic) return nullHighlighting
-      const tipo = typeof node.value
-      const { line, column, word } = getLine(node, documentoStr)
-      switch (tipo) {
-        case 'number':
-        case 'bigint':
-          const valor_numerico = node.value.toString()
-          return dropSingleReference(plotter({
-            ln: line,
-            col: column + word.indexOf(valor_numerico),
-            len: valor_numerico.length,
-          }, 'Literal_number'))
-        case 'boolean':
-          const valor_booleano = node.value.toString()
-          return dropSingleReference(plotter({
-            ln: line,
-            col: column + word.indexOf(valor_booleano),
-            len: valor_booleano.length,
-          }, 'Literal_bool'))
-        case 'string':
-          const valor_string = node.value.toString()
-          return dropSingleReference(plotter({
-            ln: line,
-            col: column + word.indexOf(valor_string) - 1,
-            len: valor_string.length + 2,
-          }, 'Literal_string'))
-        default:
-          return nullHighlighting
+      const getKindForLiteral = (type: LiteralType): string | undefined => {
+        switch (type) {
+          case 'number':
+          case 'bigint':
+            return 'Literal_number'
+          case 'boolean':
+            return 'Literal_bool'
+          case 'string':
+            return 'Literal_string'
+          default:
+            return undefined
+        }
       }
+
+      const getLengthForLiteral = (type: LiteralType, value: string): number =>
+        value.length + (type === 'string' ? 2 : 0)
+
+      const getColumnForLiteral = (word: string, value: string): number =>
+        word.indexOf(value) - (type === 'string' ? 1 : 0)
+
+      if (node.isSynthetic) return nullHighlighting
+
+      const type = typeof node.value
+      const value = node.value.toString()
+      const literalKind = getKindForLiteral(type)
+      if (!literalKind) return nullHighlighting
+
+      const { line, column, word } = getLine(node, textDocument)
+      return dropSingleReference(plotter({
+        ln: line,
+        col: column + getColumnForLiteral(word, value),
+        len: getLengthForLiteral(type, value),
+      }, literalKind))
     }),
     when(Package)(node => {
       try {

@@ -122,6 +122,7 @@ suite('literals sample', () => {
 
 
   test('highlights boolean', () => {
+    console.info(JSON.stringify(processed.filter(t => t.tokenType === 'enum')))
     const operatorTokens = processedByTokenType(processed, 'enum')
 
     const nextRange = () => operatorTokens.next().value.range
