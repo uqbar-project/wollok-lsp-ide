@@ -136,7 +136,7 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
         return { result: [
           {
             ...generatePlotterForNode(node),
-            tokenType: tokenTypeObj[reference.type]
+            tokenType: tokenTypeObj[reference.type],
           },
         ], references: undefined }
       }
