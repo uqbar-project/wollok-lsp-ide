@@ -131,20 +131,14 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
     ),
     when(Variable)(resultForReference),
     when(Reference)(node => {
-      //node.variable
-      //node.value
-      //TODO: Si previamente hay un campo del mismo nombre no se toma
-      //TODO: los parametros o propiedades se toman como nuevas referencias
-      if(node.name == 'wollok.lang.Closure'
-      || node.name == 'wollok.lang.List'
-      || node.name == 'wollok.lang.Set')
-        return nullHighlighting
-
-      const referencia  = context.find(currentNode => currentNode.name === node.name)
-      if (referencia){
-        const pl = generatePlotterForNode(node)
-        pl.tokenType = tokenTypeObj[referencia.type]
-        return { result: pl, references: undefined } //no agrego informacion
+      const reference  = context.find(currentNode => currentNode.name === node.name)
+      if (reference){
+        return { result: [
+          {
+            ...generatePlotterForNode(node),
+            tokenType: tokenTypeObj[reference.type]
+          },
+        ], references: undefined }
       }
       return nullHighlighting
     }),
@@ -181,24 +175,23 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
       }
     }),
     when(Send)(node => {
-      const currentKeyboard = keywords[node.kind]
+      const symbols = keywords[node.kind]
       const { line, column,  word } = getLine(node, textDocument)
-      if(currentKeyboard && currentKeyboard.includes(node.message)){
-        if(node.message == 'negate'){//es la forma alternativa del simbolo '!'
-          const idx_negate = word.indexOf('!')
-          const col_offset: number= idx_negate == -1? word.indexOf('not'): idx_negate
-          const plotKeyboard =  plotter({
+      if (symbols?.includes(node.message)){
+
+        if (node.message == 'negate') {
+          const operator = word.indexOf('!') == -1 ? 'not' : '!'
+          const columnOffset = word.indexOf(operator)
+          return dropSingleReference(plotter({
             ln: line,
-            col: column + col_offset,
-            len: idx_negate == -1? 3: 1,
-          }, node.kind)
-          return dropSingleReference(plotKeyboard)
+            col: column + columnOffset,
+            len: operator.length,
+          }, node.kind))
         }
         const col = column + word.indexOf(node.message)
         const plotKeyboard = plotter({ ln: line, col, len: node.message.length }, node.kind)
         return dropSingleReference(plotKeyboard)
       }
-      //if(keywords.Send.includes(node.message)) return null_case
       const col = column + word.indexOf(node.message)
       return {
         result: [plotter({ ln: line, col, len: node.message.length }, 'Method')], //node.kind)
