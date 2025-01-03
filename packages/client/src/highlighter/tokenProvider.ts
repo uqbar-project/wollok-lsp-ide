@@ -1,4 +1,4 @@
-import { Assignment, Class, Describe, Field, If, Import, KEYWORDS, last, Literal, match, Method, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Super, Test, Throw, Try, Variable, when } from 'wollok-ts'
+import { Assignment, Class, Describe, Field, If, Import, KEYWORDS, last, Literal, match, Method, NamedArgument, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Super, Test, Throw, Try, Variable, when } from 'wollok-ts'
 import { keywords, plotter, tokenTypeObj } from './definitions'
 import { WollokNodePlotter } from './utils'
 
@@ -145,6 +145,11 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
     when(Assignment)(node => ({
       result: [
         defaultKeywordPlotter(node),
+      ], references: undefined,
+    })),
+    when(NamedArgument)(node => ({
+      result: [
+        generatePlotterForNode(node),
       ], references: undefined,
     })),
     when(Parameter)(node => {

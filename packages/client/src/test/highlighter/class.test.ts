@@ -91,6 +91,18 @@ suite('a class sample', () => {
     expect(birthdateDefinitionRange.start).toEqual({ line: 2, column: 15 })
     expect(birthdateDefinitionRange.end).toEqual({ line: 2, column: 24 })
 
+    const dayNamedArgumentRange = nextRange()
+    expect(dayNamedArgumentRange.start).toEqual({ line: 2, column: 36 })
+    expect(dayNamedArgumentRange.end).toEqual({ line: 2, column: 39 })
+
+    const monthNamedArgumentRange = nextRange()
+    expect(monthNamedArgumentRange.start).toEqual({ line: 2, column: 45 })
+    expect(monthNamedArgumentRange.end).toEqual({ line: 2, column: 50 })
+
+    const yearNamedArgumentRange = nextRange()
+    expect(yearNamedArgumentRange.start).toEqual({ line: 2, column: 56 })
+    expect(yearNamedArgumentRange.end).toEqual({ line: 2, column: 60 })
+
     const energyInFlyMethodRange1 = nextRange()
     expect(energyInFlyMethodRange1.start).toEqual({ line: 5, column: 4 })
     expect(energyInFlyMethodRange1.end).toEqual({ line: 5, column: 10 })

@@ -116,6 +116,18 @@ suite('inheritance sample', () => {
     const energyVarFromBirdRange = nextRange()
     expect(energyVarFromBirdRange.start).toEqual({ line: 1, column: 6 })
     expect(energyVarFromBirdRange.end).toEqual({ line: 1, column: 12 })
+
+    const energyAsNamedParameterRange = nextRange()
+    expect(energyAsNamedParameterRange.start).toEqual({ line: 5, column: 28 })
+    expect(energyAsNamedParameterRange.end).toEqual({ line: 5, column: 34 })
+
+    const energyAsNamedParameter2Range = nextRange()
+    expect(energyAsNamedParameter2Range.start).toEqual({ line: 7, column: 32 })
+    expect(energyAsNamedParameter2Range.end).toEqual({ line: 7, column: 38 })
+
+    const energyAsNamedParameter3Range = nextRange()
+    expect(energyAsNamedParameter3Range.start).toEqual({ line: 9, column: 38 })
+    expect(energyAsNamedParameter3Range.end).toEqual({ line: 9, column: 44 })
   })
 
   test('highlights global variables', () => {

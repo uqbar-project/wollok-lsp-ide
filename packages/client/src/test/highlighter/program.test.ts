@@ -95,6 +95,10 @@ suite('a program sample', () => {
     expect(firstProgramDefinitionRange.start).toEqual({ line: 0, column: 8 })
     expect(firstProgramDefinitionRange.end).toEqual({ line: 0, column: 12 })
 
+    const messageNamedArgumentForExceptionRange = nextRange()
+    expect(messageNamedArgumentForExceptionRange.start).toEqual({ line: 3, column: 40 })
+    expect(messageNamedArgumentForExceptionRange.end).toEqual({ line: 3, column: 47 })
+
     const secondProgramDefinitionRange = nextRange()
     expect(secondProgramDefinitionRange.start).toEqual({ line: 11, column: 8 })
     expect(secondProgramDefinitionRange.end).toEqual({ line: 11, column: 19 })
