@@ -1,0 +1,18 @@
+program main {
+  var count = 0
+  try {
+    if (!count > 0) throw new Exception(message = "something wrong happened")
+  } catch e: DomainException {
+  } catch e: Exception {
+  } then always {
+    count = 1
+  }
+}
+
+program anotherMain {
+  try {
+    console.println("hi")
+  } then always {
+    console.println("bye")
+  }
+}

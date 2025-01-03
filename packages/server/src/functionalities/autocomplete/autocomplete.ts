@@ -6,6 +6,7 @@ import { isNotImportedIn } from 'wollok-ts'
 import { completionsForNode } from './node-completion'
 import { completeMessages } from './send-completion'
 import { match, when } from 'wollok-ts/dist/extensions'
+import { logger } from '../../utils/logger'
 
 export const completions = (environment: Environment) => (
   params: CompletionParams,
@@ -16,7 +17,8 @@ export const completions = (environment: Environment) => (
   const selectionNode = cursorNode(environment, position, textDocument)
   if(!selectionNode) {
     timeMeasurer.finalReport()
-    throw new Error('Could not find selection node')
+    logger.error(`Could not find selection node for position ${JSON.stringify(position)} in text document ${textDocument.uri}`)
+    return []
   }
   timeMeasurer.addTime(`Autocomplete - ${selectionNode?.kind}`)
 

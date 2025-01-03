@@ -26,6 +26,7 @@ import { subscribeWollokCommands } from './commands'
 import { getLSPMessage } from './messages'
 import { wollokLSPExtensionId } from './shared-definitions'
 import { allWollokFiles } from './utils'
+import { legend, provider, selector } from './highlighter'
 
 let client: LanguageClient
 
@@ -50,7 +51,7 @@ export function activate(context: ExtensionContext): void {
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for Wollok documents
-    documentSelector: [{ scheme: 'file', language: 'wollok' }],
+    documentSelector: [selector],
     synchronize: {
       configurationSection: wollokLSPExtensionId,
       // Notify the server about file changes to '.clientrc files contained in the workspace
@@ -61,6 +62,8 @@ export function activate(context: ExtensionContext): void {
   // Subscribe Wollok Commands
   subscribeWollokCommands(context)
 
+  const semanticTokensProvider = languages.registerDocumentSemanticTokensProvider(selector, provider, legend)
+  context.subscriptions.push(semanticTokensProvider)
 
   // Subscribe Wollok Debug Adapter
   const debuggerFactory = new WollokDebugAdapterFactory(context, vscode.workspace)

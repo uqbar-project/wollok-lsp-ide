@@ -21,7 +21,7 @@ export const completionsForNode = (node: Node): CompletionItem[] => {
       when(New)(completeNew)
     )
   } catch (error) {
-    logger.error(`✘ Completions for node failed: ${error}`, error)
+    logger.error(`✘ Completions for node ${node.kind} (${node.sourceMap} - ${node.sourceFileName}) failed: ${error}`, error)
     return completeForParent(node)
   }
 }
