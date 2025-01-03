@@ -1,5 +1,5 @@
-import { Assignment, Class, Describe, Field, If, Import, KEYWORDS, Literal, match, Method, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Super, Test, Variable, when } from 'wollok-ts'
-import { keywords, plotter, tokenTypeObj } from './definition'
+import { Assignment, Class, Describe, Field, If, Import, KEYWORDS, last, Literal, match, Method, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Super, Test, Throw, Try, Variable, when } from 'wollok-ts'
+import { keywords, plotter, tokenTypeObj } from './definitions'
 import { WollokNodePlotter } from './utils'
 
 type NodeContext = {
@@ -241,15 +241,29 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
     })),
     when(If)(node => {
       const result = [defaultKeywordPlotter(node)]
-      if (node.elseBody && node.elseBody.sourceMap) {
+      if (node.elseBody?.sourceMap) {
         result.push(generatePlotterAfterNode(node.thenBody, KEYWORDS.ELSE))
       }
       return dropReference(result)
     }),
+    when(Try)(node => {
+      const result = [
+        defaultKeywordPlotter(node),
+        ...node.catches.flatMap(_catch => [
+          defaultKeywordPlotter(_catch),
+          ...[_catch.parameterType && customPlotter(_catch.parameterType, _catch.parameterType.name, 'Class')],
+        ]),
+      ]
+      if (node.always?.sourceMap) {
+        result.push(generatePlotterAfterNode(node.catches.length ? last(node.catches) : node.body, 'then always'))
+      }
+      return dropReference(result)
+    }),
+    when(Throw)(defaultHighlightNoReference),
     when(New)(node => ({
       result: [
         defaultKeywordPlotter(node),
-        generatePlotterForNode(node.instantiated),
+        customPlotter(node.instantiated, node.instantiated.name, 'Class'),
       ], references: undefined,
     })),
     when(Self)(defaultHighlightNoReference),

@@ -44,7 +44,6 @@ export const keywords = {
   'ParameterizedType':'property',
   'NamedArgument':'property',
   'Body':'property',*/
-  'Catch':'catch',
   'Package':'package',
   'Import':'import',
   'Program':'program',
@@ -73,10 +72,12 @@ export const keywords = {
   'New':'new',
   'If':'if',
   'Else':'else',
+  'Try': 'try',
+  'Catch': 'catch',
+  'Always': 'then always',
+  'Throw': 'throw',
   //'Literal':'property',
   /*'Super':'property',
-  'Throw':'property',
-  'Try':'property',
   'Environment':'property',
   */
   'Class': 'class',

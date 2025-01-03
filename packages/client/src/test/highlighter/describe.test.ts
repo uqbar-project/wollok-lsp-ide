@@ -64,7 +64,7 @@ suite('describe sample', () => {
     expect(test2Range.end).toEqual({ line: 10, column: 11 })
   })
 
-  test('highlights property names', () => {
+  test('highlights properties', () => {
     const propertyTokens = processedByTokenType(processed, 'property')
 
     const nextRange = () => propertyTokens.next().value.range
@@ -139,8 +139,6 @@ suite('describe sample', () => {
   })
 
   test('highlights methods', () => {
-    console.info(JSON.stringify(processed.filter(t => t.tokenType === 'method')))
-
     const methodTokens = processedByTokenType(processed, 'method')
 
     const nextRange = () => methodTokens.next().value.range
@@ -162,7 +160,7 @@ suite('describe sample', () => {
     expect(messageRange2.end).toEqual({ line: 11, column: 18 })
   })
 
-  test('highlights variable', () => {
+  test('highlights variables', () => {
     const variableTokens = processedByTokenType(processed, 'variable')
 
     const nextRange = () => variableTokens.next().value.range
@@ -176,7 +174,7 @@ suite('describe sample', () => {
     expect(localVariableUseRange.end).toEqual({ line: 8, column: 33 })
   })
 
-  test('highlights operator', () => {
+  test('highlights operators', () => {
     const operatorTokens = processedByTokenType(processed, 'operator')
 
     const nextRange = () => operatorTokens.next().value.range

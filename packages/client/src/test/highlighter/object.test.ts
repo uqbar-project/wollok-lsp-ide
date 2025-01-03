@@ -90,7 +90,7 @@ suite('an object sample', () => {
     expect(nameInMessageRange.end).toEqual({ line: 9, column: 27 })
   })
 
-  test('highlights object name', () => {
+  test('highlights wkos', () => {
     const classTokens = processedByTokenType(processed, 'object')
 
     const nextRange = () => classTokens.next().value.range
@@ -100,7 +100,7 @@ suite('an object sample', () => {
     expect(objectRange.end).toEqual({ line: 0, column: 13 })
   })
 
-  test('highlights method names', () => {
+  test('highlights methods', () => {
     const methodTokens = processedByTokenType(processed, 'method')
 
     const nextRange = () => methodTokens.next().value.range

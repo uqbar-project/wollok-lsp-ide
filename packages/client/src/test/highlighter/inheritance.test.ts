@@ -72,7 +72,7 @@ suite('inheritance sample', () => {
     expect(supercallRange2.end).toEqual({ line: 12, column: 9 })
   })
 
-  test('highlights class names', () => {
+  test('highlights classes', () => {
     const keywordsTokens = processedByTokenType(processed, 'class')
 
     const nextRange = () => keywordsTokens.next().value.range
@@ -98,7 +98,7 @@ suite('inheritance sample', () => {
     expect(birdAsSuperclassOfUnnamedObjectRange.end).toEqual({ line: 9, column: 37 })
   })
 
-  test('highlights wko names', () => {
+  test('highlights wkos', () => {
     const keywordsTokens = processedByTokenType(processed, 'object')
 
     const nextRange = () => keywordsTokens.next().value.range
@@ -118,7 +118,7 @@ suite('inheritance sample', () => {
     expect(energyVarFromBirdRange.end).toEqual({ line: 1, column: 12 })
   })
 
-  test('highlights variables', () => {
+  test('highlights global variables', () => {
     const keywordsTokens = processedByTokenType(processed, 'variable')
 
     const nextRange = () => keywordsTokens.next().value.range

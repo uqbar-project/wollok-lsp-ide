@@ -56,7 +56,7 @@ suite('literals sample', () => {
     expect(var5Range.end).toEqual({ line: 7, column: 5 })
   })
 
-  test('highlights property names', () => {
+  test('highlights properties', () => {
     const propertyTokens = processedByTokenType(processed, 'property')
 
     const nextRange = () => propertyTokens.next().value.range
@@ -69,9 +69,9 @@ suite('literals sample', () => {
     expect(bigEnergyVarRange.start).toEqual({ line: 2, column: 6 })
     expect(bigEnergyVarRange.end).toEqual({ line: 2, column: 15 })
 
-    const nombreConstRange = nextRange()
-    expect(nombreConstRange.start).toEqual({ line: 3, column: 8 })
-    expect(nombreConstRange.end).toEqual({ line: 3, column: 12 })
+    const nameConstRange = nextRange()
+    expect(nameConstRange.start).toEqual({ line: 3, column: 8 })
+    expect(nameConstRange.end).toEqual({ line: 3, column: 12 })
 
     const happyVarRange = nextRange()
     expect(happyVarRange.start).toEqual({ line: 4, column: 6 })
@@ -80,10 +80,6 @@ suite('literals sample', () => {
     const bornConstRange = nextRange()
     expect(bornConstRange.start).toEqual({ line: 5, column: 8 })
     expect(bornConstRange.end).toEqual({ line: 5, column: 12 })
-
-    const classInNewRange = nextRange()
-    expect(classInNewRange.start).toEqual({ line: 5, column: 19 })
-    expect(classInNewRange.end).toEqual({ line: 5, column: 23 })
 
     const nullVarRange = nextRange()
     expect(nullVarRange.start).toEqual({ line: 6, column: 6 })
@@ -94,7 +90,7 @@ suite('literals sample', () => {
     expect(closureVarRange.end).toEqual({ line: 7, column: 13 })
   })
 
-  test('highlights class', () => {
+  test('highlights classes', () => {
     const classTokens = processedByTokenType(processed, 'class')
 
     const nextRange = () => classTokens.next().value.range
@@ -102,6 +98,10 @@ suite('literals sample', () => {
     const classRange = nextRange()
     expect(classRange.start).toEqual({ line: 0, column: 6 })
     expect(classRange.end).toEqual({ line: 0, column: 10 })
+
+    const classInNewRange = nextRange()
+    expect(classInNewRange.start).toEqual({ line: 5, column: 19 })
+    expect(classInNewRange.end).toEqual({ line: 5, column: 23 })
   })
 
   test('highlights numbers', () => {
@@ -133,7 +133,7 @@ suite('literals sample', () => {
   })
 
 
-  test('highlights boolean', () => {
+  test('highlights booleans', () => {
     const booleanTokens = processedByTokenType(processed, 'enum')
 
     const nextRange = () => booleanTokens.next().value.range
@@ -143,7 +143,7 @@ suite('literals sample', () => {
     expect(booleanRange.end).toEqual({ line: 4, column: 18 })
   })
 
-  test('highlights parameter', () => {
+  test('highlights parameters', () => {
     const variableTokens = processedByTokenType(processed, 'parameter')
 
     const nextRange = () => variableTokens.next().value.range
@@ -157,7 +157,7 @@ suite('literals sample', () => {
     expect(parameterInClosureUseRange.end).toEqual({ line: 7, column: 32 })
   })
 
-  test('highlights operator', () => {
+  test('highlights operators', () => {
     const operatorTokens = processedByTokenType(processed, 'operator')
 
     const nextRange = () => operatorTokens.next().value.range
