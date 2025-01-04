@@ -112,7 +112,7 @@ export const tokenTypes = [
   'variable', //       For identifiers that declare or reference a local or global variable.
 ]
 
-export function plotter(start: { ln, col, len }, kind: string): WollokNodePlotter {
+export function plotSingleLine(start: { ln, col, len }, kind: string): WollokNodePlotter {
   return {
     range: createRange(start.ln, start.col, start.len),
     tokenType: tokenTypeObj[kind],
@@ -120,18 +120,28 @@ export function plotter(start: { ln, col, len }, kind: string): WollokNodePlotte
   }
 }
 
+export function plotMultiline(start: { ln, col }, end: { ln, col }, kind: string): WollokNodePlotter {
+  return {
+    range: createRange(start.ln, start.col, start.len),
+    tokenType: tokenTypeObj[kind],
+    tokenModifiers: ['declaration'],
+  }
+}
 /*
-Standard token modifiers:
 
-ID     Description
+Standard token modifiers
+
+ID             Description
+----------------------------------------------------------------------------------------------
 declaration    For declarations of symbols.
 definition     For definitions of symbols, for example, in header files.
 readonly       For readonly variables and member fields (constants).
-static For class members (static members).
+static         For class members (static members).
 deprecated     For symbols that should no longer be used.
 abstract       For types and member functions that are abstract.
-async  For functions that are marked async.
+async          For functions that are marked async.
 modification   For variable references where the variable is assigned to.
 documentation  For occurrences of symbols in documentation.
 defaultLibrary For symbols that are part of the standard library.
+
 */

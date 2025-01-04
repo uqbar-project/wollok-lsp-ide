@@ -74,18 +74,20 @@ suite('comments & annotations sample', () => {
     expect(methodInClassRange.end).toEqual({ line: 12, column: 21 })
   })
 
-  // test('highlights parameters', () => {
-  //   const parameterTokens = processedByTokenType(processed, 'parameter')
+  test('highlights comments', () => {
+    console.info(JSON.stringify(processed.filter(t => t.tokenType === 'comment')))
 
-  //   const nextRange = () => parameterTokens.next().value.range
+    const parameterTokens = processedByTokenType(processed, 'comment')
 
-  //   const minutesParameterRange = nextRange()
-  //   expect(minutesParameterRange.start).toEqual({ line: 4, column: 13 })
-  //   expect(minutesParameterRange.end).toEqual({ line: 4, column: 20 })
+    const nextRange = () => parameterTokens.next().value.range
 
-  //   const minutesUsageParameterRange = nextRange()
-  //   expect(minutesUsageParameterRange.start).toEqual({ line: 5, column: 28 })
-  //   expect(minutesUsageParameterRange.end).toEqual({ line: 5, column: 35 })
-  // })
+    const commentSingleLineRange = nextRange()
+    expect(commentSingleLineRange.start).toEqual({ line: 3, column: 4 })
+    expect(commentSingleLineRange.end).toEqual({ line: 3, column: 19 })
+
+    // const minutesUsageParameterRange = nextRange()
+    // expect(minutesUsageParameterRange.start).toEqual({ line: 7, column: 0 })
+    // expect(minutesUsageParameterRange.end).toEqual({ line: 7, column: 2 })
+  })
 
 })

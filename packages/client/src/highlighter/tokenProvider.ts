@@ -1,6 +1,6 @@
 import { Annotation, Assignment, Class, Describe, Field, If, Import, KEYWORDS, last, Literal, match, Method, NamedArgument, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Super, Test, Throw, Try, Variable, when } from 'wollok-ts'
-import { keywords, plotter, tokenTypeObj } from './definitions'
-import { WollokNodePlotter } from './utils'
+import { keywords, plotSingleLine, tokenTypeObj } from './definitions'
+import { getLineColumn, mergeHighlightingResults, WollokNodePlotter } from './utils'
 
 type NodeContext = {
   name: string,
@@ -17,18 +17,7 @@ type LineResult = {
 
 export type HighlightingResult = {
   result: WollokNodePlotter[];
-  references: NodeContext | NodeContext[];
-}
-
-type ProcesamientoComentario = {
-  result: WollokNodePlotter[];
-  multilinea?: {
-    ln: number,
-    col: number,
-    len: number
-  }[]
-  firstLineMC?: number;
-  presetIndex?: number;
+  references: NodeContext[] | undefined;
 }
 
 /* ============================================================================ */
@@ -62,34 +51,35 @@ const getLine = (node: Node, documentLines: string[]): LineResult => {
 
 const nullHighlighting = { result: undefined, references: undefined }
 
+// ******************* References helpers
+const saveReference = (node: NamedNode): NodeContext[] => [{ name: node.name, type: node.kind }]
+const dropSingleReference = (node: WollokNodePlotter): HighlightingResult => dropReference([node])
+const dropReference = (node: WollokNodePlotter[]): HighlightingResult => ({ result: node, references: undefined })
+
 function processNode(node: Node, textDocument: string[], context: NodeContext[]): HighlightingResult {
   if (!node.sourceMap) return nullHighlighting
 
-  const generatePlotterForNode = (node: NamedNode) => customPlotter(node, node.name, node.kind)
-  const customPlotter = (node: Node, token: string, kind = 'Keyword', after?: number) => {
+  // ******************* Plot helpers
+  const plot = (node: Node, token: string, kind = 'Keyword', after?: number) => {
     if (!token) throw new Error(`Invalid token for node ${node.kind}`)
     const { line, column, word } = getLine(node, textDocument)
     const col = column + word.indexOf(token, after)
-    return plotter({ ln: line, col, len: token.length }, kind)
+    return plotSingleLine({ ln: line, col, len: token.length }, kind)
   }
-  const generatePlotterAfterNode = (node: Node, token: string, kind = 'Keyword') => {
+  const plotNode = (node: NamedNode) => plot(node, node.name, node.kind)
+  const plotNodeAfter = (node: Node, token: string, kind = 'Keyword') => {
     const { line, column } = node.sourceMap.end
-    return plotter({ ln: line - 1, col: column, len: token.length }, kind)
+    return plotSingleLine({ ln: line - 1, col: column, len: token.length }, kind)
   }
-  const defaultKeywordPlotter = (node: Node) => customPlotter(node, keywords[node.kind])
-
-  const saveReference = (node: NamedNode) => ({ name: node.name, type: node.kind })
-  const dropSingleReference = (node: WollokNodePlotter): HighlightingResult => dropReference([node])
-  const dropReference = (node: WollokNodePlotter[]): HighlightingResult => ({ result: node, references: undefined })
-
-  const resultForReference = (node: Variable | Field) => {
+  const plotKeyword = (node: Node) => plot(node, keywords[node.kind])
+  const plotReference = (node: Variable | Field) => {
     const result = [
-      customPlotter(node, node.isConstant ? KEYWORDS.CONST : KEYWORDS.VAR),
+      plot(node, node.isConstant ? KEYWORDS.CONST : KEYWORDS.VAR),
     ]
     .concat(
-      ...node.is(Field) && node.isProperty ? [customPlotter(node, KEYWORDS.PROPERTY)] : [],
+      ...node.is(Field) && node.isProperty ? [plot(node, KEYWORDS.PROPERTY)] : [],
     ).concat(
-      [generatePlotterForNode(node)]
+      [plotNode(node)]
     )
     return {
       result,
@@ -97,45 +87,46 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
     }
   }
 
+  // ******************* Highlight helpers
   const defaultHighlightWithReference = (node: NamedNode) => ({ result: [
-      defaultKeywordPlotter(node),
-      generatePlotterForNode(node),
+      plotKeyword(node),
+      plotNode(node),
     ],
     references: saveReference(node),
   })
 
-  const defaultHighlightNoReference = (node: Node): HighlightingResult => dropSingleReference(defaultKeywordPlotter(node))
+  const defaultHighlightNoReference = (node: Node): HighlightingResult => dropSingleReference(plotKeyword(node))
 
   return match(node)(
     when(Class)(node => ({ result: [
-        defaultKeywordPlotter(node),
+        plotKeyword(node),
       ].concat(
-        node.supertypes.length ? customPlotter(node, KEYWORDS.INHERITS) : []
-      ).concat(generatePlotterForNode(node)),
+        node.supertypes.length ? plot(node, KEYWORDS.INHERITS) : []
+      ).concat(plotNode(node)),
       references: saveReference(node) })
     ),
     when(Singleton)(node => {
       if (node.sourceMap == undefined || node.isClosure()) return nullHighlighting
       const currentNode = node as unknown as NamedNode
       const validName = node.name !== undefined && node.name.trim().length
-      const result = [defaultKeywordPlotter(node)]
-      if (node.supertypes.length) result.push(customPlotter(node, KEYWORDS.INHERITS))
-      if (validName) result.push(generatePlotterForNode(currentNode))
+      const result = [plotKeyword(node)]
+      if (node.supertypes.length) result.push(plot(node, KEYWORDS.INHERITS))
+      if (validName) result.push(plotNode(currentNode))
       return {
         result,
         references: validName ? saveReference(currentNode) : undefined,
       }
     }),
     when(Field)(node =>
-      node.isSynthetic ? nullHighlighting : resultForReference(node)
+      node.isSynthetic ? nullHighlighting : plotReference(node)
     ),
-    when(Variable)(resultForReference),
+    when(Variable)(plotReference),
     when(Reference)(node => {
       const reference  = context.find(currentNode => currentNode.name === node.name)
       if (reference){
         return { result: [
           {
-            ...generatePlotterForNode(node),
+            ...plotNode(node),
             tokenType: tokenTypeObj[reference.type],
           },
         ], references: undefined }
@@ -144,19 +135,19 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
     }),
     when(Assignment)(node => ({
       result: [
-        defaultKeywordPlotter(node),
+        plotKeyword(node),
       ], references: undefined,
     })),
     when(NamedArgument)(node => ({
       result: [
-        generatePlotterForNode(node),
+        plotNode(node),
       ], references: undefined,
     })),
     when(Parameter)(node => {
       const { line, column, word } = getLine(node, textDocument)
       const col = column + word.indexOf(node.name)
       return {
-        result: [plotter({ ln: line, col, len: node.name.length }, node.kind)],
+        result: [plotSingleLine({ ln: line, col, len: node.name.length }, node.kind)],
         references: saveReference(node),
       }
     }),
@@ -166,13 +157,13 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
       const { line, column, word } = getLine(node, textDocument)
       const col = column + word.indexOf(node.name)
 
-      const result = (node.isOverride ? [customPlotter(node, KEYWORDS.OVERRIDE)] : [])
+      const result = (node.isOverride ? [plot(node, KEYWORDS.OVERRIDE)] : [])
         .concat(
           [
-            plotter({ ln: line, col, len: node.name.length }, node.kind),
-            defaultKeywordPlotter(node),
+            plotSingleLine({ ln: line, col, len: node.name.length }, node.kind),
+            plotKeyword(node),
           ]
-        .concat(node.isNative() ? [customPlotter(node, KEYWORDS.NATIVE, 'Keyword', KEYWORDS.METHOD.length + 1 + node.name.length)] : [])
+        .concat(node.isNative() ? [plot(node, KEYWORDS.NATIVE, 'Keyword', KEYWORDS.METHOD.length + 1 + node.name.length)] : [])
         )
 
       return {
@@ -187,33 +178,33 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
         if (node.message == 'negate') {
           const operator = word.indexOf('!') == -1 ? 'not' : '!'
           const columnOffset = word.indexOf(operator)
-          return dropSingleReference(plotter({
+          return dropSingleReference(plotSingleLine({
             ln: line,
             col: column + columnOffset,
             len: operator.length,
           }, node.kind))
         }
         const col = column + word.indexOf(node.message)
-        const plotKeyboard = plotter({ ln: line, col, len: node.message.length }, node.kind)
+        const plotKeyboard = plotSingleLine({ ln: line, col, len: node.message.length }, node.kind)
         return dropSingleReference(plotKeyboard)
       }
       const col = column + word.indexOf(node.message)
       return {
-        result: [plotter({ ln: line, col, len: node.message.length }, 'Method')], //node.kind)
+        result: [plotSingleLine({ ln: line, col, len: node.message.length }, 'Method')], //node.kind)
         references: undefined,
       }
     }),
     when(Return)(defaultHighlightNoReference),
     when(Literal)(node => {
       if (node.isSynthetic) return nullHighlighting
-      if (node.isNull()) return dropSingleReference(customPlotter(node, KEYWORDS.NULL))
+      if (node.isNull()) return dropSingleReference(plot(node, KEYWORDS.NULL))
 
       const value = node.value?.toString()
       const literalKind = getKindForLiteral(node)
       if (!literalKind) return nullHighlighting
 
       const { line, column, word } = getLine(node, textDocument)
-      return dropSingleReference(plotter({
+      return dropSingleReference(plotSingleLine({
         ln: line,
         col: column + getColumnForLiteral(node, word, value),
         len: getLengthForLiteral(node, value),
@@ -223,8 +214,8 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
       try {
         return {
           result: [
-            defaultKeywordPlotter(node),
-            generatePlotterForNode(node),
+            plotKeyword(node),
+            plotNode(node),
           ], references: saveReference(node),
         }
       } catch (e) {
@@ -233,42 +224,42 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
     }),
     when(Import)(node => ({
       result: [
-        defaultKeywordPlotter(node),
+        plotKeyword(node),
       ], references: saveReference(node.entity),
     })),
     when(Program)(defaultHighlightWithReference),
     when(Describe)(defaultHighlightWithReference),
     when(Test)(node => ({
-      result: (node.isOnly ? [customPlotter(node, KEYWORDS.ONLY)] : []).concat([
-        defaultKeywordPlotter(node),
-        generatePlotterForNode(node),
+      result: (node.isOnly ? [plot(node, KEYWORDS.ONLY)] : []).concat([
+        plotKeyword(node),
+        plotNode(node),
       ]), references: saveReference(node),
     })),
     when(If)(node => {
-      const result = [defaultKeywordPlotter(node)]
+      const result = [plotKeyword(node)]
       if (node.elseBody?.sourceMap) {
-        result.push(generatePlotterAfterNode(node.thenBody, KEYWORDS.ELSE))
+        result.push(plotNodeAfter(node.thenBody, KEYWORDS.ELSE))
       }
       return dropReference(result)
     }),
     when(Try)(node => {
       const result = [
-        defaultKeywordPlotter(node),
+        plotKeyword(node),
         ...node.catches.flatMap(_catch => [
-          defaultKeywordPlotter(_catch),
-          ...[_catch.parameterType && customPlotter(_catch.parameterType, _catch.parameterType.name, 'Class')],
+          plotKeyword(_catch),
+          ...[_catch.parameterType && plot(_catch.parameterType, _catch.parameterType.name, 'Class')],
         ]),
       ]
       if (node.always?.sourceMap) {
-        result.push(generatePlotterAfterNode(node.catches.length ? last(node.catches) : node.body, 'then always'))
+        result.push(plotNodeAfter(node.catches.length ? last(node.catches) : node.body, 'then always'))
       }
       return dropReference(result)
     }),
     when(Throw)(defaultHighlightNoReference),
     when(New)(node => ({
       result: [
-        defaultKeywordPlotter(node),
-        customPlotter(node.instantiated, node.instantiated.name, 'Class'),
+        plotKeyword(node),
+        plot(node.instantiated, node.instantiated.name, 'Class'),
       ], references: undefined,
     })),
     when(Self)(defaultHighlightNoReference),
@@ -277,68 +268,25 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
   )
 }
 
-export function processCode(node: Node, textDocument: string[]): WollokNodePlotter[] {
-  return node.reduce((acum, node: Node) =>
-  {
-    const processed = processNode(node, textDocument, acum.references)
-    return {
-      result: acum.result.concat(processed.result ?? []),
-      references: acum.references.concat(processed.references || []),
-    }
-  }, { result: [], references: [{ name: 'console', type: 'Reference' }] }).result
-}
+const processCommentForNode = (node: Node, textDocument: string[]): HighlightingResult => {
 
-//TODO: al no poder procesar comentarios multilinea se transforma a comentarios comunes.
-function plotterMultiLinea(arr: any[]) {
-  return arr.map( x => plotter(x, 'Comment'))
-}
-
-export function processComments(docText: string[]): WollokNodePlotter[] {
-  return docText.reduce( processCommentLine, { result:[], multilinea:undefined }).result
-
-  function processCommentLine(acum: ProcesamientoComentario, strln, linea) {
-    const indL = strln.indexOf('//')
-    const indM = strln.indexOf('/*')
-    const presetIndex: number = acum.presetIndex || 0
-
-    if (acum.multilinea !== undefined) {
-      const indMf = strln.indexOf('*/')
-      if (indMf >= 0) {
-        const newLen = indMf + 2 + presetIndex
-        const plot = acum.firstLineMC !== undefined?
-          { ln: linea, col: acum.firstLineMC, len: indMf + 4 }:
-          { ln: linea, col: presetIndex, len: strln.length - presetIndex }
-        const temp = plotterMultiLinea([...acum.multilinea, plot])
-        const tempconcat = acum.result.concat(temp)
-        return processCommentLine({
-          result: tempconcat,
-          presetIndex: newLen,
-        }, strln.substring(indMf + 2), linea)
-      } else {
-        const plot = acum.firstLineMC !== undefined?
-          { ln: linea, col: acum.firstLineMC, len: strln.length + 2 }:
-          { ln: linea, col: presetIndex,      len: strln.length }
-        return { result: acum.result, multilinea: [...acum.multilinea, plot] }
-      }
-    }
-    //hay un comentario de linea y comienza antes de un posible comentario multilinea
-    if (indL != -1 && (indM == -1 || indL < indM)) {
-      return {
-        result: [
-          ...acum.result,
-          plotter({ ln: linea, col: indL + presetIndex, len: strln.length - indL }, 'Comment'),
-        ],
-      }
-    }
-    //hay un comentario multi-linea y comienza antes de un posible comentario de linea
-    if (indM != -1 && (indL == -1 || indM < indL)) {
-      return processCommentLine({
-        result: acum.result,
-        multilinea: [],
-        firstLineMC: indM + presetIndex,
-        presetIndex: indM + 2 + presetIndex,
-      }, strln.substring(indM + 2), linea)
-    }
-    return { ...acum, presetIndex: undefined }
+  const commentPlotter = (comment: string) => {
+    const offset = textDocument.join('\n').indexOf(comment)
+    const [line, column] = getLineColumn(textDocument, offset)
+    return plotSingleLine({ ln: line, col: column, len: comment.length }, 'Comment')
   }
+
+  if (!node.sourceMap) return nullHighlighting
+
+  const commentsAnnotations = node.metadata.filter(({ name }: Annotation) => name == 'comment')
+  return commentsAnnotations.length ?
+    { result: commentsAnnotations.map((commentAnnotation) => commentPlotter(commentAnnotation.args.text as unknown as string)), references: undefined } : nullHighlighting
+}
+
+export function processCode(node: Node, textDocument: string[]): WollokNodePlotter[] {
+  return node.reduce((acumResults, node: Node) =>
+  {
+    const nodeResults = mergeHighlightingResults(processNode(node, textDocument, acumResults.references), processCommentForNode(node, textDocument))
+    return mergeHighlightingResults(acumResults, nodeResults)
+  }, { result: [], references: [{ name: 'console', type: 'Reference' }] }).result
 }

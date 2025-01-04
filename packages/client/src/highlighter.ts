@@ -2,25 +2,23 @@
 import * as vscode from 'vscode'
 import { excludeNullish, parse } from 'wollok-ts'
 import { WollokNodePlotter, WollokPosition } from './highlighter/utils'
-import { processCode, processComments } from './highlighter/tokenProvider'
+import { processCode } from './highlighter/tokenProvider'
 import { tokenModifiers, tokenTypes } from './highlighter/definitions'
 
 const convertToVSCPosition = (position: WollokPosition) =>
   new vscode.Position(position.line, position.column)
 
-const convertToVSCTokens = (wollokNodesPlotter: WollokNodePlotter[]) =>
-  wollokNodesPlotter
-    .map(wollokNodePlotter => {
-      const { range } = wollokNodePlotter
-      const { start, end } = range
-      return {
-        ...wollokNodePlotter,
-        range: new vscode.Range(
-          convertToVSCPosition(start),
-          convertToVSCPosition(end),
-        ),
-      }
-    })
+const convertToVSCToken = (wollokNodePlotter: WollokNodePlotter) => {
+  const { range } = wollokNodePlotter
+  const { start, end } = range
+  return {
+    ...wollokNodePlotter,
+    range: new vscode.Range(
+      convertToVSCPosition(start),
+      convertToVSCPosition(end),
+    ),
+  }
+}
 
 export const provider: vscode.DocumentSemanticTokensProvider = {
   provideDocumentSemanticTokens(
@@ -30,17 +28,15 @@ export const provider: vscode.DocumentSemanticTokensProvider = {
     const parsedFile = parse.File(document.fileName)
     const textFile = document.getText()
     const parsedPackage = parsedFile.tryParse(textFile)
+    const packageNode = parsedPackage.members[0]
 
     const splittedLines = textFile.split('\n')
-    const processed = excludeNullish([]
-      .concat(convertToVSCTokens(processCode(parsedPackage.members[0], splittedLines)))
-      .concat(processComments(splittedLines))
-    )
+    const processed = excludeNullish(processCode(packageNode, splittedLines))
 
-    processed.forEach((node: WollokNodePlotter) =>
-      tokensBuilder.push(node.range as unknown as vscode.Range, node.tokenType, node.tokenModifiers)
-    )
-
+    processed.forEach((node: WollokNodePlotter) => {
+      const vscToken = convertToVSCToken(node)
+      tokensBuilder.push(vscToken.range as unknown as vscode.Range, vscToken.tokenType, vscToken.tokenModifiers)
+    })
     return tokensBuilder.build()
   },
 }
