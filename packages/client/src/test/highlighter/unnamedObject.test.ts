@@ -1,6 +1,6 @@
-import { WollokNodePlotter } from '../../highlighter/utils'
 import { expect } from 'expect'
 import { processedByTokenType, readFileForTokenProvider } from './utils'
+import { WollokNodePlotter } from '../../highlighter/definitions'
 
 suite('an unnamed object sample', () => {
 
