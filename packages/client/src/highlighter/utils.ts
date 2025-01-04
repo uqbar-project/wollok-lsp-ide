@@ -1,13 +1,27 @@
-  // ================================================================================================
-  //
-  // Uncomment this to have quick answer by running
-  // yarn run test:highlighter
-  //
-  // ================================================================================================
+import { HighlightingResult, WollokNodePlotter, WollokPosition, WollokRange, WollokTokenKinds } from './definitions'
 
-import { HighlightingResult } from './tokenProvider'
+/* ====================================================================================== */
+/*                                    Helpers for plotter                                 */
+/* ====================================================================================== */
+export function plotSingleLine(start: { ln, col, len }, kind: string): WollokNodePlotter {
+  return {
+    range: createRange(start.ln, start.col, start.len),
+    tokenType: WollokTokenKinds[kind],
+    tokenModifiers: ['declaration'],
+  }
+}
 
-  //
+export function plotMultiline(start: WollokPosition, end: WollokPosition, kind: string): WollokNodePlotter {
+  return {
+    range: {
+      start,
+      end,
+    },
+    tokenType: WollokTokenKinds[kind],
+    tokenModifiers: ['declaration'],
+  }
+}
+
 export const createRange = (line: number, column: number, length: number): WollokRange =>
   ({
     start: {
@@ -18,22 +32,6 @@ export const createRange = (line: number, column: number, length: number): Wollo
       column: column + length,
     },
   })
-
-export type WollokPosition = {
-  line: number,
-  column: number,
-}
-
-export type WollokRange = {
-  start: WollokPosition,
-  end: WollokPosition,
-}
-
-export type WollokNodePlotter = {
-  range: WollokRange
-  tokenType: string
-  tokenModifiers?: string[]
-}
 
 export const getLineColumn = (text: string[], offset: number): [number, number] => {
   let totalLength = 0

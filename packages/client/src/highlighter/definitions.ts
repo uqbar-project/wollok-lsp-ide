@@ -1,7 +1,8 @@
-import { createRange, WollokNodePlotter } from './utils'
+import { Node } from 'wollok-ts'
 
 export const tokenModifiers = ['declaration', 'definition', 'documentation', 'keyword']
-export const tokenTypeObj = {
+
+export const WollokTokenKinds = {
   'Assignment': 'property',
   'Body': 'property',
   'Catch': 'property',
@@ -38,20 +39,23 @@ export const tokenTypeObj = {
   'Variable': 'variable',
 }
 
-export const keywords = {
-  /*
-  'Parameter':'property',
-  'ParameterizedType':'property',
-  'NamedArgument':'property',
-  'Body':'property',*/
-  'Package':'package',
-  'Import':'import',
-  'Program':'program',
-  'Test':'test',
+export const WollokKeywords = {
+  'Always': 'then always',
+  'Assignment':'=',
+  'Catch': 'catch',
+  'Class': 'class',
   'Describe':'describe',
-  'Singleton': 'object',
-  //'Mixin':'property',
-  'Variable': ['var', 'const'],
+  'Else':'else',
+  'Field':'var',
+  'If':'if',
+  'Import':'import',
+  'Method': 'method',
+  'Mixin': 'class',
+  'New':'new',
+  'Package':'package',
+  'Program':'program',
+  'Return': 'return',
+  'Self':'self',
   'Send': [
     // eslint-disable-next-line array-element-newline
     '+', '*', '-', '/', '<', '>', '<=', '>=',
@@ -62,71 +66,77 @@ export const keywords = {
     // eslint-disable-next-line array-element-newline
     '==', '!=',
   ],
-  'Field':'var',
-  'Method': 'method',
-  'Return': 'return',
-  'Assignment':'=',
-  //'Reference':'property',
-  'Self':'self',
+  'Singleton': 'object',
   'Super':'super',
-  'New':'new',
-  'If':'if',
-  'Else':'else',
-  'Try': 'try',
-  'Catch': 'catch',
-  'Always': 'then always',
+  'Test':'test',
   'Throw': 'throw',
-  //'Literal':'property',
-  /*'Super':'property',
-  'Environment':'property',
-  */
-  'Class': 'class',
+  'Try': 'try',
+  'Variable': ['var', 'const'],
 }
 
 // Standard token types:
 // ID   Description
 export const tokenTypes = [
-  'class', //  For identifiers that declare or reference a class type.
-  'comment', //        For tokens that represent a comment.
-  'decorator', //      For identifiers that declare or reference decorators and annotations.
-  'enum', //   For identifiers that declare or reference an enumeration type.
-  'enumMember', //     For identifiers that declare or reference an enumeration property, constant, or member.
-  'event', //  For identifiers that declare an event property.
-  'function', //       For identifiers that declare a function.
-  'interface', //      For identifiers that declare or reference an interface type.
-  'keyword', //        For tokens that represent a language keyword.
-  'label', //  For identifiers that declare a label.
-  'macro', //  For identifiers that declare a macro.
-  'method', // For identifiers that declare a member function or method.
-  'namespace', //      For identifiers that declare or reference a namespace, module, or package.
-  'number', // For tokens that represent a number literal.
-  'object', //No es parte de los tipos por default
-  'operator', //       For tokens that represent an operator.
-  'parameter', //      For identifiers that declare or reference a function or method parameters.
-  'property', //       For identifiers that declare or reference a member property, member field, or member variable.
-  'regexp', // For tokens that represent a regular expression literal.
-  'string', // For tokens that represent a string literal.
-  'struct', // For identifiers that declare or reference a struct type.
-  'type', //   For identifiers that declare or reference a type that is not covered above.
-  'typeParameter', //  For identifiers that declare or reference a type parameter.
-  'variable', //       For identifiers that declare or reference a local or global variable.
+  'class',          // For identifiers that declare or reference a class type.
+  'comment',        // For tokens that represent a comment.
+  'decorator',      // For identifiers that declare or reference decorators and annotations.
+  'enum',           // For identifiers that declare or reference an enumeration type.
+  'enumMember',     // For identifiers that declare or reference an enumeration property, constant, or member.
+  'event',          // For identifiers that declare an event property.
+  'function',       // For identifiers that declare a function.
+  'interface',      // For identifiers that declare or reference an interface type.
+  'keyword',        // For tokens that represent a language keyword.
+  'label',          // For identifiers that declare a label.
+  'macro',          // For identifiers that declare a macro.
+  'method',         // For identifiers that declare a member function or method.
+  'namespace',      // For identifiers that declare or reference a namespace, module, or package.
+  'number',         // For tokens that represent a number literal.
+  'object',         // Custom Wollok token type for WKOs and unnamed objects
+  'operator',       // For tokens that represent an operator.
+  'parameter',      // For identifiers that declare or reference a function or method parameters.
+  'property',       // For identifiers that declare or reference a member property, member field, or member variable.
+  'regexp',         // For tokens that represent a regular expression literal.
+  'string',         // For tokens that represent a string literal.
+  'struct',         // For identifiers that declare or reference a struct type.
+  'type',           // For identifiers that declare or reference a type that is not covered above.
+  'typeParameter',  // For identifiers that declare or reference a type parameter.
+  'variable',       // For identifiers that declare or reference a local or global variable.
 ]
 
-export function plotSingleLine(start: { ln, col, len }, kind: string): WollokNodePlotter {
-  return {
-    range: createRange(start.ln, start.col, start.len),
-    tokenType: tokenTypeObj[kind],
-    tokenModifiers: ['declaration'],
-  }
+export type NodeContext = {
+  name: string,
+  type: string
 }
 
-export function plotMultiline(start: { ln, col }, end: { ln, col }, kind: string): WollokNodePlotter {
-  return {
-    range: createRange(start.ln, start.col, start.len),
-    tokenType: tokenTypeObj[kind],
-    tokenModifiers: ['declaration'],
-  }
+export type NamedNode = Node & { name: string }
+
+export type LineResult = {
+  line: number,
+  column: number,
+  word: string,
 }
+
+export type HighlightingResult = {
+  result: WollokNodePlotter[];
+  references: NodeContext[] | undefined;
+}
+
+export type WollokPosition = {
+  line: number,
+  column: number,
+}
+
+export type WollokRange = {
+  start: WollokPosition,
+  end: WollokPosition,
+}
+
+export type WollokNodePlotter = {
+  range: WollokRange
+  tokenType: string
+  tokenModifiers?: string[]
+}
+
 /*
 
 Standard token modifiers

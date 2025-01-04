@@ -1,9 +1,8 @@
 ///esModuleIn
 import * as vscode from 'vscode'
 import { excludeNullish, parse } from 'wollok-ts'
-import { WollokNodePlotter, WollokPosition } from './highlighter/utils'
 import { processCode } from './highlighter/tokenProvider'
-import { tokenModifiers, tokenTypes } from './highlighter/definitions'
+import { tokenModifiers, tokenTypes, WollokNodePlotter, WollokPosition } from './highlighter/definitions'
 
 const convertToVSCPosition = (position: WollokPosition) =>
   new vscode.Position(position.line, position.column)

@@ -1,26 +1,6 @@
 import { Annotation, Assignment, Class, Describe, Field, If, Import, KEYWORDS, last, Literal, match, Method, NamedArgument, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Super, Test, Throw, Try, Variable, when } from 'wollok-ts'
-import { keywords, plotSingleLine, tokenTypeObj } from './definitions'
-import { getLineColumn, mergeHighlightingResults, WollokNodePlotter } from './utils'
-
-type NodeContext = {
-  name: string,
-  type: string
-}
-
-type NamedNode = Node & { name: string }
-
-type LineResult = {
-  line: number,
-  column: number,
-  word: string,
-}
-
-export type HighlightingResult = {
-  result: WollokNodePlotter[];
-  references: NodeContext[] | undefined;
-}
-
-/* ============================================================================ */
+import { WollokKeywords, WollokTokenKinds, NamedNode, NodeContext, HighlightingResult, LineResult, WollokNodePlotter } from './definitions'
+import { getLineColumn, mergeHighlightingResults, plotSingleLine } from './utils'
 
 const getKindForLiteral = (node: Literal): string | undefined => {
   if (node.isNumeric()) return 'Literal_number'
@@ -71,7 +51,7 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
     const { line, column } = node.sourceMap.end
     return plotSingleLine({ ln: line - 1, col: column, len: token.length }, kind)
   }
-  const plotKeyword = (node: Node) => plot(node, keywords[node.kind])
+  const plotKeyword = (node: Node) => plot(node, WollokKeywords[node.kind])
   const plotReference = (node: Variable | Field) => {
     const result = [
       plot(node, node.isConstant ? KEYWORDS.CONST : KEYWORDS.VAR),
@@ -127,7 +107,7 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
         return { result: [
           {
             ...plotNode(node),
-            tokenType: tokenTypeObj[reference.type],
+            tokenType: WollokTokenKinds[reference.type],
           },
         ], references: undefined }
       }
@@ -171,7 +151,7 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
       }
     }),
     when(Send)(node => {
-      const symbols = keywords[node.kind]
+      const symbols = WollokKeywords[node.kind]
       const { line, column,  word } = getLine(node, textDocument)
       if (symbols?.includes(node.message)){
 

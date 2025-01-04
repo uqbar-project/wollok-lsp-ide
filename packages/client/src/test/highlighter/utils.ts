@@ -1,7 +1,7 @@
 import { excludeNullish, parse } from 'wollok-ts'
 import { readFileSync } from 'fs'
 import { processCode } from '../../highlighter/tokenProvider'
-import { WollokNodePlotter } from '../../highlighter/utils'
+import { WollokNodePlotter } from '../../highlighter/definitions'
 
 const validateHighlighter = (wollokNodesPlotter: WollokNodePlotter[]) =>
   wollokNodesPlotter.every(wollokNodePlotter => {
