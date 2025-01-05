@@ -18,6 +18,7 @@ const getColumnForLiteral = (node: Literal, word: string, value: string): number
 /* ============================================================================ */
 
 const getLine = (node: Node, documentLines: string[]): LineResult => {
+  if (!node.sourceMap) throw new Error(`Node ${node.kind} has no source map!`)
   const start = node.sourceMap.start
   const line = start.line - 1
   const column = start.column - 1
@@ -103,7 +104,7 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
     when(Variable)(plotReference),
     when(Reference)(node => {
       const reference  = context.find(currentNode => currentNode.name === node.name)
-      if (reference){
+      if (reference && node.sourceMap){
         return { result: [
           {
             ...plotNode(node),
@@ -227,7 +228,7 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
         plotKeyword(node),
         ...node.catches.flatMap(_catch => [
           plotKeyword(_catch),
-          ...[_catch.parameterType && plot(_catch.parameterType, _catch.parameterType.name, 'Class')],
+          ...[_catch.parameterType && _catch.parameterType.sourceMap && plot(_catch.parameterType, _catch.parameterType.name, 'Class')],
         ]),
       ]
       if (node.always?.sourceMap) {

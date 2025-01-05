@@ -47,25 +47,29 @@ suite('a program sample', () => {
     expect(catchSecondExceptionRange.start).toEqual({ line: 5, column: 4 })
     expect(catchSecondExceptionRange.end).toEqual({ line: 5, column: 9 })
 
+    const catchThirdExceptionRange = nextRange()
+    expect(catchThirdExceptionRange.start).toEqual({ line: 6, column: 4 })
+    expect(catchThirdExceptionRange.end).toEqual({ line: 6, column: 9 })
+
     const thenAlwaysKeywordRange = nextRange()
-    expect(thenAlwaysKeywordRange.start).toEqual({ line: 6, column: 4 })
-    expect(thenAlwaysKeywordRange.end).toEqual({ line: 6, column: 15 })
+    expect(thenAlwaysKeywordRange.start).toEqual({ line: 7, column: 4 })
+    expect(thenAlwaysKeywordRange.end).toEqual({ line: 7, column: 15 })
 
     const assignmentKeywordRange = nextRange()
-    expect(assignmentKeywordRange.start).toEqual({ line: 7, column: 10 })
-    expect(assignmentKeywordRange.end).toEqual({ line: 7, column: 11 })
+    expect(assignmentKeywordRange.start).toEqual({ line: 8, column: 10 })
+    expect(assignmentKeywordRange.end).toEqual({ line: 8, column: 11 })
 
     const secondProgramRange = nextRange()
-    expect(secondProgramRange.start).toEqual({ line: 11, column: 0 })
-    expect(secondProgramRange.end).toEqual({ line: 11, column: 7 })
+    expect(secondProgramRange.start).toEqual({ line: 12, column: 0 })
+    expect(secondProgramRange.end).toEqual({ line: 12, column: 7 })
 
     const tryInSecondProgramRange = nextRange()
-    expect(tryInSecondProgramRange.start).toEqual({ line: 12, column: 2 })
-    expect(tryInSecondProgramRange.end).toEqual({ line: 12, column: 5 })
+    expect(tryInSecondProgramRange.start).toEqual({ line: 13, column: 2 })
+    expect(tryInSecondProgramRange.end).toEqual({ line: 13, column: 5 })
 
     const thenAlwaysWIthoutCatchRange = nextRange()
-    expect(thenAlwaysWIthoutCatchRange.start).toEqual({ line: 14, column: 4 })
-    expect(thenAlwaysWIthoutCatchRange.end).toEqual({ line: 14, column: 15 })
+    expect(thenAlwaysWIthoutCatchRange.start).toEqual({ line: 15, column: 4 })
+    expect(thenAlwaysWIthoutCatchRange.end).toEqual({ line: 15, column: 15 })
   })
 
   test('highlights class name', () => {
@@ -83,7 +87,7 @@ suite('a program sample', () => {
 
     const classInCatch2Range = nextRange()
     expect(classInCatch2Range.start).toEqual({ line: 5, column: 13 })
-    expect(classInCatch2Range.end).toEqual({ line: 5, column: 22 })
+    expect(classInCatch2Range.end).toEqual({ line: 5, column: 42 })
   })
 
   test('highlights properties', () => {
@@ -100,16 +104,16 @@ suite('a program sample', () => {
     expect(messageNamedArgumentForExceptionRange.end).toEqual({ line: 3, column: 47 })
 
     const secondProgramDefinitionRange = nextRange()
-    expect(secondProgramDefinitionRange.start).toEqual({ line: 11, column: 8 })
-    expect(secondProgramDefinitionRange.end).toEqual({ line: 11, column: 19 })
+    expect(secondProgramDefinitionRange.start).toEqual({ line: 12, column: 8 })
+    expect(secondProgramDefinitionRange.end).toEqual({ line: 12, column: 19 })
 
     const consoleReferenceRange = nextRange()
-    expect(consoleReferenceRange.start).toEqual({ line: 13, column: 4 })
-    expect(consoleReferenceRange.end).toEqual({ line: 13, column: 11 })
+    expect(consoleReferenceRange.start).toEqual({ line: 14, column: 4 })
+    expect(consoleReferenceRange.end).toEqual({ line: 14, column: 11 })
 
     const consoleReference2Range = nextRange()
-    expect(consoleReference2Range.start).toEqual({ line: 15, column: 4 })
-    expect(consoleReference2Range.end).toEqual({ line: 15, column: 11 })
+    expect(consoleReference2Range.start).toEqual({ line: 16, column: 4 })
+    expect(consoleReference2Range.end).toEqual({ line: 16, column: 11 })
   })
 
   test('highlights methods', () => {
@@ -118,12 +122,12 @@ suite('a program sample', () => {
     const nextRange = () => methodTokens.next().value.range
 
     const printlnMessageRange = nextRange()
-    expect(printlnMessageRange.start).toEqual({ line: 13, column: 12 })
-    expect(printlnMessageRange.end).toEqual({ line: 13, column: 19 })
+    expect(printlnMessageRange.start).toEqual({ line: 14, column: 12 })
+    expect(printlnMessageRange.end).toEqual({ line: 14, column: 19 })
 
     const printlnMessage2Range = nextRange()
-    expect(printlnMessage2Range.start).toEqual({ line: 15, column: 12 })
-    expect(printlnMessage2Range.end).toEqual({ line: 15, column: 19 })
+    expect(printlnMessage2Range.start).toEqual({ line: 16, column: 12 })
+    expect(printlnMessage2Range.end).toEqual({ line: 16, column: 19 })
   })
 
   test('highlights parameters', () => {
@@ -168,8 +172,8 @@ suite('a program sample', () => {
     expect(countInMessageRange.end).toEqual({ line: 3, column: 14 })
 
     const countInAssignmentRange = nextRange()
-    expect(countInAssignmentRange.start).toEqual({ line: 7, column: 4 })
-    expect(countInAssignmentRange.end).toEqual({ line: 7, column: 9 })
+    expect(countInAssignmentRange.start).toEqual({ line: 8, column: 4 })
+    expect(countInAssignmentRange.end).toEqual({ line: 8, column: 9 })
   })
 
   test('highlights numbers', () => {
@@ -186,8 +190,8 @@ suite('a program sample', () => {
     expect(countComparisonRange.end).toEqual({ line: 3, column: 18 })
 
     const countValueInAssignmentRange = nextRange()
-    expect(countValueInAssignmentRange.start).toEqual({ line: 7, column: 12 })
-    expect(countValueInAssignmentRange.end).toEqual({ line: 7, column: 13 })
+    expect(countValueInAssignmentRange.start).toEqual({ line: 8, column: 12 })
+    expect(countValueInAssignmentRange.end).toEqual({ line: 8, column: 13 })
   })
 
 })

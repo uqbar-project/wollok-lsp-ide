@@ -3,7 +3,8 @@ program main {
   try {
     if (!count > 0) throw new Exception(message = "something wrong happened")
   } catch e: DomainException {
-  } catch e: Exception {
+  } catch e: MessageNotUnderstoodException {
+  } catch e {
   } then always {
     count = 1
   }
