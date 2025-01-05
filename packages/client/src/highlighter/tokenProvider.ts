@@ -1,6 +1,6 @@
 import { Annotation, Assignment, Class, Describe, Field, If, Import, KEYWORDS, last, Literal, match, Method, NamedArgument, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Super, Test, Throw, Try, Variable, when } from 'wollok-ts'
 import { WollokKeywords, WollokTokenKinds, NamedNode, NodeContext, HighlightingResult, LineResult, WollokNodePlotter } from './definitions'
-import { getLineColumn, mergeHighlightingResults, plotSingleLine } from './utils'
+import { getLineColumn, mergeHighlightingResults, plotRange, plotSingleLine } from './utils'
 
 const getKindForLiteral = (node: Literal): string | undefined => {
   if (node.isNumeric()) return 'Literal_number'
@@ -43,13 +43,13 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
   const plot = (node: Node, token: string, kind = 'Keyword', after?: number) => {
     if (!token) throw new Error(`Invalid token for node ${node.kind}`)
     const { line, column, word } = getLine(node, textDocument)
-    const col = column + word.indexOf(token, after)
-    return plotSingleLine({ ln: line, col, len: token.length }, kind)
+    const columnForToken = column + word.indexOf(token, after)
+    return plotSingleLine({ line, column: columnForToken, length: token.length }, kind)
   }
   const plotNode = (node: NamedNode) => plot(node, node.name, node.kind)
   const plotNodeAfter = (node: Node, token: string, kind = 'Keyword') => {
     const { line, column } = node.sourceMap.end
-    return plotSingleLine({ ln: line - 1, col: column, len: token.length }, kind)
+    return plotSingleLine({ line: line - 1, column, length: token.length }, kind)
   }
   const plotKeyword = (node: Node) => plot(node, WollokKeywords[node.kind])
   const plotReference = (node: Variable | Field) => {
@@ -125,9 +125,9 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
     })),
     when(Parameter)(node => {
       const { line, column, word } = getLine(node, textDocument)
-      const col = column + word.indexOf(node.name)
+      const parameterColumn = column + word.indexOf(node.name)
       return {
-        result: [plotSingleLine({ ln: line, col, len: node.name.length }, node.kind)],
+        result: [plotSingleLine({ line, column: parameterColumn, length: node.name.length }, node.kind)],
         references: saveReference(node),
       }
     }),
@@ -135,12 +135,12 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
       if (node.isSynthetic) return nullHighlighting
 
       const { line, column, word } = getLine(node, textDocument)
-      const col = column + word.indexOf(node.name)
+      const methodColumn = column + word.indexOf(node.name)
 
       const result = (node.isOverride ? [plot(node, KEYWORDS.OVERRIDE)] : [])
         .concat(
           [
-            plotSingleLine({ ln: line, col, len: node.name.length }, node.kind),
+            plotSingleLine({ line, column: methodColumn, length: node.name.length }, node.kind),
             plotKeyword(node),
           ]
         .concat(node.isNative() ? [plot(node, KEYWORDS.NATIVE, 'Keyword', KEYWORDS.METHOD.length + 1 + node.name.length)] : [])
@@ -159,18 +159,18 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
           const operator = word.indexOf('!') == -1 ? 'not' : '!'
           const columnOffset = word.indexOf(operator)
           return dropSingleReference(plotSingleLine({
-            ln: line,
-            col: column + columnOffset,
-            len: operator.length,
+            line,
+            column: column + columnOffset,
+            length: operator.length,
           }, node.kind))
         }
-        const col = column + word.indexOf(node.message)
-        const plotKeyboard = plotSingleLine({ ln: line, col, len: node.message.length }, node.kind)
+        const columnForSymbol = column + word.indexOf(node.message)
+        const plotKeyboard = plotSingleLine({ line, column: columnForSymbol, length: node.message.length }, node.kind)
         return dropSingleReference(plotKeyboard)
       }
-      const col = column + word.indexOf(node.message)
+      const columnForMessage = column + word.indexOf(node.message)
       return {
-        result: [plotSingleLine({ ln: line, col, len: node.message.length }, 'Method')], //node.kind)
+        result: [plotSingleLine({ line, column: columnForMessage, length: node.message.length }, 'Method')], //node.kind)
         references: undefined,
       }
     }),
@@ -185,9 +185,9 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
 
       const { line, column, word } = getLine(node, textDocument)
       return dropSingleReference(plotSingleLine({
-        ln: line,
-        col: column + getColumnForLiteral(node, word, value),
-        len: getLengthForLiteral(node, value),
+        line,
+        column: column + getColumnForLiteral(node, word, value),
+        length: getLengthForLiteral(node, value),
       }, literalKind))
     }),
     when(Package)(node => {
@@ -252,15 +252,16 @@ const processCommentForNode = (node: Node, textDocument: string[]): Highlighting
 
   const commentPlotter = (comment: string) => {
     const offset = textDocument.join('\n').indexOf(comment)
-    const [line, column] = getLineColumn(textDocument, offset)
-    return plotSingleLine({ ln: line, col: column, len: comment.length }, 'Comment')
+    const start = getLineColumn(textDocument, offset)
+    const end = getLineColumn(textDocument, offset + comment.length)
+    return plotRange(textDocument, start, end, 'Comment')
   }
 
   if (!node.sourceMap) return nullHighlighting
 
   const commentsAnnotations = node.metadata.filter(({ name }: Annotation) => name == 'comment')
   return commentsAnnotations.length ?
-    { result: commentsAnnotations.map((commentAnnotation) => commentPlotter(commentAnnotation.args.text as unknown as string)), references: undefined } : nullHighlighting
+    { result: commentsAnnotations.flatMap((commentAnnotation) => commentPlotter(commentAnnotation.args.text as unknown as string)), references: undefined } : nullHighlighting
 }
 
 export function processCode(node: Node, textDocument: string[]): WollokNodePlotter[] {

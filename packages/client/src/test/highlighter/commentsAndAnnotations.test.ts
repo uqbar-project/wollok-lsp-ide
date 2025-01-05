@@ -85,9 +85,29 @@ suite('comments & annotations sample', () => {
     expect(commentSingleLineRange.start).toEqual({ line: 3, column: 4 })
     expect(commentSingleLineRange.end).toEqual({ line: 3, column: 19 })
 
-    // const minutesUsageParameterRange = nextRange()
-    // expect(minutesUsageParameterRange.start).toEqual({ line: 7, column: 0 })
-    // expect(minutesUsageParameterRange.end).toEqual({ line: 7, column: 2 })
+    const multilineComment1_1Range = nextRange()
+    expect(multilineComment1_1Range.start).toEqual({ line: 7, column: 0 })
+    expect(multilineComment1_1Range.end).toEqual({ line: 7, column: 2 })
+
+    const multilineComment1_2Range = nextRange()
+    expect(multilineComment1_2Range.start).toEqual({ line: 8, column: 0 })
+    expect(multilineComment1_2Range.end).toEqual({ line: 8, column: 13 })
+
+    const multilineComment1_3Range = nextRange()
+    expect(multilineComment1_3Range.start).toEqual({ line: 9, column: 0 })
+    expect(multilineComment1_3Range.end).toEqual({ line: 9, column: 2 })
+
+    const multilineComment2_1Range = nextRange()
+    expect(multilineComment2_1Range.start).toEqual({ line: 15, column: 0 })
+    expect(multilineComment2_1Range.end).toEqual({ line: 15, column: 2 })
+
+    const multilineComment2_2Range = nextRange()
+    expect(multilineComment2_2Range.start).toEqual({ line: 16, column: 0 })
+    expect(multilineComment2_2Range.end).toEqual({ line: 16, column: 15 })
+
+    const multilineComment2_3Range = nextRange()
+    expect(multilineComment2_3Range.start).toEqual({ line: 17, column: 0 })
+    expect(multilineComment2_3Range.end).toEqual({ line: 17, column: 2 })
   })
 
 })
