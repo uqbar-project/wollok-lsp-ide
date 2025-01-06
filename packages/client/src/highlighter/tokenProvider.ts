@@ -1,4 +1,4 @@
-import { Annotation, Assignment, Class, Describe, Field, If, Import, KEYWORDS, last, Literal, match, Method, NamedArgument, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Super, Test, Throw, Try, Variable, when } from 'wollok-ts'
+import { Annotation, Assignment, Class, Describe, Field, If, Import, KEYWORDS, last, Literal, match, Method, Mixin, NamedArgument, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Super, Test, Throw, Try, Variable, when } from 'wollok-ts'
 import { WollokKeywords, WollokTokenKinds, NamedNode, NodeContext, HighlightingResult, LineResult, WollokNodePlotter } from './definitions'
 import { getLineColumn, mergeHighlightingResults, plotRange, plotSingleLine } from './utils'
 
@@ -33,7 +33,7 @@ const getLine = (node: Node, documentLines: string[]): LineResult => {
 const nullHighlighting = { result: undefined, references: undefined }
 
 // ******************* References helpers
-const saveAnnotationReference = (annotation: Annotation) =>  [{ name: annotation.name, type: 'Annotation' } ]
+const saveAnnotationReference = (annotation: Annotation) =>  [{ name: annotation.name, type: 'Annotation' }]
 const saveReference = (node: NamedNode): NodeContext[] => [{ name: node.name, type: node.kind }]
 const dropSingleReference = (node: WollokNodePlotter): HighlightingResult => dropReference([node])
 const dropReference = (node: WollokNodePlotter[]): HighlightingResult => ({ result: node, references: undefined })
@@ -81,10 +81,17 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
 
   return match(node)(
     when(Class)(node => ({ result: [
-        plotKeyword(node),
-      ].concat(
-        node.supertypes.length ? plot(node, KEYWORDS.INHERITS) : []
-      ).concat(plotNode(node)),
+      plotKeyword(node),
+    ].concat(
+      node.supertypes.length ? plot(node, KEYWORDS.INHERITS) : []
+    ).concat(plotNode(node)),
+      references: saveReference(node) })
+    ),
+    when(Mixin)(node => ({ result: [
+      plotKeyword(node),
+    ].concat(
+      node.supertypes.length ? plot(node, KEYWORDS.INHERITS) : []
+    ).concat(plotNode(node)),
       references: saveReference(node) })
     ),
     when(Singleton)(node => {

@@ -270,6 +270,13 @@
           "description": "If true, opens dynamic diagram in Dark Mode. Otherwise, it uses Light Mode.",
           "order": 33
         },
+        "wollokLSP.astHighlighter.activated": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "If true, uses the AST Highlighter (complete highlighter for parameters, variables, methods, also for keywords)",
+          "order": 35
+        },
         "wollokLSP.maxThreshold": {
           "scope": "resource",
           "type": "number",
