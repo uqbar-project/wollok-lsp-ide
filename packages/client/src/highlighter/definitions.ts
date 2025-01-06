@@ -3,12 +3,12 @@ import { Node } from 'wollok-ts'
 export const tokenModifiers = ['declaration', 'definition', 'documentation', 'keyword']
 
 export const WollokTokenKinds = {
+  'Annotation': 'decorator',
   'Assignment': 'property',
   'Body': 'property',
   'Catch': 'property',
   'Class': 'class',
   'Comment':'comment',
-  'CommentMultiline':'comment-multiline',
   'Describe': 'class',
   'Environment': 'property',
   'Field': 'property',
@@ -105,7 +105,7 @@ export const tokenTypes = [
 
 export type NodeContext = {
   name: string,
-  type: string
+  type: string,
 }
 
 export type NamedNode = Node & { name: string }

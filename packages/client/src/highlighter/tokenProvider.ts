@@ -33,6 +33,7 @@ const getLine = (node: Node, documentLines: string[]): LineResult => {
 const nullHighlighting = { result: undefined, references: undefined }
 
 // ******************* References helpers
+const saveAnnotationReference = (annotation: Annotation) =>  [{ name: annotation.name, type: 'Annotation' } ]
 const saveReference = (node: NamedNode): NodeContext[] => [{ name: node.name, type: node.kind }]
 const dropSingleReference = (node: WollokNodePlotter): HighlightingResult => dropReference([node])
 const dropReference = (node: WollokNodePlotter[]): HighlightingResult => ({ result: node, references: undefined })
@@ -249,26 +250,44 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
   )
 }
 
-const processCommentForNode = (node: Node, textDocument: string[]): HighlightingResult => {
+const processAnnotationsForNode = (node: Node, textDocument: string[], references: NodeContext[]): HighlightingResult => {
+  const fullDocument = textDocument.join('\n')
 
-  const commentPlotter = (comment: string) => {
+  const commentPlotter = (comment: string): WollokNodePlotter[] => {
     const offset = textDocument.join('\n').indexOf(comment)
     const start = getLineColumn(textDocument, offset)
     const end = getLineColumn(textDocument, offset + comment.length)
     return plotRange(textDocument, start, end, 'Comment')
   }
 
+  const annotationPlotter = (node: Node, annotationName: string): WollokNodePlotter[] => {
+    if (references.find(reference => reference.name === annotationName)) return []
+
+    let after = -1
+    const offsets = []
+    while ((after = fullDocument.indexOf(`@${annotationName}`, after + 1)) >= 0) {
+      offsets.push(after)
+    }
+    return offsets.map(offset => {
+      const { line, column } = getLineColumn(textDocument, offset)
+      return plotSingleLine({ line, column, length: annotationName.length + 1 }, 'Annotation')
+    })
+  }
+
+  const processAnnotation = (annotation: Annotation): HighlightingResult =>
+    ({ result: annotation.name === 'comment' ? commentPlotter(annotation.args.text as unknown as string) : annotationPlotter(node, annotation.name), references: saveAnnotationReference(annotation) })
+
   if (!node.sourceMap) return nullHighlighting
 
-  const commentsAnnotations = node.metadata.filter(({ name }: Annotation) => name == 'comment')
-  return commentsAnnotations.length ?
-    { result: commentsAnnotations.flatMap((commentAnnotation) => commentPlotter(commentAnnotation.args.text as unknown as string)), references: undefined } : nullHighlighting
+  return node.metadata.reduce((finalResult, annotation) => mergeHighlightingResults(
+    finalResult, processAnnotation(annotation)
+  ), nullHighlighting)
 }
 
 export function processCode(node: Node, textDocument: string[]): WollokNodePlotter[] {
   return node.reduce((acumResults, node: Node) =>
   {
-    const nodeResults = mergeHighlightingResults(processNode(node, textDocument, acumResults.references), processCommentForNode(node, textDocument))
+    const nodeResults = mergeHighlightingResults(processNode(node, textDocument, acumResults.references), processAnnotationsForNode(node, textDocument, acumResults.references))
     return mergeHighlightingResults(acumResults, nodeResults)
   }, { result: [], references: [{ name: 'console', type: 'Reference' }] }).result
 }

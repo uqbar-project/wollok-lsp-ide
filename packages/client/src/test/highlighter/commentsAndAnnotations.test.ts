@@ -75,8 +75,6 @@ suite('comments & annotations sample', () => {
   })
 
   test('highlights comments', () => {
-    console.info(JSON.stringify(processed.filter(t => t.tokenType === 'comment')))
-
     const parameterTokens = processedByTokenType(processed, 'comment')
 
     const nextRange = () => parameterTokens.next().value.range
@@ -108,6 +106,26 @@ suite('comments & annotations sample', () => {
     const multilineComment2_3Range = nextRange()
     expect(multilineComment2_3Range.start).toEqual({ line: 17, column: 0 })
     expect(multilineComment2_3Range.end).toEqual({ line: 17, column: 2 })
+  })
+
+  test('highlights annotations', () => {
+    console.info(JSON.stringify(processed.filter(t => t.tokenType === 'decorator')))
+
+    const parameterTokens = processedByTokenType(processed, 'decorator')
+
+    const nextRange = () => parameterTokens.next().value.range
+
+    const notExpectDecoratorRange = nextRange()
+    expect(notExpectDecoratorRange.start).toEqual({ line: 1, column: 2 })
+    expect(notExpectDecoratorRange.end).toEqual({ line: 1, column: 12 })
+
+    const methodTypeDecoratorRange = nextRange()
+    expect(methodTypeDecoratorRange.start).toEqual({ line: 11, column: 2 })
+    expect(methodTypeDecoratorRange.end).toEqual({ line: 11, column: 7 })
+
+    const parameterTypeDecoratorRange = nextRange()
+    expect(parameterTypeDecoratorRange.start).toEqual({ line: 12, column: 22 })
+    expect(parameterTypeDecoratorRange.end).toEqual({ line: 12, column: 27 })
   })
 
 })
