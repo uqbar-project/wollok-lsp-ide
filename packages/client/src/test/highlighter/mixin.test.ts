@@ -11,7 +11,6 @@ suite('a mixin sample', () => {
   })
 
   test('highlights keywords', () => {
-    console.info(new Set(processed.map(t => t.tokenType)))
     const keywordsTokens = processedByTokenType(processed, 'keyword')
 
     const nextRange = () => keywordsTokens.next().value.range
@@ -160,8 +159,6 @@ suite('a mixin sample', () => {
   })
 
   test('highlights numbers', () => {
-    console.info(JSON.stringify(processed.filter(t => t.tokenType === 'number')))
-
     const numberTokens = processedByTokenType(processed, 'number')
 
     const nextRange = () => numberTokens.next().value.range
