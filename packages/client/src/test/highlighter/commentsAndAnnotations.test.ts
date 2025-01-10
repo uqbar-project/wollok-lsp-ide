@@ -109,8 +109,6 @@ suite('comments & annotations sample', () => {
   })
 
   test('highlights annotations', () => {
-    console.info(JSON.stringify(processed.filter(t => t.tokenType === 'decorator')))
-
     const parameterTokens = processedByTokenType(processed, 'decorator')
 
     const nextRange = () => parameterTokens.next().value.range
