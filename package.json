@@ -343,13 +343,13 @@
       {
         "id": "parameter",
         "superType": "type",
-        "description": "parametro de metodos o funciones"
+        "description": "parámetro de métodos o funciones"
       }
     ],
     "semanticTokenModifiers": [
       {
         "id": "native",
-        "description": "simbolo nativo de wollok"
+        "description": "símbolo nativo de wollok"
       }
     ]
   },
