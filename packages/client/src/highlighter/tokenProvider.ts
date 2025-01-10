@@ -1,4 +1,4 @@
-import { Annotation, Assignment, Class, Describe, Field, If, Import, KEYWORDS, last, Literal, match, Method, Mixin, NamedArgument, New, Node, Package, Parameter, Program, Reference, Return, Self, Send, Singleton, Super, Test, Throw, Try, Variable, when } from 'wollok-ts'
+import { Annotation, Assignment, Class, Describe, excludeNullish, Field, If, Import, KEYWORDS, last, Literal, match, Method, Mixin, NamedArgument, New, Node, Package, Parameter, parse, Program, Reference, Return, Self, Send, Singleton, Super, Test, Throw, Try, Variable, when } from 'wollok-ts'
 import { WollokKeywords, WollokTokenKinds, NamedNode, NodeContext, HighlightingResult, LineResult, WollokNodePlotter } from './definitions'
 import { getLineColumn, mergeHighlightingResults, plotRange, plotSingleLine } from './utils'
 
@@ -291,10 +291,20 @@ const processAnnotationsForNode = (node: Node, textDocument: string[], reference
   ), nullHighlighting)
 }
 
-export function processCode(node: Node, textDocument: string[]): WollokNodePlotter[] {
+const processCode = (node: Node, textDocument: string[]): WollokNodePlotter[] => {
   return node.reduce((acumResults, node: Node) =>
   {
     const nodeResults = mergeHighlightingResults(processNode(node, textDocument, acumResults.references), processAnnotationsForNode(node, textDocument, acumResults.references))
     return mergeHighlightingResults(acumResults, nodeResults)
   }, { result: [], references: [{ name: 'console', type: 'Reference' }] }).result
+}
+
+export const processDocument = (filename: string, textDocument: string): WollokNodePlotter[] => {
+  const parsedFile = parse.File(filename)
+  const textFile = textDocument
+  const parsedPackage = parsedFile.tryParse(textFile)
+  const packageNode = parsedPackage.members[0]
+
+  const splittedLines = textFile.split('\n')
+  return excludeNullish(processCode(packageNode, splittedLines))
 }

@@ -1,6 +1,5 @@
-import { excludeNullish, parse } from 'wollok-ts'
 import { readFileSync } from 'fs'
-import { processCode } from '../../highlighter/tokenProvider'
+import { processDocument } from '../../highlighter/tokenProvider'
 import { WollokNodePlotter } from '../../highlighter/definitions'
 
 const validateHighlighter = (wollokNodesPlotter: WollokNodePlotter[]) =>
@@ -10,12 +9,8 @@ const validateHighlighter = (wollokNodesPlotter: WollokNodePlotter[]) =>
   })
 
 export const readFileForTokenProvider = (filePath: string): WollokNodePlotter[] => {
-  const parsedFile = parse.File(filePath)
-  const docText = readFileSync(filePath, { encoding: 'utf-8' })
-  const parsedPackage = parsedFile.tryParse(docText)
-  const splittedLines = docText.split('\n')
-  const packageNode = parsedPackage.members[0]
-  const processed = excludeNullish(processCode(packageNode, splittedLines))
+  const textDocument = readFileSync(filePath, { encoding: 'utf-8' })
+  const processed = processDocument(filePath, textDocument)
   validateHighlighter(processed)
   return processed.sort((a, b) => a.range.start.line * 1000 + a.range.start.column - b.range.start.line * 1000 - b.range.start.column)
 }

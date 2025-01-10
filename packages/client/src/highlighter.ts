@@ -1,8 +1,7 @@
 ///esModuleIn
 import * as vscode from 'vscode'
-import { excludeNullish, parse } from 'wollok-ts'
-import { processCode } from './highlighter/tokenProvider'
 import { tokenModifiers, tokenTypes, WollokNodePlotter, WollokPosition } from './highlighter/definitions'
+import { processDocument } from './highlighter/tokenProvider'
 import { wollokLSPExtensionCode } from './shared-definitions'
 
 const convertToVSCPosition = (position: WollokPosition) =>
@@ -28,15 +27,7 @@ export const provider: vscode.DocumentSemanticTokensProvider = {
     const highlighterActivated = wollokLSPConfiguration.get('astHighlighter.activated') as boolean
     if (highlighterActivated) {
       const tokensBuilder = new vscode.SemanticTokensBuilder(legend)
-      const parsedFile = parse.File(document.fileName)
-      const textFile = document.getText()
-      const parsedPackage = parsedFile.tryParse(textFile)
-      const packageNode = parsedPackage.members[0]
-
-      const splittedLines = textFile.split('\n')
-      const processed = excludeNullish(processCode(packageNode, splittedLines))
-
-      processed.forEach((node: WollokNodePlotter) => {
+      processDocument(document.fileName, document.getText()).forEach((node: WollokNodePlotter) => {
         const vscToken = convertToVSCToken(node)
         tokensBuilder.push(vscToken.range as unknown as vscode.Range, vscToken.tokenType, vscToken.tokenModifiers)
       })
