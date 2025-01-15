@@ -5,7 +5,7 @@
   "author": "Uqbar Foundation",
   "license": "LGPL-3.0",
   "publisher": "uqbar",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/uqbar-project/wollok-lsp-ide.git"
@@ -47,6 +47,11 @@
     "hoverProvider": true
   },
   "main": "./out/client/src/extension",
+  "configurationDefaults": {
+    "[wollok]": {
+      "editor.semanticHighlighting.enabled": true
+    }
+  },
   "contributes": {
     "menus": {
       "editor/title/run": [
@@ -280,6 +285,13 @@
           "description": "If true, opens dynamic diagram in Dark Mode. Otherwise, it uses Light Mode.",
           "order": 33
         },
+        "wollokLSP.astHighlighter.activated": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": true,
+          "description": "If true, uses the AST Highlighter (complete highlighter for parameters, variables, methods, also for keywords)",
+          "order": 35
+        },
         "wollokLSP.maxThreshold": {
           "scope": "resource",
           "type": "number",
@@ -331,6 +343,29 @@
         "mac": "cmd+r",
         "when": "editorTextFocus && resourceExtname == .wtest"
       }
+    ],
+    "semanticTokenTypes": [
+      {
+        "id": "keyword",
+        "superType": "type",
+        "description": "palabra reservada de wollok"
+      },
+      {
+        "id": "object",
+        "superType": "type",
+        "description": "singleton"
+      },
+      {
+        "id": "parameter",
+        "superType": "type",
+        "description": "parámetro de métodos o funciones"
+      }
+    ],
+    "semanticTokenModifiers": [
+      {
+        "id": "native",
+        "description": "símbolo nativo de wollok"
+      }
     ]
   },
   "scripts": {
@@ -345,7 +380,7 @@
     "lint:fix": "cd client && eslint . --fix && cd ../server && eslint . --fix && cd ..",
     "test": "yarn compile-tests && yarn lint && yarn test:e2e && yarn test:unit",
     "test:e2e": "vscode-test",
-    "test:unit": "yarn workspaces foreach -Rpt --from '{wollok-lsp-ide-server,wollok-debug-adapter}' run test",
+    "test:unit": "cd packages/client && yarn run test:highlighter && cd .. && yarn workspaces foreach -Rpt --from '{wollok-lsp-ide-server,wollok-debug-adapter}' run test",
     "nyc": "nyc",
     "build-coverage-report": "rimraf coverage-total && cpy --flat ./coverage-e2e/coverage-final.json ./coverage-total --rename=coverage-e2e.json && cpy --flat ./coverage-unit/coverage-final.json ./coverage-total --rename=coverage-unit.json && nyc merge ./coverage-total ./coverage-total/coverage.json",
     "coverage": "yarn cover:unit && yarn cover:e2e",
@@ -358,7 +393,7 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "wollok-ts": "../wollok-ts"
+    "wollok-ts": "4.2.0"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",

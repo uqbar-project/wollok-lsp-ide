@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.0
+- i18n translations for lens and error messages 💬
+- Update Wollok-TS 4.1.9 ⬆️
+
 ## v0.3.6
 - Navigate to properties ⛵
 - Add wollok init command 🌱

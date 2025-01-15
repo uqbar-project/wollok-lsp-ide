@@ -1,0 +1,14 @@
+import somePackage.*
+import anotherPackage.pepita
+
+describe "some describe" {
+  var value = 10
+  test "some test" {
+    if (value < 5) value = 20
+    const anotherValue = if (value > 5) 2 else 1
+    assert.equals(2, anotherValue)
+  }
+  only test "another test" {
+    assert.notThat(false)
+  }
+}

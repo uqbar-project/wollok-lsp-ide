@@ -99,17 +99,17 @@ describe('debug adapter', function () {
 
       const expectedBreakpoints = [
         { line: 4, column: 3, lineEnd: 4, columnEnd: 21 },
-        { line: 4, column: 15, lineEnd: 5, columnEnd: 1 },
+        { line: 4, column: 15, lineEnd: 4, columnEnd: 21 },
       ]
 
       assert.equal(response.body.breakpoints.length, expectedBreakpoints.length)
-      for(const location of response.body.breakpoints) {
-        assert(expectedBreakpoints.some(expected =>
+      for(const expected of expectedBreakpoints) {
+        assert(response.body.breakpoints.some(location =>
           expected.line === location.line &&
           expected.column === location.column &&
           expected.lineEnd === location.lineEnd &&
           expected.columnEnd === location.columnEnd
-        ))
+        ), `expected breakpoint at: ${JSON.stringify(expected)}`)
       }
     })
   })
