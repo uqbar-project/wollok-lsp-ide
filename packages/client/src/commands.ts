@@ -120,15 +120,17 @@ const registerCLICommand = (
 
 const wollokCLITask = (task: string, name: string, cliCommands: Array<string | vscode.ShellQuotedString>) => {
   const wollokLSPConfiguration = workspace.getConfiguration(wollokLSPExtensionCode)
-  const wollokCliPath: string = wollokLSPConfiguration.get('cli-path')
+  const wollokCliPath = wollokLSPConfiguration.get<string>('cli-path')
   if (!wollokCliPath) {
     vscode.commands.executeCommand('workbench.action.openSettings', wollokLSPExtensionCode)
     throw new Error(getLSPMessage('missingWollokCliPath'))
   }
 
+  const verbose = wollokLSPConfiguration.get<boolean>('verbose')
   const folder = workspace.workspaceFolders[0]
   const shellCommandArgs: Array<string | vscode.ShellQuotedString> = [
     ...cliCommands,
+    ...verbose ? ['--verbose'] : [],
     '-p',
     fsToShell(folder.uri.fsPath),
   ]
