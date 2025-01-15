@@ -26,7 +26,7 @@ export const getProgramCodeLenses = (file: Package): CodeLens[] =>
   file.members.filter(is(Program)).flatMap(program => [
     buildLens(program, COMMAND_RUN_GAME, getLSPMessage(COMMAND_RUN_GAME)),
     buildLens(program, COMMAND_RUN_PROGRAM, getLSPMessage(COMMAND_RUN_PROGRAM)),
-    buildLens(program, COMMAND_DEBUG, getLSPMessage(COMMAND_DEBUG)),
+    buildLens(program, COMMAND_DEBUG, getLSPMessage(COMMAND_EXECUTE_DEBUG, ['program'])),
   ])
 
 

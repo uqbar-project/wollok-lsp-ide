@@ -1,7 +1,7 @@
 import { DebugSession, InitializedEvent, OutputEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread, Variable } from '@vscode/debugadapter'
 import { DebugProtocol } from '@vscode/debugprotocol'
 import * as vscode from 'vscode'
-import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, interprete, is, LIST_MODULE, Node, NUMBER_MODULE, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Interpreter, Describe } from 'wollok-ts'
+import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, interprete, LIST_MODULE, Node, NUMBER_MODULE, Package, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Interpreter } from 'wollok-ts'
 import { LaunchTargetArguments, Target, targetFinder } from './target-finders'
 import { toClientPath, toWollokPath } from './utils/path-converters'
 import { WollokPositionConverter } from './utils/wollok-position-converter'
