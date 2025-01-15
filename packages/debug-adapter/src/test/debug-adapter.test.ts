@@ -1,13 +1,13 @@
 import * as path from 'path'
 import { DebugClient } from '@vscode/debugadapter-testsupport'
-import * as assert from 'node:assert'
 import { DebugProtocol } from '@vscode/debugprotocol'
-
+import { assert } from 'chai'
 const DEBUG_ADAPTER = path.resolve(__dirname, 'start-debug-session.js')
 const FIXTURES_ROOT = path.resolve(__dirname, '../../../../packages/debug-adapter/src/test/fixtures')
 const PROGRAM = path.resolve(FIXTURES_ROOT, 'aProgram.wpgm')
 const TEST_FILE = path.resolve(FIXTURES_ROOT, 'aTest.wtest')
 const WLK = path.resolve(FIXTURES_ROOT, 'anObject.wlk')
+
 
 describe('debug adapter', function () {
   let dc: DebugClient
@@ -20,7 +20,7 @@ describe('debug adapter', function () {
   this.afterEach( function () { return dc.stop() })
 
   it('unknown request should produce error', function () {
-    return assert.rejects(dc.send('illegal_request'))
+    dc.send('illegal_request').then(() => assert.fail('Expected to throw an error'))
   })
 
   describe('launching', () => {
@@ -104,12 +104,7 @@ describe('debug adapter', function () {
 
       assert.equal(response.body.breakpoints.length, expectedBreakpoints.length)
       for(const expected of expectedBreakpoints) {
-        assert(response.body.breakpoints.some(location =>
-          expected.line === location.line &&
-          expected.column === location.column &&
-          expected.lineEnd === location.lineEnd &&
-          expected.columnEnd === location.columnEnd
-        ), `expected breakpoint at: ${JSON.stringify(expected)}`)
+        assert.deepInclude(response.body.breakpoints, expected)
       }
     })
   })

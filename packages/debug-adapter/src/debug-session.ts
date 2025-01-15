@@ -46,7 +46,7 @@ export class WollokDebugSession extends DebugSession {
     // initialize wollok interpreter
     const debuggableFileExtensions = [WOLLOK_FILE_EXTENSION, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION]
     this.workspace.findFiles(`**/*.{${debuggableFileExtensions.join(',')}}`).then(async files => {
-      const wollokPackages = await Promise.all(files.map(file =>
+      const projectFiles = await Promise.all(files.map(file =>
 
         new Promise<FileContent>(resolve => this.workspace.openTextDocument(file).then(textDocument => {
           resolve({ name: toWollokPath(textDocument.uri.fsPath), content: textDocument.getText() })
@@ -101,6 +101,7 @@ export class WollokDebugSession extends DebugSession {
   protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments, _request?: DebugProtocol.Request): void {
     const breakpointsPackage = this.packageFromSource(args.source as Source)
 
+    // Remove old breakpoints from the requested file
     const breakpointsToRemove = []
     this.executionDirector.breakpoints.forEach(breakpointedNode => {
       if(breakpointedNode.parentPackage.id === breakpointsPackage.id) {
@@ -109,27 +110,27 @@ export class WollokDebugSession extends DebugSession {
     })
     breakpointsToRemove.forEach(breapointedNode => this.executionDirector.removeBreakpoint(breapointedNode))
 
-    if(breakpointsPackage) {
-      const nodesToBreakAt = breakpointsPackage.descendants.filter((node: Node) => {
-        return args.breakpoints.some(breakpoint =>
-          breakpoint.column ?
-            this.positionConverter.convertDebuggerLineToClient(node.sourceMap?.start.line) === breakpoint.line && this.positionConverter.convertDebuggerColumnToClient(node.sourceMap?.start.column) === breakpoint.column :
-            node.is(Sentence) && node.parent.is(Body) && this.positionConverter.convertDebuggerLineToClient(node.sourceMap?.start.line) === breakpoint.line
-        )
-      })
-      nodesToBreakAt.forEach(node => {
-        this.executionDirector.addBreakpoint(node)
-      })
+    // Add all breakpoints to the requested file
+    const nodesToBreakAt = breakpointsPackage.descendants.filter((node: Node) => {
+      return args.breakpoints.some(breakpoint =>
+        breakpoint.column ?
+          // if the breakpoint has a column then it must be an inline breakpoint
+          this.positionConverter.convertDebuggerLineToClient(node.sourceMap?.start.line) === breakpoint.line && this.positionConverter.convertDebuggerColumnToClient(node.sourceMap?.start.column) === breakpoint.column :
+          // otherwise look for a sentence
+          node.is(Sentence) && node.parent.is(Body) && this.positionConverter.convertDebuggerLineToClient(node.sourceMap?.start.line) === breakpoint.line
+      )
+    })
+    nodesToBreakAt.forEach(node => {
+      this.executionDirector.addBreakpoint(node)
+    })
 
-      response.body = {
-        breakpoints: nodesToBreakAt.map(node => ({
-            verified: true,
-            ...this.positionConverter.convertSourceMapToClient(node.sourceMap),
-            source: this.sourceFromNode(node),
-          })
-        ),
-
-      }
+    response.body = {
+      breakpoints: nodesToBreakAt.map(node => ({
+          verified: true,
+          ...this.positionConverter.convertSourceMapToClient(node.sourceMap),
+          source: this.sourceFromNode(node),
+        })
+      ),
     }
     this.sendResponse(response)
   }
