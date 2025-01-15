@@ -53,7 +53,7 @@ export class WollokDebugSession extends DebugSession {
         }))
       ))
 
-      const environment = buildEnvironment(wollokPackages, undefined)
+      const environment = buildEnvironment(projectFiles)
       this.interpreter = executionFor(environment)
       this.sendResponse(response)
       this.sendEvent(new InitializedEvent())
