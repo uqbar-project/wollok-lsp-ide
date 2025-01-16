@@ -28,10 +28,10 @@ suite('Should run commands', () => {
     sinon.restore()
   })
 
-  test('run program', () => {
-    return testCommand(
+  test('run program', () =>
+    testCommand(
       pepitaURI,
-      () => runProgram()(['file.program']),
+      () => runProgram()('file.program'),
       [
         'run',
         quoted('file.program'),
@@ -40,12 +40,12 @@ suite('Should run commands', () => {
         quoted(folderURI.fsPath),
       ],
     )
-  })
+  )
 
-  test('run game', () => {
-    return testCommand(
+  test('run game', () =>
+    testCommand(
       pepitaURI,
-      () => runProgram(true)(['file.program']),
+      () => runProgram(true)('file.program'),
       [
         'run',
         '-g',
@@ -57,11 +57,10 @@ suite('Should run commands', () => {
         quoted(folderURI.fsPath),
       ],
     )
-  })
+  )
 
   test('runs tests', () => {
-
-    const testArgs: [string, string, string, string] = [null, 'tests.wtest', 'tests de pepita', 'something']
+    const testArgs: [null, string, string, string] = [null, 'tests.wtest', 'tests de pepita', 'something']
 
     return testCommand(
       pepitaURI,
@@ -76,13 +75,13 @@ suite('Should run commands', () => {
         quoted('something'),
         '--skipValidations',
         '-p',
-        { quoting: ShellQuoting.Strong, value:folderURI.fsPath },
+        quoted(folderURI.fsPath),
       ],
     )
   })
 
-  test('run all tests', () => {
-    return testCommand(
+  test('run all tests', () =>
+    testCommand(
       pepitaURI,
       runAllTests,
       [
@@ -92,32 +91,48 @@ suite('Should run commands', () => {
         quoted(folderURI.fsPath),
       ],
     )
-  })
+  )
 
-  test('repl on current file', () => {
-      return testCommand(
-        pepitaURI,
-        startRepl,
-        [
-          'repl',
-          quoted(pepitaURI.fsPath),
-          '--skipValidations',
-          '--port',
-          DEFAULT_REPL_PORT.toString(),
-          '--darkMode',
-          '', // do not open dynamic diagram
-          '-p',
-          quoted(folderURI.fsPath),
-        ],
-      )
-  })
+  test('repl on current file', () =>
+    testCommand(
+      pepitaURI,
+      startRepl,
+      [
+        'repl',
+        quoted(pepitaURI.fsPath),
+        '--skipValidations',
+        '--port',
+        DEFAULT_REPL_PORT.toString(),
+        '--darkMode',
+        '', // do not open dynamic diagram
+        '-p',
+        quoted(folderURI.fsPath),
+      ],
+    )
+  )
 
-  test('create a new project in the workspace directory', () => {
-    return testCommand(
+  test('create a new project in the workspace directory', () =>
+    testCommand(
       pepitaURI,
       initProject,
       [
         'init',
+        '-p',
+        quoted(folderURI.fsPath),
+      ],
+    )
+  )
+
+  test('run verbose', () => {
+    configuration['verbose'] = true
+    return testCommand(
+      pepitaURI,
+      () => runProgram()('file.program'),
+      [
+        'run',
+        quoted('file.program'),
+        '--skipValidations',
+        '--verbose',
         '-p',
         quoted(folderURI.fsPath),
       ],
@@ -134,7 +149,7 @@ async function testCommand(
   const task = command()
   const execution = task.execution as ShellExecution
   assert.equal(execution.args.length, expectedArgs.length, `Execution should have ${expectedArgs.length} arguments, but has ${execution.args.length}`)
-  for(let i = 0; i < execution.args.length; i++){
+  for (let i = 0; i < execution.args.length; i++) {
     assertCommandSegmentMatches(execution.args[i], expectedArgs[i])
   }
 }
@@ -142,7 +157,7 @@ async function testCommand(
 
 function assertCommandSegmentMatches(actual: string | ShellQuotedString, expected: string | ShellQuotedString) {
   assert.equal(typeof actual, typeof expected)
-  if(typeof actual === 'string'){
+  if (typeof actual === 'string') {
     assert.equal(actual, expected)
   } else {
     assert.equal(actual.value, (expected as ShellQuotedString).value)
