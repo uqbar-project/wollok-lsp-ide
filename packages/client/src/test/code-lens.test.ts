@@ -23,6 +23,14 @@ suite('Should do code lenses', () => {
           arguments: ['pepitaGame.juego'],
         },
       ),
+      new CodeLens(
+        new Range(new Position(0, 0), new Position(2, 1)),
+        {
+          title: 'Debug program',
+          command: 'wollok.debug',
+          arguments: ['pepitaGame.juego'],
+        }
+      ),
     ])
   })
 
@@ -51,6 +59,14 @@ suite('Should do code lenses', () => {
           command: 'wollok.run.test',
           arguments: [null, 'test.wtest', 'pepita test', 'pepita is happy'],
         },
+      ),
+      new CodeLens(
+        new Range(new Position(1, 4), new Position(3, 5)),
+        {
+          title: 'Debug test',
+          command: 'wollok.debug',
+          arguments: ['test."pepita test"."pepita is happy"'],
+        }
       ),
     ])
   })

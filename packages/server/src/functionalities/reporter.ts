@@ -7,6 +7,7 @@ import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_R
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 
 export const COMMAND_EXECUTE = 'command.execute'
+export const COMMAND_EXECUTE_DEBUG = 'command.execute_debug'
 export const SERVER_PROCESSING_REQUEST = 'server_processing_request'
 export const ERROR_MISSING_WORKSPACE_FOLDER = 'missing_workspace_folder'
 
@@ -17,6 +18,7 @@ const lspMessagesEn = {
   [COMMAND_RUN_ALL_TESTS]: 'Run all tests',
   [COMMAND_RUN_TEST]: 'Run test',
   [COMMAND_EXECUTE]: 'Run {0}',
+  [COMMAND_EXECUTE_DEBUG]: 'Debug {0}',
   [SERVER_PROCESSING_REQUEST]: 'Processing Request...',
   [ERROR_MISSING_WORKSPACE_FOLDER]: 'Missing workspace folder!',
 }
@@ -28,6 +30,7 @@ const lspMessagesEs = {
   [COMMAND_RUN_ALL_TESTS]: 'Ejecutar todos los tests',
   [COMMAND_RUN_TEST]: 'Ejecutar test',
   [COMMAND_EXECUTE]: 'Ejecutar {0}',
+  [COMMAND_EXECUTE_DEBUG]: 'Depurar {0}',
   [SERVER_PROCESSING_REQUEST]: 'Procesando...',
   [ERROR_MISSING_WORKSPACE_FOLDER]: '¡No existe la carpeta de trabajo principal!',
 }

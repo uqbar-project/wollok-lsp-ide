@@ -14,7 +14,7 @@ import {
   asShellString,
   fsToShell,
 } from './platform-string-utils'
-import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode, COMMAND_INIT_PROJECT } from './shared-definitions'
+import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode, COMMAND_INIT_PROJECT, COMMAND_DEBUG } from './shared-definitions'
 import { getLSPMessage } from './messages'
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
@@ -32,6 +32,7 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
   context.subscriptions.push(
     registerCLICommand(COMMAND_INIT_PROJECT, initProject),
   )
+  context.subscriptions.push(registerDebuggerCommand())
 }
 
 /**
@@ -142,4 +143,21 @@ const wollokCLITask = (task: string, name: string, cliCommands: Array<string | v
     'wollok',
     new ShellExecution(fsToShell(wollokCliPath), shellCommandArgs),
   )
+}
+function registerDebuggerCommand(): { dispose(): any } {
+  return commands.registerCommand(COMMAND_DEBUG, async (fqn: string) => {
+    vscode.debug.startDebugging(
+      vscode.workspace.workspaceFolders[0],
+      {
+        type: "wollok",
+        request: "launch",
+        name: "Launch Debug Session",
+        stopOnEntry: false,
+        target: {
+          type: 'fqn',
+          fqn,
+        },
+      }
+    )
+  })
 }

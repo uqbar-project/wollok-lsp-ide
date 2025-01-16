@@ -1,14 +1,14 @@
-import { DebugSession, InitializedEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread, Variable } from '@vscode/debugadapter'
+import { DebugSession, InitializedEvent, OutputEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread, Variable } from '@vscode/debugadapter'
 import { DebugProtocol } from '@vscode/debugprotocol'
-import path = require('path')
 import * as vscode from 'vscode'
-import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, Environment, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, is, LIST_MODULE, Node, NUMBER_MODULE, Package, Program, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, Test, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
+import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, interprete, LIST_MODULE, Node, NUMBER_MODULE, Package, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Interpreter } from 'wollok-ts'
+import { LaunchTargetArguments, Target, targetFinder } from './target-finders'
+import { toClientPath, toWollokPath } from './utils/path-converters'
+import { WollokPositionConverter } from './utils/wollok-position-converter'
 export class WollokDebugSession extends DebugSession {
   protected static readonly THREAD_ID = 1
-  protected static WOLLOK_PATH_SEPARATOR = '/'
 
   protected interpreter: DirectedInterpreter
-  protected environment: Environment
   protected executionDirector: ExecutionDirector<unknown>
   protected frames: WollokIdMap<Frame> = new WollokIdMap()
   protected contexts: WollokIdMap<Context> = new WollokIdMap()
@@ -17,6 +17,7 @@ export class WollokDebugSession extends DebugSession {
   protected configurationDone: Promise<void>
   protected notifyConfigurationDone: () => void
 
+  protected positionConverter: WollokPositionConverter
 
   constructor(protected workspace: typeof vscode.workspace){
     super()
@@ -30,56 +31,41 @@ export class WollokDebugSession extends DebugSession {
     this.notifyConfigurationDone()
   }
 
-  protected initializeRequest(response: DebugProtocol.InitializeResponse, _args: DebugProtocol.InitializeRequestArguments): void {
+  protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
     // capabilities
     response.body = {
       ...response.body,
-      // ToDo: supportsBreakpointLocationsRequest: true
+      supportsBreakpointLocationsRequest: true,
       supportsDelayedStackTraceLoading: true,
       supportsConfigurationDoneRequest: true,
       supportsSingleThreadExecutionRequests: false,
     }
 
+    this.positionConverter = new WollokPositionConverter(args.linesStartAt1, args.columnsStartAt1)
+
     // initialize wollok interpreter
     const debuggableFileExtensions = [WOLLOK_FILE_EXTENSION, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION]
     this.workspace.findFiles(`**/*.{${debuggableFileExtensions.join(',')}}`).then(async files => {
-      const wollokPackages = await Promise.all(files.map(file =>
+      const projectFiles = await Promise.all(files.map(file =>
 
         new Promise<FileContent>(resolve => this.workspace.openTextDocument(file).then(textDocument => {
-          resolve({ name: this.toWollokPath(textDocument.uri.fsPath), content: textDocument.getText() })
+          resolve({ name: toWollokPath(textDocument.uri.fsPath), content: textDocument.getText() })
         }))
       ))
 
-      this.environment = buildEnvironment(wollokPackages, undefined)
-      this.interpreter = executionFor(this.environment)
+      const environment = buildEnvironment(projectFiles)
+      this.interpreter = executionFor(environment)
       this.sendResponse(response)
       this.sendEvent(new InitializedEvent())
     })
   }
 
   protected launchRequest(response: DebugProtocol.LaunchResponse, args: WollokLaunchArguments, _request?: DebugProtocol.Request): void {
-    const containerPackage = this.environment.descendants.filter<Package>(is(Package)).find(pkg => pkg.sourceFileName === this.toWollokPath(args.file))
+    let container: Target
 
-    if(!containerPackage){
-      this.sendErrorResponse(response, 404, 'Could not find target file')
-      return
-    }
-
-    const container: Test | Program | undefined = containerPackage.descendants.find<Test|Program>(function (node: Node): node is Test | Program {
-      if('test' in args.target) {
-        const isPossibleTargetTest = node.is(Test) && node.name === `"${args.target.test}"`
-        if(args.target.describe) {
-          // possible bug: recursive describes?
-          return isPossibleTargetTest && node.parent.name === `"${args.target.describe}"`
-        } else {
-          return isPossibleTargetTest
-        }
-      } else {
-        return node.is(Program) && node.name === args.target.program
-      }
-    })
-
-    if(!container){
+    try  {
+      container = targetFinder(args.target).findTarget(this.interpreter.evaluation.environment)
+    } catch(_error) {
       this.sendErrorResponse(response, 404, 'Could not find target test or program')
       return
     }
@@ -97,14 +83,12 @@ export class WollokDebugSession extends DebugSession {
       this.sendResponse(response)
       this.moveExecution(() => {
         return this.executionDirector.resume(
-          args.stopOnEntry ? node => container.body.sentences[0]?.id === node.id : undefined
+          args.stopOnEntry ? node => (container as any).body.sentences[0]?.id === node.id : undefined
         )
       }, args.stopOnEntry ? 'entry' : undefined)
     })
   }
-
   protected threadsRequest(response: DebugProtocol.ThreadsResponse): void {
-
     // runtime supports no threads so just return a default thread.
     response.body = {
       threads: [
@@ -115,57 +99,63 @@ export class WollokDebugSession extends DebugSession {
   }
 
   protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments, _request?: DebugProtocol.Request): void {
-    const sourcePath = this.toWollokPath(args.source.path)
-    const breakpointsPackage = this.environment.descendants.find<Package>(function (node): node is Package {
-      return node.is(Package) && node.sourceFileName === sourcePath
-    })
+    const breakpointsPackage = this.packageFromSource(args.source as Source)
 
+    // Remove old breakpoints from the requested file
+    const breakpointsToRemove = []
     this.executionDirector.breakpoints.forEach(breakpointedNode => {
-      if(breakpointedNode.sourceFileName === breakpointsPackage.sourceFileName) {
-        this.executionDirector.removeBreakpoint(breakpointedNode)
+      if(breakpointedNode.parentPackage.id === breakpointsPackage.id) {
+        breakpointsToRemove.push(breakpointedNode)
       }
     })
+    breakpointsToRemove.forEach(breapointedNode => this.executionDirector.removeBreakpoint(breapointedNode))
 
-    if(breakpointsPackage){
-      const sentences = breakpointsPackage.descendants.filter<Sentence>(function (node): node is Sentence {
-        return node.is(Sentence) && node.parent.is(Body) && args.breakpoints.map(breakpoint => breakpoint.line).includes(node.sourceMap?.start.line)
-      })
-      sentences.forEach(sentence => {
-        this.executionDirector.addBreakpoint(sentence)
-      })
+    // Add all breakpoints to the requested file
+    const nodesToBreakAt = breakpointsPackage.descendants.filter((node: Node) => {
+      return args.breakpoints.some(breakpoint =>
+        breakpoint.column ?
+          // if the breakpoint has a column then it must be an inline breakpoint
+          this.positionConverter.convertDebuggerLineToClient(node.sourceMap?.start.line) === breakpoint.line && this.positionConverter.convertDebuggerColumnToClient(node.sourceMap?.start.column) === breakpoint.column :
+          // otherwise look for a sentence
+          node.is(Sentence) && node.parent.is(Body) && this.positionConverter.convertDebuggerLineToClient(node.sourceMap?.start.line) === breakpoint.line
+      )
+    })
+    nodesToBreakAt.forEach(node => {
+      this.executionDirector.addBreakpoint(node)
+    })
 
-      response.body = {
-        breakpoints: sentences.map(sentence => ({
-            verified: true,
-            line: sentence.sourceMap.start.line,
-            column: sentence.sourceMap.start.column,
-            endColumn: sentence.sourceMap.end.column,
-            endLine: sentence.sourceMap.end.line,
-            source: this.sourceFromNode(sentence),
-          })
-        ),
-
-      }
+    response.body = {
+      breakpoints: nodesToBreakAt.map(node => ({
+          verified: true,
+          ...this.positionConverter.convertSourceMapToClient(node.sourceMap),
+          source: this.sourceFromNode(node),
+        })
+      ),
     }
     this.sendResponse(response)
   }
 
-  protected setExceptionBreakPointsRequest(response: DebugProtocol.SetExceptionBreakpointsResponse, _args: DebugProtocol.SetExceptionBreakpointsArguments, _request?: DebugProtocol.Request): void {
-    this.sendResponse(response)
-  }
 
   protected moveExecution(action: () => ExecutionState<unknown>, overrideStoppedReason?: string): void{
     const state = action()
 
-    // reset stack state when moving execution
+    // Reset stack state when moving execution
     this.frames.clear()
     this.contexts.clear()
 
     const stoppedReason = overrideStoppedReason || (state.done ? state.error ? 'exception' : 'done' : 'breakpoint')
     if(!state.done && 'next' in state) {
       this.stoppedNode = state.next
+      if(this.stoppedNode.isSynthetic) {
+        return this.moveExecution(() => this.executionDirector.stepOver(), overrideStoppedReason)
+      }
       this.sendEvent(new StoppedEvent(stoppedReason, WollokDebugSession.THREAD_ID))
     } else {
+      if(state.error) {
+        this.sendEvent(new OutputEvent(state.error.message, 'stderr'))
+      } else {
+          this.sendEvent(new OutputEvent('Finished executing without errors', 'stdout'))
+      }
       this.sendEvent(new TerminatedEvent())
     }
   }
@@ -212,12 +202,26 @@ export class WollokDebugSession extends DebugSession {
     return {
       id: this.frames.getIdFor(frame),
       name: frame.description,
-      line: currentNode.sourceMap?.start.line,
-      column: currentNode.sourceMap?.start.column,
-      endColumn: currentNode.sourceMap?.end.column,
-      endLine: currentNode.sourceMap?.end.line,
+      ...currentNode.sourceMap && this.positionConverter.convertSourceMapToClient(currentNode.sourceMap),
       source: !!currentNode.sourceFileName && this.sourceFromNode(currentNode),
     }
+  }
+
+  protected breakpointLocationsRequest(response: DebugProtocol.BreakpointLocationsResponse, args: DebugProtocol.BreakpointLocationsArguments, _request?: DebugProtocol.Request): void {
+    const pkg = this.packageFromSource(args.source as Source)
+    const breakpoints = pkg.descendants.filter(node => {
+      if(!node.sourceMap) return false
+      const nodeLocation = this.positionConverter.convertSourceMapToClient(node.sourceMap!)
+      return args.endLine ?
+        nodeLocation.line >= args.line && nodeLocation.lineEnd <= args.endLine && nodeLocation.column >= args.column && nodeLocation.columnEnd <= args.endColumn :
+        nodeLocation.line === args.line
+    }).map(node => this.positionConverter.convertSourceMapToClient(node.sourceMap!))
+
+    response.body = {
+      breakpoints,
+    }
+
+    this.sendResponse(response)
   }
 
   protected scopesRequest(response: DebugProtocol.ScopesResponse, args: DebugProtocol.ScopesArguments, _request?: DebugProtocol.Request): void {
@@ -233,12 +237,21 @@ export class WollokDebugSession extends DebugSession {
     this.sendResponse(response)
   }
 
-  protected toWollokPath(aPath: string): string {
-    return aPath.replace(new RegExp( '\\' + path.sep, 'g'), WollokDebugSession.WOLLOK_PATH_SEPARATOR)
-  }
+  protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments, _request?: DebugProtocol.Request): void {
+    const currentEvaluation = args.context === 'repl' ? this.interpreter.evaluation : this.interpreter.evaluation.copy()
+    const frame = args.frameId ? this.frames.get(args.frameId) : currentEvaluation.currentFrame
+    const execution = interprete(
+      new Interpreter(currentEvaluation),
+      args.expression,
+      frame
+    )
 
-  protected toClientPath(aWollokPath: string): string {
-    return aWollokPath.replace(new RegExp( '\\' + WollokDebugSession.WOLLOK_PATH_SEPARATOR, 'g'), path.sep)
+    response.body = {
+      result: execution.result,
+      variablesReference: 0,
+    }
+
+    this.sendResponse(response)
   }
 
   protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments, _request?: DebugProtocol.Request): void {
@@ -285,7 +298,15 @@ export class WollokDebugSession extends DebugSession {
   }
 
   private sourceFromNode<T extends Node>(node: T): Source {
-    return new Source(node.sourceFileName.split('/').pop()!, this.toClientPath(node.sourceFileName))
+    return new Source(node.sourceFileName.split('/').pop()!, toClientPath(node.sourceFileName))
+  }
+
+  private packageFromSource(source: Source): Package {
+    const pkg = this.interpreter.evaluation.environment.descendants.find(node => node.is(Package) && toWollokPath(source.path) === node.sourceFileName) as Package | undefined
+    if(!pkg) {
+      throw new Error(`Could not find package for source ${source.path}`)
+    }
+    return pkg
   }
 }
 
@@ -310,11 +331,7 @@ function getLabel(value: RuntimeObject): string {
 
 interface WollokLaunchArguments extends DebugProtocol.LaunchRequestArguments {
   stopOnEntry?: boolean
-  file: string,
-  target: {
-    test: string,
-    describe?: string
-  } | { program: string }
+  target: LaunchTargetArguments
 }
 
 class WollokIdMap<T extends { id: string }> extends Map<number, T> {

@@ -1,12 +1,13 @@
 import * as path from 'path'
 import { DebugClient } from '@vscode/debugadapter-testsupport'
-import * as assert from 'node:assert'
 import { DebugProtocol } from '@vscode/debugprotocol'
-
+import { assert } from 'chai'
 const DEBUG_ADAPTER = path.resolve(__dirname, 'start-debug-session.js')
 const FIXTURES_ROOT = path.resolve(__dirname, '../../../../packages/debug-adapter/src/test/fixtures')
 const PROGRAM = path.resolve(FIXTURES_ROOT, 'aProgram.wpgm')
+const TEST_FILE = path.resolve(FIXTURES_ROOT, 'aTest.wtest')
 const WLK = path.resolve(FIXTURES_ROOT, 'anObject.wlk')
+
 
 describe('debug adapter', function () {
   let dc: DebugClient
@@ -19,7 +20,7 @@ describe('debug adapter', function () {
   this.afterEach( function () { return dc.stop() })
 
   it('unknown request should produce error', function () {
-    return assert.rejects(dc.send('illegal_request'))
+    dc.send('illegal_request').then(() => assert.fail('Expected to throw an error'))
   })
 
   describe('launching', () => {
@@ -27,8 +28,9 @@ describe('debug adapter', function () {
       return Promise.all([
         dc.launch({
           "stopOnEntry": false,
-          "file": PROGRAM,
           "target": {
+            "file": PROGRAM,
+            "type": "program",
             "program": "aWollokProgram",
           },
         }),
@@ -41,8 +43,9 @@ describe('debug adapter', function () {
       await Promise.all([
         dc.launch({
           "stopOnEntry": true,
-          "file": PROGRAM,
           "target": {
+            "file": PROGRAM,
+            "type": "program",
             "program": "aWollokProgram",
           },
         }),
@@ -64,8 +67,9 @@ describe('debug adapter', function () {
       return dc.hitBreakpoint(
         {
           "stopOnEntry": false,
-          "file": PROGRAM,
           "target": {
+            "file": PROGRAM,
+            type: "program",
             "program": "aWollokProgram",
           },
         },
@@ -74,6 +78,35 @@ describe('debug adapter', function () {
         { column: 3, path: PROGRAM, line: 4, verified: true },
       )
     })
+
+    it('in-line breakpoint locations', async () => {
+      await Promise.all([
+        dc.launch({
+          "stopOnEntry": true,
+          "target": {
+            "file": PROGRAM,
+            "type": "program",
+            "program": "aWollokProgram",
+          },
+        }),
+        dc.configurationDoneRequest(),
+      ])
+
+      const response = await dc.send('breakpointLocations', {
+        source: { path: PROGRAM },
+        line: 4,
+      })
+
+      const expectedBreakpoints = [
+        { line: 4, column: 3, lineEnd: 4, columnEnd: 21 },
+        { line: 4, column: 15, lineEnd: 4, columnEnd: 21 },
+      ]
+
+      assert.equal(response.body.breakpoints.length, expectedBreakpoints.length)
+      for(const expected of expectedBreakpoints) {
+        assert.deepInclude(response.body.breakpoints, expected)
+      }
+    })
   })
 
   describe('stopped at breakpoint', function () {
@@ -81,8 +114,9 @@ describe('debug adapter', function () {
       return dc.hitBreakpoint(
         {
           "stopOnEntry": false,
-          "file": PROGRAM,
           "target": {
+            "file": PROGRAM,
+            "type": "program",
             "program": "aWollokProgram",
           },
         },
@@ -130,6 +164,46 @@ describe('debug adapter', function () {
           assert(actualVariables.map(variable => variable.name).includes(expectedVariable))
         }
       }))
+    })
+  })
+
+  describe('finished execution', function (){
+    it('finishing without errors', async function (){
+      await Promise.all([
+        dc.launch({
+            "stopOnEntry": false,
+            "target": {
+              "file": TEST_FILE,
+              type: "test",
+              "describe": "some tests",
+              "test": "does not break",
+            },
+          }),
+          dc.configurationDoneRequest(),
+      ])
+      await Promise.all([
+        dc.assertOutput('stdout', "Finished executing without errors", 1000),
+        dc.waitForEvent('terminated', 1000),
+      ])
+    })
+
+    it('finishing with errors', async function (){
+      await Promise.all([
+        dc.launch({
+            "stopOnEntry": false,
+            "target": {
+              "file": TEST_FILE,
+              type: "test",
+              "describe": "some tests",
+              "test": "breaks",
+            },
+          }),
+          dc.configurationDoneRequest(),
+      ])
+      await Promise.all([
+        dc.assertOutput('stderr', "My exception message", 1000),
+        dc.waitForEvent('terminated', 1000),
+      ])
     })
   })
 })

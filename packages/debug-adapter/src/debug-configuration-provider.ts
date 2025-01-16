@@ -1,25 +1,26 @@
 import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, ProviderResult, WorkspaceFolder } from 'vscode'
 import * as vscode from 'vscode'
 
+const targetTypeRequiredKeys = {
+  'fqn': ['fqn'],
+  'program': ['file', 'program'],
+  'test': ['file', 'test'],
+}
+
 export class WollokDebugConfigurationProvider implements DebugConfigurationProvider {
 
   resolveDebugConfiguration(_folder: WorkspaceFolder | undefined, config: DebugConfiguration, _token?: CancellationToken): ProviderResult<DebugConfiguration> {
-    if (!config.file) {
-      return vscode.window.showErrorMessage("Cannot find a file to debug").then(_ => {
-        return undefined	// abort launch
-      })
+    if(!config.target.type) {
+      return vscode.window.showErrorMessage('No target type provided').then(() => undefined)
     }
 
-    if(config.target.program && config.target.test){
-      return vscode.window.showErrorMessage("Cannot specify both program and test properties at the same time").then(_ => {
-        return undefined	// abort launch
-      })
+    if(!targetTypeRequiredKeys[config.target.type]) {
+      return vscode.window.showErrorMessage(`Unknown target type: ${config.target.type}`).then(() => undefined)
     }
 
-    if(!config.target.program && !config.target.test) {
-      return vscode.window.showErrorMessage("Must specify either program or test property").then(_ => {
-        return undefined	// abort launch
-      })
+    const missingKeys = targetTypeRequiredKeys[config.target.type].filter(key => !config.target[key])
+    if(missingKeys.length) {
+      return vscode.window.showErrorMessage(`Missing required target parameters: ${missingKeys.join(', ')}`).then(() => undefined)
     }
 
     return config
