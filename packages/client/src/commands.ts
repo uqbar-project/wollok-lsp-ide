@@ -38,7 +38,7 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
  * CLI Commands
  */
 
-export const runProgram = (isGame = false) => ([fqn]: [string]): Task => {
+export const runProgram = (isGame = false) => (fqn: string): Task => {
   const wollokLSPConfiguration = workspace.getConfiguration(wollokLSPExtensionCode)
   const portNumber = wollokLSPConfiguration.get('gamePortNumber') as number ?? DEFAULT_GAME_PORT
 
@@ -52,7 +52,7 @@ export const runProgram = (isGame = false) => ([fqn]: [string]): Task => {
   ])
 }
 
-export const runTest = ([filter, file, describe, test]: [string|null, string|null, string|null, string|null]): Task =>
+export const runTest = ([filter, file, describe, test]: [string | null, string | null, string | null, string | null]): Task =>
   wollokCLITask('run tests', `Wollok ${getLSPMessage(COMMAND_RUN_TEST)}`, [
     'test',
     ...filter ? [asShellString(filter)] : [],
@@ -76,7 +76,7 @@ export const initProject = (): Task =>
 const getCurrentFileName = (document: vscode.TextDocument | undefined) =>
   document ? path.basename(document.uri.path) : 'Synthetic File'
 
-const getFiles = (document: vscode.TextDocument | undefined): [ReturnType<typeof fsToShell>] | []  =>
+const getFiles = (document: vscode.TextDocument | undefined): [ReturnType<typeof fsToShell>] | [] =>
   document ? [fsToShell(document.uri.fsPath)] : []
 
 export const startRepl = (): Task => {
@@ -88,7 +88,7 @@ export const startRepl = (): Task => {
   const portNumber = wollokLSPConfiguration.get('replPortNumber') as number ?? DEFAULT_REPL_PORT
   const DYNAMIC_DIAGRAM_URI = `http://localhost:${portNumber}/`
 
-  const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations', '--port', portNumber.toString(), dynamicDiagramDarkMode ? '--darkMode' : '', openDynamicDiagram ? '': '--skipDiagram']
+  const cliCommands = [`repl`, ...getFiles(currentDocument), '--skipValidations', '--port', portNumber.toString(), dynamicDiagramDarkMode ? '--darkMode' : '', openDynamicDiagram ? '' : '--skipDiagram']
   // Terminate previous tasks
   vscode.commands.executeCommand('workbench.action.terminal.killAll')
   const replTask = wollokCLITask('repl', `Wollok Repl: ${getCurrentFileName(currentDocument)}`, cliCommands)
@@ -120,15 +120,17 @@ const registerCLICommand = (
 
 const wollokCLITask = (task: string, name: string, cliCommands: Array<string | vscode.ShellQuotedString>) => {
   const wollokLSPConfiguration = workspace.getConfiguration(wollokLSPExtensionCode)
-  const wollokCliPath: string = wollokLSPConfiguration.get('cli-path')
+  const wollokCliPath = wollokLSPConfiguration.get<string>('cli-path')
   if (!wollokCliPath) {
     vscode.commands.executeCommand('workbench.action.openSettings', wollokLSPExtensionCode)
     throw new Error(getLSPMessage('missingWollokCliPath'))
   }
 
+  const verbose = wollokLSPConfiguration.get<boolean>('verbose')
   const folder = workspace.workspaceFolders[0]
   const shellCommandArgs: Array<string | vscode.ShellQuotedString> = [
     ...cliCommands,
+    ...verbose ? ['--verbose'] : [],
     '-p',
     fsToShell(folder.uri.fsPath),
   ]

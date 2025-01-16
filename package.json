@@ -284,6 +284,13 @@
           "description": "Maximum threshold in milliseconds: if an operation takes longer, it will be saved in the log file.",
           "order": 40
         },
+        "wollokLSP.verbose": {
+          "scope": "resource",
+          "type": "boolean",
+          "default": false,
+          "description": "Launch CLI commands using --verbose option.",
+          "order": 41
+        },
         "wollokLSP.typeSystem.enabled": {
           "scope": "resource",
           "type": "boolean",
