@@ -1,5 +1,5 @@
 import { getMessage, LANGUAGES, Messages } from 'wollok-ts'
-import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, wollokLSPExtensionCode } from '@shared/definitions'
+import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, wollokLSPExtensionCode } from '../../shared/definitions'
 import { workspace } from 'vscode'
 
 export const languageDescription: { [key: string]: LANGUAGES } = {

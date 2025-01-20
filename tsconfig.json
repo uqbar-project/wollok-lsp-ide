@@ -13,10 +13,7 @@
     "resolveJsonModule": true,
     "esModuleInterop": false,
     "experimentalDecorators": true,
-    "skipLibCheck": true,
-    "paths": {
-      "@shared/*": ["./packages/shared/*"]
-    }
+    "skipLibCheck": true
   },
   "exclude": ["node_modules", ".vscode-test", "out"]
 }

@@ -1,5 +1,5 @@
 import { Connection } from 'vscode-languageserver/node'
-import { wollokLSPExtensionCode } from '@shared/definitions'
+import { wollokLSPExtensionCode } from '../../shared/definitions'
 import { LANGUAGES } from 'wollok-ts'
 
 export const DEFAULT_REPL_PORT = 3000

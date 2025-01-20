@@ -2,7 +2,7 @@
 import * as vscode from 'vscode'
 import { tokenModifiers, tokenTypes, WollokNodePlotter, WollokPosition } from './highlighter/definitions'
 import { processDocument } from './highlighter/tokenProvider'
-import { wollokLSPExtensionCode } from '@shared/definitions'
+import { wollokLSPExtensionCode } from '../../shared/definitions'
 
 const convertToVSCPosition = (position: WollokPosition) =>
   new vscode.Position(position.line, position.column)
