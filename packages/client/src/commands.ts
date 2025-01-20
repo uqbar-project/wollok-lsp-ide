@@ -14,7 +14,7 @@ import {
   asShellString,
   fsToShell,
 } from './platform-string-utils'
-import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode, COMMAND_INIT_PROJECT, COMMAND_DEBUG } from './shared-definitions'
+import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode, COMMAND_INIT_PROJECT, COMMAND_DEBUG } from '@shared/definitions'
 import { getLSPMessage } from './messages'
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "rxjs": "^7.8.1",
+    "shared": "workspace:^",
     "vscode-languageserver": "^9.0.1",
     "vscode-languageserver-textdocument": "^1.0.11",
     "winston": "^3.11.0"

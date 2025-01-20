@@ -9,6 +9,7 @@
     "url": "https://github.com/uqbar-project/wollok-lsp-ide"
   },
   "dependencies": {
+    "shared": "workspace:^",
     "wollok-debug-adapter": "workspace:^"
   },
   "scripts": {

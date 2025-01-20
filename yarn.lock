@@ -7663,6 +7663,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"shared@workspace:^, shared@workspace:packages/shared":
+  version: 0.0.0-use.local
+  resolution: "shared@workspace:packages/shared"
+  languageName: unknown
+  linkType: soft
+
 "shebang-command@npm:^2.0.0":
   version: 2.0.0
   resolution: "shebang-command@npm:2.0.0"
@@ -8954,6 +8960,7 @@ __metadata:
     glob: "npm:^11.0.0"
     mocha: "npm:^10.2.0"
     nyc: "npm:^15.1.0"
+    shared: "workspace:^"
     sinon: "npm:^15.0.3"
     vscode-languageclient: "npm:^9.0.1"
     wollok-debug-adapter: "workspace:^"
@@ -8972,6 +8979,7 @@ __metadata:
     jest: "npm:^29.7.0"
     mocha: "npm:^10.7.3"
     rxjs: "npm:^7.8.1"
+    shared: "workspace:^"
     sinon: "npm:^15.0.3"
     ts-mocha: "npm:^10.0.0"
     vscode-languageserver: "npm:^9.0.1"
