@@ -4,7 +4,7 @@ import * as sinon from 'sinon'
 import { ShellExecution, ShellQuotedString, ShellQuoting, Task, Uri, workspace } from 'vscode'
 import { initProject, runAllTests, runProgram, runTest, startRepl } from '../commands'
 import { activate, getDocumentURI, getFolderURI } from './helper'
-import { DEFAULT_GAME_PORT, DEFAULT_REPL_PORT } from '../../../server/src/settings'
+import { DEFAULT_GAME_PORT, DEFAULT_REPL_PORT } from '../../../shared/definitions'
 
 suite('Should run commands', () => {
   const folderURI = getFolderURI()

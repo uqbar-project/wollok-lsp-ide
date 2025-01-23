@@ -1,9 +1,7 @@
 import { Connection } from 'vscode-languageserver/node'
 import { wollokLSPExtensionCode } from '../../shared/definitions'
 import { LANGUAGES } from 'wollok-ts'
-
-export const DEFAULT_REPL_PORT = 3000
-export const DEFAULT_GAME_PORT = 4200
+import { DEFAULT_REPL_PORT, DEFAULT_GAME_PORT } from '../../shared/definitions'
 
 export interface WollokLSPSettings {
   maxNumberOfProblems: number
