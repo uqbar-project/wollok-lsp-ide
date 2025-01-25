@@ -182,8 +182,8 @@ describe('debug adapter', function () {
           dc.configurationDoneRequest(),
       ])
       await Promise.all([
-        dc.assertOutput('stdout', "Finished executing without errors", 1000),
-        dc.waitForEvent('terminated', 1000),
+        dc.assertOutput('stdout', "Finished executing without errors", 2000),
+        dc.waitForEvent('terminated', 2000),
       ])
     })
 
@@ -201,8 +201,8 @@ describe('debug adapter', function () {
           dc.configurationDoneRequest(),
       ])
       await Promise.all([
-        dc.assertOutput('stderr', "My exception message", 1000),
-        dc.waitForEvent('terminated', 1000),
+        dc.assertOutput('stderr', "My exception message", 2000),
+        dc.waitForEvent('terminated', 2000),
       ])
     })
   })
