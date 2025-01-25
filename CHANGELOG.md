@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.4.1
+- AST-based **Highlighter**! 🔆
+- Debugger improvements 🐛
+- Configure verbose commands 📓
+- Update Wollok-TS 4.2.0 ⬆️
+- Shared packages 🛠️
+
 ## v0.4.0
 - i18n translations for lens and error messages 💬
 - Update Wollok-TS 4.1.9 ⬆️
