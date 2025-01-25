@@ -10,7 +10,7 @@
     "url": "https://github.com/uqbar-project/wollok-lsp-ide"
   },
   "scripts": {
-    "test": "mocha --config .mocharc.js"
+    "test": "mocha --config .mocharc.js --timeout=2000"
   },
   "dependencies": {
     "@vscode/debugadapter": "^1.66.0",

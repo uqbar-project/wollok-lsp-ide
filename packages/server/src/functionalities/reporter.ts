@@ -1,6 +1,6 @@
 import { getMessage, LANGUAGES, Messages, Problem } from 'wollok-ts'
 import { lang } from '../settings'
-import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../shared-definitions'
+import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../../../shared/definitions'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // CUSTOM MESSAGES DEFINITION

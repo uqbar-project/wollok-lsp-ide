@@ -24,7 +24,7 @@ import {
 import { WollokDebugAdapterFactory, WollokDebugConfigurationProvider } from '../../debug-adapter/src/index'
 import { subscribeWollokCommands } from './commands'
 import { getLSPMessage } from './messages'
-import { wollokLSPExtensionId } from './shared-definitions'
+import { wollokLSPExtensionId } from '../../shared/definitions'
 import { allWollokFiles } from './utils'
 import { legend, provider, selector } from './highlighter'
 

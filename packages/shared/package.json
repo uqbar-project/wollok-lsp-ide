@@ -1,0 +1,12 @@
+{
+  "name": "shared",
+  "author": "Uqbar Foundation",
+  "license": "LGPL-3.0",
+  "engines": {
+    "node": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uqbar-project/wollok-lsp-ide"
+  }
+}
