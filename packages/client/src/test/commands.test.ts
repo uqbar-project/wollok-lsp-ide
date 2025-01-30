@@ -31,7 +31,7 @@ suite('Should run commands', () => {
   test('run program', () =>
     testCommand(
       pepitaURI,
-      () => runProgram()('file.program'),
+      () => runProgram()(['file.program']),
       [
         'run',
         quoted('file.program'),
@@ -45,7 +45,7 @@ suite('Should run commands', () => {
   test('run game', () =>
     testCommand(
       pepitaURI,
-      () => runProgram(true)('file.program'),
+      () => runProgram(true)(['file.program']),
       [
         'run',
         '-g',
@@ -127,7 +127,7 @@ suite('Should run commands', () => {
     configuration['verbose'] = true
     return testCommand(
       pepitaURI,
-      () => runProgram()('file.program'),
+      () => runProgram()(['file.program']),
       [
         'run',
         quoted('file.program'),
