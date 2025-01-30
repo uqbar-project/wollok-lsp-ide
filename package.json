@@ -44,7 +44,8 @@
     "renameProvider": {
       "prepareProvider": true
     },
-    "hoverProvider": true
+    "hoverProvider": true,
+    "codeActionProvider": true
   },
   "main": "./out/client/src/extension",
   "configurationDefaults": {
@@ -400,7 +401,7 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
-    "wollok-ts": "4.2.0"
+    "wollok-ts": "../wollok-ts"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",

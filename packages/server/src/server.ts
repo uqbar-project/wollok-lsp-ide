@@ -31,6 +31,7 @@ import { setWorkspaceUri, WORKSPACE_URI } from './utils/text-documents'
 import { EnvironmentProvider } from './utils/vm/environment'
 import { completions } from './functionalities/autocomplete/autocomplete'
 import { ERROR_MISSING_WORKSPACE_FOLDER, getLSPMessage, SERVER_PROCESSING_REQUEST } from './functionalities/reporter'
+import { codeActions } from './functionalities/code-actions'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -86,6 +87,7 @@ connection.onInitialize((params: InitializeParams) => {
       renameProvider: { prepareProvider: true },
       documentFormattingProvider: true,
       documentRangeFormattingProvider: true,
+      codeActionProvider: true,
     },
   }
   if (hasWorkspaceFolderCapability) {
@@ -212,6 +214,7 @@ const handlers: readonly [
     [connection.onRenameRequest, rename(documents)],
     [connection.onHover, typeDescriptionOnHover],
     [connection.onReferences, references],
+    [connection.onCodeAction, codeActions],
   ]
 
 try {
