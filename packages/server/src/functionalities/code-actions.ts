@@ -1,6 +1,5 @@
-import { CodeAction, CodeActionParams, Command, Range } from 'vscode-languageserver'
-import { BaseProblem, Class, Entity, Environment, Import, Mixin, Node, print, Problem, Reference, Singleton, validate } from 'wollok-ts'
-import { possiblyReferenced } from 'wollok-ts'
+import { CodeAction, CodeActionKind, CodeActionParams, Command } from 'vscode-languageserver'
+import { Assignment, Class, Environment, Field, Mixin, Node, possiblyReferenced, print, Problem, Reference, Singleton, validate, Variable } from 'wollok-ts'
 import { writeImportFor } from '../utils/imports'
 import { getNodesByPosition, toVSCRange, uriFromRelativeFilePath } from '../utils/text-documents'
 
@@ -17,23 +16,46 @@ export const codeActions = (environment: Environment) => (params: CodeActionPara
 const isImportableNode = (node: Node): node is Singleton | Class | Mixin => node.is(Singleton) || node.is(Class) || node.is(Mixin)
 
 const matchProblemWithFixers = (problem: Problem): CodeActionResponse => {
-  switch(problem.code) {
-    case 'missingReference':
-    case 'shouldReferenceToObjects':
-      return fixShouldReferenceToObjects(problem.node as Reference<Node>)
-    default:
-      return []
-  }
+  const fixer = fixers[problem.code]
+  return fixer ? fixer(problem.node) : []
 }
 
 
 // FIXERS //
-const fixShouldReferenceToObjects = (node: Reference<Node>): CodeActionResponse => {
+type Fixer = (node: Node) => CodeActionResponse
+const fixers: Record<string, Fixer> = {
+  missingReference: fixByImporting,
+  shouldReferenceToObjects: fixByImporting,
+  shouldDefineConstInsteadOfVar: (variable: Field | Variable) =>  changeConstantValue(variable, true, false),
+  shouldNotReassignConst: (assignment: Assignment) =>  changeConstantValue(assignment.variable.target, false, true),
+}
+
+function changeConstantValue(variable: Variable | Field, newValue: boolean, displayVarInTitle = false): CodeActionResponse {
+  const copiedVar = variable.copy({ isConstant: newValue })
+  return [{
+    title: `Convert ${displayVarInTitle ? variable.name : ''} to ${newValue ? 'const' : 'var'}`,
+    kind: CodeActionKind.QuickFix,
+    isPreferred: true,
+    edit: {
+      changes: {
+        [uriFromRelativeFilePath(variable.sourceFileName)]: [{
+          newText: print(copiedVar),
+          range: toVSCRange(variable.sourceMap!),
+        }],
+      },
+    },
+  }]
+
+}
+
+function fixByImporting(node: Reference<Node>): CodeActionResponse {
   const targets = possiblyReferenced(node, node.environment).filter(isImportableNode)
 
   return targets.map<CodeActionResponse[number]>(target => {
     return {
-    title: `Import from ${target.sourceFileName}\n`,
+    title: `Import from ${target.sourceFileName}`,
+    kind: CodeActionKind.QuickFix,
+    isPreferred: true,
     edit: {
       changes: {
         [uriFromRelativeFilePath(node.sourceFileName)]: [{
