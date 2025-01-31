@@ -46,7 +46,7 @@ export const fieldCompletionItem: CompletionItemMapper<Field> = namedCompletionI
 
 export const singletonCompletionItem: CompletionItemMapper<Singleton> = moduleCompletionItem(CompletionItemKind.Class)
 
-export const withImport = <T extends Node>(mapper: CompletionItemMapper<T>) => (relativeTo: Node): CompletionItemMapper<T> => (node) => {
+export const withImport = (mapper: CompletionItemMapper<Class | Singleton | Mixin>) => (relativeTo: Node): CompletionItemMapper<Class | Singleton | Mixin> => (node) => {
   const importedPackage = node.parentPackage!
   const originalPackage = relativeTo.parentPackage!
 
