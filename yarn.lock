@@ -9014,14 +9014,14 @@ __metadata:
 
 "wollok-ts@file:../wollok-ts::locator=wollok-lsp-ide%40workspace%3A.":
   version: 4.2.1
-  resolution: "wollok-ts@file:../wollok-ts#../wollok-ts::hash=67ea01&locator=wollok-lsp-ide%40workspace%3A."
+  resolution: "wollok-ts@file:../wollok-ts#../wollok-ts::hash=50fd94&locator=wollok-lsp-ide%40workspace%3A."
   dependencies:
     "@types/parsimmon": "npm:^1.10.8"
     parsimmon: "npm:^1.18.1"
     prettier-printer: "npm:^1.1.4"
     unraw: "npm:^3.0.0"
     uuid: "npm:^9.0.1"
-  checksum: 10c0/2b7ad653be108d76153074526468331808244f859e7b01807e2a11811e20afa9f668cfecdd0c82292081cd31b02478322d6696f4b1186cde74d207dcbc792988
+  checksum: 10c0/50512b6c4ad75f5c19f0d031e55a2a1957f51eb338ad9f8d08f1f1781b2938d4d93a170761b1f07425087ef74b4be7a6be08b366230ec25862f39d238d9aa2f2
   languageName: node
   linkType: hard
 

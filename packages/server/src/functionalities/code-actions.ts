@@ -1,25 +1,21 @@
-import { CodeAction, CodeActionKind, CodeActionParams, Command } from 'vscode-languageserver'
+import { CodeAction, CodeActionKind, CodeActionParams, Command, Diagnostic } from 'vscode-languageserver'
 import { Assignment, Class, Environment, Field, Mixin, Node, possiblyReferenced, print, Problem, Reference, Singleton, validate, Variable } from 'wollok-ts'
 import { writeImportFor } from '../utils/imports'
-import { getNodesByPosition, toVSCRange, uriFromRelativeFilePath } from '../utils/text-documents'
+import { packageFromURI, rangeIncludes, toVSCRange, uriFromRelativeFilePath } from '../utils/text-documents'
 
 type CodeActionResponse = Array<Command | CodeAction>
 
 export const codeActions = (environment: Environment) => (params: CodeActionParams): CodeActionResponse => {
-  const possibleNodes = getNodesByPosition(environment, { position: params.range.start, textDocument: params.textDocument })
-
-  const problems = validate(possibleNodes.reverse()[0])
-  const fixers = problems.flatMap(problem => matchProblemWithFixers(problem))
-  return fixers
+  const problems = validate(packageFromURI(params.textDocument.uri, environment))
+  const problemsInRange = problems.filter(problem => rangeIncludes(toVSCRange(problem.sourceMap), params.range))
+  if(problemsInRange.length === 0) return null
+  return problemsInRange.flatMap(problem => {
+    const fixer = fixers[problem.code]
+    if (!fixer) return []
+    const diagnostics = matchDiagnostics(problem, params.context.diagnostics)
+    return fixer(problem.node).map(action => ({ ...action, diagnostics: diagnostics }))
+  })
 }
-
-const isImportableNode = (node: Node): node is Singleton | Class | Mixin => node.is(Singleton) || node.is(Class) || node.is(Mixin)
-
-const matchProblemWithFixers = (problem: Problem): CodeActionResponse => {
-  const fixer = fixers[problem.code]
-  return fixer ? fixer(problem.node) : []
-}
-
 
 // FIXERS //
 type Fixer = (node: Node) => CodeActionResponse
@@ -33,7 +29,7 @@ const fixers: Record<string, Fixer> = {
 function changeConstantValue(variable: Variable | Field, newValue: boolean, displayVarInTitle = false): CodeActionResponse {
   const copiedVar = variable.copy({ isConstant: newValue })
   return [{
-    title: `Convert ${displayVarInTitle ? variable.name : ''} to ${newValue ? 'const' : 'var'}`,
+    title: `Convert ${displayVarInTitle ? variable.name + ' ' : ''}to ${newValue ? 'const' : 'var'}`,
     kind: CodeActionKind.QuickFix,
     isPreferred: true,
     edit: {
@@ -45,8 +41,13 @@ function changeConstantValue(variable: Variable | Field, newValue: boolean, disp
       },
     },
   }]
-
 }
+
+function matchDiagnostics(problem: Problem, diagnostics: Diagnostic[]): Diagnostic[] {
+  return diagnostics.filter(diagnostic => diagnostic.code === problem.code)
+}
+
+const isImportableNode = (node: Node): node is Singleton | Class | Mixin => node.is(Singleton) || node.is(Class) || node.is(Mixin)
 
 function fixByImporting(node: Reference<Node>): CodeActionResponse {
   const targets = possiblyReferenced(node, node.environment).filter(isImportableNode)
