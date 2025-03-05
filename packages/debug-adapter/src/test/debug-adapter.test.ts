@@ -200,10 +200,8 @@ describe('debug adapter', function () {
             "test": "does not break",
           },
         }).then(async () => {
-          await Promise.all([
-            dc.assertOutput('stdout', "Finished executing without errors", 1000),
-            dc.waitForEvent('terminated', 1000),
-          ])
+          await dc.assertOutput('stdout', "Finished executing without errors", 1000)
+          await dc.waitForEvent('terminated', 1000)
           resolve("Finished")
         })
         dc.configurationDoneRequest()
