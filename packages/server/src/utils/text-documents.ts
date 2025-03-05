@@ -53,6 +53,8 @@ export const toVSCRange = (sourceMap: SourceMap): Range =>
   Range.create(toVSCPosition(sourceMap.start), toVSCPosition(sourceMap.end))
 
 export const nodeToLocation = (node: Node): Location => {
+  if (!node.sourceMap) throw new Error('No source map found for node')
+
   if(node.parentPackage.isGlobalPackage){
     if(!WOLLOK_LANG_PATH) throw new Error('No Wollok lang path found')
     return Location.create(
@@ -69,7 +71,6 @@ export const nodeToLocation = (node: Node): Location => {
     )
   }
 
-  if (!node.sourceMap) throw new Error('No source map found for node')
 
   return Location.create(
     uriFromRelativeFilePath(node.sourceFileName!),
@@ -91,9 +92,17 @@ export function trimIn(range: Range, textDocument: TextDocument): Range {
 }
 
 export const packageFromURI = (uri: string, environment: Environment): Package | undefined => {
-  const sanitizedURI = relativeFilePath(uri)
+  // When the URI is a reference to a native wollok file
+  // we simply just need to get the last part so it matches
+  // the synthetic package name
+  let sanitizedPath = uri.replace(`file://${WOLLOK_LANG_PATH}`, 'wollok')
+
+  // When the URI is a reference to a file in the workspace
+  // if not the sanitization just wont have any effect
+  sanitizedPath = relativeFilePath(uri)
+
   // TODO: Use projectFQN ?
-  return environment.descendants.find(node => node.is(Package) && node.fileName === sanitizedURI) as Package | undefined
+  return environment.descendants.find(node => node.is(Package) && node.fileName === sanitizedPath) as Package | undefined
 }
 
 export const packageToURI = (pkg: Package): string => fileNameToURI(pkg.fileName!)
