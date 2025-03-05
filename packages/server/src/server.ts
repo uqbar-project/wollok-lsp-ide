@@ -112,7 +112,7 @@ connection.onInitialized(() => {
 })
 
 connection.onRequest(LANG_PATH_REQUEST, (path: string) => {
-  connection.console.log('Wollok language path event received.')
+  connection.console.log('Wollok language path event received: ' +  path)
   setWollokLangPath(path)
 })
 

@@ -80,7 +80,7 @@ export function activate(context: ExtensionContext): void {
 
   // Force first validation
   validateWorkspace()
-  client.sendRequest(LANG_PATH_REQUEST, path.join(vscode.extensions.getExtension([wollokLSPExtensionPublisher, wollokLSPExtensionId].join('.')).extensionPath, 'wollok'))
+  client.sendRequest(LANG_PATH_REQUEST, vscode.extensions.getExtension([wollokLSPExtensionPublisher, wollokLSPExtensionId].join('.')).extensionUri.path + '/wollok')
 
   const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left)
 
