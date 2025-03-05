@@ -1,8 +1,10 @@
 // IDE
 export const wollokLSPExtensionCode = 'wollokLSP'
 export const wollokLSPExtensionId = 'wollok-lsp-ide'
+export const wollokLSPExtensionPublisher = 'uqbar'
 export const DEFAULT_REPL_PORT = 3000
 export const DEFAULT_GAME_PORT = 4200
+export const LANG_PATH_REQUEST = 'SET_LANG_PATH'
 
 
 // Commands

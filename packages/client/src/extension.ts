@@ -24,7 +24,7 @@ import {
 import { WollokDebugAdapterFactory, WollokDebugConfigurationProvider } from '../../debug-adapter/src/index'
 import { subscribeWollokCommands } from './commands'
 import { getLSPMessage } from './messages'
-import { wollokLSPExtensionId } from '../../shared/definitions'
+import { LANG_PATH_REQUEST, wollokLSPExtensionId, wollokLSPExtensionPublisher } from '../../shared/definitions'
 import { allWollokFiles } from './utils'
 import { legend, provider, selector } from './highlighter'
 
@@ -80,6 +80,7 @@ export function activate(context: ExtensionContext): void {
 
   // Force first validation
   validateWorkspace()
+  client.sendRequest(LANG_PATH_REQUEST, path.join(vscode.extensions.getExtension([wollokLSPExtensionPublisher, wollokLSPExtensionId].join('.')).extensionPath, 'wollok'))
 
   const statusBarItem = window.createStatusBarItem(StatusBarAlignment.Left)
 
