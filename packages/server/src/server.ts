@@ -14,12 +14,15 @@ import {
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node'
 import { Environment } from 'wollok-ts'
+import { LANG_PATH_REQUEST } from '../../shared/definitions'
+import { completions } from './functionalities/autocomplete/autocomplete'
 import { codeLenses } from './functionalities/code-lens'
 import { definition } from './functionalities/definition'
 import { formatDocument, formatRange } from './functionalities/formatter'
 import { typeDescriptionOnHover } from './functionalities/hover'
 import { references } from './functionalities/references'
 import { rename, requestIsRenamable as isRenamable } from './functionalities/rename'
+import { ERROR_MISSING_WORKSPACE_FOLDER, getLSPMessage, SERVER_PROCESSING_REQUEST } from './functionalities/reporter'
 import { documentSymbols, workspaceSymbols } from './functionalities/symbols'
 import {
   validateTextDocument,
@@ -27,11 +30,8 @@ import {
 import { initializeSettings, WollokLSPSettings } from './settings'
 import { logger } from './utils/logger'
 import { ProgressReporter } from './utils/progress-reporter'
-import { setWorkspaceUri, WORKSPACE_URI } from './utils/text-documents'
+import { setWollokLangPath, setWorkspaceUri, WORKSPACE_URI } from './utils/text-documents'
 import { EnvironmentProvider } from './utils/vm/environment'
-import { completions } from './functionalities/autocomplete/autocomplete'
-import { ERROR_MISSING_WORKSPACE_FOLDER, getLSPMessage, SERVER_PROCESSING_REQUEST } from './functionalities/reporter'
-import { LANG_PATH_REQUEST } from '../../shared/definitions'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -62,7 +62,6 @@ const requestContext = combineLatest([environmentProvider.$environment.pipe(filt
 const requestProgressReporter = new ProgressReporter(connection, { identifier: 'wollok-request', title: getLSPMessage(SERVER_PROCESSING_REQUEST) })
 
 let hasWorkspaceFolderCapability = false
-export let WOLLOK_LANG_PATH = null
 
 connection.onInitialize((params: InitializeParams) => {
   const capabilities = params.capabilities
@@ -114,7 +113,7 @@ connection.onInitialized(() => {
 
 connection.onRequest(LANG_PATH_REQUEST, (path: string) => {
   connection.console.log('Wollok language path event received.')
-  WOLLOK_LANG_PATH = path
+  setWollokLangPath(path)
 })
 
 // Cache the settings of all open documents

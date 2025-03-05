@@ -3,7 +3,13 @@ import * as path from 'path'
 import { Location, Position, Range, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, FileContent, Node, PROGRAM_FILE_EXTENSION, Package, SourceIndex, SourceMap, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
-import { WOLLOK_LANG_PATH } from '../server'
+
+
+let WOLLOK_LANG_PATH: string = null
+export const setWollokLangPath = (path: string): void => {
+  WOLLOK_LANG_PATH = path
+}
+
 
 // TODO: Refactor
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
@@ -53,16 +59,17 @@ export const toVSCRange = (sourceMap: SourceMap): Range =>
   Range.create(toVSCPosition(sourceMap.start), toVSCPosition(sourceMap.end))
 
 export const nodeToLocation = (node: Node): Location => {
-  if (!node.sourceMap) throw new Error('No source map found for node')
+  if(!node.sourceFileName) throw new Error('No source file found for node')
 
-  if(node.parentPackage.isGlobalPackage){
+  if(node.parentPackage?.isGlobalPackage){
+    if(!node.sourceMap) throw new Error('No source map found for node')
+
     if(!WOLLOK_LANG_PATH) throw new Error('No Wollok lang path found')
     return Location.create(
       `file://${WOLLOK_LANG_PATH}/${node.parentPackage.name}.wlk`,
       toVSCRange(node.sourceMap)
     )
   }
-  if(!node.sourceFileName) throw new Error('No source file found for node')
 
   if(node.is(Package)){
     return Location.create(
@@ -71,6 +78,7 @@ export const nodeToLocation = (node: Node): Location => {
     )
   }
 
+  if(!node.sourceMap) throw new Error('No source map found for node')
 
   return Location.create(
     uriFromRelativeFilePath(node.sourceFileName!),

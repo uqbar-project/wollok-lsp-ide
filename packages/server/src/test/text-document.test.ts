@@ -1,7 +1,7 @@
 import { expect } from 'expect'
 import * as path from 'path'
 import { Position, Range } from 'vscode-languageserver'
-import { Literal, Node, Package, SourceMap } from 'wollok-ts'
+import { Environment, Literal, Node, Package, SourceMap } from 'wollok-ts'
 import { between, findPackageJSON, nodeToLocation, relativeFilePath, setWorkspaceUri } from '../utils/text-documents'
 
 const { join, resolve }  = path.posix
@@ -40,7 +40,7 @@ describe('text document utilities', () => {
 
   describe('node to location', () => {
 
-    const pepitaPackage: Package = new Package({ name: 'pepita', fileName: 'src/pepita.wlk' })
+    const pepitaPackage: Package = new Package({ name: 'pepita', fileName: 'src/pepita.wlk', parent: new Environment({ members: [] }) })
     const testNodeLocation = (node: Node, expectedFile: string, expectedRange: Range) => {
       const location = nodeToLocation(node)
       expect(location.uri).toEqual('examples/example-project/' + expectedFile)
