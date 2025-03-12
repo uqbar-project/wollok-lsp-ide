@@ -1,5 +1,5 @@
 import { CodeAction, CodeActionKind, CodeActionParams, Command, Diagnostic } from 'vscode-languageserver'
-import { Assignment, Class, Environment, Field, Mixin, Node, possiblyReferenced, print, Problem, Reference, Singleton, validate, Variable } from 'wollok-ts'
+import { Assignment, Class, Describe, Environment, Field, Mixin, Node, possiblyReferenced, print, Problem, Reference, Singleton, validate, Variable } from 'wollok-ts'
 import { writeImportFor } from '../utils/imports'
 import { packageFromURI, rangeIncludes, toVSCRange, uriFromRelativeFilePath } from '../utils/text-documents'
 
@@ -47,7 +47,7 @@ function matchDiagnostics(problem: Problem, diagnostics: Diagnostic[]): Diagnost
   return diagnostics.filter(diagnostic => diagnostic.code === problem.code)
 }
 
-const isImportableNode = (node: Node): node is Singleton | Class | Mixin => node.is(Singleton) || node.is(Class) || node.is(Mixin)
+const isImportableNode = (node: Node): node is Singleton | Class | Mixin | Describe => node.is(Singleton) || node.is(Class) || node.is(Mixin) || node.is(Describe)
 
 function fixByImporting(node: Reference<Node>): CodeActionResponse {
   const targets = possiblyReferenced(node, node.environment).filter(isImportableNode)
