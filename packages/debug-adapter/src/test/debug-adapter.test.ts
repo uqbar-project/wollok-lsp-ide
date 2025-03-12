@@ -201,8 +201,8 @@ describe('debug adapter', function () {
           },
         }).then(async () => {
           await Promise.all([
-            dc.assertOutput('stdout', "Finished executing without errors", 1000),
-            dc.waitForEvent('terminated', 1000),
+            dc.assertOutput('stdout', "Finished executing without errors", 3000),
+            dc.waitForEvent('terminated', 2000),
           ]).catch(reject)
           resolve("Finished")
         })

@@ -8936,7 +8936,6 @@ __metadata:
   dependencies:
     "@types/chai": "npm:^4"
     "@types/mocha": "npm:^10"
-    "@types/node": "npm:^18.14.1"
     "@types/vscode": "npm:^1.92.0"
     "@vscode/debugadapter": "npm:^1.66.0"
     "@vscode/debugadapter-testsupport": "npm:^1.67.0"
@@ -8953,7 +8952,6 @@ __metadata:
   resolution: "wollok-lsp-ide-client@workspace:packages/client"
   dependencies:
     "@types/mocha": "npm:^10.0.1"
-    "@types/node": "npm:^18.14.1"
     "@types/sinon": "npm:^10.0.13"
     "@types/vscode": "npm:^1.80.0"
     "@vscode/test-electron": "npm:^2.3.9"
@@ -8973,7 +8971,6 @@ __metadata:
   dependencies:
     "@types/expect": "npm:^24.3.0"
     "@types/mocha": "npm:^10"
-    "@types/node": "npm:^18.14.1"
     "@types/sinon": "npm:^10.0.13"
     expect: "npm:^29.7.0"
     jest: "npm:^29.7.0"
@@ -8993,6 +8990,7 @@ __metadata:
   resolution: "wollok-lsp-ide@workspace:."
   dependencies:
     "@istanbuljs/nyc-config-typescript": "npm:^1.0.2"
+    "@types/node": "npm:^18.14.1"
     "@types/source-map-support": "npm:^0"
     "@typescript-eslint/eslint-plugin": "npm:^5.53.0"
     "@typescript-eslint/parser": "npm:^5.53.0"
@@ -9009,21 +9007,21 @@ __metadata:
     source-map-support: "npm:^0.5.21"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^4.9.5"
-    wollok-ts: "npm:4.2.0"
+    wollok-ts: "npm:4.2.1"
     yarn-run-all: "npm:^3.1.1"
   languageName: unknown
   linkType: soft
 
-"wollok-ts@npm:4.2.0":
-  version: 4.2.0
-  resolution: "wollok-ts@npm:4.2.0"
+"wollok-ts@npm:4.2.1":
+  version: 4.2.1
+  resolution: "wollok-ts@npm:4.2.1"
   dependencies:
     "@types/parsimmon": "npm:^1.10.8"
     parsimmon: "npm:^1.18.1"
     prettier-printer: "npm:^1.1.4"
     unraw: "npm:^3.0.0"
     uuid: "npm:^9.0.1"
-  checksum: 10c0/5606c36a79ab486127122ba804e3df6c686cb4b1212c4dd64a1be30f58e4c787d50965b1625a8f4213116c32dfb955176a6d4722f03cf6bf03d0ba98af86f122
+  checksum: 10c0/a4613614030fde0a395f56fb8fa89d686c98c2f3d984669e62702f1c4ca8b129de02db49980653ed24b78a537ea942a71baa5b9a3c25591c6ca1ef6c27a4661a
   languageName: node
   linkType: hard
 

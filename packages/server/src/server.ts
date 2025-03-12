@@ -16,6 +16,7 @@ import {
 import { Environment } from 'wollok-ts'
 import { LANG_PATH_REQUEST } from '../../shared/definitions'
 import { completions } from './functionalities/autocomplete/autocomplete'
+import { codeActions } from './functionalities/code-actions'
 import { codeLenses } from './functionalities/code-lens'
 import { definition } from './functionalities/definition'
 import { formatDocument, formatRange } from './functionalities/formatter'
@@ -87,6 +88,7 @@ connection.onInitialize((params: InitializeParams) => {
       renameProvider: { prepareProvider: true },
       documentFormattingProvider: true,
       documentRangeFormattingProvider: true,
+      codeActionProvider: true,
     },
   }
   if (hasWorkspaceFolderCapability) {
@@ -219,6 +221,7 @@ const handlers: readonly [
     [connection.onRenameRequest, rename(documents)],
     [connection.onHover, typeDescriptionOnHover],
     [connection.onReferences, references],
+    [connection.onCodeAction, codeActions],
   ]
 
 try {

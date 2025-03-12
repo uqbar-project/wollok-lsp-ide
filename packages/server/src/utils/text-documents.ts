@@ -58,6 +58,13 @@ export const toVSCPosition = (position: SourceIndex): Position =>
 export const toVSCRange = (sourceMap: SourceMap): Range =>
   Range.create(toVSCPosition(sourceMap.start), toVSCPosition(sourceMap.end))
 
+
+export function rangeIncludes(range: Range, included: Range): boolean {
+  const start = range.start
+  const end = range.end
+  return between(included.start, start, end) && between(included.end, start, end)
+}
+
 export const nodeToLocation = (node: Node): Location => {
   if(!node.sourceFileName) throw new Error('No source file found for node')
 

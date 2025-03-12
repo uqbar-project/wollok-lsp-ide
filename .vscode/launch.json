@@ -15,6 +15,7 @@
       "runtimeExecutable": "${execPath}",
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
+      "autoAttachChildProcesses": true,
       "preLaunchTask": {
         "type": "npm",
         "script": "compile"
@@ -25,7 +26,9 @@
       "request": "attach",
       "name": "Attach to Server",
       "port": 6009,
+      "address": "localhost",
       "restart": true,
+      "sourceMaps": true,
       "outFiles": ["${workspaceFolder}/out/**/*.js"]
     },
     {

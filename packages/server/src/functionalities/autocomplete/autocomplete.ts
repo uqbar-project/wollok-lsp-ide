@@ -7,6 +7,7 @@ import { completionsForNode } from './node-completion'
 import { completeMessages } from './send-completion'
 import { match, when } from 'wollok-ts/dist/extensions'
 import { logger } from '../../utils/logger'
+import { writeImportFor } from '../../utils/imports'
 
 export const completions = (environment: Environment) => (
   params: CompletionParams,
@@ -45,7 +46,7 @@ export const fieldCompletionItem: CompletionItemMapper<Field> = namedCompletionI
 
 export const singletonCompletionItem: CompletionItemMapper<Singleton> = moduleCompletionItem(CompletionItemKind.Class)
 
-export const withImport = <T extends Node>(mapper: CompletionItemMapper<T>) => (relativeTo: Node): CompletionItemMapper<T> => (node) => {
+export const withImport = (mapper: CompletionItemMapper<Class | Singleton | Mixin>) => (relativeTo: Node): CompletionItemMapper<Class | Singleton | Mixin> => (node) => {
   const importedPackage = node.parentPackage!
   const originalPackage = relativeTo.parentPackage!
 
@@ -57,7 +58,7 @@ export const withImport = <T extends Node>(mapper: CompletionItemMapper<T>) => (
   ) {
     result.detail = `Add import ${importedPackage.fileName ? relativeFilePath(packageToURI(importedPackage)) : importedPackage.name}${result.detail ? ` - ${result.detail}` : ''}`
     result.additionalTextEdits = (result.additionalTextEdits ?? []).concat(
-      TextEdit.insert(Position.create(0, 0), `import ${importedPackage.name}.*\n`)
+      TextEdit.insert(Position.create(0, 0), `${writeImportFor(importedPackage)}\n`)
     )
   }
 
