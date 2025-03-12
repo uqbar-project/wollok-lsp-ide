@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.4.2
+## v0.5.0
 - Quick fixes 🧑‍🏭
 - Go to definition for base code references 🔍
 - Update Wollok-TS 4.2.1 ⬆️
