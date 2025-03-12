@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.4.2
+- HOT-FIX Run program lens 🚧
+
 ## v0.4.1
 - AST-based **Highlighter**! 🔆
 - Debugger improvements 🐛

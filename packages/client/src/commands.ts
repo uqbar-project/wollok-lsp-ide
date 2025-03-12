@@ -38,7 +38,7 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
  * CLI Commands
  */
 
-export const runProgram = (isGame = false) => (fqn: string): Task => {
+export const runProgram = (isGame = false) => ([fqn]: [string]): Task => {
   const wollokLSPConfiguration = workspace.getConfiguration(wollokLSPExtensionCode)
   const portNumber = wollokLSPConfiguration.get('gamePortNumber') as number ?? DEFAULT_GAME_PORT
 

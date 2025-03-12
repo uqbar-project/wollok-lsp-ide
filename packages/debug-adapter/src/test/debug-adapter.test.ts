@@ -169,7 +169,7 @@ describe('debug adapter', function () {
 
   describe('finished execution', function (){
     it('finishing with errors', function (){
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         dc.launch({
           "stopOnEntry": false,
           "target": {
@@ -182,7 +182,7 @@ describe('debug adapter', function () {
           await Promise.all([
             dc.assertOutput('stderr', "My exception message", 3000),
             dc.waitForEvent('terminated', 2000),
-          ])
+          ]).catch(reject)
           resolve("Finished")
         })
         dc.configurationDoneRequest()
@@ -190,7 +190,7 @@ describe('debug adapter', function () {
     })
 
     it('finishing without errors', function (){
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         dc.launch({
           "stopOnEntry": false,
           "target": {
@@ -201,9 +201,9 @@ describe('debug adapter', function () {
           },
         }).then(async () => {
           await Promise.all([
-            dc.assertOutput('stdout', "Finished executing without errors", 1000),
-            dc.waitForEvent('terminated', 1000),
-          ])
+            dc.assertOutput('stdout', "Finished executing without errors", 3000),
+            dc.waitForEvent('terminated', 2000),
+          ]).catch(reject)
           resolve("Finished")
         })
         dc.configurationDoneRequest()

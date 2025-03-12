@@ -5,7 +5,7 @@
   "author": "Uqbar Foundation",
   "license": "LGPL-3.0",
   "publisher": "uqbar",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/uqbar-project/wollok-lsp-ide.git"
@@ -378,12 +378,13 @@
   },
   "scripts": {
     "check-types": "tsc --noEmit",
-    "compile": "rimraf ./out && yarn check-types && yarn node esbuild.js",
+    "compile": "rimraf ./out && yarn check-types && yarn copy-lang && yarn node esbuild.js",
     "compile-tests": "rimraf ./out && tsc --outDir out",
     "watch": "run-p -l watch:esbuild watch:tsc",
     "watch:esbuild": "yarn node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "watch:compile-tests": "rimraf ./out && tsc --outDir out --watch",
+    "copy-lang": "cp -R ./node_modules/wollok-ts/dist/wre/wollok ./",
     "lint": "yarn workspaces foreach -A run eslint . --fix",
     "lint:fix": "cd client && eslint . --fix && cd ../server && eslint . --fix && cd ..",
     "test": "yarn compile-tests && yarn lint && yarn test:e2e && yarn test:unit",

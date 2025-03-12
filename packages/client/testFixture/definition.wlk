@@ -18,3 +18,5 @@ object gandalf {
 
 	method poder() = pepita_2.vida() + 1
 }
+
+const a = assert

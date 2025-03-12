@@ -14,12 +14,16 @@ import {
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node'
 import { Environment } from 'wollok-ts'
+import { LANG_PATH_REQUEST } from '../../shared/definitions'
+import { completions } from './functionalities/autocomplete/autocomplete'
+import { codeActions } from './functionalities/code-actions'
 import { codeLenses } from './functionalities/code-lens'
 import { definition } from './functionalities/definition'
 import { formatDocument, formatRange } from './functionalities/formatter'
 import { typeDescriptionOnHover } from './functionalities/hover'
 import { references } from './functionalities/references'
 import { rename, requestIsRenamable as isRenamable } from './functionalities/rename'
+import { ERROR_MISSING_WORKSPACE_FOLDER, getLSPMessage, SERVER_PROCESSING_REQUEST } from './functionalities/reporter'
 import { documentSymbols, workspaceSymbols } from './functionalities/symbols'
 import {
   validateTextDocument,
@@ -27,11 +31,8 @@ import {
 import { initializeSettings, WollokLSPSettings } from './settings'
 import { logger } from './utils/logger'
 import { ProgressReporter } from './utils/progress-reporter'
-import { setWorkspaceUri, WORKSPACE_URI } from './utils/text-documents'
+import { setWollokLangPath, setWorkspaceUri, WORKSPACE_URI } from './utils/text-documents'
 import { EnvironmentProvider } from './utils/vm/environment'
-import { completions } from './functionalities/autocomplete/autocomplete'
-import { ERROR_MISSING_WORKSPACE_FOLDER, getLSPMessage, SERVER_PROCESSING_REQUEST } from './functionalities/reporter'
-import { codeActions } from './functionalities/code-actions'
 
 export type ClientConfigurations = {
   formatter: { abbreviateAssignments: boolean, maxWidth: number }
@@ -112,6 +113,11 @@ connection.onInitialized(() => {
   }
 })
 
+connection.onRequest(LANG_PATH_REQUEST, (path: string) => {
+  connection.console.log('Wollok language path event received: ' +  path)
+  setWollokLangPath(path)
+})
+
 // Cache the settings of all open documents
 const documentSettings: Map<string, Thenable<WollokLSPSettings>> = new Map()
 
@@ -142,9 +148,9 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
       deferredChanges.push(change) // Will be executed when workspace folder arrive
       throw new Error(getLSPMessage(ERROR_MISSING_WORKSPACE_FOLDER))
     }
-
+    if(!change.document.uri.includes(WORKSPACE_URI)) return
     environmentProvider.updateEnvironmentWith(change.document)
-    validateTextDocument(connection, documents.all())(change.document)(
+    validateTextDocument(connection, lintableOpenDocuments())(change.document)(
       environmentProvider.$environment.getValue()!
     )
   } catch (e) {
@@ -168,7 +174,7 @@ connection.onRequest((change) => {
 
     if (change.startsWith('STRONG_FILES_CHANGED')) { // A file was deleted, renamed, moved, etc.
       environmentProvider.resetEnvironment()
-      environmentProvider.updateEnvironmentWith(...documents.all())
+      environmentProvider.updateEnvironmentWith(...lintableOpenDocuments())
 
       // Remove zombies problems
       const files = change.split(':').pop()
@@ -190,9 +196,10 @@ connection.onRequest((change) => {
 config.subscribe(() => {
   try {
     // Revalidate all open text documents
-    environmentProvider.updateEnvironmentWith(...documents.all())
-    documents.all().forEach(doc =>
-      validateTextDocument(connection, documents.all())(doc)(environmentProvider.$environment.getValue()!)
+    const docs = lintableOpenDocuments()
+    environmentProvider.updateEnvironmentWith(...docs)
+    docs.forEach(doc =>
+      validateTextDocument(connection, docs)(doc)(environmentProvider.$environment.getValue()!)
     )
   } catch (error) {
     handleError('Updating environment failed', error)
@@ -277,4 +284,8 @@ function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: E
       })
     })
   }
+}
+
+function lintableOpenDocuments(): TextDocument[] {
+  return documents.all().filter(document => document.uri.includes(WORKSPACE_URI))
 }
