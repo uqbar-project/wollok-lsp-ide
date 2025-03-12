@@ -9007,21 +9007,21 @@ __metadata:
     source-map-support: "npm:^0.5.21"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^4.9.5"
-    wollok-ts: ../wollok-ts
+    wollok-ts: "npm:4.2.1"
     yarn-run-all: "npm:^3.1.1"
   languageName: unknown
   linkType: soft
 
-"wollok-ts@file:../wollok-ts::locator=wollok-lsp-ide%40workspace%3A.":
+"wollok-ts@npm:4.2.1":
   version: 4.2.1
-  resolution: "wollok-ts@file:../wollok-ts#../wollok-ts::hash=50fd94&locator=wollok-lsp-ide%40workspace%3A."
+  resolution: "wollok-ts@npm:4.2.1"
   dependencies:
     "@types/parsimmon": "npm:^1.10.8"
     parsimmon: "npm:^1.18.1"
     prettier-printer: "npm:^1.1.4"
     unraw: "npm:^3.0.0"
     uuid: "npm:^9.0.1"
-  checksum: 10c0/50512b6c4ad75f5c19f0d031e55a2a1957f51eb338ad9f8d08f1f1781b2938d4d93a170761b1f07425087ef74b4be7a6be08b366230ec25862f39d238d9aa2f2
+  checksum: 10c0/a4613614030fde0a395f56fb8fa89d686c98c2f3d984669e62702f1c4ca8b129de02db49980653ed24b78a537ea942a71baa5b9a3c25591c6ca1ef6c27a4661a
   languageName: node
   linkType: hard
 
