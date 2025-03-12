@@ -32,6 +32,13 @@ packages
 .pnp.*
 .yarnrc.yml
 node_modules
+server
+client
+
+# coverage
+coverage-e2e
+coverage-unit
+codecov.yml
 
 # wollok logging
 **/wollok.log

@@ -396,7 +396,7 @@
     "cover:e2e": "vscode-test --coverage --coverage-repoter=text --coverage-reporter=json --coverage-output=coverage-e2e",
     "cover:unit": "c8 --reporter=json --report-dir=coverage-unit yarn test:unit",
     "bundle": "yarn compile -- --production",
-    "package": "yarn bundle && vsce package --no-dependencies",
+    "package": "vsce package --no-dependencies",
     "vscode:prepublish": "yarn bundle",
     "prepare": "husky install",
     "lint-staged": "lint-staged"

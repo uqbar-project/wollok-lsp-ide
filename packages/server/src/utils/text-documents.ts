@@ -114,7 +114,7 @@ export const packageFromURI = (uri: string, environment: Environment): Package |
 
   // When the URI is a reference to a file in the workspace
   // if not the sanitization just wont have any effect
-  sanitizedPath = relativeFilePath(uri)
+  sanitizedPath = relativeFilePath(sanitizedPath)
 
   // TODO: Use projectFQN ?
   return environment.descendants.find(node => node.is(Package) && node.fileName === sanitizedPath) as Package | undefined
