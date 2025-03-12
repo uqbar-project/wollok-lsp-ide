@@ -1,6 +1,11 @@
 # Changelog
 
 ## v0.4.2
+- Quick fixes 🧑‍🏭
+- Go to definition for base code references 🔍
+- Update Wollok-TS 4.2.1 ⬆️
+
+## v0.4.2
 - HOT-FIX Run program lens 🚧
 
 ## v0.4.1
