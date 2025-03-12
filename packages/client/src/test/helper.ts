@@ -13,6 +13,7 @@ import {
   window,
   workspace,
 } from 'vscode'
+import { wollokLSPExtensionId, wollokLSPExtensionPublisher } from '../../../shared/definitions'
 
 export let document: TextDocument
 export let editor: TextEditor
@@ -24,7 +25,7 @@ export let platformEol: string
  */
 export async function activate(docUri: Uri, timeToWait = 2000): Promise<void> {
   // The extensionId is `publisher.name` from package.json
-  const wollokExtension = extensions.getExtension('uqbar.wollok-lsp-ide')!
+  const wollokExtension = extensions.getExtension(`${wollokLSPExtensionPublisher}.${wollokLSPExtensionId}`)!
   await wollokExtension.activate()
   try {
     document = await workspace.openTextDocument(docUri)
