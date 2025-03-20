@@ -110,11 +110,11 @@ export const packageFromURI = (uri: string, environment: Environment): Package |
   // When the URI is a reference to a native wollok file
   // we simply just need to get the last part so it matches
   // the synthetic package name
-  let sanitizedPath = uri.replace(`file://${WOLLOK_LANG_PATH}`, 'wollok')
+  let sanitizedPath = decodeURIComponent(uri).replace(`file://${WOLLOK_LANG_PATH}`, 'wollok')
 
   // When the URI is a reference to a file in the workspace
   // if not the sanitization just wont have any effect
-  sanitizedPath = relativeFilePath(sanitizedPath)
+    sanitizedPath = relativeFilePath(sanitizedPath)
 
   // TODO: Use projectFQN ?
   return environment.descendants.find(node => node.is(Package) && node.fileName === sanitizedPath) as Package | undefined
@@ -158,7 +158,7 @@ export const setWorkspaceUri = (uri: string): void => {
 }
 
 export const relativeFilePath = (absoluteURI: string): string => {
-  return absoluteURI.replaceAll(WORKSPACE_URI + '/', '')
+  return decodeURIComponent(absoluteURI).replaceAll(WORKSPACE_URI + '/', '')
 }
 
 export const uriFromRelativeFilePath = (relativeURI: string): string => {

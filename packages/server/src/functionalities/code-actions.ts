@@ -13,7 +13,7 @@ export const codeActions = (environment: Environment) => (params: CodeActionPara
     const fixer = fixers[problem.code]
     if (!fixer) return []
     const diagnostics = matchDiagnostics(problem, params.context.diagnostics)
-    return fixer(problem.node).map(action => ({ ...action, diagnostics: diagnostics }))
+    return fixer(problem.node).map(action => ({ ...action, diagnostics }))
   })
 }
 

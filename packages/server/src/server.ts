@@ -14,7 +14,7 @@ import {
   TextDocumentSyncKind,
 } from 'vscode-languageserver/node'
 import { Environment } from 'wollok-ts'
-import { LANG_PATH_REQUEST } from '../../shared/definitions'
+import { LANG_PATH_REQUEST, STRONG_FILES_CHANGED_REQUEST, WORKSPACE_URI_REQUEST } from '../../shared/definitions'
 import { completions } from './functionalities/autocomplete/autocomplete'
 import { codeActions } from './functionalities/code-actions'
 import { codeLenses } from './functionalities/code-lens'
@@ -118,6 +118,34 @@ connection.onRequest(LANG_PATH_REQUEST, (path: string) => {
   setWollokLangPath(path)
 })
 
+connection.onRequest(WORKSPACE_URI_REQUEST, (uri: string) => {
+  try {
+    setWorkspaceUri(decodeURIComponent(uri))
+    deferredChanges.forEach(rebuildTextDocument)
+    deferredChanges.length = 0
+  } catch (error) {
+    handleError(`${WORKSPACE_URI_REQUEST} request failed`, error)
+  }
+})
+
+connection.onRequest(STRONG_FILES_CHANGED_REQUEST, (filePaths: string[]) => {
+  try {
+    environmentProvider.resetEnvironment()
+    environmentProvider.updateEnvironmentWith(...lintableOpenDocuments())
+  
+    // Remove zombies problems
+    setTimeout(() => {
+      filePaths.forEach(uri => {
+        logger.info(`Removing diagnostics from ${uri}`)
+        connection.sendDiagnostics({ uri, diagnostics: [] })
+      })
+    }, 100)  
+  } catch (error) {
+    handleError(`${STRONG_FILES_CHANGED_REQUEST} request failed`, error)
+  }
+})
+
+
 // Cache the settings of all open documents
 const documentSettings: Map<string, Thenable<WollokLSPSettings>> = new Map()
 
@@ -148,7 +176,7 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
       deferredChanges.push(change) // Will be executed when workspace folder arrive
       throw new Error(getLSPMessage(ERROR_MISSING_WORKSPACE_FOLDER))
     }
-    if(!change.document.uri.includes(WORKSPACE_URI)) return
+    if(!decodeURIComponent(change.document.uri).includes(WORKSPACE_URI)) return
     environmentProvider.updateEnvironmentWith(change.document)
     validateTextDocument(connection, lintableOpenDocuments())(change.document)(
       environmentProvider.$environment.getValue()!
@@ -162,36 +190,6 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(rebuildTextDocument)
 
-// Custom requests from client
-connection.onRequest((change) => {
-  logger.info(`onRequest - ${change}`)
-  try {
-    if (change.startsWith('WORKSPACE_URI')) { // WORKSPACE_URI:[uri]
-      setWorkspaceUri('file:' + change.split(':').pop())
-      deferredChanges.forEach(rebuildTextDocument)
-      deferredChanges.length = 0
-    }
-
-    if (change.startsWith('STRONG_FILES_CHANGED')) { // A file was deleted, renamed, moved, etc.
-      environmentProvider.resetEnvironment()
-      environmentProvider.updateEnvironmentWith(...lintableOpenDocuments())
-
-      // Remove zombies problems
-      const files = change.split(':').pop()
-      if (files) {
-        const uris = files.split(',')
-        setTimeout(() => {
-          uris.forEach(uri => {
-            logger.info(`Removing diagnostics from ${uri}`)
-            connection.sendDiagnostics({ uri, diagnostics: [] })
-          })
-        }, 100)
-      }
-    }
-  } catch (error) {
-    handleError('onRequest change failed', error)
-  }
-})
 
 config.subscribe(() => {
   try {
@@ -287,5 +285,5 @@ function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: E
 }
 
 function lintableOpenDocuments(): TextDocument[] {
-  return documents.all().filter(document => document.uri.includes(WORKSPACE_URI))
+  return documents.all().filter(document => decodeURIComponent(document.uri).includes(WORKSPACE_URI))
 }
