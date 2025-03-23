@@ -113,36 +113,28 @@ connection.onInitialized(() => {
   }
 })
 
-connection.onRequest(LANG_PATH_REQUEST, (path: string) => {
+safeCustomRequest(LANG_PATH_REQUEST, (path: string) => {
   connection.console.log('Wollok language path event received: ' +  path)
   setWollokLangPath(path)
 })
 
-connection.onRequest(WORKSPACE_URI_REQUEST, (uri: string) => {
-  try {
+safeCustomRequest(WORKSPACE_URI_REQUEST, (uri: string) => {
     setWorkspaceUri(decodeURIComponent(uri))
     deferredChanges.forEach(rebuildTextDocument)
     deferredChanges.length = 0
-  } catch (error) {
-    handleError(`${WORKSPACE_URI_REQUEST} request failed`, error)
-  }
 })
 
-connection.onRequest(STRONG_FILES_CHANGED_REQUEST, (filePaths: string[]) => {
-  try {
+safeCustomRequest(STRONG_FILES_CHANGED_REQUEST, (filePaths: string[]) => {
     environmentProvider.resetEnvironment()
     environmentProvider.updateEnvironmentWith(...lintableOpenDocuments())
-  
+
     // Remove zombies problems
     setTimeout(() => {
       filePaths.forEach(uri => {
         logger.info(`Removing diagnostics from ${uri}`)
         connection.sendDiagnostics({ uri, diagnostics: [] })
       })
-    }, 100)  
-  } catch (error) {
-    handleError(`${STRONG_FILES_CHANGED_REQUEST} request failed`, error)
-  }
+    }, 100)
 })
 
 
@@ -286,4 +278,12 @@ function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: E
 
 function lintableOpenDocuments(): TextDocument[] {
   return documents.all().filter(document => decodeURIComponent(document.uri).includes(WORKSPACE_URI))
+}
+
+function safeCustomRequest(requestCode: string, requestHandler: (...params: any[]) => void): void {
+  try {
+    connection.onRequest(requestCode, requestHandler)
+  } catch (error) {
+    handleError(`${requestCode} request failed`, error)
+  }
 }

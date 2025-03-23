@@ -13,16 +13,17 @@ export const setWollokLangPath = (path: string): void => {
 
 // TODO: Refactor
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
+  const sanitezedURI = decodeURIComponent(uri)
   if (!node.sourceFileName) return false
   if (node.kind === 'Package') {
-    return uri.includes(node.sourceFileName)
+    return sanitezedURI.includes(node.sourceFileName)
   }
   if (!node.sourceMap) return false
 
   const startPosition = toVSCPosition(node.sourceMap.start)
   const endPosition = toVSCPosition(node.sourceMap.end)
 
-  return uri.includes(node.sourceFileName!)
+  return sanitezedURI.includes(node.sourceFileName!)
     && node.sourceMap
     && between(position, startPosition, endPosition)
 }
@@ -106,6 +107,9 @@ export function trimIn(range: Range, textDocument: TextDocument): Range {
   )
 }
 
+/**
+ * @param uri can be unsanitized
+ */
 export const packageFromURI = (uri: string, environment: Environment): Package | undefined => {
   // When the URI is a reference to a native wollok file
   // we simply just need to get the last part so it matches
@@ -114,15 +118,11 @@ export const packageFromURI = (uri: string, environment: Environment): Package |
 
   // When the URI is a reference to a file in the workspace
   // if not the sanitization just wont have any effect
-    sanitizedPath = relativeFilePath(sanitizedPath)
+  sanitizedPath = relativeFilePath(sanitizedPath)
 
   // TODO: Use projectFQN ?
   return environment.descendants.find(node => node.is(Package) && node.fileName === sanitizedPath) as Package | undefined
 }
-
-export const packageToURI = (pkg: Package): string => fileNameToURI(pkg.fileName!)
-
-export const fileNameToURI = (fileName: string): string => `file:///${fileName}`
 
 export const getWollokFileExtension = (uri: string): typeof WOLLOK_FILE_EXTENSION | typeof PROGRAM_FILE_EXTENSION | typeof TEST_FILE_EXTENSION => {
   const extension = uri.split('.').pop()
@@ -152,6 +152,10 @@ export function cursorNode(
 /** URI */
 
 export let WORKSPACE_URI = ''
+
+export const packageToURI = (pkg: Package): string => fileNameToURI(pkg.fileName!)
+
+export const fileNameToURI = (fileName: string): string => `file:///${fileName}`
 
 export const setWorkspaceUri = (uri: string): void => {
   WORKSPACE_URI = uri
