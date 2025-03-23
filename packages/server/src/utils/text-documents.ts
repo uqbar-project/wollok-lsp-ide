@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { Location, Position, Range, TextDocumentIdentifier, TextDocumentPositionParams } from 'vscode-languageserver'
+import { Location, Position, Range, TextDocumentIdentifier, TextDocumentPositionParams, TextDocuments } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, FileContent, Node, PROGRAM_FILE_EXTENSION, Package, SourceIndex, SourceMap, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
 
@@ -184,4 +184,12 @@ export const findPackageJSON = (uri: string): string => {
     baseUri = baseUri.slice(0, lastIndex)
   }
   return baseUri
+}
+
+/**
+ * @param uri a decoded URI
+ * @param documents a TextDocuments instance with possibly unsanitized URIs 
+ */
+export const getDocumentByURI = (uri: string, documents: TextDocuments<TextDocument>): TextDocument | undefined => {
+  return documents.all().find(doc => decodeURIComponent(doc.uri) === uri)
 }

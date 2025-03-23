@@ -1,7 +1,7 @@
 import { RenameParams, TextDocuments, TextEdit, WorkspaceEdit } from 'vscode-languageserver'
 import { TextDocument } from 'vscode-languageserver-textdocument'
 import { Environment, Field, Node, Parameter, Reference, targettingAt, Variable } from 'wollok-ts'
-import { cursorNode, uriFromRelativeFilePath, toVSCRange } from '../utils/text-documents'
+import { cursorNode, uriFromRelativeFilePath, toVSCRange, getDocumentByURI } from '../utils/text-documents'
 
 export const rename = (documents: TextDocuments<TextDocument>) => (environment: Environment) => (params: RenameParams): WorkspaceEdit | null => {
   // cast cursor node as it's already validated in prepareRename request
@@ -50,7 +50,7 @@ function renameNode(node: Renamable, newName: string, environment: Environment, 
       uri,
       edit: {
         range,
-        newText: documents.get(uri)!.getText(range).replaceAll(hit.name!, newName),
+        newText: getDocumentByURI(uri, documents)!.getText(range).replaceAll(hit.name!, newName),
       },
     }
   })
