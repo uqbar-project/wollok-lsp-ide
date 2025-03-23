@@ -188,7 +188,7 @@ export const findPackageJSON = (uri: string): string => {
 
 /**
  * @param uri a decoded URI
- * @param documents a TextDocuments instance with possibly unsanitized URIs 
+ * @param documents a TextDocuments instance with possibly unsanitized URIs
  */
 export const getDocumentByURI = (uri: string, documents: TextDocuments<TextDocument>): TextDocument | undefined => {
   return documents.all().find(doc => decodeURIComponent(doc.uri) === uri)

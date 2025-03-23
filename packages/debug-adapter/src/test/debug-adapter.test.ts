@@ -168,48 +168,40 @@ describe('debug adapter', function () {
   })
 
   describe('finished execution', function (){
-    it('finishing with errors', function (){
-      return new Promise((resolve, reject) => {
-        dc.launch({
-          "stopOnEntry": false,
-          "target": {
-            "file": TEST_FILE,
-            type: "test",
-            "describe": "some tests",
-            "test": "breaks",
-          },
-        }).then(async () => {
-          await Promise.all([
-            dc.assertOutput('stderr', "My exception message", 3000),
-            dc.waitForEvent('terminated', 2000),
-          ]).catch(reject)
-          resolve("Finished")
-        })
-        dc.configurationDoneRequest()
+    it('finishing with errors', async function (){
+      setTimeout(() => dc.configurationDoneRequest(), 100)
+      await dc.launch({
+        "stopOnEntry": false,
+        "target": {
+          "file": TEST_FILE,
+          type: "test",
+          "describe": "some tests",
+          "test": "breaks",
+        },
       })
+
+      await Promise.all([
+          dc.assertOutput('stderr', "My exception message", 3000),
+          dc.waitForEvent('terminated', 2000),
+      ])
     })
 
-    it('finishing without errors', function (){
-      return new Promise((resolve, reject) => {
-        dc.launch({
-          "stopOnEntry": false,
-          "target": {
-            "file": TEST_FILE,
-            type: "test",
-            "describe": "some tests",
-            "test": "does not break",
-          },
-        }).then(async () => {
-          await Promise.all([
-            dc.assertOutput('stdout', "Finished executing without errors", 3000),
-            dc.waitForEvent('terminated', 2000),
-          ]).catch(reject)
-          resolve("Finished")
-        })
-        dc.configurationDoneRequest()
+    it('finishing without errors', async function (){
+      setTimeout(() => dc.configurationDoneRequest(), 100)
+      await dc.launch({
+      "stopOnEntry": false,
+      "target": {
+          "file": TEST_FILE,
+          type: "test",
+          "describe": "some tests",
+          "test": "does not break",
+        },
       })
+      await Promise.all([
+        dc.assertOutput('stdout', "Finished executing without errors", 3000),
+        dc.waitForEvent('terminated', 2000),
+      ])
     })
-
   })
 })
 
