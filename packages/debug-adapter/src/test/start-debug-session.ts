@@ -19,7 +19,7 @@ const mockWorkspace = {
   openTextDocument: (path: {fsPath: string}, _uri: { fsPath: string }) => Promise.resolve({ getText: () => fs.readFileSync(path.fsPath).toString('utf-8'), uri: { fsPath: path.fsPath } }),
 }
 
-const session = new WollokDebugSession(mockWorkspace as any)
+const session = new WollokDebugSession(mockWorkspace as any, '/some/path/to/wollok')
 process.on('SIGTERM', () => {
   session.shutdown()
 })
