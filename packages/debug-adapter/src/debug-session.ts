@@ -19,7 +19,7 @@ export class WollokDebugSession extends DebugSession {
 
   protected positionConverter: WollokPositionConverter
 
-  constructor(protected workspace: typeof vscode.workspace){
+  constructor(protected workspace: typeof vscode.workspace, private readonly wollokLangPath: string){
     super()
     this.configurationDone = new Promise<void>(resolve => {
       this.notifyConfigurationDone = resolve
@@ -298,11 +298,21 @@ export class WollokDebugSession extends DebugSession {
   }
 
   private sourceFromNode<T extends Node>(node: T): Source {
+    if(node.parentPackage.isBaseWollokCode){
+      return new Source(node.label, toClientPath(node.sourceFileName.replace('wollok',this.wollokLangPath)))
+    }
     return new Source(node.sourceFileName.split('/').pop()!, toClientPath(node.sourceFileName))
   }
 
   private packageFromSource(source: Source): Package {
-    const pkg = this.interpreter.evaluation.environment.descendants.find(node => node.is(Package) && toWollokPath(source.path) === node.sourceFileName) as Package | undefined
+    const sourcePath = toClientPath(source.path)
+    let pkg: Package|undefined
+    if(sourcePath.includes(this.wollokLangPath)) {
+      pkg = this.interpreter.evaluation.environment.getNodeOrUndefinedByFQN<Package>('wollok.'+sourcePath.split('/').pop().split('.')[0]!)
+    } else {
+      pkg = this.interpreter.evaluation.environment.descendants.find(node => node.is(Package) && sourcePath === node.sourceFileName) as Package | undefined
+    }
+
     if(!pkg) {
       throw new Error(`Could not find package for source ${source.path}`)
     }
