@@ -102,7 +102,7 @@ export class WollokDebugSession extends DebugSession {
     const breakpointsPackage = this.packageFromSource(args.source as Source)
 
     // Remove old breakpoints from the requested file
-    const breakpointsToRemove = []
+    const breakpointsToRemove: Node[] = []
     this.executionDirector.breakpoints.forEach(breakpointedNode => {
       if(breakpointedNode.parentPackage.id === breakpointsPackage.id) {
         breakpointsToRemove.push(breakpointedNode)
@@ -299,13 +299,13 @@ export class WollokDebugSession extends DebugSession {
 
   private sourceFromNode<T extends Node>(node: T): Source {
     if(node.parentPackage.isBaseWollokCode){
-      return new Source(node.label, toClientPath(node.sourceFileName.replace('wollok',this.wollokLangPath)))
+      return new Source(node.label, toClientPath(node.sourceFileName.replace('wollok', this.wollokLangPath)))
     }
     return new Source(node.sourceFileName.split('/').pop()!, toClientPath(node.sourceFileName))
   }
 
   private packageFromSource(source: Source): Package {
-    const sourcePath = toClientPath(source.path)
+    const sourcePath = toWollokPath(source.path)
     let pkg: Package|undefined
     if(sourcePath.includes(this.wollokLangPath)) {
       pkg = this.interpreter.evaluation.environment.getNodeOrUndefinedByFQN<Package>('wollok.'+sourcePath.split('/').pop().split('.')[0]!)
