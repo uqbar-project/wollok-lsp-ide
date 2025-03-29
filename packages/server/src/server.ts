@@ -31,7 +31,7 @@ import {
 import { initializeSettings, WollokLSPSettings } from './settings'
 import { logger } from './utils/logger'
 import { ProgressReporter } from './utils/progress-reporter'
-import { setWollokLangPath, setWorkspaceUri, WORKSPACE_URI } from './utils/text-documents'
+import { isWorkspaceURI, setWollokLangPath, setWorkspaceUri, WORKSPACE_URI } from './utils/text-documents'
 import { EnvironmentProvider } from './utils/vm/environment'
 
 export type ClientConfigurations = {
@@ -168,7 +168,7 @@ const rebuildTextDocument = (change: TextDocumentChangeEvent<TextDocument>) => {
       deferredChanges.push(change) // Will be executed when workspace folder arrive
       throw new Error(getLSPMessage(ERROR_MISSING_WORKSPACE_FOLDER))
     }
-    if(!decodeURIComponent(change.document.uri).includes(WORKSPACE_URI)) return
+    if(!isWorkspaceURI(change.document.uri)) return
     environmentProvider.updateEnvironmentWith(change.document)
     validateTextDocument(connection, lintableOpenDocuments())(change.document)(
       environmentProvider.$environment.getValue()!
@@ -277,7 +277,7 @@ function waitForFirstHandler<Params, Return, PR>(requestHandler: (environment: E
 }
 
 function lintableOpenDocuments(): TextDocument[] {
-  return documents.all().filter(document => decodeURIComponent(document.uri).includes(WORKSPACE_URI))
+  return documents.all().filter(document => isWorkspaceURI(document.uri))
 }
 
 function safeCustomRequest(requestCode: string, requestHandler: (...params: any[]) => void): void {

@@ -193,3 +193,6 @@ export const findPackageJSON = (uri: string): string => {
 export const getDocumentByURI = (uri: string, documents: TextDocuments<TextDocument>): TextDocument | undefined => {
   return documents.all().find(doc => decodeURIComponent(doc.uri) === uri)
 }
+
+export const isWorkspaceURI = (uri: string): boolean =>
+  decodeURIComponent(uri).includes(WORKSPACE_URI)
