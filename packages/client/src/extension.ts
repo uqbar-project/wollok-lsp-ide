@@ -24,7 +24,7 @@ import {
 import { WollokDebugAdapterFactory, WollokDebugConfigurationProvider } from '../../debug-adapter/src/index'
 import { subscribeWollokCommands } from './commands'
 import { getLSPMessage } from './messages'
-import { LANG_PATH_REQUEST, wollokLSPExtensionId, wollokLSPExtensionPublisher } from '../../shared/definitions'
+import { LANG_PATH_REQUEST, STRONG_FILES_CHANGED_REQUEST, wollokLSPExtensionId, wollokLSPExtensionPublisher, WORKSPACE_URI_REQUEST } from '../../shared/definitions'
 import { allWollokFiles } from './utils'
 import { legend, provider, selector } from './highlighter'
 
@@ -97,8 +97,8 @@ export function activate(context: ExtensionContext): void {
 
   type CriticalFileChangeEvent = FileDeleteEvent | FileRenameEvent
   const revalidateWorskpace = (_event: CriticalFileChangeEvent) => {
-    const pathForChange = (file: CriticalFileChangeEvent['files'][number]) => 'oldUri' in file ? file.oldUri.fsPath : file.fsPath
-    return client.sendRequest(`STRONG_FILES_CHANGED:${_event.files.map(pathForChange).join(',')}`).then(validateWorkspace)
+    const filePathsForChange = (file: CriticalFileChangeEvent['files'][number]) => 'oldUri' in file ? file.oldUri.path : file.path
+    return client.sendRequest(STRONG_FILES_CHANGED_REQUEST, _event.files.map(filePathsForChange)).then(validateWorkspace)
   }
 
   workspace.onDidDeleteFiles(revalidateWorskpace)
@@ -115,7 +115,8 @@ export function deactivate(): Thenable<void> | undefined {
 async function validateWorkspace() {
   const uris = await allWollokFiles()
   // ToDo check workspaceFolders for undefined and length
-  await client.sendRequest(`WORKSPACE_URI:${workspace.workspaceFolders![0].uri}`)
+  const uri = workspace.workspaceFolders![0].uri
+  await client.sendRequest(WORKSPACE_URI_REQUEST, uri.toString())
   for (const uri of uris) {
     // Force 'change' on document for server tracking
     const textDoc = await workspace.openTextDocument(uri)

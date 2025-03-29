@@ -5,6 +5,8 @@ export const wollokLSPExtensionPublisher = 'uqbar'
 export const DEFAULT_REPL_PORT = 3000
 export const DEFAULT_GAME_PORT = 4200
 export const LANG_PATH_REQUEST = 'SET_LANG_PATH'
+export const STRONG_FILES_CHANGED_REQUEST = 'STRONG_FILES_CHANGED'
+export const WORKSPACE_URI_REQUEST = 'WORKSPACE_URI'
 
 
 // Commands

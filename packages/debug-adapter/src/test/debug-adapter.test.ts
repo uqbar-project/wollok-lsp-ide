@@ -2,6 +2,7 @@ import * as path from 'path'
 import { DebugClient } from '@vscode/debugadapter-testsupport'
 import { DebugProtocol } from '@vscode/debugprotocol'
 import { assert } from 'chai'
+import { continueAfter } from '../../../shared/test/test-utils'
 const DEBUG_ADAPTER = path.resolve(__dirname, 'start-debug-session.js')
 const FIXTURES_ROOT = path.resolve(__dirname, '../../../../packages/debug-adapter/src/test/fixtures')
 const PROGRAM = path.resolve(FIXTURES_ROOT, 'aProgram.wpgm')
@@ -168,48 +169,52 @@ describe('debug adapter', function () {
   })
 
   describe('finished execution', function (){
-    it('finishing with errors', function (){
-      return new Promise((resolve, reject) => {
-        dc.launch({
-          "stopOnEntry": false,
-          "target": {
-            "file": TEST_FILE,
-            type: "test",
-            "describe": "some tests",
-            "test": "breaks",
-          },
-        }).then(async () => {
-          await Promise.all([
-            dc.assertOutput('stderr', "My exception message", 3000),
-            dc.waitForEvent('terminated', 2000),
-          ]).catch(reject)
-          resolve("Finished")
-        })
+    let readyToSendConfigurationDoneRequest: Promise<void>
+    this.beforeEach(() => {
+      readyToSendConfigurationDoneRequest = continueAfter(() => dc['_supportsConfigurationDoneRequest'])
+    })
+    it('finishes with errors', async function (){
+      const lauched = dc.launch({
+        "stopOnEntry": false,
+        "target": {
+          "file": TEST_FILE,
+          type: "test",
+          "describe": "some tests",
+          "test": "breaks",
+        },
+      })
+
+      readyToSendConfigurationDoneRequest.then(() => {
         dc.configurationDoneRequest()
       })
+
+      await lauched
+      await Promise.all([
+          dc.assertOutput('stderr', "My exception message", 3000),
+          dc.waitForEvent('terminated', 2000),
+      ])
     })
 
-    it('finishing without errors', function (){
-      return new Promise((resolve, reject) => {
-        dc.launch({
-          "stopOnEntry": false,
-          "target": {
+    it('finishes without errors', async function (){
+      const lauched = dc.launch({
+        "stopOnEntry": false,
+        "target": {
             "file": TEST_FILE,
             type: "test",
             "describe": "some tests",
             "test": "does not break",
           },
-        }).then(async () => {
-          await Promise.all([
-            dc.assertOutput('stdout', "Finished executing without errors", 3000),
-            dc.waitForEvent('terminated', 2000),
-          ]).catch(reject)
-          resolve("Finished")
-        })
+      })
+      readyToSendConfigurationDoneRequest.then(() => {
         dc.configurationDoneRequest()
       })
-    })
 
+      await lauched
+      await Promise.all([
+        dc.assertOutput('stdout', "Finished executing without errors", 3000),
+        dc.waitForEvent('terminated', 2000),
+      ])
+    })
   })
 })
 
