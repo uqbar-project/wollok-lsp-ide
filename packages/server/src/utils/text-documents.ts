@@ -13,17 +13,17 @@ export const setWollokLangPath = (path: string): void => {
 
 // TODO: Refactor
 const include = (node: Node, { position, textDocument: { uri } }: TextDocumentPositionParams) => {
-  const sanitezedURI = decodeURIComponent(uri)
+  const sanitizedURI = decodeURIComponent(uri)
   if (!node.sourceFileName) return false
   if (node.kind === 'Package') {
-    return sanitezedURI.includes(node.sourceFileName)
+    return sanitizedURI.includes(node.sourceFileName)
   }
   if (!node.sourceMap) return false
 
   const startPosition = toVSCPosition(node.sourceMap.start)
   const endPosition = toVSCPosition(node.sourceMap.end)
 
-  return sanitezedURI.includes(node.sourceFileName!)
+  return sanitizedURI.includes(node.sourceFileName!)
     && node.sourceMap
     && between(position, startPosition, endPosition)
 }
