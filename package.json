@@ -374,6 +374,17 @@
         "id": "native",
         "description": "símbolo nativo de wollok"
       }
+    ],
+    "notebooks": [
+      {
+        "type": "wollok-notebook",
+        "displayName": "Wollok Notebook",
+        "selector": [
+            {
+                "filenamePattern": "*.wlkn"
+            }
+        ]
+      }
     ]
   },
   "scripts": {
