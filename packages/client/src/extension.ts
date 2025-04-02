@@ -27,6 +27,7 @@ import { getLSPMessage } from './messages'
 import { LANG_PATH_REQUEST, STRONG_FILES_CHANGED_REQUEST, wollokLSPExtensionId, wollokLSPExtensionPublisher, WORKSPACE_URI_REQUEST } from '../../shared/definitions'
 import { allWollokFiles } from './utils'
 import { legend, provider, selector } from './highlighter'
+import { WollokNotebookSerializer } from './notebook'
 
 let client: LanguageClient
 
@@ -69,6 +70,9 @@ export function activate(context: ExtensionContext): void {
   const debuggerFactory = new WollokDebugAdapterFactory(context, vscode.workspace)
   context.subscriptions.push(vscode.debug.registerDebugConfigurationProvider('wollok', new WollokDebugConfigurationProvider()))
 	context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('wollok', debuggerFactory))
+  context.subscriptions.push(
+    vscode.workspace.registerNotebookSerializer('wollok-notebook', new WollokNotebookSerializer())
+  )
 
   // Create the language client and start the client.
   client = new LanguageClient(
