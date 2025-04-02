@@ -286,13 +286,15 @@ const processAnnotationsForNode = (node: Node, textDocument: string[], reference
 
   if (!node.sourceMap) return nullHighlighting
 
-  return node.metadata.reduce((finalResult, annotation) => mergeHighlightingResults(
+  return (node.metadata ?? []).reduce((finalResult, annotation) => mergeHighlightingResults(
     finalResult, processAnnotation(annotation)
   ), nullHighlighting)
 }
 
 const processCode = (node: Node, textDocument: string[]): WollokNodePlotter[] => {
-  return node.reduce((acumResults, node: Node) =>
+  if (!node) return []
+
+  return node?.reduce((acumResults, node: Node) =>
   {
     const nodeResults = mergeHighlightingResults(processNode(node, textDocument, acumResults.references), processAnnotationsForNode(node, textDocument, acumResults.references))
     return mergeHighlightingResults(acumResults, nodeResults)
