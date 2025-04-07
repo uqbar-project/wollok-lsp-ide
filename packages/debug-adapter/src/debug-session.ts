@@ -99,7 +99,21 @@ export class WollokDebugSession extends DebugSession {
   }
 
   protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments, _request?: DebugProtocol.Request): void {
-    const breakpointsPackage = this.packageFromSource(args.source as Source)
+    let breakpointsPackage: Package
+    try {
+      breakpointsPackage = this.packageFromSource(args.source as Source)
+    }catch(_error) {
+      // response.body.breakpoints = []
+      response.body.breakpoints = args.breakpoints.map(breakpoint => ({
+        verified: false,
+
+        message: 'Could not find package for source',
+        line: breakpoint.line,
+        column: breakpoint.column,
+      }))
+      this.sendResponse(response)
+      return;
+    }
 
     // Remove old breakpoints from the requested file
     const breakpointsToRemove: Node[] = []
@@ -306,7 +320,7 @@ export class WollokDebugSession extends DebugSession {
 
   private packageFromSource(source: Source): Package {
     const sourcePath = toWollokPath(source.path)
-    let pkg: Package|undefined
+    let pkg: Package | undefined
     if(sourcePath.includes(this.wollokLangPath)) {
       pkg = this.interpreter.evaluation.environment.getNodeOrUndefinedByFQN<Package>('wollok.'+sourcePath.split('/').pop().split('.')[0]!)
     } else {
