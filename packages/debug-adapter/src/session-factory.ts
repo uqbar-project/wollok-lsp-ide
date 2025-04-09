@@ -9,6 +9,6 @@ export class WollokDebugAdapterFactory implements DebugAdapterDescriptorFactory 
   createDebugAdapterDescriptor(_session: DebugSession): ProviderResult<DebugAdapterDescriptor> {
 
 
-    return new DebugAdapterInlineImplementation(new WollokDebugSession(this.workspace))
+    return new DebugAdapterInlineImplementation(new WollokDebugSession(this.workspace, this.context.extensionUri.path + '/wollok'))
   }
 }
