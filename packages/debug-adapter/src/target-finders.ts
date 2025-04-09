@@ -1,5 +1,6 @@
-import { Uri } from 'vscode'
 import { Describe, Environment, Node, Package, Program, Test } from 'wollok-ts'
+import { build } from 'urijs'
+import uriToPath = require('file-uri-to-path')
 
 export type LaunchTargetArguments =
   { type: 'test', file: string, test: string, describe?: string } |
@@ -40,18 +41,14 @@ export class FqnTargetFinder extends TargetFinder {
 }
 
 export abstract class FileTargetFinder extends TargetFinder {
-  private uri: Uri
+  private uri: string
   constructor(clientPath: string) {
     super()
-    this.uri = this.getURIFromPath(clientPath)
-  }
-
-  getURIFromPath(path: string): Uri {
-    return Uri.file(path)
+    this.uri = build({ protocol: 'file', path: clientPath })
   }
 
   findTargetOrUndefined(environment: Environment): Target | undefined {
-    const pkg = environment.descendants.find(node => node.is(Package) && this.uri.path === node.sourceFileName) as Package | undefined
+    const pkg = environment.descendants.find(node => node.is(Package) && uriToPath(this.uri) === node.sourceFileName) as Package | undefined
     if(!pkg) return undefined
     return pkg.descendants.find(node => this.isValidTarget(node)) as Target | undefined
   }

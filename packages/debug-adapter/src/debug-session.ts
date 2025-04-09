@@ -1,8 +1,9 @@
 import { DebugSession, InitializedEvent, OutputEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread, Variable } from '@vscode/debugadapter'
 import { DebugProtocol } from '@vscode/debugprotocol'
 import * as vscode from 'vscode'
-import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, interprete, LIST_MODULE, Node, NUMBER_MODULE, Package, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Interpreter } from 'wollok-ts'
+import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, interprete, Interpreter, LIST_MODULE, Node, NUMBER_MODULE, Package, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
 import { LaunchTargetArguments, Target, targetFinder } from './target-finders'
+import { uriPathToFsPath } from './utils/uri'
 import { WollokPositionConverter } from './utils/wollok-position-converter'
 export class WollokDebugSession extends DebugSession {
   protected static readonly THREAD_ID = 1
@@ -110,7 +111,7 @@ export class WollokDebugSession extends DebugSession {
         column: breakpoint.column,
       }))
       this.sendResponse(response)
-      return;
+      return
     }
 
     // Remove old breakpoints from the requested file
@@ -310,15 +311,14 @@ export class WollokDebugSession extends DebugSession {
   }
 
   private sourceFromNode<T extends Node>(node: T): Source {
-    const uri = vscode.Uri.from({scheme: 'file', path: node.sourceFileName})
     if(node.parentPackage.isBaseWollokCode){
       return new Source(node.label, node.sourceFileName.replace('wollok', this.wollokLangPath))
     }
-    return new Source(node.sourceFileName.split('/').pop()!, uri.fsPath)
+    return new Source(node.sourceFileName.split('/').pop()!, uriPathToFsPath(node.sourceFileName))
   }
 
   private packageFromSource(source: Source): Package {
-    const sourcePath = vscode.Uri.file(source.path).path
+    const sourcePath = uriPathToFsPath(source.path)
     let pkg: Package | undefined
     if(sourcePath.includes(this.wollokLangPath)) {
       pkg = this.interpreter.evaluation.environment.getNodeOrUndefinedByFQN<Package>('wollok.'+sourcePath.split('/').pop().split('.')[0]!)
