@@ -3,7 +3,6 @@ import { DebugProtocol } from '@vscode/debugprotocol'
 import * as vscode from 'vscode'
 import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, interprete, LIST_MODULE, Node, NUMBER_MODULE, Package, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Interpreter } from 'wollok-ts'
 import { LaunchTargetArguments, Target, targetFinder } from './target-finders'
-import { toClientPath, toWollokPath } from './utils/path-converters'
 import { WollokPositionConverter } from './utils/wollok-position-converter'
 export class WollokDebugSession extends DebugSession {
   protected static readonly THREAD_ID = 1
@@ -49,7 +48,7 @@ export class WollokDebugSession extends DebugSession {
       const projectFiles = await Promise.all(files.map(file =>
 
         new Promise<FileContent>(resolve => this.workspace.openTextDocument(file).then(textDocument => {
-          resolve({ name: toWollokPath(textDocument.uri.fsPath), content: textDocument.getText() })
+          resolve({ name: textDocument.uri.path, content: textDocument.getText() })
         }))
       ))
 
@@ -102,12 +101,11 @@ export class WollokDebugSession extends DebugSession {
     let breakpointsPackage: Package
     try {
       breakpointsPackage = this.packageFromSource(args.source as Source)
-    }catch(_error) {
-      // response.body.breakpoints = []
+    } catch(_error) {
       response.body.breakpoints = args.breakpoints.map(breakpoint => ({
         verified: false,
-
         message: 'Could not find package for source',
+        reason: 'failed',
         line: breakpoint.line,
         column: breakpoint.column,
       }))
@@ -312,14 +310,15 @@ export class WollokDebugSession extends DebugSession {
   }
 
   private sourceFromNode<T extends Node>(node: T): Source {
+    const uri = vscode.Uri.from({scheme: 'file', path: node.sourceFileName})
     if(node.parentPackage.isBaseWollokCode){
-      return new Source(node.label, toClientPath(node.sourceFileName.replace('wollok', this.wollokLangPath)))
+      return new Source(node.label, node.sourceFileName.replace('wollok', this.wollokLangPath))
     }
-    return new Source(node.sourceFileName.split('/').pop()!, toClientPath(node.sourceFileName))
+    return new Source(node.sourceFileName.split('/').pop()!, uri.fsPath)
   }
 
   private packageFromSource(source: Source): Package {
-    const sourcePath = toWollokPath(source.path)
+    const sourcePath = vscode.Uri.file(source.path).path
     let pkg: Package | undefined
     if(sourcePath.includes(this.wollokLangPath)) {
       pkg = this.interpreter.evaluation.environment.getNodeOrUndefinedByFQN<Package>('wollok.'+sourcePath.split('/').pop().split('.')[0]!)
