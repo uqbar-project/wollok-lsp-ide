@@ -15,8 +15,8 @@ const wollokFiles = fs
   .map(aFilePath => path.resolve(FIXTURES_ROOT, aFilePath))
 
 const mockWorkspace = {
-  findFiles: (_globPattern: string) => Promise.resolve(wollokFiles.map(fsPath =>  ({ fsPath, path: fsPath }))),
-  openTextDocument: (path: {fsPath: string}, _uri: { fsPath: string }) => Promise.resolve({ getText: () => fs.readFileSync(path.fsPath).toString('utf-8'), uri: { fsPath: path.fsPath, path: path.fsPath } }),
+  findFiles: (_globPattern: string) => Promise.resolve(wollokFiles.map(fsPath =>  ({ fsPath, path: '/'+fsPath.replace(/\\/g, '/') }))),
+  openTextDocument: (uri: { fsPath: string, path: string }) => Promise.resolve({ getText: () => fs.readFileSync(uri.fsPath).toString('utf-8'), uri: { fsPath: uri.fsPath, path: uri.path } }),
 }
 
 const session = new WollokDebugSession(mockWorkspace as any, '/some/path/to/wollok')

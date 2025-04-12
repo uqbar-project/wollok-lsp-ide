@@ -1,9 +1,10 @@
 import { DebugSession, InitializedEvent, OutputEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread, Variable } from '@vscode/debugadapter'
 import { DebugProtocol } from '@vscode/debugprotocol'
+import { parse } from 'urijs'
 import * as vscode from 'vscode'
 import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, interprete, Interpreter, LIST_MODULE, Node, NUMBER_MODULE, Package, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
 import { LaunchTargetArguments, Target, targetFinder } from './target-finders'
-import { uriPathToFsPath } from './utils/uri'
+import { uriFromFile, uriPathToFsPath } from './utils/uri'
 import { WollokPositionConverter } from './utils/wollok-position-converter'
 export class WollokDebugSession extends DebugSession {
   protected static readonly THREAD_ID = 1
@@ -318,7 +319,7 @@ export class WollokDebugSession extends DebugSession {
   }
 
   private packageFromSource(source: Source): Package {
-    const sourcePath = uriPathToFsPath(source.path)
+    const sourcePath = parse(uriFromFile(source.path)).path
     let pkg: Package | undefined
     if(sourcePath.includes(this.wollokLangPath)) {
       pkg = this.interpreter.evaluation.environment.getNodeOrUndefinedByFQN<Package>('wollok.'+sourcePath.split('/').pop().split('.')[0]!)
