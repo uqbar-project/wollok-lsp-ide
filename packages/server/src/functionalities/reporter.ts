@@ -1,6 +1,6 @@
 import { getMessage, LANGUAGES, Messages, Problem } from 'wollok-ts'
 import { lang } from '../settings'
-import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../../../shared/definitions'
+import { COMMAND_RUN_ALL_TESTS, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../../../shared/definitions'
 
 // ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 // CUSTOM MESSAGES DEFINITION
@@ -12,7 +12,6 @@ export const SERVER_PROCESSING_REQUEST = 'server_processing_request'
 export const ERROR_MISSING_WORKSPACE_FOLDER = 'missing_workspace_folder'
 
 const lspMessagesEn = {
-  [COMMAND_RUN_GAME]: 'Run game',
   [COMMAND_RUN_PROGRAM]: 'Run program',
   [COMMAND_START_REPL]: 'Run in REPL',
   [COMMAND_RUN_ALL_TESTS]: 'Run all tests',
@@ -24,7 +23,6 @@ const lspMessagesEn = {
 }
 
 const lspMessagesEs = {
-  [COMMAND_RUN_GAME]: 'Jugar',
   [COMMAND_RUN_PROGRAM]: 'Ejecutar programa',
   [COMMAND_START_REPL]: 'Ejecutar REPL',
   [COMMAND_RUN_ALL_TESTS]: 'Ejecutar todos los tests',

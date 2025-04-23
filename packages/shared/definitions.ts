@@ -11,7 +11,6 @@ export const WORKSPACE_URI_REQUEST = 'WORKSPACE_URI'
 
 // Commands
 export const COMMAND_START_REPL = 'wollok.start.repl'
-export const COMMAND_RUN_GAME = 'wollok.run.game'
 export const COMMAND_RUN_PROGRAM = 'wollok.run.program'
 export const COMMAND_RUN_ALL_TESTS = 'wollok.run.allTests'
 export const COMMAND_RUN_TEST = 'wollok.run.test'

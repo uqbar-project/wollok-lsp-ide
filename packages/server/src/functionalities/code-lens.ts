@@ -2,7 +2,7 @@ import { CodeLens, CodeLensParams, Position, Range } from 'vscode-languageserver
 import { Describe, Node, Package, Test, Program, Environment, is, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Class, Singleton, Entity } from 'wollok-ts'
 import { getWollokFileExtension, packageFromURI, toVSCRange } from '../utils/text-documents'
 import { removeQuotes } from '../utils/strings'
-import { COMMAND_DEBUG, COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../../../shared/definitions'
+import { COMMAND_DEBUG, COMMAND_RUN_ALL_TESTS, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../../../shared/definitions'
 import { COMMAND_EXECUTE, COMMAND_EXECUTE_DEBUG, getLSPMessage } from './reporter'
 
 export const codeLenses = (environment: Environment) => (params: CodeLensParams): CodeLens[] | null => {
@@ -24,7 +24,6 @@ export const codeLenses = (environment: Environment) => (params: CodeLensParams)
 
 export const getProgramCodeLenses = (file: Package): CodeLens[] =>
   file.members.filter(is(Program)).flatMap(program => [
-    buildLens(program, COMMAND_RUN_GAME, getLSPMessage(COMMAND_RUN_GAME)),
     buildLens(program, COMMAND_RUN_PROGRAM, getLSPMessage(COMMAND_RUN_PROGRAM)),
     buildLens(program, COMMAND_DEBUG, getLSPMessage(COMMAND_EXECUTE_DEBUG, ['program'])),
   ])

@@ -36,23 +36,8 @@ suite('Should run commands', () => {
         'run',
         quoted('file.program'),
         '--skipValidations',
-        '-p',
-        quoted(folderURI.fsPath),
-      ],
-    )
-  )
-
-  test('run game', () =>
-    testCommand(
-      pepitaURI,
-      () => runProgram(true)(['file.program']),
-      [
-        'run',
-        '-g',
         '--port',
         DEFAULT_GAME_PORT.toString(),
-        quoted('file.program'),
-        '--skipValidations',
         '-p',
         quoted(folderURI.fsPath),
       ],
@@ -132,6 +117,8 @@ suite('Should run commands', () => {
         'run',
         quoted('file.program'),
         '--skipValidations',
+        '--port',
+        DEFAULT_GAME_PORT.toString(),
         '--verbose',
         '-p',
         quoted(folderURI.fsPath),

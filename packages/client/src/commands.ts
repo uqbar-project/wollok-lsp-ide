@@ -13,7 +13,7 @@ import {
   asShellString,
   fsToShell,
 } from './platform-string-utils'
-import { DEFAULT_GAME_PORT, DEFAULT_REPL_PORT, COMMAND_RUN_ALL_TESTS, COMMAND_RUN_GAME, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode, COMMAND_INIT_PROJECT, COMMAND_DEBUG } from '../../shared/definitions'
+import { DEFAULT_GAME_PORT, DEFAULT_REPL_PORT, COMMAND_RUN_ALL_TESTS, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL, wollokLSPExtensionCode, COMMAND_INIT_PROJECT, COMMAND_DEBUG } from '../../shared/definitions'
 import { getLSPMessage } from './messages'
 
 export const subscribeWollokCommands = (context: ExtensionContext): void => {
@@ -26,9 +26,6 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
     registerCLICommand(COMMAND_RUN_PROGRAM, runProgram()),
   )
   context.subscriptions.push(
-    registerCLICommand(COMMAND_RUN_GAME, runProgram(true)),
-  )
-  context.subscriptions.push(
     registerCLICommand(COMMAND_INIT_PROJECT, initProject),
   )
   context.subscriptions.push(registerDebuggerCommand())
@@ -38,17 +35,18 @@ export const subscribeWollokCommands = (context: ExtensionContext): void => {
  * CLI Commands
  */
 
-export const runProgram = (isGame = false) => ([fqn]: [string]): Task => {
+export const runProgram = () => ([fqn]: [string]): Task => {
   const wollokLSPConfiguration = workspace.getConfiguration(wollokLSPExtensionCode)
   const portNumber = wollokLSPConfiguration.get('gamePortNumber') as number ?? DEFAULT_GAME_PORT
 
   // Terminate previous terminal session
   vscode.commands.executeCommand('workbench.action.terminal.killAll')
-  return wollokCLITask('run program', `Wollok ${getLSPMessage(isGame ? COMMAND_RUN_GAME : COMMAND_RUN_PROGRAM)}`, [
+  return wollokCLITask('run program', `Wollok ${getLSPMessage(COMMAND_RUN_PROGRAM)}`, [
     'run',
-    ...isGame ? ['-g', '--port', portNumber.toString()] : [],
     asShellString(fqn),
     '--skipValidations',
+    '--port',
+    portNumber.toString(),
   ])
 }
 
