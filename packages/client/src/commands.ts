@@ -43,9 +43,10 @@ export const runProgram = () => ([fqn]: [string]): Task => {
   vscode.commands.executeCommand('workbench.action.terminal.killAll')
   return wollokCLITask('run program', `Wollok ${getLSPMessage(COMMAND_RUN_PROGRAM)}`, [
     'run',
-    '--port', portNumber.toString(),
     asShellString(fqn),
     '--skipValidations',
+    '--port',
+    portNumber.toString(),
   ])
 }
 

@@ -10,14 +10,6 @@ suite('Should do code lenses', () => {
       new CodeLens(
         new Range(new Position(0, 0), new Position(2, 1)),
         {
-          title: 'Run game',
-          command: 'wollok.run.game',
-          arguments: ['pepitaGame.juego'],
-        },
-      ),
-      new CodeLens(
-        new Range(new Position(0, 0), new Position(2, 1)),
-        {
           title: 'Run program',
           command: 'wollok.run.program',
           arguments: ['pepitaGame.juego'],
