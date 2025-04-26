@@ -1,6 +1,8 @@
 import * as path from 'path'
 import { WollokDebugSession } from '../debug-session'
 import * as fs from 'fs'
+import { uriFromFile } from '../utils/uri'
+import { parse } from 'urijs'
 
 /**
  * In this file the debug session is being launched as an executable
@@ -15,8 +17,13 @@ const wollokFiles = fs
   .map(aFilePath => path.resolve(FIXTURES_ROOT, aFilePath))
 
 const mockWorkspace = {
-  findFiles: (_globPattern: string) => Promise.resolve(wollokFiles.map(fsPath =>  ({ fsPath, path:(fsPath[0] === '/' ? '' : '/') + fsPath.replace(/\\/g, '/') }))),
+  findFiles: (_globPattern: string) => Promise.resolve(wollokFiles.map(fsPath =>  ({ fsPath, path:fsPathToUriPath(fsPath) }))),
   openTextDocument: (uri: { fsPath: string, path: string }) => Promise.resolve({ getText: () => fs.readFileSync(uri.fsPath).toString('utf-8'), uri: { fsPath: uri.fsPath, path: uri.path } }),
+}
+
+function fsPathToUriPath(fsPath: string): string {
+  const uri = uriFromFile(fsPath)
+  return parse(uri).path
 }
 
 const session = new WollokDebugSession(mockWorkspace as any, '/some/path/to/wollok')
