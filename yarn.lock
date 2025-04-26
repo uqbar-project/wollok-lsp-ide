@@ -1451,6 +1451,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/urijs@npm:^1":
+  version: 1.19.25
+  resolution: "@types/urijs@npm:1.19.25"
+  checksum: 10c0/462464294f0cd5f2271e1ab760a45abe252a946559444188a4ad0edba39b1a8bff41b140b79596a5e3c44a5d0d29f78c9ab97b5e82efb1e8617093a549c22bf6
+  languageName: node
+  linkType: hard
+
 "@types/vscode@npm:^1.80.0, @types/vscode@npm:^1.92.0":
   version: 1.93.0
   resolution: "@types/vscode@npm:1.93.0"
@@ -3849,6 +3856,13 @@ __metadata:
   dependencies:
     flat-cache: "npm:^3.0.4"
   checksum: 10c0/58473e8a82794d01b38e5e435f6feaf648e3f36fdb3a56e98f417f4efae71ad1c0d4ebd8a9a7c50c3ad085820a93fc7494ad721e0e4ebc1da3573f4e1c3c7cdd
+  languageName: node
+  linkType: hard
+
+"file-uri-to-path@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "file-uri-to-path@npm:2.0.0"
+  checksum: 10c0/78fad70e5ce84b11d9590998e4a3c3f87765c18bfa7edfcfd71eab1968c99d4448d24712911479aacf2a870578769f0b4e4fcc093654462a88823d8d134aed48
   languageName: node
   linkType: hard
 
@@ -8696,6 +8710,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"urijs@npm:^1.19.11":
+  version: 1.19.11
+  resolution: "urijs@npm:1.19.11"
+  checksum: 10c0/96e15eea5b41a99361d506e4d8fcc64dc43f334bd5fd34e08261467b6954b97a6b45929a8d6c79e2dc76aadfd6ca950e0f4bd7f3c0757a08978429634d07eda1
+  languageName: node
+  linkType: hard
+
 "url-join@npm:^4.0.1":
   version: 4.0.1
   resolution: "url-join@npm:4.0.1"
@@ -8936,14 +8957,17 @@ __metadata:
   dependencies:
     "@types/chai": "npm:^4"
     "@types/mocha": "npm:^10"
+    "@types/urijs": "npm:^1"
     "@types/vscode": "npm:^1.92.0"
     "@vscode/debugadapter": "npm:^1.66.0"
     "@vscode/debugadapter-testsupport": "npm:^1.67.0"
     "@vscode/debugprotocol": "npm:^1.66.0"
     chai: "npm:4.3.10"
+    file-uri-to-path: "npm:^2.0.0"
     mocha: "npm:^10.7.3"
     nyc: "npm:^17.0.0"
     ts-mocha: "npm:^10.0.0"
+    urijs: "npm:^1.19.11"
   languageName: unknown
   linkType: soft
 

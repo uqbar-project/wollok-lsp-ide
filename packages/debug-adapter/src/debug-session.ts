@@ -1,9 +1,11 @@
 import { DebugSession, InitializedEvent, OutputEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread, Variable } from '@vscode/debugadapter'
 import { DebugProtocol } from '@vscode/debugprotocol'
+import { parse } from 'urijs'
 import * as vscode from 'vscode'
-import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, interprete, LIST_MODULE, Node, NUMBER_MODULE, Package, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Interpreter } from 'wollok-ts'
+import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, interprete, Interpreter, LIST_MODULE, Node, NUMBER_MODULE, Package, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
 import { LaunchTargetArguments, Target, targetFinder } from './target-finders'
-import { toClientPath, toWollokPath } from './utils/path-converters'
+import { fileFromPath, fileNameFromPath } from './utils/files'
+import { uriFromFile, uriPathToFsPath } from './utils/uri'
 import { WollokPositionConverter } from './utils/wollok-position-converter'
 export class WollokDebugSession extends DebugSession {
   protected static readonly THREAD_ID = 1
@@ -19,7 +21,7 @@ export class WollokDebugSession extends DebugSession {
 
   protected positionConverter: WollokPositionConverter
 
-  constructor(protected workspace: typeof vscode.workspace){
+  constructor(protected workspace: typeof vscode.workspace, private readonly wollokLangPath: string){
     super()
     this.configurationDone = new Promise<void>(resolve => {
       this.notifyConfigurationDone = resolve
@@ -49,7 +51,7 @@ export class WollokDebugSession extends DebugSession {
       const projectFiles = await Promise.all(files.map(file =>
 
         new Promise<FileContent>(resolve => this.workspace.openTextDocument(file).then(textDocument => {
-          resolve({ name: toWollokPath(textDocument.uri.fsPath), content: textDocument.getText() })
+          resolve({ name: textDocument.uri.path, content: textDocument.getText() })
         }))
       ))
 
@@ -99,10 +101,23 @@ export class WollokDebugSession extends DebugSession {
   }
 
   protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments, _request?: DebugProtocol.Request): void {
-    const breakpointsPackage = this.packageFromSource(args.source as Source)
+    let breakpointsPackage: Package
+    try {
+      breakpointsPackage = this.packageFromSource(args.source as Source)
+    } catch(_error) {
+      response.body.breakpoints = args.breakpoints.map(breakpoint => ({
+        verified: false,
+        message: 'Could not find package for source',
+        reason: 'failed',
+        line: breakpoint.line,
+        column: breakpoint.column,
+      }))
+      this.sendResponse(response)
+      return
+    }
 
     // Remove old breakpoints from the requested file
-    const breakpointsToRemove = []
+    const breakpointsToRemove: Node[] = []
     this.executionDirector.breakpoints.forEach(breakpointedNode => {
       if(breakpointedNode.parentPackage.id === breakpointsPackage.id) {
         breakpointsToRemove.push(breakpointedNode)
@@ -298,11 +313,21 @@ export class WollokDebugSession extends DebugSession {
   }
 
   private sourceFromNode<T extends Node>(node: T): Source {
-    return new Source(node.sourceFileName.split('/').pop()!, toClientPath(node.sourceFileName))
+    if(node.parentPackage.isBaseWollokCode){
+      return new Source(node.label, node.sourceFileName.replace('wollok', this.wollokLangPath))
+    }
+    return new Source(fileFromPath(node.sourceFileName), uriPathToFsPath(node.sourceFileName))
   }
 
   private packageFromSource(source: Source): Package {
-    const pkg = this.interpreter.evaluation.environment.descendants.find(node => node.is(Package) && toWollokPath(source.path) === node.sourceFileName) as Package | undefined
+    const sourcePath = parse(uriFromFile(source.path)).path
+    let pkg: Package | undefined
+    if(sourcePath.includes(this.wollokLangPath)) {
+      pkg = this.interpreter.evaluation.environment.getNodeOrUndefinedByFQN<Package>('wollok.' + fileNameFromPath(sourcePath)!)
+    } else {
+      pkg = this.interpreter.evaluation.environment.descendants.find(node => node.is(Package) && sourcePath === node.sourceFileName) as Package | undefined
+    }
+
     if(!pkg) {
       throw new Error(`Could not find package for source ${source.path}`)
     }

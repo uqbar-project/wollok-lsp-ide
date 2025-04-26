@@ -1,5 +1,6 @@
 import { Describe, Environment, Node, Package, Program, Test } from 'wollok-ts'
-import { toWollokPath } from './utils/path-converters'
+import { parse } from 'urijs'
+import { uriFromFile } from './utils/uri'
 
 export type LaunchTargetArguments =
   { type: 'test', file: string, test: string, describe?: string } |
@@ -39,15 +40,15 @@ export class FqnTargetFinder extends TargetFinder {
   }
 }
 
-abstract class FileTargetFinder extends TargetFinder{
-  private path: string
+export abstract class FileTargetFinder extends TargetFinder {
+  private uri: string
   constructor(clientPath: string) {
     super()
-    this.path = toWollokPath(clientPath)
+    this.uri = uriFromFile(clientPath)
   }
 
   findTargetOrUndefined(environment: Environment): Target | undefined {
-    const pkg = environment.descendants.find(node => node.is(Package) && this.path === node.sourceFileName) as Package | undefined
+    const pkg = environment.descendants.find(node => node.is(Package) && parse(this.uri).path === node.sourceFileName) as Package | undefined
     if(!pkg) return undefined
     return pkg.descendants.find(node => this.isValidTarget(node)) as Target | undefined
   }
