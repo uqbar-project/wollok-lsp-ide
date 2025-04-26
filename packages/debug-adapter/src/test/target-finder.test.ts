@@ -1,5 +1,5 @@
 import { FqnTargetFinder, LaunchTargetArguments, ProgramTargetFinder, targetFinder, TestTargetFinder } from '../target-finders'
-import * as assert from 'node:assert'
+import assert from 'node:assert'
 import { buildEnvironment, Environment } from 'wollok-ts'
 
 const PROGRAM_PATH = '/users/user/documents/my-project/a/pepitaProgram.wpgm'

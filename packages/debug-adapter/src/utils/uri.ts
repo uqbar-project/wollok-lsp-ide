@@ -1,4 +1,4 @@
-import fileUriToPath = require('file-uri-to-path')
+import fileUriToPath from 'file-uri-to-path'
 import * as path from 'path'
 import { build } from 'urijs'
 

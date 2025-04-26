@@ -1,6 +1,5 @@
 import { Describe, Environment, Node, Package, Program, Test } from 'wollok-ts'
-import { build, parse } from 'urijs'
-import uriToPath = require('file-uri-to-path')
+import { parse } from 'urijs'
 import { uriFromFile } from './utils/uri'
 
 export type LaunchTargetArguments =
