@@ -4,6 +4,7 @@ import { parse } from 'urijs'
 import * as vscode from 'vscode'
 import { Body, BOOLEAN_MODULE, buildEnvironment, Context, DirectedInterpreter, ExecutionDirector, executionFor, ExecutionState, FileContent, Frame, interprete, Interpreter, LIST_MODULE, Node, NUMBER_MODULE, Package, PROGRAM_FILE_EXTENSION, RuntimeObject, RuntimeValue, Sentence, STRING_MODULE, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION } from 'wollok-ts'
 import { LaunchTargetArguments, Target, targetFinder } from './target-finders'
+import { fileFromPath, fileNameFromPath } from './utils/files'
 import { uriFromFile, uriPathToFsPath } from './utils/uri'
 import { WollokPositionConverter } from './utils/wollok-position-converter'
 export class WollokDebugSession extends DebugSession {
@@ -315,14 +316,14 @@ export class WollokDebugSession extends DebugSession {
     if(node.parentPackage.isBaseWollokCode){
       return new Source(node.label, node.sourceFileName.replace('wollok', this.wollokLangPath))
     }
-    return new Source(node.sourceFileName.split('/').pop()!, uriPathToFsPath(node.sourceFileName))
+    return new Source(fileFromPath(node.sourceFileName), uriPathToFsPath(node.sourceFileName))
   }
 
   private packageFromSource(source: Source): Package {
     const sourcePath = parse(uriFromFile(source.path)).path
     let pkg: Package | undefined
     if(sourcePath.includes(this.wollokLangPath)) {
-      pkg = this.interpreter.evaluation.environment.getNodeOrUndefinedByFQN<Package>('wollok.'+sourcePath.split('/').pop().split('.')[0]!)
+      pkg = this.interpreter.evaluation.environment.getNodeOrUndefinedByFQN<Package>('wollok.' + fileNameFromPath(sourcePath)!)
     } else {
       pkg = this.interpreter.evaluation.environment.descendants.find(node => node.is(Package) && sourcePath === node.sourceFileName) as Package | undefined
     }
