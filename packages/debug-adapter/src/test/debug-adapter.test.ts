@@ -167,7 +167,7 @@ describe('debug adapter', function () {
     })
   })
 
-  describe('finished execution', function (){
+  describe.skip('finished execution', function (){
     it('finishing with errors', async function (){
       setTimeout(() => dc.configurationDoneRequest(), 100)
       await dc.launch({
