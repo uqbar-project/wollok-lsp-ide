@@ -1,5 +1,5 @@
 import { CompletionItem } from 'vscode-languageserver'
-import { Body, Class, Describe, Entity, Environment, Import, Method, Mixin, New, Node, Package, Program, Reference, Singleton, Test, Variable, implicitImport, match, parentImport, when } from 'wollok-ts'
+import { Body, Class, Describe, Entity, Environment, Field, Import, Method, Mixin, New, Node, Package, Program, Reference, Singleton, Test, Variable, implicitImport, match, parentImport, when } from 'wollok-ts'
 import { logger } from '../../utils/logger'
 import { classCompletionItem, entityCompletionItem, fieldCompletionItem, initializerCompletionItem, parameterCompletionItem, singletonCompletionItem, variableCompletionItem, withImport } from './autocomplete'
 import { optionAsserts, optionConstReferences, optionDescribes, optionImports, optionInitialize, optionMethods, optionModules, optionPrograms, optionPropertiesAndReferences, optionReferences, optionTests } from './options-autocomplete'
@@ -18,7 +18,8 @@ export const completionsForNode = (node: Node): CompletionItem[] => {
       when(Method)(completeMethod),
       when(Describe)(completeDescribe),
       when(Reference<Class>)(completeReference),
-      when(New)(completeNew)
+      when(New)(completeNew),
+      when(Field)(field => completionsForNode(field.parent)),
     )
   } catch (error) {
     logger.error(`✘ Completions for node ${node.kind} (${node.sourceMap} - ${node.sourceFileName}) failed: ${error}`, error)
