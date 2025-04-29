@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.1
+- Add Wollok base code debug capabilities 🐛🌐
+- Remove the need for Run game lens 👓
+
 ## v0.5.0
 - Quick fixes 🧑‍🏭
 - Go to definition for base code references 🔍
