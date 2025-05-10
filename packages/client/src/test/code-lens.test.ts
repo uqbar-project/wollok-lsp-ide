@@ -82,7 +82,7 @@ suite('Should do code lenses', () => {
         },
       ),
       new CodeLens(
-        new Range(new Position(6, 0), new Position(8, 1)),
+        new Range(new Position(6, 0), new Position(7, 1)),
         {
           title: 'Run in REPL',
           command: 'wollok.start.repl',

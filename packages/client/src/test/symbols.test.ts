@@ -12,6 +12,7 @@ suite('Should do symbols', () => {
     await testDocumentSymbols(docUri, [
       { name: 'Pepita', kind: SymbolKind.Class },
       { name: 'a', kind: SymbolKind.Class },
+      { name: 'MixinName', kind: SymbolKind.Enum },
     ])
   })
 
