@@ -1,5 +1,5 @@
 import { CodeLens, CodeLensParams, Position, Range } from 'vscode-languageserver'
-import { Describe, Node, Package, Test, Program, Environment, is, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Class, Singleton, Entity } from 'wollok-ts'
+import { Describe, Node, Package, Test, Program, Environment, is, PROGRAM_FILE_EXTENSION, TEST_FILE_EXTENSION, WOLLOK_FILE_EXTENSION, Class, Singleton, Mixin, Entity } from 'wollok-ts'
 import { getWollokFileExtension, packageFromURI, toVSCRange } from '../utils/text-documents'
 import { removeQuotes } from '../utils/strings'
 import { COMMAND_DEBUG, COMMAND_RUN_ALL_TESTS, COMMAND_RUN_PROGRAM, COMMAND_RUN_TEST, COMMAND_START_REPL } from '../../../shared/definitions'
@@ -53,8 +53,8 @@ export const getWollokFileCodeLenses = (file: Package): CodeLens[] =>
 const isTesteable = (node: Node): node is Test | Describe =>
   node.is(Test) || node.is(Describe)
 
-const isWollokDefinition = (node: Node): node is Class | Singleton =>
-  node.is(Class) || node.is(Singleton)
+const isWollokDefinition = (node: Node): node is Class | Singleton | Mixin =>
+  node.is(Class) || node.is(Singleton) || node.is(Mixin)
 
 const buildRunAllTestsCodeLens = (file: Package): CodeLens =>
   buildCommandCodeLens(
