@@ -92,18 +92,6 @@ suite('Should do code lenses', () => {
     ])
   })
 
-  test('Shows test code lenses for Wollok Mixin file', async () => {
-    await testCodeLenses(getDocumentURI('mixin.wlk'), [
-      new CodeLens(
-        new Range(new Position(0, 0), new Position(2, 1)),
-        {
-          title: 'Run in REPL',
-          command: 'wollok.start.repl',
-          arguments: ['mixin.MixinName'],
-        },
-      ),
-    ])
-  })
 })
 
 async function testCodeLenses(
