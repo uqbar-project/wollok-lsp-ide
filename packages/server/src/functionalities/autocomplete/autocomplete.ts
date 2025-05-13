@@ -33,6 +33,8 @@ export const completions = (environment: Environment) => (
   return result
 }
 
+export const completionResolve = (_: Environment) => (item: CompletionItem): CompletionItem => item
+
 // -----------------
 // -----MAPPERS-----
 // -----------------

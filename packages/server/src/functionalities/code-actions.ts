@@ -8,7 +8,7 @@ type CodeActionResponse = Array<Command | CodeAction>
 export const codeActions = (environment: Environment) => (params: CodeActionParams): CodeActionResponse => {
   const problems = validate(packageFromURI(params.textDocument.uri, environment))
   const problemsInRange = problems.filter(problem => rangeIncludes(toVSCRange(problem.sourceMap), params.range))
-  if(problemsInRange.length === 0) return null
+  if (problemsInRange.length === 0) return []
   return problemsInRange.flatMap(problem => {
     const fixer = fixers[problem.code]
     if (!fixer) return []
