@@ -15,7 +15,7 @@ import {
 } from 'vscode-languageserver/node'
 import { Environment } from 'wollok-ts'
 import { LANG_PATH_REQUEST, STRONG_FILES_CHANGED_REQUEST, WORKSPACE_URI_REQUEST } from '../../shared/definitions'
-import { completions } from './functionalities/autocomplete/autocomplete'
+import { completionResolve, completions } from './functionalities/autocomplete/autocomplete'
 import { codeActions } from './functionalities/code-actions'
 import { codeLenses } from './functionalities/code-lens'
 import { definition } from './functionalities/definition'
@@ -207,6 +207,7 @@ const handlers: readonly [
     [connection.onDocumentFormatting, formatDocument],
     [connection.onDocumentRangeFormatting, formatRange],
     [connection.onCompletion, completions],
+    [connection.onCompletionResolve, completionResolve],
     [connection.onPrepareRename, isRenamable],
     [connection.onRenameRequest, rename(documents)],
     [connection.onHover, typeDescriptionOnHover],
