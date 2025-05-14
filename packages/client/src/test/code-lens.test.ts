@@ -81,8 +81,17 @@ suite('Should do code lenses', () => {
           arguments: ['pepita.a'],
         },
       ),
+      new CodeLens(
+        new Range(new Position(6, 0), new Position(7, 1)),
+        {
+          title: 'Run in REPL',
+          command: 'wollok.start.repl',
+          arguments: ['pepita.MixinName'],
+        },
+      ),
     ])
   })
+
 })
 
 async function testCodeLenses(
