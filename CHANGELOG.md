@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.2
+- Fixed annoying autocomplete popup error because a change in VSC LSP 🧑‍🏭
+- Add code lenses to mixins 👓
+
 ## v0.5.1
 - Add Wollok base code debug capabilities 🐛🌐
 - Remove the need for Run game lens 👓
