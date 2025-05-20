@@ -1,14 +1,14 @@
 # Changelog
 
-## v0.5.2
+## v0.5.2 (CLI [v0.3.1](https://github.com/uqbar-project/wollok-ts-cli/releases/tag/v0.3.1))
 - Fixed annoying autocomplete popup error because a change in VSC LSP 🧑‍🏭
 - Add code lenses to mixins 👓
 
-## v0.5.1
+## v0.5.1 (CLI [v0.3.1](https://github.com/uqbar-project/wollok-ts-cli/releases/tag/v0.3.1))
 - Add Wollok base code debug capabilities 🐛🌐
 - Remove the need for Run game lens 👓
 
-## v0.5.0
+## v0.5.0 (CLI [v0.3.0](https://github.com/uqbar-project/wollok-ts-cli/releases/tag/v0.3.0))
 - Quick fixes 🧑‍🏭
 - Go to definition for base code references 🔍
 - Update Wollok-TS 4.2.1 ⬆️
