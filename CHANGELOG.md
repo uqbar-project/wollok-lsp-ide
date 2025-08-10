@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.5.2 (CLI [v0.4.0](https://github.com/uqbar-project/wollok-ts-cli/releases/tag/v0.4.0))
+## v0.5.3 (CLI [v0.4.0](https://github.com/uqbar-project/wollok-ts-cli/releases/tag/v0.4.0))
 - Update Wollok-TS 4.2.3 ⬆️
 
 ## v0.5.2 (CLI [v0.3.1](https://github.com/uqbar-project/wollok-ts-cli/releases/tag/v0.3.1))
