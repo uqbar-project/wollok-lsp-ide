@@ -2,7 +2,6 @@ import { Annotation, Assignment, Class, Describe, excludeNullish, Field, If, Imp
 import { WollokKeywords, WollokTokenKinds, NamedNode, NodeContext, HighlightingResult, LineResult, WollokNodePlotter } from './definitions'
 import { getLineColumn, mergeHighlightingResults, plotRange, plotSingleLine } from './utils'
 
-
 const ENTER = '\n'
 
 const getKindForLiteral = (node: Literal): string | undefined => {
@@ -307,6 +306,7 @@ const processCode = (node: Node, textDocument: string[]): WollokNodePlotter[] =>
 export const processDocument = (filename: string, textDocument: string): WollokNodePlotter[] => {
   const parsedFile = parse.File(filename)
   const parsedPackage = parsedFile.tryParse(textDocument)
-  const splittedLines = textDocument.split('\n')
+  const EOL = textDocument.includes('\r\n') ? '\r\n' : '\n'
+  const splittedLines = textDocument.split(EOL)
   return excludeNullish(processCode(parsedPackage, splittedLines))
 }
