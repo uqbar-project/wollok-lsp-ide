@@ -3,7 +3,6 @@ import { WollokKeywords, WollokTokenKinds, NamedNode, NodeContext, HighlightingR
 import { getLineColumn, mergeHighlightingResults, plotRange, plotSingleLine } from './utils'
 
 
-const ENTER_regexp = /\r?\n/g
 const ENTER = '\n'
 
 const getKindForLiteral = (node: Literal): string | undefined => {
@@ -307,12 +306,7 @@ const processCode = (node: Node, textDocument: string[]): WollokNodePlotter[] =>
 
 export const processDocument = (filename: string, textDocument: string): WollokNodePlotter[] => {
   const parsedFile = parse.File(filename)
-  const textFile = textDocument.replaceAll(ENTER_regexp, ENTER)
-  const parsedPackage = parsedFile.tryParse(textFile)
-  // TODO: Fix parser so we always get the package node
-  const firstElement = parsedPackage.members[0]
-  const packageNode = firstElement.is(Package) ? firstElement : parsedPackage
-  const splittedLines = textFile.split(ENTER)
-  const filteredLines = excludeNullish(processCode(packageNode, splittedLines))
-  return filteredLines
+  const parsedPackage = parsedFile.tryParse(textDocument)
+  const splittedLines = textDocument.split('\n')
+  return excludeNullish(processCode(parsedPackage, splittedLines))
 }
