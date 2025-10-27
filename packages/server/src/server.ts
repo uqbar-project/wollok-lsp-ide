@@ -254,6 +254,8 @@ function syncHandler<Params, Return, PR>(requestHandler: ServerRequestHandler<Pa
     requestProgressReporter.begin()
     try {
       return requestHandler(params, cancel, workDoneProgress, resultProgress)
+    } catch (error) {
+      handleError('Error on handler', error)
     } finally {
       requestProgressReporter.end()
     }

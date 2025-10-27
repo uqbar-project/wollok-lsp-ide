@@ -36,7 +36,7 @@ export class EnvironmentProvider {
         timeMeasurer.addTime('Inferring types')
       }
       return environment
-    } catch (error) {
+    } catch (error: unknown) {
       documents.forEach(document => {
         generateErrorForFile(this.connection, document)
       })
