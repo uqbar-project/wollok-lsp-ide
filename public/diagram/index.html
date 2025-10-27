@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Dynamic Diagram</title>
+    <script src="./lib/cytoscape.min.js"></script>
+    <script src="./diagram-index.js"></script>
+    <link rel="stylesheet" href="./diagram.css" />
+    <style>
+      #cy {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="main" class="main">
+      <div class="botonera">
+        <button class="button" onclick="updateLayout()" title="Relocate the objects and their relationships in the diagram">ORGANIZE</button>
+        <!-- Modo Oscuro/Claro -->
+        <div class="row">
+          <img src="images/dark-mode.png" id="img-mode" title="Dark/Light mode"/>
+          <input type="checkbox" id="toggle-mode" class="toggle" onchange="modeChanged()">
+        </div>
+        <div class="row">
+          <img src="images/pin-objects.png" id="img-pin" title="Fix objects position"/>
+          <input type="checkbox" id="toggle-pin" class="toggle" onshow="objectsPositionChanged()" onchange="objectsPositionChanged()">
+        </div>
+      </div>
+      <script type="module">
+        import { io } from "./lib/socket.io.esm.min.js"
+
+        const socket = io()
+        socket.on("connect", function () {
+          console.log("conectado!")
+        })
+
+        socket.on("event", function (data) {
+          console.log(`evento! ${data}`)
+        })
+
+        socket.on("disconnect", function () {
+          console.log("desconectado!")
+        })
+
+        initializeCytoscape(document.getElementById("cy"))
+
+        socket.on("initDiagram", function (options) {
+          document.getElementById('toggle-mode').checked = options?.darkMode ?? false
+          modeChanged()
+        })
+
+        socket.on("updateDiagram", (elements) => {
+          console.log("Updating diagram", elements)
+          reloadDiagram(elements)
+        })
+      </script>
+      <div id="cy"></div>
+    </div>
+  </body>
+</html>

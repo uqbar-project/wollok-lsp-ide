@@ -1,3 +1,6 @@
+import cors from 'cors'
+import http from 'http'
+import express from 'express'
 import { DebugSession, InitializedEvent, OutputEvent, Source, StackFrame, StoppedEvent, TerminatedEvent, Thread, Variable } from '@vscode/debugadapter'
 import { DebugProtocol } from '@vscode/debugprotocol'
 import { parse } from 'urijs'
@@ -7,6 +10,7 @@ import { LaunchTargetArguments, Target, targetFinder } from './target-finders'
 import { fileFromPath, fileNameFromPath } from './utils/files'
 import { uriFromFile, uriPathToFsPath } from './utils/uri'
 import { WollokPositionConverter } from './utils/wollok-position-converter'
+import { initializeDynamicDiagram } from './dynamic-diagram'
 export class WollokDebugSession extends DebugSession {
   protected static readonly THREAD_ID = 1
 
@@ -18,6 +22,8 @@ export class WollokDebugSession extends DebugSession {
 
   protected configurationDone: Promise<void>
   protected notifyConfigurationDone: () => void
+
+  protected onReloadForDiagram: (interpreter: Interpreter) => void
 
   protected positionConverter: WollokPositionConverter
 
@@ -51,6 +57,7 @@ export class WollokDebugSession extends DebugSession {
       const projectFiles = await Promise.all(files.map(file =>
 
         new Promise<FileContent>(resolve => this.workspace.openTextDocument(file).then(textDocument => {
+          // resolve({ name: textDocument.uri.path.slice('.Users.ivanjawerbaum.Documents.pruebas.'.length), content: textDocument.getText() })
           resolve({ name: textDocument.uri.path, content: textDocument.getText() })
         }))
       ))
@@ -72,6 +79,15 @@ export class WollokDebugSession extends DebugSession {
       return
     }
 
+    this.onReloadForDiagram = initializeDynamicDiagram(
+      this.interpreter as unknown as Interpreter,
+      {
+        host: 'localhost',
+        port: '3000',
+      },
+      container.parentPackage,
+      true
+    ).onReload
     this.executionDirector = this.interpreter.exec(
       container
     )
@@ -173,6 +189,7 @@ export class WollokDebugSession extends DebugSession {
       }
       this.sendEvent(new TerminatedEvent())
     }
+    this.onReloadForDiagram?.(this.interpreter as unknown as Interpreter)
   }
 
   protected continue(): void {
