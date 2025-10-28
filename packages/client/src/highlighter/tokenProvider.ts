@@ -2,6 +2,8 @@ import { Annotation, Assignment, Class, Describe, excludeNullish, Field, If, Imp
 import { WollokKeywords, WollokTokenKinds, NamedNode, NodeContext, HighlightingResult, LineResult, WollokNodePlotter } from './definitions'
 import { getLineColumn, mergeHighlightingResults, plotRange, plotSingleLine } from './utils'
 
+const ENTER = '\n'
+
 const getKindForLiteral = (node: Literal): string | undefined => {
   if (node.isNumeric()) return 'Literal_number'
   if (node.isBoolean()) return 'Literal_bool'
@@ -258,10 +260,10 @@ function processNode(node: Node, textDocument: string[], context: NodeContext[])
 }
 
 const processAnnotationsForNode = (node: Node, textDocument: string[], references: NodeContext[]): HighlightingResult => {
-  const fullDocument = textDocument.join('\n')
+  const fullDocument = textDocument.join(ENTER)
 
   const commentPlotter = (comment: string): WollokNodePlotter[] => {
-    const offset = textDocument.join('\n').indexOf(comment)
+    const offset = textDocument.join(ENTER).indexOf(comment)
     const start = getLineColumn(textDocument, offset)
     const end = getLineColumn(textDocument, offset + comment.length)
     return plotRange(textDocument, start, end, 'Comment')
@@ -303,10 +305,8 @@ const processCode = (node: Node, textDocument: string[]): WollokNodePlotter[] =>
 
 export const processDocument = (filename: string, textDocument: string): WollokNodePlotter[] => {
   const parsedFile = parse.File(filename)
-  const textFile = textDocument
-  const parsedPackage = parsedFile.tryParse(textFile)
-  const packageNode = parsedPackage.members[0]
-
-  const splittedLines = textFile.split('\n')
-  return excludeNullish(processCode(packageNode, splittedLines))
+  const parsedPackage = parsedFile.tryParse(textDocument)
+  const EOL = textDocument.includes('\r\n') ? '\r\n' : '\n'
+  const splittedLines = textDocument.split(EOL)
+  return excludeNullish(processCode(parsedPackage, splittedLines))
 }
