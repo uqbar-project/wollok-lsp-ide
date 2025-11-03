@@ -6,8 +6,12 @@ import { packageFromURI, rangeIncludes, toVSCRange, uriFromRelativeFilePath } fr
 type CodeActionResponse = Array<Command | CodeAction>
 
 export const codeActions = (environment: Environment) => (params: CodeActionParams): CodeActionResponse => {
-  const problems = validate(packageFromURI(params.textDocument.uri, environment))
-  const problemsInRange = problems.filter(problem => rangeIncludes(toVSCRange(problem.sourceMap), params.range))
+  const uri = params.textDocument.uri
+  if (!uri) return []
+  const packageUri = packageFromURI(uri, environment)
+  if (!packageUri) return []
+  const problems = validate(packageUri)
+  const problemsInRange = problems.filter(problem => problem.sourceMap && rangeIncludes(toVSCRange(problem.sourceMap), params.range))
   if (problemsInRange.length === 0) return []
   return problemsInRange.flatMap(problem => {
     const fixer = fixers[problem.code]

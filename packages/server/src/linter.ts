@@ -64,7 +64,7 @@ export const validateTextDocument =
         try {
           const problems = validate(environment)
           sendDiagnostics(connection, problems, allDocuments)
-        } catch (error) {
+        } catch (error: unknown) {
           logger.error(`✘ Validate text document error: ${error}`, error)
           generateErrorForFile(connection, textDocument)
         } finally {
