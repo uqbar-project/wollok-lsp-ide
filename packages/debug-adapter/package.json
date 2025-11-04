@@ -15,11 +15,17 @@
   "dependencies": {
     "@vscode/debugadapter": "^1.66.0",
     "@vscode/debugprotocol": "^1.66.0",
+    "cors": "2.8.5",
+    "express": "5.1.0",
     "file-uri-to-path": "^2.0.0",
-    "urijs": "^1.19.11"
+    "socket.io": "4.8.1",
+    "urijs": "^1.19.11",
+    "wollok-web-tools": "1.1.10"
   },
   "devDependencies": {
     "@types/chai": "^4",
+    "@types/cors": "^2",
+    "@types/express": "^5",
     "@types/mocha": "^10",
     "@types/urijs": "^1",
     "@types/vscode": "^1.92.0",
