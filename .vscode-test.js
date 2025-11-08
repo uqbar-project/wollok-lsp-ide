@@ -3,7 +3,7 @@ var { defineConfig } = require('@vscode/test-cli')
 module.exports = defineConfig({
   tests: [
     {
-      files: 'out/client/src/test/*.test.js',
+      files: 'out/client/src/test/**/*.test.js',
       version: 'stable',
       extensionDevelopmentPath: __dirname,
       workspaceFolder: `${__dirname}/packages/client/testFixture`,
