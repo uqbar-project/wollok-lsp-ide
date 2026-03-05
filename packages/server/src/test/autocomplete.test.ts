@@ -142,7 +142,6 @@ describe('autocomplete', () => {
         'io',
         'console',
         'assert',
-        'runtime',
         // snippets
         'var attribute',
         'const attribute',
