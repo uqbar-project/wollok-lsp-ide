@@ -28,7 +28,7 @@ suite('Should go to definitions', () => {
     const definitionURI = getDocumentURI('definition.wlk')
     const wollokExtension = vscode.extensions.getExtension(`${wollokLSPExtensionPublisher}.${wollokLSPExtensionId}`)!
     await testDefinition(definitionURI, new Position(21, 14), [
-      new Location(Uri.file(wollokExtension.extensionPath + '/wollok/lib.wlk'), new Range(new Position(39, 0), new Position(253, 1))),
+      new Location(Uri.file(wollokExtension.extensionPath + '/wollok/lib.wlk'), new Range(new Position(43, 0), new Position(268, 1))),
     ])
   })
 })
