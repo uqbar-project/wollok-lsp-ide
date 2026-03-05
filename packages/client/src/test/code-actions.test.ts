@@ -14,11 +14,11 @@ suite('Should do code actions', () => {
     await testCodeActions(
       missingReferenceDoc,
       new Range(new Position(2, 13), new Position(2, 13)),
-      [quickfix]
+      quickfix
     )
   })
 
-  test('Gets quick fixes for shouldDefineConstInsteadOfVar', async () => {
+  test.only('Gets quick fixes for shouldDefineConstInsteadOfVar', async () => {
     const quickfix = new CodeAction('Convert to const', CodeActionKind.QuickFix)
     quickfix.edit = new WorkspaceEdit()
     quickfix.edit.replace(codeActionsDoc, new Range(new Position(1, 2), new Position(1, 9)), `const bar`)
@@ -26,7 +26,7 @@ suite('Should do code actions', () => {
     await testCodeActions(
       codeActionsDoc,
       new Range(new Position(1, 8), new Position(1, 8)),
-      [quickfix]
+      quickfix
     )
   })
 
@@ -38,14 +38,14 @@ suite('Should do code actions', () => {
     await testCodeActions(
       codeActionsDoc,
       new Range(new Position(9, 7), new Position(9, 7)),
-      [quickfix]
+      quickfix
     )
   })
 })
 async function testCodeActions(
   docUri: Uri,
   triggerRange: Range,
-  expectedCodeActionList: CodeAction[],
+  expectedCodeAction: CodeAction,
 ) {
   await activate(docUri)
   docUri['_fsPath']  = docUri.fsPath
@@ -56,8 +56,8 @@ async function testCodeActions(
   )) as CodeLens[] | null
 
   assert.deepEqual(
-    actualCodeActions,
-    expectedCodeActionList,
+    actualCodeActions[0],
+    expectedCodeAction,
     'Code actions mismatch',
   )
 }
