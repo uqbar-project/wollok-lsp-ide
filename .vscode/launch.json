@@ -13,7 +13,10 @@
       "request": "launch",
       "name": "Launch Client",
       "runtimeExecutable": "${execPath}",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "${workspaceFolder}/packages/client/testFixture"
+      ],
       "outFiles": ["${workspaceFolder}/out/**/*.js"],
       "autoAttachChildProcesses": true,
       "preLaunchTask": {
