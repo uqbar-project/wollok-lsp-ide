@@ -1,6 +1,9 @@
 # Changelog
 
-## v0.5.4 (CLI [v1.0.3](https://github.com/uqbar-project/wollok-ts-cli/releases/tag/v0.4.0))
+## v0.5.5 (CLI [v1.1.0](https://github.com/uqbar-project/wollok-ts-cli/releases/tag/v1.1.0))
+- Update Wollok-TS 4.3.0 ⬆️
+
+## v0.5.4 (CLI [v1.0.3](https://github.com/uqbar-project/wollok-ts-cli/releases/tag/v1.0.3))
 - Update Wollok-TS 4.2.4 ⬆️
 - Avoid pop-up errors
 - Fix highlighter
