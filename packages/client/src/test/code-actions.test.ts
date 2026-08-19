@@ -18,7 +18,7 @@ suite('Should do code actions', () => {
     )
   })
 
-  test.only('Gets quick fixes for shouldDefineConstInsteadOfVar', async () => {
+  test('Gets quick fixes for shouldDefineConstInsteadOfVar', async () => {
     const quickfix = new CodeAction('Convert to const', CodeActionKind.QuickFix)
     quickfix.edit = new WorkspaceEdit()
     quickfix.edit.replace(codeActionsDoc, new Range(new Position(1, 2), new Position(1, 9)), `const bar`)
