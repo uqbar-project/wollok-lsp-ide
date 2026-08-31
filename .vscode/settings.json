@@ -10,5 +10,9 @@
     "**/.pnp.*": true
   },
   "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "[wollok]": {
+    "editor.defaultFormatter": "uqbar.wollok-lsp-ide",
+    "editor.formatOnSave": true
+  }
 }

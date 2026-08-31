@@ -50,7 +50,9 @@
   "main": "./out/client/src/extension",
   "configurationDefaults": {
     "[wollok]": {
-      "editor.semanticHighlighting.enabled": true
+      "editor.semanticHighlighting.enabled": true,
+      "editor.defaultFormatter": "uqbar.wollok-lsp-ide",
+      "editor.formatOnSave": true
     }
   },
   "contributes": {
