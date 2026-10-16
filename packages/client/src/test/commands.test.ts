@@ -1,5 +1,4 @@
 import * as assert from 'assert'
-import { afterEach, beforeEach } from 'mocha'
 import * as sinon from 'sinon'
 import { ShellExecution, ShellQuotedString, ShellQuoting, Task, Uri, workspace } from 'vscode'
 import { initProject, runAllTests, runProgram, runTest, startRepl } from '../commands'
@@ -18,13 +17,13 @@ suite('Should run commands', () => {
     'dynamicDiagram.openDynamicDiagramOnRepl': true,
   }
 
-  beforeEach(() => {
+  setup(() => {
     sinon.stub(workspace, 'getConfiguration').value((_configuration: string) => ({
       get: (_value: string) => configuration[_value],
     }))
   })
 
-  afterEach(() => {
+  teardown(() => {
     sinon.restore()
   })
 

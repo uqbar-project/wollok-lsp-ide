@@ -32,8 +32,8 @@ suite('Symbols', () => {
   })
 
   test('includes node type when type system is enabled', async () => {
-    await setConfiguration('typeSystem.enabled', true)
     try {
+      await setConfiguration('typeSystem.enabled', true)
       await activate(docUri)
 
       const actualSymbolsList: DocumentSymbol[] = await commands.executeCommand(

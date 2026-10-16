@@ -410,7 +410,7 @@
     "@types/source-map-support": "^0",
     "@typescript-eslint/eslint-plugin": "^5.53.0",
     "@typescript-eslint/parser": "^5.53.0",
-    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-cli": "^0.0.15",
     "@vscode/vsce": "^3.1.1",
     "c8": "^10.1.2",
     "cpy-cli": "^5.0.0",
