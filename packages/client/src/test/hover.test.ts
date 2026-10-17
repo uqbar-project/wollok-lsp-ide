@@ -8,23 +8,7 @@ import { activate, getDocumentURI, setConfiguration } from './helper'
 suite('Should display on hover', () => {
   const hoverURI = getDocumentURI('hover.wlk')
 
-  test('hover field with type info', async () => {
-    await setConfiguration('typeSystem.enabled', true)
-    await testHover(
-      hoverURI,
-      new Position(1, 8),
-      new Hover(
-        [
-          new MarkdownString('\n```text\nField: Number\n```\n'),
-          new MarkdownString('\n```wollok\nconst x = 2\n```\n'),
-        ],
-        new Range(new Position(1, 2), new Position(1, 13))
-      )
-    )
-  })
-
   test('hover field without type info', async () => {
-    await setConfiguration('typeSystem.enabled', false)
     await testHover(
       hoverURI,
       new Position(1, 8),
@@ -40,7 +24,7 @@ suite('Should display on hover', () => {
 })
 
 
-async function testHover(uri: Uri, position: Position, expected: any): Promise<void> {
+export async function testHover(uri: Uri, position: Position, expected: any): Promise<void> {
   await activate(uri)
   const actual = await commands.executeCommand('vscode.executeHoverProvider', uri, position)
   delete actual[0]['canDecreaseVerbosity']
