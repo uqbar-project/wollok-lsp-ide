@@ -1,6 +1,6 @@
 import * as assert from 'assert'
 import { commands, Hover, MarkdownString, Position, Range, Uri } from 'vscode'
-import { activate, getDocumentURI, setConfiguration } from './helper'
+import { activate, getDocumentURI } from './helper'
 
 /** ATTENTION
  * These tests are NOT ATOMIC, they depend on each other, order matters. (Resolve TODO)

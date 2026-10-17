@@ -5,9 +5,9 @@ import { testHover } from './hover.test'
 
 suite('Types', () => {
 
-  setup(() => sleep(9000).then(() => setConfiguration('typeSystem.enabled', true)))
+  setup(() => sleep(8000).then(() => setConfiguration('typeSystem.enabled', true)))
 
-  teardown(() => setConfiguration('typeSystem.enabled', false))
+  teardown(() => sleep(8000).then(() => setConfiguration('typeSystem.enabled', false)))
 
   test('on symbols', async () => {
     const docUri = getDocumentURI('types.wlk')
