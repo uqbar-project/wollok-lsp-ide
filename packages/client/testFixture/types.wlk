@@ -1,3 +1,3 @@
 object Types {
-	method fly(minutes, food) = 1
+	method m(n) = 1 + n
 }

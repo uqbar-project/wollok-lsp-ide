@@ -20,7 +20,7 @@ suite('Types', () => {
 
     assert.deepStrictEqual(
       actualSymbolsList.map(symbol => symbol.children?.map(s => s.name)),
-      [['fly(minutes, food): (Any, Any) => Number']],
+      [['m(n): (Number) => Number']],
     )
   })
 
