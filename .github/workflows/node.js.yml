@@ -30,16 +30,16 @@ jobs:
         run: yarn
       - name: Compile
         run: yarn compile-tests
-      # - name: Run tests with coverage
-      #   if: matrix.os == 'windows-latest'
-      #   uses: coactions/setup-xvfb@v1
-      #   with:
-      #     run: yarn coverage
-      - name: Run tests
-        if: matrix.os == 'ubuntu-latest'
+      - name: Run tests with coverage
+        if: matrix.os == 'windows-latest'
         uses: coactions/setup-xvfb@v1
         with:
-          run: yarn test:unit
+          run: yarn coverage
+      # - name: Run tests
+      #   if: matrix.os == 'ubuntu-latest'
+      #   uses: coactions/setup-xvfb@v1
+      #   with:
+      #     run: yarn test:unit
       - name: Update coverage
         uses: codecov/codecov-action@v4
         if: matrix.os == 'windows-latest'
