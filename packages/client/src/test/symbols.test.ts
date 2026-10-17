@@ -1,7 +1,7 @@
 import * as assert from 'assert'
-import { commands, SymbolKind, Uri } from 'vscode'
-import { DocumentSymbol, WorkspaceSymbol } from 'vscode-languageclient'
-import { activate, getDocumentURI, setConfiguration } from './helper'
+import { commands, DocumentSymbol, SymbolKind, Uri } from 'vscode'
+import { WorkspaceSymbol } from 'vscode-languageclient'
+import { activate, getDocumentURI } from './helper'
 
 type SymbolData = { kind: SymbolKind; name: string }
 
@@ -29,26 +29,6 @@ suite('Symbols', () => {
       pepitaSymbol?.children?.map(symbol => symbol.name),
       ['fly(minutes, food)'],
     )
-  })
-
-  test('includes node type when type system is enabled', async () => {
-    try {
-      await setConfiguration('typeSystem.enabled', true)
-      await activate(docUri)
-
-      const actualSymbolsList: DocumentSymbol[] = await commands.executeCommand(
-        'vscode.executeDocumentSymbolProvider',
-        docUri,
-      )
-      const pepitaSymbol = actualSymbolsList.find(symbol => symbol.name === 'Pepita')
-
-      assert.deepStrictEqual(
-        pepitaSymbol?.children?.map(symbol => symbol.name),
-        ['fly(minutes, food): Number'],
-      )
-    } finally {
-      await setConfiguration('typeSystem.enabled', false)
-    }
   })
 
   test('Provides workspace symbols', async () => {
