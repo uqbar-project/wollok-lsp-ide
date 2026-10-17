@@ -11,14 +11,10 @@ on:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
-    env:
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
-
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js from .nvmrc
@@ -34,11 +30,11 @@ jobs:
         uses: coactions/setup-xvfb@v1
         with:
           run: yarn coverage
-      # - name: Run tests
-      #   if: matrix.os == 'ubuntu-latest'
-      #   uses: coactions/setup-xvfb@v1
-      #   with:
-      #     run: yarn test:unit
+      - name: Run tests
+        if: matrix.os != 'windows-latest'
+        uses: coactions/setup-xvfb@v1
+        with:
+          run: yarn test
       - name: Update coverage
         uses: codecov/codecov-action@v4
         if: matrix.os == 'windows-latest'
