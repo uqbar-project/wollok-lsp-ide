@@ -1,11 +1,11 @@
 import * as assert from 'assert'
 import { commands, DocumentSymbol, Hover, MarkdownString, Position, Range } from 'vscode'
-import { activate, getDocumentURI, setConfiguration } from './helper'
+import { activate, getDocumentURI, setConfiguration, sleep } from './helper'
 import { testHover } from './hover.test'
 
 suite('Types', () => {
 
-  setup(() => setConfiguration('typeSystem.enabled', true))
+  setup(() => sleep(9000).then(() => setConfiguration('typeSystem.enabled', true)))
 
   teardown(() => setConfiguration('typeSystem.enabled', false))
 
