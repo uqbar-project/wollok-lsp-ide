@@ -1,11 +1,11 @@
 import * as assert from 'assert'
-import { commands, SymbolKind, Uri } from 'vscode'
-import { DocumentSymbol, WorkspaceSymbol } from 'vscode-languageclient'
+import { commands, DocumentSymbol, SymbolKind, Uri } from 'vscode'
+import { WorkspaceSymbol } from 'vscode-languageclient'
 import { activate, getDocumentURI } from './helper'
 
 type SymbolData = { kind: SymbolKind; name: string }
 
-suite('Should do symbols', () => {
+suite('Symbols', () => {
   const docUri = getDocumentURI('pepita.wlk')
 
   test('Provides document symbols', async () => {
@@ -14,6 +14,21 @@ suite('Should do symbols', () => {
       { name: 'a', kind: SymbolKind.Class },
       { name: 'MixinName', kind: SymbolKind.Enum },
     ])
+  })
+
+  test('includes method parameters', async () => {
+    await activate(docUri)
+
+    const actualSymbolsList: DocumentSymbol[] = await commands.executeCommand(
+      'vscode.executeDocumentSymbolProvider',
+      docUri,
+    )
+    const pepitaSymbol = actualSymbolsList.find(symbol => symbol.name === 'Pepita')
+
+    assert.deepStrictEqual(
+      pepitaSymbol?.children?.map(symbol => symbol.name),
+      ['fly(minutes, food)'],
+    )
   })
 
   test('Provides workspace symbols', async () => {

@@ -37,7 +37,7 @@ export async function activate(docUri: Uri, timeToWait = 2000): Promise<void> {
   }
 }
 
-async function sleep(milliseconds: number) {
+export async function sleep(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds))
 }
 

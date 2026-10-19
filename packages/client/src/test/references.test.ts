@@ -1,5 +1,4 @@
 import * as assert from 'assert'
-import { beforeEach } from 'mocha'
 import { commands, Location, Position, Range, Uri } from 'vscode'
 import { activate, getDocumentURI } from './helper'
 
@@ -9,7 +8,7 @@ import { activate, getDocumentURI } from './helper'
 suite('References', () => {
   let fileURI: Uri
 
-  beforeEach(() => {
+  setup(() => {
     fileURI = getDocumentURI('reference.wlk')
   })
 
